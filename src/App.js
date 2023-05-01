@@ -12,6 +12,7 @@ import FacultyLogin from './Faculty/facultyLogin';
 import FacultyProfile from './Faculty/facultyProfile';
 import Home from './SuperAdmin/Home';
 import AssignRole from './SuperAdmin/assignRole';
+import SignInSuperAdmin from './SuperAdmin/signInSuperAdmin';
 import SignUpSuperAdmin from './SuperAdmin/signUpSuperAdmin';
 import UpdateAssignRole from './SuperAdmin/updateAssignRole';
 
@@ -31,7 +32,8 @@ function App() {
       {/* <CreateSyllabus/> */}
       {/* <ViewSyllabus/> */}
       {/* <MarksEntry/> */}
-      <SignUpSuperAdmin/>
+      {/* <SignUpSuperAdmin/> */}
+      <SignInSuperAdmin/>
     </div>
   );
 }

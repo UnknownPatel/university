@@ -1,6 +1,44 @@
-import React from 'react'
+import axios from 'axios';
+import React, { useState } from 'react'
 
 const SignUpSuperAdmin = () => {
+  const [formData, setFormData] = useState({
+    name:"",
+    admin_email:"",
+    admin_password:"",
+    subdomain:"",
+    established_year: "",
+    city:"",
+    state: "",
+    country: "",
+    examination_controller_email: "",
+    assistant_exam_controller_email: "",
+    academic_head_email: "",
+    hod_email: "",
+  })
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    axios
+    .post("http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/universities",{
+      university:formData
+    })
+    .then(function(response) {
+      console.log(response);
+      alert("Success");
+    })
+    .catch(function(error) {
+      let message = typeof error.response !== "undefined" ? error.response.data.message
+        :error.message;
+        console.warn("Error", message);
+        console.log(error);
+    });
+  }
+  const handleChange = (event) => {
+    setFormData({
+      ...formData,
+      [event.target.name]: event.target.value,
+    });
+  }
   return (
     <div className='bg-blue-900 '>
 
@@ -26,7 +64,8 @@ const SignUpSuperAdmin = () => {
                         type="text"
                         name="name"
                         id="name"
-                        
+                        value={formData.name}
+                        onChange={handleChange}
                         className="h-10 border mt-1 rounded px-4 w-full bg-gray-50"
                         
                         placeholder="University name"
@@ -34,54 +73,59 @@ const SignUpSuperAdmin = () => {
                     </div>
 
                     <div className="md:col-span-5">
-                      <label htmlFor="email">Address</label>
+                      <label htmlFor="subDomain">Sub Domain</label>
                       <input
                         type="text"
                         name="subdomain"
                         id="subdomain"
-                        
+                        value={formData.subdomain}
+                        onChange={handleChange}
                         className="h-10 border mt-1 rounded px-4 w-full bg-gray-50"
-                        
-                        placeholder="Address"
+                        // value=""
+                        placeholder="Sub Domain Name"
+                      />
+                    </div>
+
+                    <div className="md:col-span-5">
+                      <label htmlFor="established_year">Established Year</label>
+                      <input
+                        type="date"
+                        name="established_year"
+                        id="established_year"
+                        value={formData.established_year}
+                        onChange={handleChange}
+
+                        className="h-10 border mt-1 rounded px-4 w-full bg-gray-50"
                       />
                     </div>
 
 
                     <div className="md:col-span-5">
-                      <label htmlFor="email">Email Address</label>
+                      <label htmlFor="admin_email">Admin Email Address</label>
                       <input
                         type="email"
-                        name="support_email"
-                        id="support_email"
+                        name="admin_email"
+                        id="admin_email"
+                        value={formData.admin_email}
+                        onChange={handleChange}
                         className="h-10 border mt-1 rounded px-4 w-full bg-gray-50"
                         placeholder="email"
                       />
                     </div>
                     <div className="md:col-span-3">
-                      <label htmlFor="address">Password</label>
+                      <label htmlFor="admin_password">Admin Password</label>
                       <input
                         type="password"
                         name="admin_password"
                         id="admin_password"
-                        
+                        value={formData.admin_password}
+                        onChange={handleChange}
                         className="h-10 border mt-1 rounded px-4 w-full bg-gray-50"
                         
                         placeholder="Password"
                       />
                     </div>
-                    {/* <div className="md:col-span-5">
-                      <label htmlFor="email">Sub Domain</label>
-                      <input
-                        type="text"
-                        name="subdomain"
-                        id="subdomain"
-                        // value={formData.subdomain}
-                        // onChange={handleChange}
-                        className="h-10 border mt-1 rounded px-4 w-full bg-gray-50"
-                        // value=""
-                        placeholder="email@domain.com"
-                      />
-                    </div> */}
+                    
 
                     {/* <div className="md:col-span-3">
                       <label htmlFor="address">Admin Email</label>
@@ -97,7 +141,7 @@ const SignUpSuperAdmin = () => {
                       />
                     </div> */}
 
-                    <div className="md:col-span-2">
+                    {/* <div className="md:col-span-2">
                       <label htmlFor="city">Contact Number</label>
                       <input
                         type="number"
@@ -108,7 +152,7 @@ const SignUpSuperAdmin = () => {
                         
                         placeholder="contact number"
                       />
-                    </div>
+                    </div> */}
 
                     <div className="md:col-span-2">
                       <label htmlFor="country">Country / region</label>
@@ -118,7 +162,8 @@ const SignUpSuperAdmin = () => {
                           name="country"
                           id="country"
                           placeholder="Country"
-                        
+                          value={formData.country}
+                          onChange={handleChange}
                           className="px-4 appearance-none outline-none text-gray-800 w-full bg-transparent"
                           
                         />
@@ -134,7 +179,8 @@ const SignUpSuperAdmin = () => {
                           name="state"
                           id="state"
                           placeholder="State"
-                        
+                          value={formData.state}
+                          onChange={handleChange}
                           className="px-4 appearance-none outline-none text-gray-800 w-full bg-transparent"
                           
                         />
@@ -147,13 +193,14 @@ const SignUpSuperAdmin = () => {
                         type="text"
                         name="city"
                         id="city"
-                        
+                        value={formData.city}
+                        onChange={handleChange}
                         className="transition-all flex items-center h-10 border mt-1 rounded px-4 w-full bg-gray-50"
                         placeholder="city"
                         
                       />
                     </div>
-                    <div className="md:col-span-2">
+                    {/* <div className="md:col-span-2">
                       <label htmlFor="city">Upload Logo</label>
                       <input
                         id="file_input"
@@ -162,13 +209,62 @@ const SignUpSuperAdmin = () => {
                         
                         placeholder="contact number"
                       />
-                    </div>
+                    </div> */}
                     
+                    <div className="md:col-span-5">
+                      <label htmlFor="examination_controller_email">Examination Controller Email</label>
+                      <input
+                        type="email"
+                        name="examination_controller_email"
+                        id="examination_controller_email"
+                        value={formData.examination_controller_email}
+                        onChange={handleChange}
+                        className="h-10 border mt-1 rounded px-4 w-full bg-gray-50"
+                        placeholder="Examination Controller Email"
+                      />
+                    </div>
+                    <div className="md:col-span-5">
+                      <label htmlFor="assistant_exam_controller_email">Assistant Exam Controller Email</label>
+                      <input
+                        type="email"
+                        name="assistant_exam_controller_email"
+                        id="assistant_exam_controller_email"
+                        value={formData.assistant_exam_controller_email}
+                        onChange={handleChange}
+                        className="h-10 border mt-1 rounded px-4 w-full bg-gray-50"
+                        placeholder="Assistant Exam Controller Email"
+                      />
+                    </div>
+                    <div className="md:col-span-5">
+                      <label htmlFor="academic_head_email">Academic Head Email</label>
+                      <input
+                        type="email"
+                        name="academic_head_email"
+                        id="academic_head_email"
+                        value={formData.academic_head_email}
+                        onChange={handleChange}
+                        className="h-10 border mt-1 rounded px-4 w-full bg-gray-50"
+                        placeholder="Academic Head Email"
+                      />
+                    </div>
+                    <div className="md:col-span-5">
+                      <label htmlFor="hod_email">HOD Mail</label>
+                      <input
+                        type="email"
+                        name="hod_email"
+                        id="hod_email"
+                        value={formData.hod_email}
+                        onChange={handleChange}
+                        className="h-10 border mt-1 rounded px-4 w-full bg-gray-50"
+                        placeholder="HOD Mail"
+                      />
+                    </div>
+
                     <div className="md:col-span-5 text-right">
                       <div className="inline-flex items-end">
                         <button
                           type="submit"
-                        
+                          onClick={handleSubmit}
                           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
                         >
                           Submit
