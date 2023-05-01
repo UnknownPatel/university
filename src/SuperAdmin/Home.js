@@ -13,8 +13,8 @@ const Home = () => {
 
     const host = window.location.host;
     const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
-    if (arr.length > 0) setSubdomain(arr[0]);
-    console.log(arr);
+    if (arr.length > 0){ subdomain = arr[0]}
+    console.log(subdomain);
 
     if (subdomain !== null || subdomain !== ""){
     axios
@@ -45,7 +45,7 @@ const Home = () => {
          </button>
         <a href="/home" className="flex ml-2 md:mr-24">
           <img src="" className="h-8 mr-3" alt="Logo" />
-          <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">Institute Name</span>
+          <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">{uniName}</span>
         </a>
       </div>
       <div className="flex items-center">

@@ -102,7 +102,7 @@ const SignInSuperAdmin = () => {
     <hr className="my-6 border-gray-300 w-full"/>
 
     <p className="mt-8">Need an account? <a href="/signupSuperAdmin" className="text-blue-500 hover:text-blue-700 font-semibold">
-        Create an account
+        Create an University
         </a></p>
 
 
