@@ -1,12 +1,13 @@
+import React, { useState } from 'react';
 import axios from 'axios';
-import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom';
 
 const SignUpSuperAdmin = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name:"",
     admin_email:"",
     admin_password:"",
-    subdomain:"",
     established_year: "",
     city:"",
     state: "",
@@ -20,11 +21,13 @@ const SignUpSuperAdmin = () => {
     event.preventDefault();
     axios
     .post("http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/universities",{
-      university:formData
+      university: formData
     })
     .then(function(response) {
       console.log(response);
+
       alert("Success");
+      navigate("/");
     })
     .catch(function(error) {
       let message = typeof error.response !== "undefined" ? error.response.data.message
@@ -72,7 +75,7 @@ const SignUpSuperAdmin = () => {
                       />
                     </div>
 
-                    <div className="md:col-span-5">
+                    {/* <div className="md:col-span-5">
                       <label htmlFor="subDomain">Sub Domain</label>
                       <input
                         type="text"
@@ -84,7 +87,7 @@ const SignUpSuperAdmin = () => {
                         // value=""
                         placeholder="Sub Domain Name"
                       />
-                    </div>
+                    </div> */}
 
                     <div className="md:col-span-5">
                       <label htmlFor="established_year">Established Year</label>

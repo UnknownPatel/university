@@ -1,20 +1,22 @@
 import axios from 'axios';
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 
 
+var acces_token;
 var subdomain;
-
-const Home = () => {
-  
+const UploadExcel = () => {
   const [uniName, setUniName] = useState("");
   // const [subdomain, setSubdomain] = useState(null);
+  const [selectedValue, setSelectedValue] = useState("");
+  const [selectedFile, setSelectedFile] = useState("");
 
   useEffect(() => {
+    acces_token = localStorage.getItem("acces_token");
 
     const host = window.location.host;
     const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
-    if (arr.length > 0) setSubdomain(arr[0]);
-    console.log(arr);
+    if (arr.length > 0){ subdomain = arr[0]}
+    console.log(subdomain);
 
     if (subdomain !== null || subdomain !== ""){
     axios
@@ -30,10 +32,32 @@ const Home = () => {
 
   },[]);
 
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    if(selectedFile !== null || selectedFile !== ""){
+    axios
+    .post(" http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/excel_sheets",{
+      excel_sheet : {
+      name: selectedValue,
+      sheet: selectedFile
+    },
+    subdomain : subdomain
+  
+  },
+  {
+    headers : {
+      'Authorization' : `Bearer ${acces_token}`,
+      'Content-Type' : 'multipart/form-data'
+    }
+  })
+}
+    console.log(selectedFile);
+  }
+
+
   return (
     <div>
-      
-<nav className="fixed top-0 z-50 w-full bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+      <nav className="fixed top-0 z-50 w-full bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
   <div className="px-3 py-3 lg:px-5 lg:pl-3">
     <div className="flex items-center justify-between">
       <div className="flex items-center justify-start">
@@ -43,7 +67,7 @@ const Home = () => {
                <path clip-rule="evenodd" fill-rule="evenodd" d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"></path>
             </svg>
          </button>
-        <a href="/home" className="flex ml-2 md:mr-24">
+        <a href="" className="flex ml-2 md:mr-24">
           <img src="" className="h-8 mr-3" alt="Logo" />
           <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">Institute Name</span>
         </a>
@@ -59,7 +83,7 @@ const Home = () => {
             <div className="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded shadow dark:bg-gray-700 dark:divide-gray-600" id="dropdown-user">
               <div className="px-4 py-3" role="none">
                 <p className="text-sm text-gray-900 dark:text-white" role="none">
-                  
+                 
                 </p>
                 <p className="text-sm font-medium text-gray-900 truncate dark:text-gray-300" role="none">
                   
@@ -67,16 +91,16 @@ const Home = () => {
               </div>
               <ul className="py-1" role="none">
                 <li>
-                  <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">Dashboard</a>
+                  <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem"></a>
                 </li>
                 <li>
-                  <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">Settings</a>
+                  <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem"></a>
                 </li>
                 <li>
-                  <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">Earnings</a>
+                  <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem"></a>
                 </li>
                 <li>
-                  <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">Sign out</a>
+                  <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem"></a>
                 </li>
               </ul>
             </div>
@@ -103,7 +127,7 @@ const Home = () => {
          <li>
             <a href="/uploadExcel" className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
                <span className="flex-1 ml-3 whitespace-nowrap">Upload Excel File</span>
-            </a>
+             </a>
          </li>
          <li>
             <a href="#" className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
@@ -111,45 +135,49 @@ const Home = () => {
             </a>
          </li>
          
+         
       </ul>
    </div>
 </aside>
 
 <div className="p-4 sm:ml-64">
    <div className="p-4 rounded-lg mt-14">
-        <div className='text-6xl text-center'>
-            <p>Congratulations !</p>
+    <div className='text-center text-4xl'>
+        <p>{uniName}</p>
+    </div>
+       <br />
+       <br />
+       <form onSubmit={handleSubmit}>
+        <div className='flex justify-center'>
+        <label htmlFor="File_Name" className="block text-lg font-bold mb-2" >Select File:</label>
+        <select className="py-3 px-4 pr-9 block w-96 rounded-2xl text-sm border-2 " onChange={(e) => {setSelectedValue(e.target.value); console.log(selectedValue);}}>
+          <option>Select File</option>
+          <option>Faculty Details</option>
+          <option>Course and Semester Details</option>
+          <option>Subject Details</option>
+          <option>Faculty Supervision</option>
+          <option>Marks Entry Details</option>
+          <option>Faculty Assignment for Marks Entry</option>
+        </select>
         </div>
-        <div className='text-3xl text-center mt-3'>
-            <h4>You have Succcessfully Logged in as</h4>
-        </div>
-        <div className='text-center mt-10 text-3xl'>
-            {uniName}
-        </div>
-      <hr />
-      {/* <div className='text-center text-2xl mt-20'>
+
+        <div className='text-center text-2xl mt-10'>
         <h1>Get Started By Uploading Excel File</h1>
-      </div> */}
-      {/* <div className='flex justify-center'>
-        <input class="mt-5 text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none  dark:border-gray-600 dark:placeholder-gray-400" id="default_size" type="file" accept='.xls,.xlsx'/>
-      </div> */}
-      
-      {/* <br /> */}
-      {/* <div className='text-center'>
-      <div className="inline-flex items-center">
-          <button
-            type="submit"
-            // onClick={handleSubmit}
-              className="bg-slate-800 0 text-white font-bold py-2 px-4 rounded"
-            >
-            Submit
-          </button>
       </div>
-      </div> */}
+      <div className='flex justify-center'>
+        <input className="mt-5 text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none  dark:border-gray-600 dark:placeholder-gray-400" 
+           onChange={(e) => setSelectedFile(e.target.files[0])} id="default_size" type="file" accept='.xls,.xlsx'/>
+      </div>
+        <div className="text-center mt-10">
+            <button type='submit' className="py-3 px-8 bg-black rounded-2xl text-white font-bold" >Submit</button> 
+        </div>
+
+        </form>   
+      
    </div>
          </div>
     </div>
   )
 }
 
-export default Home
+export default UploadExcel
