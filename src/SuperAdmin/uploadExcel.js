@@ -1,14 +1,18 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 
 var acces_token;
 var subdomain;
 const UploadExcel = () => {
+  const navigate = useNavigate();
   const [uniName, setUniName] = useState("");
   // const [subdomain, setSubdomain] = useState(null);
   const [selectedValue, setSelectedValue] = useState("");
   const [selectedFile, setSelectedFile] = useState("");
+  const [clientId, setClentId] = useState("");
+  const [clientSecret, setClentSecret] = useState("");
 
   useEffect(() => {
     acces_token = localStorage.getItem("acces_token");
@@ -24,6 +28,7 @@ const UploadExcel = () => {
     .then((response) => {
       console.log(response.data.university.name);
       setUniName(response.data.university.name);
+      console.log(response)
     })
     .catch((err) => {
       console.log(err);
@@ -42,7 +47,7 @@ const UploadExcel = () => {
       sheet: selectedFile
     },
     subdomain : subdomain
-  
+
   },
   {
     headers : {
@@ -54,6 +59,44 @@ const UploadExcel = () => {
     console.log(selectedFile);
   }
 
+  const handleLogout = () => {
+    const accessToken = localStorage.getItem("access_token");
+    // console.log(accessToken);
+    axios
+      .get(
+        `http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
+        // { params: { subdomain: subdomain } }
+      )
+      .then(function (response) {
+        setClentId(response.data.doorkeeper.client_id);
+        setClentSecret(response.data.doorkeeper.client_secret);
+      })
+      .catch(function (error) {
+        console.log(error.message);
+      });
+    axios
+      .post(
+        " http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/oauth/revoke",
+        {
+          token: { accessToken },
+          subdomain: subdomain,
+          client_id: clientId,
+          client_secret: clientSecret,
+        }
+      )
+      .then((response) => {
+        // console.log(response.data);
+        // Remove the access token from local storage
+        navigate("/");
+        localStorage.removeItem("access_token");
+        // Do any other necessary clean up and redirect the user to the login page
+        // ...
+      })
+      .catch((error) => {
+        // Handle error
+        console.error(error);
+      });
+  };
 
   return (
     <div>
@@ -136,7 +179,8 @@ const UploadExcel = () => {
          </li>
          
           <div className="p-4">
-            <button type="button" className="inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition">
+            <button type="button" className="inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition"
+              onClick={handleLogout}>
             <span className="">Logout</span>
             </button> 
           </div> 

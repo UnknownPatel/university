@@ -40,9 +40,9 @@ function App() {
 
       </Routes>
       </BrowserRouter>
+
+
       {/* <Route path='/updateAssignRole' element={<UpdateAssignRole/>} /> */}
-
-
       {/* <FacultyLogin/> */}
       {/* <FacultyDashboard/> */}
       {/* <FacultyExam/> */}
