@@ -61,11 +61,11 @@ const UploadExcel = () => {
 
   const handleLogout = () => {
     const accessToken = localStorage.getItem("access_token");
-    // console.log(accessToken);
+    
     axios
       .get(
         `http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
-        // { params: { subdomain: subdomain } }
+        
       )
       .then(function (response) {
         setClentId(response.data.doorkeeper.client_id);
