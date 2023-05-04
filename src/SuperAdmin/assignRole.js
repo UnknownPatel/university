@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 var acces_token;
 var subdomain;
+var id;
 const AssignRole = () => {
   const navigate = useNavigate();
   const [uniName, setUniName] = useState("");
@@ -12,6 +13,9 @@ const AssignRole = () => {
   const [isHidden, setIsHidden] = useState(true);
   const [data, setData] = useState([]);
   const[fName,setFname] = useState("");
+  const [selectedValue, setSelectedValue] = useState("");
+  const [id, setId] = useState("");
+  
 
   useEffect(() => {
     acces_token = localStorage.getItem("access_token");
@@ -20,7 +24,6 @@ const AssignRole = () => {
     const host = window.location.host;
     const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
     if (arr.length > 0){ subdomain = arr[0]}
-    console.log(subdomain);
 
     if (subdomain !== null || subdomain !== ""){
       axios
@@ -28,18 +31,15 @@ const AssignRole = () => {
       .then((response) => {
         // console.log(response.data.university.name);
         setUniName(response.data.university.name);
-        console.log(response)
       })
       .catch((err) => {
         console.log(err);
       });
 
-      console.log(subdomain); 
       axios
         .get(`http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/users/users/faculty_names?subdomain=${subdomain}`,{ headers })
         .then(response => {
           setData(response.data.data.users)
-          console.log(response.data.data.users);
         })
         .catch(error => console.log(error));
     }
@@ -48,6 +48,30 @@ const AssignRole = () => {
   const toggleContent = () => {
     setIsHidden(!isHidden);
   };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    axios
+    .post(`http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/users/users/${id}/assign_role?subdomain=${subdomain}`,
+    {
+      user:{
+        role_name: selectedValue,
+      },
+    })
+    .then((responce) => {
+      console.log(responce.data);
+  
+      if(responce.data.success === false) {
+  
+      }else{
+        alert("successfully updated")
+      }
+    })
+    .catch(function(err) {
+      console.log(err.message);
+    })
+
+  }
 
   const handleLogout = () => {
     const accessToken = localStorage.getItem("access_token");
@@ -178,45 +202,47 @@ const AssignRole = () => {
     <div className='text-center text-4xl'>
         <p>{uniName}</p>
     </div>
-        <div className='flex justify-between mt-10'>
-        <label htmlFor="" className="block text-sm font-bold">Select Faculty Name:</label>
-          <select className="py-3 px-4 pr-9 block w-60 rounded-md text-sm border-2 " id='select_name' onChange={() => {
-            setFname(document.getElementById('select_name').value);
-            console.log(fName)
+        <div className='flex items-center justify-center mt-10'>
+        <label htmlFor="" className="text-sm md:text-lg lg:text-xl mr-2">Select Faculty Name:</label>
+          <select className="form-select text-sm md:text-lg lg:text-xl mr-2 border-2" id='select_name' onChange={ (e) => {
+            setFname(e.target.value);
+            setId(e.target.getAttribute('data-id'));
+            console.log(e.target.value);
+            // console.log(e.target.getAttribute('data-id'));
+            console.log(e.target.dataset-id);
           }}>
             <option>Select Name</option>
-
             {data.map(item => {
               return(
-
-              <option value={item.designation}>{item.first_name}</option>
-              )})}
+                <option value={item.designation} data-id={item.id}>{item.first_name}</option>
+                )})}
           </select>
-              <label htmlFor="" className="block text-sm font-bold">Designation:</label>
+              <label htmlFor="" className="text-sm md:text-lg lg:text-xl mr-2">Designation:</label>
               <div className="">
-                
                 <input
                   type="text"
                   name=""
                   id=""
                   value={fName}
                   autoComplete=""
-                  className="block pl-4 w-60 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  className="form-input text-sm md:text-lg lg:text-xl border border-gray-400 rounded"
                 />
               </div>
         </div>
-        <div>
-        <label htmlFor="hs-select-label" className="block text-sm font-bold mb-2">Assign Role:</label>
-        <select className="py-3 px-4 pr-9 block w-96 rounded-2xl text-sm border-2 ">
-          <option>Examination Controller</option>
-          <option>Assistant Exam Controller</option>
-          <option>Academic Head</option>
-          <option>HOD</option>
+        <div className='flex mt-5 justify-center items-center'>
+          <label htmlFor="hs-select-label" className="text-sm md:text-lg lg:text-xl mr-2">Assign Role:</label>
+            <select className="form-select text-sm md:text-lg lg:text-xl mr-2 border-2 " onChange={(e) => {setSelectedValue(e.target.value); console.log(selectedValue);}}>
+              <option>Examination Controller</option>
+              <option>Assistant Exam Controller</option>
+              <option>Academic Head</option>
+              <option>HOD</option>
 
-        </select>
+            </select>
         </div>
-        <div className="text-center mt-10">
-            <button className="py-3 px-8 bg-black rounded-2xl text-white font-bold">Submit</button> 
+
+        <div className='flex justify-evenly mt-10'>
+        <div className="text-center">
+            <button className="py-3 px-8 bg-black rounded-2xl text-white font-bold" onClick={handleSubmit}>Submit</button> 
         </div>
 
         {/* Toggle Button */}
@@ -224,22 +250,18 @@ const AssignRole = () => {
           <button onClick={toggleContent} className="py-3 px-8 bg-black rounded-2xl text-white font-bold">
             {/* {isHidden ? 'Show Content' : 'Hide Content'} */}Create Role
           </button>
-            <div className={`${isHidden ? 'hidden' : 'block'} mt-4 p-4 bg-gray-100 rounded-md flex justify-evenly`}>
-            <label htmlFor="" className="block font-bold">Role Name:</label>
-              <div className="">
-                <input
-                  type="text"
-                  name=""
-                  id=""
-                  autoComplete=""
-                  className="block w-72 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                />
-              </div>
-              <div className="text-center">
-            <button className="py-3 px-8 bg-black rounded-2xl text-white font-bold">Submit</button> 
-        </div>
+            <div className={`${isHidden ? 'hidden' : 'block'} mt-4  bg-gray-100 rounded-md flex justify-evenly`}>
+            <div class="flex items-center">
+              <label class="mr-2">Role Name:</label>
+              <input type="text" class="form-input border border-gray-400 rounded py-2 px-3"/>
+            </div>
+            <button type="submit" class="bg-slate-500 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded">
+              Submit
+            </button>
             </div>
         </div>
+        </div>
+        
 
 
         <div className="flex flex-col">
