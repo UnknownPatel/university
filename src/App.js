@@ -18,6 +18,7 @@ import SignUpSuperAdmin from './SuperAdmin/signUpSuperAdmin';
 import UpdateAssignRole from './SuperAdmin/updateAssignRole';
 import Approve_reject_Registrations from './SuperAdmin/approve_reject_Registrations';
 import UploadExcel from './SuperAdmin/uploadExcel';
+import AdminLogin from './Admin/adminLogin';
 
 function App() {
   return (
@@ -36,7 +37,7 @@ function App() {
         <Route path="/create_syllabus" element={<CreateSyllabus/>} />
         <Route path="/view_syllabus" element={<ViewSyllabus/>} />
         <Route path="/marks_entry" element={<MarksEntry/>} />
-        <Route path=""/>
+        <Route path="/AdminLogin" element={<AdminLogin/>}/>
 
       </Routes>
       </BrowserRouter>

@@ -104,7 +104,7 @@ const SignInSuperAdmin = () => {
     <p className="mt-8">Need an account? <a href="/signupSuperAdmin" className="text-blue-500 hover:text-blue-700 font-semibold">
         Create an University
         </a></p>
-
+    <p><a href="/AdminLogin" className='text-blue-500 hover:text-blue-700 font-semibold'>Admin login</a></p>
 
   </div>
 </div>

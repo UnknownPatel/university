@@ -1,15 +1,50 @@
 import axios from 'axios';
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 
-
+var acces_token;
 var subdomain;
 const AssignRole = () => {
   const navigate = useNavigate();
+  const [uniName, setUniName] = useState("");
   const [clientId, setClentId] = useState("");
   const [clientSecret, setClentSecret] = useState("");
-
   const [isHidden, setIsHidden] = useState(true);
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    acces_token = localStorage.getItem("acces_token");
+    const host = window.location.host;
+    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
+    if (arr.length > 0){ subdomain = arr[0]}
+    console.log(subdomain);
+
+    if (subdomain !== null || subdomain !== ""){
+    axios
+    .get(`http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`)
+    .then((response) => {
+      // console.log(response.data.university.name);
+      setUniName(response.data.university.name);
+      console.log(response)
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+  }
+
+  axios
+  .get("http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/users/users/faculty_names",{
+      subdomain: subdomain,
+      token: { acces_token }
+  })
+  .then(response => {
+    setData(response.data)
+    console.log(response.data);
+  })
+  .catch(error => console.log(error));
+
+
+  },[]);
 
   const toggleContent = () => {
     setIsHidden(!isHidden);
@@ -63,12 +98,12 @@ const AssignRole = () => {
         <button data-drawer-target="logo-sidebar" data-drawer-toggle="logo-sidebar" aria-controls="logo-sidebar" type="button" className="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600">
             <span className="sr-only">Open sidebar</span>
             <svg className="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-               <path clip-rule="evenodd" fill-rule="evenodd" d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"></path>
+               <path d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"></path>
             </svg>
          </button>
         <a href="" className="flex ml-2 md:mr-24">
           <img src="" className="h-8 mr-3" alt="Logo" />
-          <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">Institute Name</span>
+          <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">{uniName}</span>
         </a>
       </div>
       <div className="flex items-center">
@@ -112,8 +147,13 @@ const AssignRole = () => {
 <aside id="logo-sidebar" className="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700" aria-label="Sidebar">
    <div className="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
       <ul className="space-y-2 font-medium">
+      <li>
+            <a href="/uploadExcel" className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+               <span className="flex-1 ml-3 whitespace-nowrap">Upload Excel File</span>
+              </a>
+         </li>
          <li>
-            <a href="/assignRole" className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+            <a href="/assignRole" className="flex items-center p-2 text-gray-900 rounded-lg bg-slate-600 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
                <span className="ml-3">Assign Roles</span>
             </a>
          </li>
@@ -123,11 +163,7 @@ const AssignRole = () => {
                
             </a>
          </li>
-         <li>
-            <a href="/uploadExcel" className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
-               <span className="flex-1 ml-3 whitespace-nowrap">Upload Excel File</span>
-              </a>
-         </li>
+         
          <li>
             <a href="#" className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
                <span className="flex-1 ml-3 whitespace-nowrap">Profile Settings</span>
@@ -146,11 +182,17 @@ const AssignRole = () => {
 <div className="p-4 sm:ml-64">
    <div className="p-4 rounded-lg mt-14">
     <div className='text-center text-4xl'>
-        <p>University Name</p>
+        <p>{uniName}</p>
     </div>
         <div className='flex justify-between mt-10'>
-        <label htmlFor="" className="block text-sm font-bold mb-2">Select Faculty Name:</label>
-              <div className="mt-2">
+        <label htmlFor="" className="block text-sm font-bold">Select Faculty Name:</label>
+          <select className="py-3 px-4 pr-9 block w-60 rounded-md text-sm border-2 ">
+            <option>Select Name</option>
+            {data.map(users => (
+              <option key={users.id} value={users.id}>{users.name}</option>
+            ))}
+          </select>
+              {/* <div className="">
                 <input
                   type="text"
                   name=""
@@ -158,9 +200,9 @@ const AssignRole = () => {
                   autoComplete=""
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 />
-              </div>
-              <label htmlFor="" className="block text-sm font-bold mb-2">Designation:</label>
-              <div className="mt-2">
+              </div> */}
+              <label htmlFor="" className="block text-sm font-bold">Designation:</label>
+              <div className="">
                 <input
                   type="text"
                   name=""
@@ -173,15 +215,15 @@ const AssignRole = () => {
         <div>
         <label htmlFor="hs-select-label" className="block text-sm font-bold mb-2">Assign Role:</label>
         <select className="py-3 px-4 pr-9 block w-96 rounded-2xl text-sm border-2 ">
-          <option selected>Examination Controller</option>
+          <option>Examination Controller</option>
           <option>Assistant Exam Controller</option>
           <option>Academic Head</option>
           <option>HOD</option>
 
         </select>
         </div>
-        <div class="text-center mt-10">
-            <button class="py-3 px-8 bg-black rounded-2xl text-white font-bold">Submit</button> 
+        <div className="text-center mt-10">
+            <button className="py-3 px-8 bg-black rounded-2xl text-white font-bold">Submit</button> 
         </div>
 
         {/* Toggle Button */}
@@ -200,8 +242,8 @@ const AssignRole = () => {
                   className="block w-72 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 />
               </div>
-              <div class="text-center">
-            <button class="py-3 px-8 bg-black rounded-2xl text-white font-bold">Submit</button> 
+              <div className="text-center">
+            <button className="py-3 px-8 bg-black rounded-2xl text-white font-bold">Submit</button> 
         </div>
             </div>
         </div>
@@ -215,31 +257,22 @@ const AssignRole = () => {
                             <thead className="bg-gray-50">
                                 <tr>
                                     <th
-                                        scope="col"
                                         className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
                                     >
                                         Faculty Name
                                     </th>
                                     <th
-                                        scope="col"
                                         className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
                                     >
                                         Designation
                                     </th>
                                     <th
-                                        scope="col"
                                         className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
                                     >
                                         Assign Role
                                     </th>
-                                    {/* <th
-                                        scope="col"
-                                        className="px-6 py-3 text-xs font-bold text-right text-gray-500 uppercase "
-                                    >
-                                        
-                                    </th> */}
+                                    
                                     <th
-                                        scope="col"
                                         className="px-6 py-3 text-xs font-bold text-right text-gray-500 uppercase "
                                     >
                                         Remove
@@ -257,14 +290,7 @@ const AssignRole = () => {
                                     <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                                         
                                     </td>
-                                    {/* <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                                        <a
-                                            className="text-green-500 hover:text-green-700"
-                                            href="#"
-                                        >
-                                            Edit
-                                        </a>
-                                    </td> */}
+                                    
                                     <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
                                         <a
                                             className="text-red-500 hover:text-red-700"
@@ -274,60 +300,8 @@ const AssignRole = () => {
                                         </a>
                                     </td>
                                 </tr>
-                                <tr>
-                                    <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
-                                        
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                        
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                        
-                                    </td>
-                                    {/* <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                                        <a
-                                            className="text-green-500 hover:text-green-700"
-                                            href="#"
-                                        >
-                                            Edit
-                                        </a>
-                                    </td> */}
-                                    <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                                        <a
-                                            className="text-red-500 hover:text-red-700"
-                                            href="#"
-                                        >
-                                            
-                                        </a>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
-                                        
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                        
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                        
-                                    </td>
-                                    {/* <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                                        <a
-                                            className="text-green-500 hover:text-green-700"
-                                            href="#"
-                                        >
-                                            Edit
-                                        </a>
-                                    </td> */}
-                                    <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                                        <a
-                                            className="text-red-500 hover:text-red-700"
-                                            href="#"
-                                        >
-                                            
-                                        </a>
-                                    </td>
-                                </tr>
+                                
+                                
                             </tbody>
                         </table>
                     </div>
