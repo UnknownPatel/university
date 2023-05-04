@@ -19,15 +19,16 @@ const SignInSuperAdmin = () => {
 
     const handleSubmit = (e) => {
       e.preventDefault();
-      // console.log("form submited");
       axios
         .get(
           ` http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
-          // { params: { subdomain: subdomain } }
+          
         )
         .then(function (response) {
-          // setClentId(response.data.doorkeeper.client_id);
-          // setClentSecret(response.data.doorkeeper.client_secret);
+          
+          const clientId = response.data.doorkeeper.client_id;
+          const clientSecret = response.data.doorkeeper.client_secret;
+         
           axios
             .post(
               "http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/oauth/token",
@@ -36,19 +37,17 @@ const SignInSuperAdmin = () => {
                 subdomain: subdomain,
                 email: getEmail,
                 password: getPassword,
-                client_id: response.data.doorkeeper.client_id,
-                client_secret: response.data.doorkeeper.client_secret,
+                client_id: clientId,
+                client_secret: clientSecret,
               }
             )
             .then((response) => {
               console.log(response.data);
-  
+              
               if (response.data.success === false) {
-                // alert("Incorrect password or email id");
+                
               } else {
                 alert("logged in successfully !!");
-                // navigate("/AdminDashboard");
-                // const accessToken = localStorage.setItem(response.data.access_token);
                 const accessToken = response.data.access_token;
                 localStorage.setItem("access_token", accessToken);
                 navigate("/home");

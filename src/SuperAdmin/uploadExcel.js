@@ -55,6 +55,18 @@ const UploadExcel = () => {
       'Content-Type' : 'multipart/form-data'
     }
   })
+  .then((responce) => {
+    console.log(responce.data);
+
+    if(responce.data.success === false) {
+
+    }else{
+      alert("File successfully uploaded")
+    }
+  })
+  .catch(function(err) {
+    console.log(err.message);
+  })
 }
     console.log(selectedFile);
   }

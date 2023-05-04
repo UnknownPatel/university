@@ -59,6 +59,7 @@ function App() {
       {/* <MarksEntry/> */}
       {/* <SignUpSuperAdmin/> */}
       {/* <SignInSuperAdmin/> */}
+      {/* <AdminLogin/> */}
     </div>
   );
 }

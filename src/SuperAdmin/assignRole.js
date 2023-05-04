@@ -11,39 +11,38 @@ const AssignRole = () => {
   const [clientSecret, setClentSecret] = useState("");
   const [isHidden, setIsHidden] = useState(true);
   const [data, setData] = useState([]);
+  const[fName,setFname] = useState("");
 
   useEffect(() => {
-    acces_token = localStorage.getItem("acces_token");
+    acces_token = localStorage.getItem("access_token");
+
+    const headers = { 'Authorization': `Bearer ${acces_token}` };
     const host = window.location.host;
     const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
     if (arr.length > 0){ subdomain = arr[0]}
     console.log(subdomain);
 
     if (subdomain !== null || subdomain !== ""){
-    axios
-    .get(`http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`)
-    .then((response) => {
-      // console.log(response.data.university.name);
-      setUniName(response.data.university.name);
-      console.log(response)
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-  }
+      axios
+      .get(`http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`)
+      .then((response) => {
+        // console.log(response.data.university.name);
+        setUniName(response.data.university.name);
+        console.log(response)
+      })
+      .catch((err) => {
+        console.log(err);
+      });
 
-  axios
-  .get("http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/users/users/faculty_names",{
-      subdomain: subdomain,
-      token: { acces_token }
-  })
-  .then(response => {
-    setData(response.data)
-    console.log(response.data);
-  })
-  .catch(error => console.log(error));
-
-
+      console.log(subdomain); 
+      axios
+        .get(`http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/users/users/faculty_names?subdomain=${subdomain}`,{ headers })
+        .then(response => {
+          setData(response.data.data.users)
+          console.log(response.data.data.users);
+        })
+        .catch(error => console.log(error));
+    }
   },[]);
 
   const toggleContent = () => {
@@ -76,15 +75,10 @@ const AssignRole = () => {
         }
       )
       .then((response) => {
-        // console.log(response.data);
-        // Remove the access token from local storage
         navigate("/");
         localStorage.removeItem("access_token");
-        // Do any other necessary clean up and redirect the user to the login page
-        // ...
       })
       .catch((error) => {
-        // Handle error
         console.error(error);
       });
   };
@@ -186,29 +180,28 @@ const AssignRole = () => {
     </div>
         <div className='flex justify-between mt-10'>
         <label htmlFor="" className="block text-sm font-bold">Select Faculty Name:</label>
-          <select className="py-3 px-4 pr-9 block w-60 rounded-md text-sm border-2 ">
+          <select className="py-3 px-4 pr-9 block w-60 rounded-md text-sm border-2 " id='select_name' onChange={() => {
+            setFname(document.getElementById('select_name').value);
+            console.log(fName)
+          }}>
             <option>Select Name</option>
-            {data.map(users => (
-              <option key={users.id} value={users.id}>{users.name}</option>
-            ))}
+
+            {data.map(item => {
+              return(
+
+              <option value={item.designation}>{item.first_name}</option>
+              )})}
           </select>
-              {/* <div className="">
-                <input
-                  type="text"
-                  name=""
-                  id=""
-                  autoComplete=""
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                />
-              </div> */}
               <label htmlFor="" className="block text-sm font-bold">Designation:</label>
               <div className="">
+                
                 <input
                   type="text"
                   name=""
                   id=""
+                  value={fName}
                   autoComplete=""
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  className="block pl-4 w-60 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 />
               </div>
         </div>
