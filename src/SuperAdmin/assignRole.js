@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import $ from "jquery";
 
 var acces_token;
 var subdomain;
@@ -16,9 +17,9 @@ const AssignRole = () => {
   const [fName, setFname] = useState("");
   const [selectedValue, setSelectedValue] = useState("");
   const [id, setId] = useState("");
-  const [facultyName, setFacultyName] = useState("");
-  const [designation, setDesignation] = useState("");
-  const [role, setRole] = useState("");
+  const [facultyName, setFacultyName] = useState([]);
+  const [designation, setDesignation] = useState([]);
+  const [role, setRole] = useState([]);
   const [remove,setRemove] = useState("");
 
   useEffect(() => {
@@ -55,6 +56,9 @@ const AssignRole = () => {
         })
         .catch((error) => console.log(error));
     }
+
+
+
   }, []);
 
   const toggleContent = () => {
@@ -64,7 +68,6 @@ const AssignRole = () => {
   const handleSubmit = (event) => {
     event.preventDefault();
     acces_token = localStorage.getItem("access_token");
-
     // Assign Role API
     axios
       .post(
@@ -82,7 +85,12 @@ const AssignRole = () => {
       )
       .then((responce) => {
         console.log(responce.data);
-
+        setFacultyName([...facultyName, responce.data.data.user.first_name]);
+        setDesignation([...designation, responce.data.data.user.designation]);
+        setRole([...role, responce.data.data.role])
+        console.log(responce.data.data.role)
+        // console.log(responce.data.data.user.first_name);
+      
         if (responce.data.success === false) {
         } else {
           alert("successfully updated");
@@ -93,10 +101,12 @@ const AssignRole = () => {
       });
   };
 
-  const handleonChange = (e) => {
-    setId(e.target.value);
-    // console.log(e.target.value);
-    console.log(id);
+  const handleonChange = (event) => {
+    setId(event.target.value);
+    var selectedIndex = event.target.options.selectedIndex;
+    setFname(event.target.options[selectedIndex].getAttribute('data-designation'));
+    console.log(event.target.options[selectedIndex].getAttribute('data-designation'));
+    // const node = document.getElementById('select_name');
     // console.log(e.target.getAttribute("data-designation"));
   };
 
@@ -312,10 +322,13 @@ const AssignRole = () => {
             
                 // console.log( item.id)
                 return (
-                  <option value={item.id} data-designation={item.designation}  >
+                  <>
+                  {/* <p id="designation_store" style={{display:"none"}} >{item.designation}</p> */}
+                  <option id={item.designation} value={item.id} data-designation={item.designation}  >
                    
                     {item.first_name}
                   </option>
+                  </>
                 );
               })}
             </select>
@@ -377,16 +390,16 @@ const AssignRole = () => {
                   isHidden ? "hidden" : "block"
                 } mt-4  bg-gray-100 rounded-md flex justify-evenly`}
               >
-                <div class="flex items-center">
-                  <label class="mr-2">Role Name:</label>
+                <div className="flex items-center">
+                  <label className="mr-2">Role Name:</label>
                   <input
                     type="text"
-                    class="form-input border border-gray-400 rounded py-2 px-3"
+                    className="form-input border border-gray-400 rounded py-2 px-3"
                   />
                 </div>
                 <button
                   type="submit"
-                  class="bg-slate-500 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded"
+                  className="bg-slate-500 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded"
                 >
                   Submit
                 </button>
@@ -417,18 +430,21 @@ const AssignRole = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
+                      {facultyName.map((facultyName, index) => (
                       <tr>
                         <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">{facultyName}</td>
-                        <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">{designation}</td>
-                        <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">{role}</td>
+                        <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">{designation[index]}</td>
+                        <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">{role[index]}
+                          </td>
 
                         <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
                           <a
                             className="text-red-500 hover:text-red-700"
                             href="#"
-                          >{remove}</a>
+                          >remove</a>
                         </td>
                       </tr>
+                      ))}
                     </tbody>
                   </table>
                 </div>
