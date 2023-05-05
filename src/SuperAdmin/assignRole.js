@@ -16,7 +16,10 @@ const AssignRole = () => {
   const [fName, setFname] = useState("");
   const [selectedValue, setSelectedValue] = useState("");
   const [id, setId] = useState("");
-  const [id2, setId2] = useState("");
+  const [facultyName, setFacultyName] = useState("");
+  const [designation, setDesignation] = useState("");
+  const [role, setRole] = useState("");
+  const [remove,setRemove] = useState("");
 
   useEffect(() => {
     acces_token = localStorage.getItem("access_token");
@@ -60,13 +63,21 @@ const AssignRole = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    acces_token = localStorage.getItem("access_token");
+
+    // Assign Role API
     axios
       .post(
-        `http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/users/users/${id}/assign_role?subdomain=${subdomain}`,
+        `http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/users/users/${id}/assign_role`,
         {
           user: {
             role_name: selectedValue,
-          },
+          },subdomain: subdomain
+        },
+        {
+          headers: {
+            'Authorization' : `Bearer ${acces_token}`
+          }
         }
       )
       .then((responce) => {
@@ -82,9 +93,16 @@ const AssignRole = () => {
       });
   };
 
+  const handleonChange = (e) => {
+    setId(e.target.value);
+    // console.log(e.target.value);
+    console.log(id);
+    // console.log(e.target.getAttribute("data-designation"));
+  };
+
   const handleLogout = () => {
     const accessToken = localStorage.getItem("access_token");
-
+    // Get Authorization details
     axios
       .get(
         `http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
@@ -96,6 +114,8 @@ const AssignRole = () => {
       .catch(function (error) {
         console.log(error.message);
       });
+
+    // Logout API request
     axios
       .post(
         " http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/oauth/revoke",
@@ -114,7 +134,7 @@ const AssignRole = () => {
         console.error(error);
       });
   };
-// console.log(id2)
+
   return (
     <div>
       <nav className="fixed top-0 z-50 w-full bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
@@ -285,20 +305,14 @@ const AssignRole = () => {
             <select
               className="form-select text-sm md:text-lg lg:text-xl mr-2 border-2"
               id="select_name"
-              onChange={(e) => {
-                setFname(e.target.value);
-                setId(e.target.value);
-                console.log(e.target.value);
-                // console.log(e.target.getAttribute('data-id'));
-                console.log(e.target.dataset - id);
-              }}
+              onChange={handleonChange}
             >
               <option>Select Name</option>
               {data.map((item) => {
             
                 // console.log( item.id)
                 return (
-                  <option value={item.designation} key={item.id}  >
+                  <option value={item.id} data-designation={item.designation}  >
                    
                     {item.first_name}
                   </option>
@@ -333,10 +347,10 @@ const AssignRole = () => {
                 console.log(selectedValue);
               }}
             >
-              <option>Examination Controller</option>
-              <option>Assistant Exam Controller</option>
-              <option>Academic Head</option>
-              <option>HOD</option>
+              <option value={'Examination Controller'}>Examination Controller</option>
+              <option value={'Assistant Exam Controller'}>Assistant Exam Controller</option>
+              <option value={'Academic Head'}>Academic Head</option>
+              <option value={'HOD'}>HOD</option>
             </select>
           </div>
 
@@ -404,15 +418,15 @@ const AssignRole = () => {
                     </thead>
                     <tbody className="divide-y divide-gray-200">
                       <tr>
-                        <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap"></td>
-                        <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap"></td>
-                        <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap"></td>
+                        <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">{facultyName}</td>
+                        <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">{designation}</td>
+                        <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">{role}</td>
 
                         <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
                           <a
                             className="text-red-500 hover:text-red-700"
                             href="#"
-                          ></a>
+                          >{remove}</a>
                         </td>
                       </tr>
                     </tbody>
