@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
+
 const SignUpSuperAdmin = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -27,6 +28,7 @@ const SignUpSuperAdmin = () => {
       console.log(response);
 
       alert("Success");
+
       navigate("/");
     })
     .catch(function(error) {

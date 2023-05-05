@@ -70,37 +70,37 @@ const AssignRole = () => {
           .catch((error) => console.log(error));
     }
 
-    axios
-    .post(
-      `http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/users/users/${id}/assign_role`,
-      {
-        user: {
-          role_name: selectedValue,
-        },subdomain: subdomain
-      },
-      {
-        headers: {
-          'Authorization' : `Bearer ${acces_token}`
-        }
-      }
-    )
-    .then((responce) => {
-      console.log(responce.data);
-      setFacultyId( responce.data.data.user.id);
-      setFacultyName( responce.data.data.user.first_name);
-      setDesignation( responce.data.data.user.designation);
-      setRole(responce.data.data.role)
-      console.warn(responce.data.data.user.designation)
-      // console.log(responce.data.data.user.first_name);
+    // axios
+    // .post(
+    //   `http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/users/users/${id}/assign_role`,
+    //   {
+    //     user: {
+    //       role_name: selectedValue,
+    //     },subdomain: subdomain
+    //   },
+    //   {
+    //     headers: {
+    //       'Authorization' : `Bearer ${acces_token}`
+    //     }
+    //   }
+    // )
+    // .then((responce) => {
+    //   console.log(responce.data);
+    //   setFacultyId( responce.data.data.user.id);
+    //   setFacultyName( responce.data.data.user.first_name);
+    //   setDesignation( responce.data.data.user.designation);
+    //   setRole(responce.data.data.role)
+    //   console.warn(responce.data.data.user.designation)
+    //   // console.log(responce.data.data.user.first_name);
     
-      if (responce.data.success === false) {
-      // } else {
-      //   alert("successfully updated");
-      }
-    })
-    .catch(function (err) {
-      console.log(err.message);
-    });
+    //   if (responce.data.success === false) {
+    //   // } else {
+    //   //   alert("successfully updated");
+    //   }
+    // })
+    // .catch(function (err) {
+    //   console.log(err.message);
+    // });
     
 
   }, []);
