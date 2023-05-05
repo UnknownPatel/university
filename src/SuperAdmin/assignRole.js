@@ -14,12 +14,15 @@ const AssignRole = () => {
   const [clientSecret, setClentSecret] = useState("");
   const [isHidden, setIsHidden] = useState(true);
   const [data, setData] = useState([{}]);
+  const [roleData, setRoleData] = useState([{}]);
   const [fName, setFname] = useState("");
   const [selectedValue, setSelectedValue] = useState("");
   const [id, setId] = useState("");
   const [facultyName, setFacultyName] = useState([]);
+  const [facultyId, setFacultyId] = useState([]);
   const [designation, setDesignation] = useState([]);
   const [role, setRole] = useState([]);
+  const [roleName, setRoleName] = useState("");
   const [remove,setRemove] = useState("");
 
   useEffect(() => {
@@ -55,9 +58,50 @@ const AssignRole = () => {
           console.log(response.data.data.users);
         })
         .catch((error) => console.log(error));
+
+        axios
+          .get(`http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/roles?subdomain=${subdomain}`,
+            {headers}
+          )
+          .then((response) => {
+            setRoleData(response.data.data.role_names);
+            console.log(response.data.data.role_names);
+          })
+          .catch((error) => console.log(error));
     }
 
-
+    axios
+    .post(
+      `http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/users/users/${id}/assign_role`,
+      {
+        user: {
+          role_name: selectedValue,
+        },subdomain: subdomain
+      },
+      {
+        headers: {
+          'Authorization' : `Bearer ${acces_token}`
+        }
+      }
+    )
+    .then((responce) => {
+      console.log(responce.data);
+      setFacultyId( responce.data.data.user.id);
+      setFacultyName( responce.data.data.user.first_name);
+      setDesignation( responce.data.data.user.designation);
+      setRole(responce.data.data.role)
+      console.warn(responce.data.data.user.designation)
+      // console.log(responce.data.data.user.first_name);
+    
+      if (responce.data.success === false) {
+      // } else {
+      //   alert("successfully updated");
+      }
+    })
+    .catch(function (err) {
+      console.log(err.message);
+    });
+    
 
   }, []);
 
@@ -85,6 +129,7 @@ const AssignRole = () => {
       )
       .then((responce) => {
         console.log(responce.data);
+        setFacultyId([...facultyId, responce.data.data.user.id]);
         setFacultyName([...facultyName, responce.data.data.user.first_name]);
         setDesignation([...designation, responce.data.data.user.designation]);
         setRole([...role, responce.data.data.role])
@@ -92,14 +137,70 @@ const AssignRole = () => {
         // console.log(responce.data.data.user.first_name);
       
         if (responce.data.success === false) {
-        } else {
-          alert("successfully updated");
+        // } else {
+        //   alert("successfully updated");
         }
       })
       .catch(function (err) {
         console.log(err.message);
       });
   };
+
+  const handleRemoveRole = (e) => {
+    e.preventDefault();
+    console.log(e.target.getAttribute('data-id'));
+    acces_token = localStorage.getItem("access_token");
+
+    const faculty_id = e.target.getAttribute('data-id')
+    const role_name = e.target.getAttribute('data-role-name')
+
+    axios
+      .post(`http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/users/users/${faculty_id}/deassign_role`,
+        {
+          user: {
+            role_name: role_name
+          },
+          subdomain: subdomain
+        },
+        {
+          headers: {
+            'Authorization' : `Bearer ${acces_token}`
+          }
+        }
+      )
+      .then((responce) => {
+        console.log(responce.data);
+      })
+      .catch(function (err) {
+        console.log(err.message);
+      });
+  }
+
+  const handleCreateRole = (e) => {
+    e.preventDefault();
+    acces_token = localStorage.getItem("access_token");
+
+    axios
+      .post('http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/roles',
+        {
+          role: {
+            name: roleName
+          },subdomain: subdomain
+        },
+        {
+          headers: {
+            'Authorization' : `Bearer ${acces_token}`
+          }
+        }
+      )
+      .then((responce) => {
+        console.log(responce.data);
+        setRoleName("");
+      })
+      .catch(function (err) {
+        console.log(err.message);
+      });
+  }
 
   const handleonChange = (event) => {
     setId(event.target.value);
@@ -360,10 +461,16 @@ const AssignRole = () => {
                 console.log(selectedValue);
               }}
             >
-              <option value={'Examination Controller'}>Examination Controller</option>
-              <option value={'Assistant Exam Controller'}>Assistant Exam Controller</option>
-              <option value={'Academic Head'}>Academic Head</option>
-              <option value={'HOD'}>HOD</option>
+              <option>Select Role</option>
+              {roleData.map((item) => {
+            
+                // console.log( item.id)
+                return (
+                  <>
+                  <option value={item.name}> {item.name} </option>
+                  </>
+                );
+              })}
             </select>
           </div>
 
@@ -394,12 +501,15 @@ const AssignRole = () => {
                   <label className="mr-2">Role Name:</label>
                   <input
                     type="text"
+                    value={roleName}
+                    onChange={(e) => setRoleName(e.target.value)}
                     className="form-input border border-gray-400 rounded py-2 px-3"
                   />
                 </div>
                 <button
                   type="submit"
                   className="bg-slate-500 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded"
+                  onClick={handleCreateRole}
                 >
                   Submit
                 </button>
@@ -441,7 +551,10 @@ const AssignRole = () => {
                           <a
                             className="text-red-500 hover:text-red-700"
                             href="#"
-                          >remove</a>
+                            data-id={facultyId}
+                            data-role-name={role[index]}
+                            onClick={handleRemoveRole}
+                          >Revoke Role</a>
                         </td>
                       </tr>
                       ))}
