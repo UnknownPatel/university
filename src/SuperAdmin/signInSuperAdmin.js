@@ -45,11 +45,16 @@ const SignInSuperAdmin = () => {
 
             if (response.data.success === false) {
             } else {
-              alert("logged in successfully !!");
-              // toast("logged in successfully");
+              // alert("logged in successfully !!");
+              toast.success('Login Successfully !!', {
+                position: toast.POSITION.TOP_CENTER
+            });
+            setTimeout(() => {
               const accessToken = response.data.access_token;
               localStorage.setItem("access_token", accessToken);
               navigate("/home");
+            },5000)
+             
             }
           })
           .catch((err) => {
