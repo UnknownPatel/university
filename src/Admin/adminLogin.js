@@ -5,8 +5,16 @@ const AdminLogin = () => {
     <div>
       <section className="flex flex-col md:flex-row h-screen items-center">
         <div className="bg-indigo-600 hidden lg:block w-full md:w-1/2 xl:w-2/3 h-screen">
-          {/* <img src="https://img.freepik.com/premium-vector/man-with-key-near-computer-account-login-password-vector-male-character-concept-business_566886-1945.jpg?w=2000" alt="" className="w-full h-full object-cover"/> */}
-          {/* <img src="https://img.freepik.com/free-vector/tablet-login-concept-illustration_114360-7963.jpg?size=626&ext=jpg&ga=GA1.1.273664279.1682681851&semt=sph" alt="" className="w-full h-full object-cover"/> */}
+          {/* <img
+            src="https://img.freepik.com/premium-vector/man-with-key-near-computer-account-login-password-vector-male-character-concept-business_566886-1945.jpg?w=2000"
+            alt=""
+            className="w-full h-full object-cover"
+          /> */}
+          {/* <img
+            src="https://img.freepik.com/free-vector/tablet-login-concept-illustration_114360-7963.jpg?size=626&ext=jpg&ga=GA1.1.273664279.1682681851&semt=sph"
+            alt=""
+            className="w-full h-full object-cover"
+          /> */}
           <img
             src="https://img.freepik.com/free-vector/privacy-policy-concept-illustration_114360-7853.jpg?size=626&ext=jpg&ga=GA1.1.273664279.1682681851&semt=sph"
             alt=""
@@ -73,7 +81,7 @@ const AdminLogin = () => {
             <hr className="my-6 border-gray-300 w-full" />
 
             <p className="mt-8">
-              If You Are Super Admin
+              If You Are Super Admin{" "}
               <a
                 href="#"
                 className="text-blue-500 hover:text-blue-700 font-semibold"

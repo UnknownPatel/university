@@ -19,11 +19,14 @@ import UpdateAssignRole from './SuperAdmin/updateAssignRole';
 import Approve_reject_Registrations from './SuperAdmin/approve_reject_Registrations';
 import UploadExcel from './SuperAdmin/uploadExcel';
 import AdminLogin from './Admin/adminLogin';
+import ExamBlockDetails from './Admin/examBlockDetails';
+import ExamAssignSupervision from './Admin/examAssignSupervision';
+import ExamTimeTable from './Admin/examTimeTable';
 
 function App() {
   return (
     <div className="App">
-      <BrowserRouter>
+      {/* <BrowserRouter>
       <Routes>
         <Route exact path='/' element={<SignInSuperAdmin/>} />
         <Route path='/signupSuperAdmin' element={<SignUpSuperAdmin/>} />
@@ -40,7 +43,7 @@ function App() {
         <Route path="/AdminLogin" element={<AdminLogin/>}/>
 
       </Routes>
-      </BrowserRouter>
+      </BrowserRouter> */}
 
 
       {/* <Route path='/updateAssignRole' element={<UpdateAssignRole/>} /> */}
@@ -60,6 +63,9 @@ function App() {
       {/* <SignUpSuperAdmin/> */}
       {/* <SignInSuperAdmin/> */}
       {/* <AdminLogin/> */}
+      {/* <ExamBlockDetails/> */}
+      <ExamAssignSupervision/>
+      {/* <ExamTimeTable/> */}
     </div>
   );
 }
