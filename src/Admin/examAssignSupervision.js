@@ -196,7 +196,7 @@ const ExamAssignSupervision = () => {
           <div className="flex flex-col items-center">
             <div className="flex justify-center space-x-4 mb-4">
               <button
-                className={`bg-slate-800 text-white font-bold py-2 px-4 rounded-lg ${
+                className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg ${
                   activeButton === "button1" ? "bg-slate-800" : ""
                 }`}
                 onClick={() => toggleContent("button1")}
@@ -204,7 +204,7 @@ const ExamAssignSupervision = () => {
                 Jr. Supervisors
               </button>
               <button
-                className={`bg-slate-800 text-white font-bold py-2 px-4 rounded-lg ${
+                className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg ${
                   activeButton === "button2" ? "bg-slate-800" : ""
                 }`}
                 onClick={() => toggleContent("button2")}
@@ -212,7 +212,7 @@ const ExamAssignSupervision = () => {
                 Sr. Supervisor
               </button>
               <button
-                className={`bg-slate-800 text-white font-bold py-2 px-4 rounded-lg ${
+                className={`bg-slate-500  text-white font-bold py-2 px-4 rounded-lg ${
                   activeButton === "button3" ? "bg-slate-800" : ""
                 }`}
                 onClick={() => toggleContent("button3")}
@@ -383,7 +383,7 @@ const ExamAssignSupervision = () => {
               </div>
               <div
                 id="content3"
-                className={`w-full  rounded-lg ${
+                className={`w-full rounded-lg ${
                   activeButton === "button3" ? "block" : "hidden"
                 }`}
               >
@@ -397,9 +397,37 @@ const ExamAssignSupervision = () => {
                   <select className="form-select text-sm md:text-lg lg:text-xl mr-2 border-2">
                     <option>Select Department</option>
                   </select>
-                  <div>
-                    
+                </div>
+                <div className="flex justify-center mt-5">
+                    <label
+                      htmlFor=""
+                      className="text-sm md:text-lg lg:text-xl mr-2"
+                    >
+                      Staff Name:
+                    </label>
+                    <input
+                      className="shadow appearance-none border rounded w-52 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                      id=""
+                      type="text"
+                      placeholder="Enter staff name"
+                    />
+                    <label
+                      htmlFor=""
+                      className="text-sm md:text-lg lg:text-xl ml-5 mr-2"
+                    >
+                      Enter Duties:
+                    </label>
+                    <input
+                      className="shadow appearance-none border rounded w-52 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                      id=""
+                      type="text"
+                      placeholder="Enter Assign Duties"
+                    />
                   </div>
+                  <div className="text-center mt-10">
+                  <button className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold">
+                    Submit
+                  </button>
                 </div>
               </div>
             </div>

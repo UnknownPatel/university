@@ -64,8 +64,8 @@ function App() {
       {/* <SignInSuperAdmin/> */}
       {/* <AdminLogin/> */}
       {/* <ExamBlockDetails/> */}
-      <ExamAssignSupervision/>
-      {/* <ExamTimeTable/> */}
+      {/* <ExamAssignSupervision/> */}
+      <ExamTimeTable/>
     </div>
   );
 }

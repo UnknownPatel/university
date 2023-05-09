@@ -1,4 +1,8 @@
 import React, { useState } from "react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import "tailwindcss/tailwind.css";
+// import ReactDatePicker from "react-datepicker";
 
 const ExamTimeTable = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -11,6 +15,11 @@ const ExamTimeTable = () => {
   function toggleContent(buttonId) {
     setActiveButton(buttonId);
   }
+  const [year, setYear] = useState(new Date());
+
+  const handleYearChange = (date) => {
+    setYear(date);
+  };
   return (
     <div>
       <div>
@@ -189,14 +198,14 @@ const ExamTimeTable = () => {
         <div className="p-4 sm:ml-64">
           <div className="p-4 rounded-lg mt-14">
             <div className="text-center text-4xl">
-              <p>Assign Supervision</p>
+              <p>Examination</p>
             </div>
             <hr className="mt-2" />
           </div>
           <div className="flex flex-col items-center">
             <div className="flex justify-center space-x-4 mb-4">
               <button
-                className={`bg-slate-800 text-white font-bold py-2 px-4 rounded-lg ${
+                className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg ${
                   activeButton === "button1" ? "bg-slate-800" : ""
                 }`}
                 onClick={() => toggleContent("button1")}
@@ -204,7 +213,7 @@ const ExamTimeTable = () => {
                 Time Table
               </button>
               <button
-                className={`bg-slate-800 text-white font-bold py-2 px-4 rounded-lg ${
+                className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg ${
                   activeButton === "button2" ? "bg-slate-800" : ""
                 }`}
                 onClick={() => toggleContent("button2")}
@@ -212,7 +221,7 @@ const ExamTimeTable = () => {
                 Blockwise Report
               </button>
               <button
-                className={`bg-slate-800 text-white font-bold py-2 px-4 rounded-lg ${
+                className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg ${
                   activeButton === "button3" ? "bg-slate-800" : ""
                 }`}
                 onClick={() => toggleContent("button3")}
@@ -220,7 +229,7 @@ const ExamTimeTable = () => {
                 Jr.Supervisor Tab
               </button>
               <button
-                className={`bg-slate-800 text-white font-bold py-2 px-4 rounded-lg ${
+                className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg ${
                   activeButton === "button4" ? "bg-slate-800" : ""
                 }`}
                 onClick={() => toggleContent("button4")}
@@ -228,7 +237,7 @@ const ExamTimeTable = () => {
                 Sr.Supervisor Tab
               </button>
               <button
-                className={`bg-slate-800 text-white font-bold py-2 px-4 rounded-lg ${
+                className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg ${
                   activeButton === "button5" ? "bg-slate-800" : ""
                 }`}
                 onClick={() => toggleContent("button5")}
@@ -237,21 +246,16 @@ const ExamTimeTable = () => {
               </button>
             </div>
             <div className="flex flex-col items-center space-y-4">
+                {/* Button Content 1 */}
               <div
                 id="content1"
                 className={`w-full p-4 rounded-lg ${
                   activeButton === "button1" ? "block" : "hidden"
                 }`}
               >
-                <div className="text-center text-2xl">
-                    University Name
-                </div>
-                <div className="text-center text-2xl">
-                    Computer Engineering
-                </div>
-                <div className="text-center text-2xl">
-                    Winter 2022examination Time Table 
-                </div>
+                <div className="text-center text-2xl">University Name</div>
+                <div className="text-center text-2xl"></div>
+                <div className="text-center text-2xl">Time Table</div>
                 <br />
                 <div className="flex justify-center">
                   <label
@@ -267,11 +271,29 @@ const ExamTimeTable = () => {
                     htmlFor=""
                     className="text-sm md:text-lg lg:text-xl mr-2"
                   >
-                    Select Branch:
+                    Select Examination
                   </label>
                   <select className="form-select text-sm md:text-lg lg:text-xl mr-2 border-2">
-                    <option>Select Branch</option>
+                    <option>Select Examination</option>
+                    <option>Winter</option>
+                    <option>Summers</option>
                   </select>
+                  <label
+                    htmlFor=""
+                    className="text-sm md:text-base lg:text-lg mr-2"
+                  >
+                    Select Year:
+                  </label>
+                  <DatePicker
+                    id="year-picker"
+                    className="border rounded px-3 py-2 "
+                    selected={year}
+                    onChange={handleYearChange}
+                    dateFormat="yyyy"
+                    showYearPicker
+                    scrollableYearDropdown
+                    yearDropdownItemNumber={10}
+                  />
                 </div>
                 <div className="flex flex-col mt-5">
                   <div className="overflow-x-auto">
@@ -309,9 +331,15 @@ const ExamTimeTable = () => {
                           <tbody className="divide-y divide-gray-200">
                             <tr>
                               <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                Information
+                                <select className="form-select text-sm md:text-sm lg:text-sm mr-2 border-2">
+                                  <option>Select Subject Name</option>
+                                </select>
                               </td>
-                              <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap"></td>
+                              <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                <select className="form-select text-sm md:text-sm lg:text-sm mr-2 border-2">
+                                  <option>Select Code</option>
+                                </select>
+                              </td>
                               <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
                                 <input
                                   className="shadow appearance-none border rounded w-40 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -341,37 +369,436 @@ const ExamTimeTable = () => {
                   </button>
                 </div>
               </div>
+              {/* Button Content 2 */}
               <div
                 id="content2"
                 className={`w-full  rounded-lg ${
                   activeButton === "button2" ? "block" : "hidden"
                 }`}
               >
-                <p>Hii tab 2</p>
+                <div className="text-center text-2xl">University Name</div>
+                <div className="text-center text-2xl">Block Wise Report</div>
+                <div className="flex flex-col mt-5">
+                  <div className="overflow-x-auto">
+                    <div className="p-1.5 w-full inline-block align-middle">
+                      <div className="overflow-hidden border rounded-lg">
+                        <table className="min-w-full divide-y divide-gray-200">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                              >
+                                Subject Name
+                              </th>
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                              >
+                                Subject Code
+                              </th>
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                              >
+                                Date
+                              </th>
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                              >
+                                Time
+                              </th>
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                              >
+                                No. of Rooms
+                              </th>
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                              >
+                                No. of Blocks
+                              </th>
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                              >
+                                No. of Students
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-200">
+                            <tr>
+                              <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                1
+                              </td>
+                              <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                2
+                              </td>
+                              <td className="px-6 py-4 text-sm  whitespace-nowrap">
+                                3
+                              </td>
+                              <td className="px-6 py-4 text-sm  whitespace-nowrap">
+                                4
+                              </td>
+                              <td className="px-6 py-4 text-sm  whitespace-nowrap">
+                                5
+                              </td>
+                              <td className="px-6 py-4 text-sm  whitespace-nowrap">
+                                6
+                              </td>
+                              <td className="px-6 py-4 text-sm  whitespace-nowrap">
+                                7
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="text-center mt-10">
+                  <button className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold">
+                    Download
+                  </button>
+                </div>
               </div>
+              {/* Button Content 3 */}
               <div
                 id="content3"
                 className={`w-full  rounded-lg ${
                   activeButton === "button3" ? "block" : "hidden"
                 }`}
               >
-                <p>Hii tab 3</p>
+                <div className="text-center text-2xl">University Name</div>
+                <div className="text-center text-2xl">Junior Supervisor List</div>
+                <div className="flex justify-center mt-5">
+                  <label
+                    htmlFor=""
+                    className="text-sm md:text-lg lg:text-xl mr-2"
+                  >
+                    Select Examination
+                  </label>
+                  <select className="form-select text-sm md:text-lg lg:text-xl mr-2 border-2">
+                    <option>Select Examination</option>
+                    <option>Winter</option>
+                    <option>Summers</option>
+                  </select>
+                  <label
+                    htmlFor=""
+                    className="text-sm md:text-lg lg:text-xl mr-2"
+                  >
+                    Select Year:
+                  </label>
+                  <DatePicker
+                    id="year-picker"
+                    className="border rounded px-3 py-2 "
+                    selected={year}
+                    onChange={handleYearChange}
+                    dateFormat="yyyy"
+                    showYearPicker
+                    scrollableYearDropdown
+                    yearDropdownItemNumber={10}
+                  />
+                </div>
+                <div className="flex flex-col mt-5">
+                  <div className="overflow-x-auto">
+                    <div className="p-1.5 w-full inline-block align-middle">
+                      <div className="overflow-hidden border rounded-lg">
+                        <table className="min-w-full divide-y divide-gray-200">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                              >
+                                Name
+                              </th>
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                              >
+                                Designation
+                              </th>
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                              >
+                                Department
+                              </th>
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                              >
+                                Date & Morning
+                              </th>
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                              >
+                                Date & Morning
+                              </th>
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                              >
+                                Date & Evening
+                              </th>
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                              >
+                                Date & Evening
+                              </th>
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                              >
+                                Sign
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-200">
+                            <tr>
+                              <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                1
+                              </td>
+                              <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                2
+                              </td>
+                              <td className="px-6 py-4 text-sm  whitespace-nowrap">
+                                3
+                              </td>
+                              <td className="px-6 py-4 text-sm  whitespace-nowrap">
+                                4
+                              </td>
+                              <td className="px-6 py-4 text-sm  whitespace-nowrap">
+                                5
+                              </td>
+                              <td className="px-6 py-4 text-sm  whitespace-nowrap">
+                                6
+                              </td>
+                              <td className="px-6 py-4 text-sm  whitespace-nowrap">
+                                7
+                              </td>
+                              <td className="px-6 py-4 text-sm  whitespace-nowrap">
+                                8
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="text-center mt-10">
+                  <button className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold">
+                    Download
+                  </button>
+                </div>
               </div>
+              {/* Button Content 4 */}
               <div
                 id="content4"
                 className={`w-full  rounded-lg ${
                   activeButton === "button4" ? "block" : "hidden"
                 }`}
               >
-                <p>hii tab 4</p>
+                <div className="flex justify-center">
+                  <label
+                    htmlFor=""
+                    className="text-sm md:text-lg lg:text-xl mr-2"
+                  >
+                    Select Examination
+                  </label>
+                  <select className="form-select text-sm md:text-lg lg:text-xl mr-2 border-2">
+                  <option>Select Examination</option>
+                    <option>Winter</option>
+                    <option>Summers</option>
+                  </select>
+                  <label
+                    htmlFor=""
+                    className="text-sm md:text-lg lg:text-xl mr-2"
+                  >
+                    Select Year:
+                  </label>
+                  <DatePicker
+                    id="year-picker2"
+                    className="border rounded px-3 py-2 "
+                    selected={year}
+                    onChange={handleYearChange}
+                    dateFormat="yyyy"
+                    showYearPicker
+                    scrollableYearDropdown
+                    yearDropdownItemNumber={10}
+                  />
+                </div>
+                <div className="flex flex-col mt-5">
+                  <div className="overflow-x-auto">
+                    <div className="p-1.5 w-full inline-block align-middle">
+                      <div className="overflow-hidden border rounded-lg">
+                        <table className="min-w-full divide-y divide-gray-200">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                              >
+                                Name
+                              </th>
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                              >
+                                Designation
+                              </th>
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                              >
+                                Department
+                              </th>
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                              >
+                                Date & Morning
+                              </th>
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                              >
+                                Date & Morning
+                              </th>
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                              >
+                                Date & Evening
+                              </th>
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                              >
+                                Date & Evening
+                              </th>
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                              >
+                                Sign
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-200">
+                            <tr>
+                              <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                1
+                              </td>
+                              <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                2
+                              </td>
+                              <td className="px-6 py-4 text-sm  whitespace-nowrap">
+                                3
+                              </td>
+                              <td className="px-6 py-4 text-sm  whitespace-nowrap">
+                                4
+                              </td>
+                              <td className="px-6 py-4 text-sm  whitespace-nowrap">
+                                5
+                              </td>
+                              <td className="px-6 py-4 text-sm  whitespace-nowrap">
+                                6
+                              </td>
+                              <td className="px-6 py-4 text-sm  whitespace-nowrap">
+                                7
+                              </td>
+                              <td className="px-6 py-4 text-sm  whitespace-nowrap">
+                                8
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="text-center mt-10">
+                  <button className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold">
+                    Download
+                  </button>
+                </div>
               </div>
+              {/* Button Content 5 */}
               <div
                 id="content5"
                 className={`w-full  rounded-lg ${
                   activeButton === "button5" ? "block" : "hidden"
                 }`}
               >
-                <p>Hii Tab 5</p>
+                <div className="text-center text-2xl">University Name</div>
+                <div className="text-center text-2xl">Other Duties</div>
+                <div className="flex flex-col mt-5">
+                  <div className="overflow-x-auto">
+                    <div className="p-1.5 w-full inline-block align-middle">
+                      <div className="overflow-hidden border rounded-lg">
+                        <table className="min-w-full divide-y divide-gray-200">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                              >
+                                Name of Staff
+                              </th>
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                              >
+                                designation
+                              </th>
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                              >
+                                Assigned Duty
+                              </th>
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                              >
+                                Sign
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-200">
+                            <tr>
+                              <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                
+                              </td>
+                              <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                
+                              </td>
+                              <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
+                               
+                              </td>
+                              <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
+                                
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="text-center mt-10">
+                  <button className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold">
+                    Download
+                  </button>
+                </div>
               </div>
             </div>
           </div>
