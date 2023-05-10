@@ -122,7 +122,7 @@ const ExamAssignSupervision = () => {
         >
           <div className="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
             <ul className="space-y-2 font-medium">
-              <li>
+              {/* <li>
                 <button
                   className="bg-gray-300 py-2 px-4 rounded-md"
                   onClick={toggleDropdown}
@@ -153,32 +153,32 @@ const ExamAssignSupervision = () => {
                   Time Table
                 </a>
                 </div>
-              </li>
+              </li> */}
               <li>
                 <a
-                  href="#"
-                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                  href="/examBlockDetails"
+                  className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
-                  <span className="ml-3">Create TimeTable</span>
+                  <span className="ml-3">Enter Block Details</span>
                 </a>
               </li>
               <li>
                 <a
-                  href="#"
-                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                  href="/examAssignSupervision"
+                  className="flex items-center p-2 text-gray-900 rounded-lg bg-slate-600 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   <span className="flex-1 ml-3 whitespace-nowrap">
-                    Faculty Supervision List
+                  Assign Supervision
                   </span>
                 </a>
               </li>
               <li>
                 <a
-                  href="#"
+                  href="/examTimeTable"
                   className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   <span className="flex-1 ml-3 whitespace-nowrap">
-                    View Supervision List
+                  Time Table
                   </span>
                 </a>
               </li>

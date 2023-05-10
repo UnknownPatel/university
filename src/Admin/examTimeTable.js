@@ -1,10 +1,157 @@
-import React, { useState } from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "tailwindcss/tailwind.css";
 
+var acces_token;
+var subdomain;
+
 const ExamTimeTable = () => {
+  const [uniName, setUniName] = useState("");
+  const [courses, setCourses] = useState([]);
+  const [branches, setBranches] = useState([]);
+  const [semesters, setSemesters] = useState([]);
+  const [subjects, setSubjects] = useState([]);
+
+  useEffect(() => {
+    acces_token = localStorage.getItem("access_token");
+
+    const headers = { Authorization: `Bearer ${acces_token}` };
+    const host = window.location.host;
+    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
+    if (arr.length > 0) {
+      subdomain = arr[0];
+    }
+
+    if (subdomain !== null || subdomain !== "") {
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
+        )
+        .then((response) => {
+          //   console.log(response.data.university.name);
+          setUniName(response.data.university.name);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/courses?subdomain=${subdomain}`,
+          { headers }
+        )
+        .then((response) => {
+          setCourses(response.data.data.courses);
+          console.log(courses);
+        })
+        .catch((error) => console.log(error));
+
+      // axios
+      //   .get(`http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/roles?subdomain=${subdomain}`,
+      //     {headers}
+      //   )
+      //   .then((response) => {
+      //     setRoleData(response.data.data.role_names);
+      //     console.log(response.data.data.role_names);
+      //   })
+      //   .catch((error) => console.log(error));
+    }
+  }, []);
+
+  const handleCourseChange = (e) => {
+    e.preventDefault();
+    var course_id = e.target.value;
+    acces_token = localStorage.getItem("access_token");
+    const headers = { Authorization: `Bearer ${acces_token}` };
+    const host = window.location.host;
+    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
+    if (arr.length > 0) {
+      subdomain = arr[0];
+    }
+    if (subdomain !== null || subdomain !== "") {
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/branches?subdomain=${subdomain}&course_id=${course_id}`,
+          { headers }
+        )
+        .then((response) => {
+          console.log(response.data.data.branches);
+          setBranches(response.data.data.branches);
+          console.log(branches);
+        })
+        .catch((error) => console.log(error));
+    }
+  };
+
+  const handleBranchChange = (e) => {
+    e.preventDefault();
+    var branch_id = e.target.value;
+    acces_token = localStorage.getItem("access_token");
+    const headers = { Authorization: `Bearer ${acces_token}` };
+    const host = window.location.host;
+    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
+    if (arr.length > 0) {
+      subdomain = arr[0];
+    }
+    if (subdomain !== null || subdomain !== "") {
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/semesters?subdomain=${subdomain}&branch_id=${branch_id}`,
+          { headers }
+        )
+        .then((response) => {
+          console.log(response.data.data.semesters);
+          setSemesters(response.data.data.semesters);
+          console.log(branches);
+        })
+        .catch((error) => console.log(error));
+    }
+  };
+
+  const handleSemesterChange = (e) => {
+    e.preventDefault();
+    var semester_id = e.target.value;
+    acces_token = localStorage.getItem("access_token");
+    const headers = { Authorization: `Bearer ${acces_token}` };
+    const host = window.location.host;
+    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
+    if (arr.length > 0) {
+      subdomain = arr[0];
+    }
+    if (subdomain !== null || subdomain !== "") {
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/subjects?subdomain=${subdomain}&semester_id=${semester_id}`,
+          { headers }
+        )
+        .then((response) => {
+          console.log(response.data.data.subjects);
+          setSubjects(response.data.data.subjects);
+          console.log(branches);
+        })
+        .catch((error) => console.log(error));
+    }
+  };
+
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const handleSubjectNameChange = (e) => {
+    e.preventDefault();
+    console.log(e.target.selectedIndex)
+    let codeSelect = document.getElementsByClassName('select-code')[0];
+    codeSelect.selectedIndex = e.target.selectedIndex
+    console.log(codeSelect);
+  }
+
+  const handleSubjectCodeChange = (e) => {
+    e.preventDefault();
+    console.log(e.target.selectedIndex)
+    let codeSelect = document.getElementsByClassName('select-subject-name')[0];
+    codeSelect.selectedIndex = e.target.selectedIndex
+    console.log(codeSelect);
+  }
 
   function toggleDropdown() {
     setIsDropdownOpen(!isDropdownOpen);
@@ -51,7 +198,7 @@ const ExamTimeTable = () => {
                 <a href="" className="flex ml-2 md:mr-24">
                   <img src="" className="h-8 mr-3" alt="Logo" />
                   <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
-                    Institute Name
+                    {uniName}
                   </span>
                 </a>
               </div>
@@ -130,7 +277,7 @@ const ExamTimeTable = () => {
         >
           <div className="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
             <ul className="space-y-2 font-medium">
-              <li>
+              {/* <li>
                 <button
                   className="bg-gray-300 py-2 px-4 rounded-md"
                   onClick={toggleDropdown}
@@ -161,32 +308,32 @@ const ExamTimeTable = () => {
                   Time Table
                 </a>
                 </div>
-              </li>
+              </li> */}
               <li>
                 <a
-                  href="#"
-                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                  href="/examBlockDetails"
+                  className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
-                  <span className="ml-3">Create TimeTable</span>
+                  <span className="ml-3">Enter Block Details</span>
                 </a>
               </li>
               <li>
                 <a
-                  href="#"
+                  href="/examAssignSupervision"
                   className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   <span className="flex-1 ml-3 whitespace-nowrap">
-                    Faculty Supervision List
+                    Assign Supervision
                   </span>
                 </a>
               </li>
               <li>
                 <a
-                  href="#"
-                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                  href="/examTimeTable"
+                  className="flex items-center p-2 text-gray-900 rounded-lg bg-slate-600 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   <span className="flex-1 ml-3 whitespace-nowrap">
-                    View Supervision List
+                    Time Table
                   </span>
                 </a>
               </li>
@@ -252,7 +399,7 @@ const ExamTimeTable = () => {
                   activeButton === "button1" ? "block" : "hidden"
                 }`}
               >
-                <div className="text-center text-2xl">University Name</div>
+                <div className="text-center text-2xl">{uniName}</div>
                 <div className="text-center text-2xl"></div>
                 <div className="text-center text-2xl">Time Table</div>
                 <br />
@@ -261,10 +408,16 @@ const ExamTimeTable = () => {
                     htmlFor=""
                     className="text-sm md:text-base lg:text-base mr-2"
                   >
-                    Select Department:
+                    Select Course:
                   </label>
-                  <select className="form-select text-sm md:text-base lg:text-base mr-2 border-2 px-3 py-2">
-                    <option>Select Department</option>
+                  <select
+                    className="form-select text-sm md:text-base lg:text-base mr-2 border-2 px-3 py-2"
+                    onChange={handleCourseChange}
+                  >
+                    <option>Select course</option>
+                    {courses.map((course, index) => (
+                      <option value={course.id}>{course.name}</option>
+                    ))}
                   </select>
                   <label
                     htmlFor=""
@@ -276,6 +429,38 @@ const ExamTimeTable = () => {
                     <option>Select Examination</option>
                     <option>Winter</option>
                     <option>Summers</option>
+                  </select>
+                </div>
+                <div className="flex justify-center mt-5">
+                  <label
+                    htmlFor=""
+                    className="text-sm md:text-base lg:text-base mr-2"
+                  >
+                    Select Branch:
+                  </label>
+                  <select
+                    className="form-select text-sm md:text-base lg:text-base mr-2 border-2 px-3 py-2"
+                    onChange={handleBranchChange}
+                  >
+                    <option>Select Branch</option>
+                    {branches.map((branch) => (
+                      <option value={branch.id}>{branch.name}</option>
+                    ))}
+                  </select>
+                  <label
+                    htmlFor=""
+                    className="text-sm md:text-base lg:text-base mr-2"
+                  >
+                    Select Semester
+                  </label>
+                  <select
+                    className="form-select text-sm md:text-base lg:text-base mr-2 border-2 px-3 py-2"
+                    onChange={handleSemesterChange}
+                  >
+                    <option>Select Semester</option>
+                    {semesters.map((semester) => (
+                      <option value={semester.id}>{semester.name}</option>
+                    ))}
                   </select>
                 </div>
                 <div className="flex justify-center items-center  ml-64 mt-2">
@@ -330,20 +515,36 @@ const ExamTimeTable = () => {
                           <tbody className="divide-y divide-gray-200">
                             <tr>
                               <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                <select className="form-select text-sm md:text-sm lg:text-sm mr-2 border-2">
+                                <select
+                                  className="form-select text-sm md:text-sm lg:text-sm mr-2 border-2 select-subject-name"
+                                  onChange={handleSubjectNameChange}
+                                >
                                   <option>Select Subject Name</option>
+                                  {subjects.map((subject) => (
+                                    <option value={subject.id}>
+                                      {subject.name}
+                                    </option>
+                                  ))}
                                 </select>
                               </td>
                               <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                <select className="form-select text-sm md:text-sm lg:text-sm mr-2 border-2">
-                                  <option>Select Code</option>
+                                <select 
+                                  className="form-select text-sm md:text-sm lg:text-sm mr-2 border-2 select-code"
+                                  onChange={handleSubjectCodeChange}
+                                >
+                                  <option value="0">Select Code</option>
+                                  {subjects.map((subject) => (
+                                    <option value={subject.id}>
+                                      {subject.code}
+                                    </option>
+                                  ))}
                                 </select>
                               </td>
                               <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
                                 <input
                                   className="shadow appearance-none border rounded w-40 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                   id=""
-                                  type="text"
+                                  type="date"
                                   placeholder="Day and Date"
                                 />
                               </td>
@@ -362,7 +563,10 @@ const ExamTimeTable = () => {
                     </div>
                   </div>
                 </div>
-                <div className="text-center mt-10">
+                <div className="flex justify-evenly text-center mt-10">
+                  <button className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold">
+                    Submit
+                  </button>
                   <button className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold">
                     Download
                   </button>
