@@ -21,7 +21,7 @@ const SignUpSuperAdmin = () => {
   const handleSubmit = (event) => {
     event.preventDefault();
     axios
-    .post("http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/universities",{
+    .post("http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities",{
       university: formData
     })
     .then(function(response) {

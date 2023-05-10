@@ -23,7 +23,7 @@ const Home = () => {
 
     if (subdomain !== null || subdomain !== ""){
     axios
-    .get(`http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`)
+    .get(`http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`)
     .then((response) => {
       console.log(response.data.university.name);
       setUniName(response.data.university.name);
@@ -40,7 +40,7 @@ const Home = () => {
     
     axios
       .get(
-        `http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
+        `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
         
       )
       .then(function (response) {
@@ -52,7 +52,7 @@ const Home = () => {
       });
     axios
       .post(
-        " http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/oauth/revoke",
+        " http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/oauth/revoke",
         {
           token: { accessToken },
           subdomain: subdomain,

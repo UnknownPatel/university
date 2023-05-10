@@ -26,7 +26,7 @@ import ExamTimeTable from './Admin/examTimeTable';
 function App() {
   return (
     <div className="App">
-      {/* <BrowserRouter>
+      <BrowserRouter>
       <Routes>
         <Route exact path='/' element={<SignInSuperAdmin/>} />
         <Route path='/signupSuperAdmin' element={<SignUpSuperAdmin/>} />
@@ -34,16 +34,21 @@ function App() {
         <Route path='/assignRole' element={<AssignRole/>} />
         <Route path="/approve_reject" element={<Approve_reject_Registrations/>} />
         <Route path="/uploadExcel" element={<UploadExcel/>} />
-        <Route path="/create_timeTable" element={<ExamController/>} />
         <Route path="/facultySupervisionList" element={<FacultySupervisionList/>} />
         <Route path="/facultyViewSupervisionList" element={<ViewSupervisionList/>} />
         <Route path="/create_syllabus" element={<CreateSyllabus/>} />
         <Route path="/view_syllabus" element={<ViewSyllabus/>} />
         <Route path="/marks_entry" element={<MarksEntry/>} />
         <Route path="/AdminLogin" element={<AdminLogin/>}/>
+        <Route path="/examController" element={<ExamController/>}/>
+        <Route path="/examBlockDetails" element={<ExamBlockDetails/>}/>
+        <Route path="/examAssignSupervision" element={<ExamAssignSupervision/>}/>
+        <Route path="/examTimeTable" element={<ExamTimeTable/>}/>
+        
+
 
       </Routes>
-      </BrowserRouter> */}
+      </BrowserRouter>
 
 
       {/* <Route path='/updateAssignRole' element={<UpdateAssignRole/>} /> */}
@@ -65,7 +70,7 @@ function App() {
       {/* <AdminLogin/> */}
       {/* <ExamBlockDetails/> */}
       {/* <ExamAssignSupervision/> */}
-      <ExamTimeTable/>
+      {/* <ExamTimeTable/> */}
     </div>
   );
 }

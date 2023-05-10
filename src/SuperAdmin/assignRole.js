@@ -38,7 +38,7 @@ const AssignRole = () => {
     if (subdomain !== null || subdomain !== "") {
       axios
         .get(
-          `http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
         )
         .then((response) => {
           // console.log(response.data.university.name);
@@ -50,7 +50,7 @@ const AssignRole = () => {
 
       axios
         .get(
-          `http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/users/users/faculty_names?subdomain=${subdomain}`,
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/faculty_names?subdomain=${subdomain}`,
           { headers }
         )
         .then((response) => {
@@ -60,7 +60,7 @@ const AssignRole = () => {
         .catch((error) => console.log(error));
 
         axios
-          .get(`http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/roles?subdomain=${subdomain}`,
+          .get(`http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/roles?subdomain=${subdomain}`,
             {headers}
           )
           .then((response) => {
@@ -72,7 +72,7 @@ const AssignRole = () => {
 
     // axios
     // .post(
-    //   `http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/users/users/${id}/assign_role`,
+    //   `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/${id}/assign_role`,
     //   {
     //     user: {
     //       role_name: selectedValue,
@@ -115,7 +115,7 @@ const AssignRole = () => {
     // Assign Role API
     axios
       .post(
-        `http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/users/users/${id}/assign_role`,
+        `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/${id}/assign_role`,
         {
           user: {
             role_name: selectedValue,
@@ -155,7 +155,7 @@ const AssignRole = () => {
     const role_name = e.target.getAttribute('data-role-name')
 
     axios
-      .post(`http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/users/users/${faculty_id}/deassign_role`,
+      .post(`http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/${faculty_id}/deassign_role`,
         {
           user: {
             role_name: role_name
@@ -181,7 +181,7 @@ const AssignRole = () => {
     acces_token = localStorage.getItem("access_token");
 
     axios
-      .post('http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/roles',
+      .post('http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/roles',
         {
           role: {
             name: roleName
@@ -216,7 +216,7 @@ const AssignRole = () => {
     // Get Authorization details
     axios
       .get(
-        `http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
+        `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
       )
       .then(function (response) {
         setClentId(response.data.doorkeeper.client_id);
@@ -229,7 +229,7 @@ const AssignRole = () => {
     // Logout API request
     axios
       .post(
-        " http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/oauth/revoke",
+        " http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/oauth/revoke",
         {
           token: { accessToken },
           subdomain: subdomain,

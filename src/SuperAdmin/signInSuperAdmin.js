@@ -22,7 +22,7 @@ const SignInSuperAdmin = () => {
     e.preventDefault();
     axios
       .get(
-        ` http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
+        ` http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
       )
       .then(function (response) {
         const clientId = response.data.doorkeeper.client_id;
@@ -30,7 +30,7 @@ const SignInSuperAdmin = () => {
 
         axios
           .post(
-            "http://ec2-52-66-116-8.ap-south-1.compute.amazonaws.com/api/v1/oauth/token",
+            "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/oauth/token",
             {
               grant_type: "password",
               subdomain: subdomain,

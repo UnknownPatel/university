@@ -143,23 +143,23 @@ const ExamTimeTable = () => {
                   }`}
                 >
                   <a
-                    href="#"
-                    className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                  >
-                    Enter Block Details
-                  </a>
-                  <a
-                    href="#"
-                    className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                  >
-                    Assign Supervision
-                  </a>
-                  <a
-                    href="#"
-                    className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                  >
-                    Time Table
-                  </a>
+                  href="/examBlockDetails"
+                  className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
+                >
+                  Enter Block Details
+                </a>
+                <a
+                  href="/examAssignSupervision"
+                  className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
+                >
+                  Assign Supervision
+                </a>
+                <a
+                  href="/examTimeTable"
+                  className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
+                >
+                  Time Table
+                </a>
                 </div>
               </li>
               <li>
