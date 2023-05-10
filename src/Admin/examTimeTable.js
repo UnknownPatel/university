@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "tailwindcss/tailwind.css";
-// import ReactDatePicker from "react-datepicker";
 
 const ExamTimeTable = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -15,10 +14,10 @@ const ExamTimeTable = () => {
   function toggleContent(buttonId) {
     setActiveButton(buttonId);
   }
-  const [year, setYear] = useState(new Date());
+  const [selectedYear, setSelectedYear] = useState(null);
 
-  const handleYearChange = (date) => {
-    setYear(date);
+  const handleYearChange = (year) => {
+    setSelectedYear(year);
   };
   return (
     <div>
@@ -246,7 +245,7 @@ const ExamTimeTable = () => {
               </button>
             </div>
             <div className="flex flex-col items-center space-y-4">
-                {/* Button Content 1 */}
+              {/* Button Content 1 */}
               <div
                 id="content1"
                 className={`w-full p-4 rounded-lg ${
@@ -260,39 +259,39 @@ const ExamTimeTable = () => {
                 <div className="flex justify-center">
                   <label
                     htmlFor=""
-                    className="text-sm md:text-lg lg:text-xl mr-2"
+                    className="text-sm md:text-base lg:text-base mr-2"
                   >
                     Select Department:
                   </label>
-                  <select className="form-select text-sm md:text-lg lg:text-xl mr-2 border-2">
+                  <select className="form-select text-sm md:text-base lg:text-base mr-2 border-2 px-3 py-2">
                     <option>Select Department</option>
                   </select>
                   <label
                     htmlFor=""
-                    className="text-sm md:text-lg lg:text-xl mr-2"
+                    className="text-sm md:text-base lg:text-base mr-2"
                   >
                     Select Examination
                   </label>
-                  <select className="form-select text-sm md:text-lg lg:text-xl mr-2 border-2">
+                  <select className="form-select text-sm md:text-base lg:text-base mr-2 border-2 px-3 py-2">
                     <option>Select Examination</option>
                     <option>Winter</option>
                     <option>Summers</option>
                   </select>
+                </div>
+                <div className="flex justify-center items-center  ml-64 mt-2">
                   <label
-                    htmlFor=""
-                    className="text-sm md:text-base lg:text-lg mr-2"
+                    htmlFor="year-picker"
+                    className="text-sm md:text-base lg:text-base mr-2"
                   >
-                    Select Year:
+                    Select year:
                   </label>
                   <DatePicker
-                    id="year-picker"
-                    className="border rounded px-3 py-2 "
-                    selected={year}
+                    id="year-picker1"
+                    selected={selectedYear}
                     onChange={handleYearChange}
-                    dateFormat="yyyy"
                     showYearPicker
-                    scrollableYearDropdown
-                    yearDropdownItemNumber={10}
+                    dateFormat="yyyy"
+                    className="border rounded px-3 py-2 w-52 justify-center"
                   />
                 </div>
                 <div className="flex flex-col mt-5">
@@ -473,34 +472,34 @@ const ExamTimeTable = () => {
                 }`}
               >
                 <div className="text-center text-2xl">University Name</div>
-                <div className="text-center text-2xl">Junior Supervisor List</div>
-                <div className="flex justify-center mt-5">
+                <div className="text-center text-2xl">
+                  Junior Supervisor List
+                </div>
+                <div className="flex justify-center mt-5 ml-56">
                   <label
                     htmlFor=""
-                    className="text-sm md:text-lg lg:text-xl mr-2"
+                    className="text-sm md:text-base lg:text-base mr-2"
                   >
-                    Select Examination
+                    Select Examination:
                   </label>
-                  <select className="form-select text-sm md:text-lg lg:text-xl mr-2 border-2">
+                  <select className="form-select text-sm md:text-base lg:text-base mr-2 border-2">
                     <option>Select Examination</option>
                     <option>Winter</option>
                     <option>Summers</option>
                   </select>
                   <label
                     htmlFor=""
-                    className="text-sm md:text-lg lg:text-xl mr-2"
+                    className="text-sm md:text-base lg:text-base mr-2"
                   >
                     Select Year:
                   </label>
                   <DatePicker
                     id="year-picker"
-                    className="border rounded px-3 py-2 "
-                    selected={year}
+                    selected={selectedYear}
                     onChange={handleYearChange}
-                    dateFormat="yyyy"
                     showYearPicker
-                    scrollableYearDropdown
-                    yearDropdownItemNumber={10}
+                    dateFormat="yyyy"
+                    className="border rounded px-3 py-2"
                   />
                 </div>
                 <div className="flex flex-col mt-5">
@@ -606,33 +605,31 @@ const ExamTimeTable = () => {
                   activeButton === "button4" ? "block" : "hidden"
                 }`}
               >
-                <div className="flex justify-center">
+                <div className="flex justify-center mt-5 ml-56">
                   <label
                     htmlFor=""
-                    className="text-sm md:text-lg lg:text-xl mr-2"
+                    className="text-sm md:text-base lg:text-base mr-2"
                   >
-                    Select Examination
+                    Select Examination:
                   </label>
-                  <select className="form-select text-sm md:text-lg lg:text-xl mr-2 border-2">
-                  <option>Select Examination</option>
+                  <select className="form-select text-sm md:text-base lg:text-base mr-2 border-2">
+                    <option>Select Examination</option>
                     <option>Winter</option>
                     <option>Summers</option>
                   </select>
                   <label
                     htmlFor=""
-                    className="text-sm md:text-lg lg:text-xl mr-2"
+                    className="text-sm md:text-base lg:text-base mr-2"
                   >
                     Select Year:
                   </label>
                   <DatePicker
-                    id="year-picker2"
-                    className="border rounded px-3 py-2 "
-                    selected={year}
+                    id="year-picker"
+                    selected={selectedYear}
                     onChange={handleYearChange}
-                    dateFormat="yyyy"
                     showYearPicker
-                    scrollableYearDropdown
-                    yearDropdownItemNumber={10}
+                    dateFormat="yyyy"
+                    className="border rounded px-3 py-2"
                   />
                 </div>
                 <div className="flex flex-col mt-5">
@@ -775,18 +772,10 @@ const ExamTimeTable = () => {
                           </thead>
                           <tbody className="divide-y divide-gray-200">
                             <tr>
-                              <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                
-                              </td>
-                              <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                
-                              </td>
-                              <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                               
-                              </td>
-                              <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                                
-                              </td>
+                              <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap"></td>
+                              <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap"></td>
+                              <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap"></td>
+                              <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap"></td>
                             </tr>
                           </tbody>
                         </table>
