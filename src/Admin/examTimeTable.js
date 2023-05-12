@@ -1,6 +1,8 @@
 import axios from "axios";
+import moment from "moment/moment";
 import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
+import { ToastContainer, toast } from "react-toastify";
 import "react-datepicker/dist/react-datepicker.css";
 import "tailwindcss/tailwind.css";
 
@@ -13,6 +15,14 @@ const ExamTimeTable = () => {
   const [branches, setBranches] = useState([]);
   const [semesters, setSemesters] = useState([]);
   const [subjects, setSubjects] = useState([]);
+  const [selectedYear, setSelectedYear] = useState();
+  const [selectedYear2, setSelectedYear2] = useState();
+  const [examinationName, setExaminationName] = useState("");
+  const [examinationName2, setExaminationName2] = useState("");
+  const [subjectId, setSubjectId] = useState("");
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+  const [displayTimeTable, setDisplayTimeTable] = useState([]);
 
   useEffect(() => {
     acces_token = localStorage.getItem("access_token");
@@ -49,7 +59,7 @@ const ExamTimeTable = () => {
         .catch((error) => console.log(error));
 
       // axios
-      //   .get(`http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/roles?subdomain=${subdomain}`,
+      //   .get(`http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables?examination_name=${}&acedemic_year=year?subdomain=${subdomain}`,
       //     {headers}
       //   )
       //   .then((response) => {
@@ -59,6 +69,64 @@ const ExamTimeTable = () => {
       //   .catch((error) => console.log(error));
     }
   }, []);
+
+  const handleExaminationChange = (examination) => {
+    // e.preventDefault();
+    // console.log(examinationName);
+    setExaminationName(examination);
+    let access_token = localStorage.getItem("access_token");
+    console.log(access_token);
+    const headers = { Authorization: `Bearer ${access_token}` };
+    const host = window.location.host;
+    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
+    if (arr.length > 0) {
+      subdomain = arr[0];
+    }
+    if (subdomain !== null || subdomain !== "") {
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables?examination_name=${examination}&academic_year=${selectedYear}&subdomain=${subdomain}`,
+          { headers }
+        )
+        .then((response) => {
+          console.log(response.data.data);
+          setDisplayTimeTable(response.data.data.time_tables);
+          // setBranches(response.data.data);
+          console.log(branches);
+        })
+        .catch((error) => console.log(error));
+    }
+  };
+
+  const handleYearChange = (date) => {
+    // console.log(examinationName);
+    setDisplayTimeTable([]);
+    setSelectedYear(date);
+    let access_token = localStorage.getItem("access_token");
+    console.log(access_token);
+    const headers = { Authorization: `Bearer ${access_token}` };
+    const host = window.location.host;
+    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
+    if (arr.length > 0) {
+      subdomain = arr[0];
+    }
+    if (subdomain !== null || subdomain !== "") {
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables?examination_name=${examinationName}&academic_year=${moment(
+            date
+          ).format("YYYY")}&subdomain=${subdomain}`,
+          { headers }
+        )
+        .then((response) => {
+          console.log(response.data.data.time_tables);
+          setDisplayTimeTable(response.data.data.time_tables);
+          // setBranches(response.data.data);
+          console.log(branches);
+        })
+        .catch((error) => console.log(error));
+    }
+  };
 
   const handleCourseChange = (e) => {
     e.preventDefault();
@@ -135,23 +203,82 @@ const ExamTimeTable = () => {
     }
   };
 
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
   const handleSubjectNameChange = (e) => {
     e.preventDefault();
-    console.log(e.target.selectedIndex)
-    let codeSelect = document.getElementsByClassName('select-code')[0];
-    codeSelect.selectedIndex = e.target.selectedIndex
+    console.log(e.target.selectedIndex);
+    let codeSelect = document.getElementsByClassName("select-code")[0];
+    codeSelect.selectedIndex = e.target.selectedIndex;
+    setSubjectId(e.target.value);
     console.log(codeSelect);
-  }
+  };
 
   const handleSubjectCodeChange = (e) => {
     e.preventDefault();
-    console.log(e.target.selectedIndex)
-    let codeSelect = document.getElementsByClassName('select-subject-name')[0];
-    codeSelect.selectedIndex = e.target.selectedIndex
+    console.log(e.target.selectedIndex);
+    let codeSelect = document.getElementsByClassName("select-subject-name")[0];
+    codeSelect.selectedIndex = e.target.selectedIndex;
+    setSubjectId(e.target.value);
     console.log(codeSelect);
-  }
+  };
+
+  const handleSubmitTimeTable = (e) => {
+    e.preventDefault();
+    acces_token = localStorage.getItem("access_token");
+
+    axios
+      .post(
+        `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables?subdomain=${subdomain}`,
+        {
+          time_table: {
+            name: examinationName,
+            academic_year: moment(selectedYear).format("YYYY"),
+            subject_id: subjectId,
+            date: date,
+            time: time,
+          },
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${acces_token}`,
+          },
+        }
+      )
+      .then((responce) => {
+        console.log(responce.data);
+        if (responce.data.status == "created") {
+          toast.success(responce.data.message, {
+            position: toast.POSITION.TOP_CENTER,
+          });
+        } else {
+          toast.error(responce.data.message, {
+            position: toast.POSITION.TOP_CENTER,
+          });
+        }
+        axios
+          .get(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables?examination_name=${examinationName}&academic_year=${moment(
+              date
+            ).format("YYYY")}&subdomain=${subdomain}`,
+            {
+              headers: {
+                Authorization: `Bearer ${acces_token}`,
+              },
+            }
+          )
+          .then((response) => {
+            console.log(response.data.data.time_tables);
+            setDisplayTimeTable(response.data.data.time_tables);
+            // setBranches(response.data.data);
+            console.log(branches);
+          })
+          .catch((error) => console.log(error));
+      })
+      .catch(function (err) {
+        console.log(err.message);
+      });
+  };
+
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   function toggleDropdown() {
     setIsDropdownOpen(!isDropdownOpen);
@@ -161,11 +288,7 @@ const ExamTimeTable = () => {
   function toggleContent(buttonId) {
     setActiveButton(buttonId);
   }
-  const [selectedYear, setSelectedYear] = useState(null);
 
-  const handleYearChange = (year) => {
-    setSelectedYear(year);
-  };
   return (
     <div>
       <div>
@@ -342,11 +465,11 @@ const ExamTimeTable = () => {
         </aside>
 
         <div className="p-4 sm:ml-64">
-          <div className="p-4 rounded-lg mt-14">
+          <div className="p-4 rounded-lg mt-10">
             <div className="text-center text-4xl">
               <p>Examination</p>
             </div>
-            <hr className="mt-2" />
+            <hr className="mt-1" />
           </div>
           <div className="flex flex-col items-center">
             <div className="flex justify-center space-x-4 mb-4">
@@ -399,11 +522,45 @@ const ExamTimeTable = () => {
                   activeButton === "button1" ? "block" : "hidden"
                 }`}
               >
-                <div className="text-center text-2xl">{uniName}</div>
-                <div className="text-center text-2xl"></div>
-                <div className="text-center text-2xl">Time Table</div>
                 <br />
-                <div className="flex justify-center">
+                <div className="flex justify-center ml-28">
+                  <label
+                    htmlFor=""
+                    className="text-sm md:text-base lg:text-base mr-4"
+                  >
+                    Select Examination:
+                  </label>
+                  <select
+                    className="form-select text-sm md:text-base lg:text-base mr-2 border-2 px-3 py-2"
+                    // onChange={(e) => setExaminationName(e.target.value)}
+                    onChange={(e) => {
+                      // setExaminationName(e.target.value)
+                      handleExaminationChange(e.target.value);
+                    }}
+                  >
+                    <option>Select Examination</option>
+                    <option value="Winter">Winter</option>
+                    <option value="Summer">Summer</option>
+                  </select>
+
+                  <label
+                    htmlFor="year-picker"
+                    className="text-sm md:text-base lg:text-base mr-4 ml-10"
+                  >
+                    Select year:
+                  </label>
+                  <DatePicker
+                    id="year-picker1"
+                    selected={selectedYear}
+                    onChange={(date) => {
+                      handleYearChange(date);
+                    }}
+                    showYearPicker
+                    dateFormat="yyyy"
+                    className="border rounded px-3 py-2 w-52 justify-center"
+                  />
+                </div>
+                <div className="flex justify-center mt-5">
                   <label
                     htmlFor=""
                     className="text-sm md:text-base lg:text-base mr-2"
@@ -419,19 +576,6 @@ const ExamTimeTable = () => {
                       <option value={course.id}>{course.name}</option>
                     ))}
                   </select>
-                  <label
-                    htmlFor=""
-                    className="text-sm md:text-base lg:text-base mr-2"
-                  >
-                    Select Examination
-                  </label>
-                  <select className="form-select text-sm md:text-base lg:text-base mr-2 border-2 px-3 py-2">
-                    <option>Select Examination</option>
-                    <option>Winter</option>
-                    <option>Summers</option>
-                  </select>
-                </div>
-                <div className="flex justify-center mt-5">
                   <label
                     htmlFor=""
                     className="text-sm md:text-base lg:text-base mr-2"
@@ -463,22 +607,6 @@ const ExamTimeTable = () => {
                     ))}
                   </select>
                 </div>
-                <div className="flex justify-center items-center  ml-64 mt-2">
-                  <label
-                    htmlFor="year-picker"
-                    className="text-sm md:text-base lg:text-base mr-2"
-                  >
-                    Select year:
-                  </label>
-                  <DatePicker
-                    id="year-picker1"
-                    selected={selectedYear}
-                    onChange={handleYearChange}
-                    showYearPicker
-                    dateFormat="yyyy"
-                    className="border rounded px-3 py-2 w-52 justify-center"
-                  />
-                </div>
                 <div className="flex flex-col mt-5">
                   <div className="overflow-x-auto">
                     <div className="p-1.5 w-full inline-block align-middle">
@@ -502,7 +630,7 @@ const ExamTimeTable = () => {
                                 scope="col"
                                 className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
                               >
-                                Day And Date
+                                Date
                               </th>
                               <th
                                 scope="col"
@@ -528,7 +656,7 @@ const ExamTimeTable = () => {
                                 </select>
                               </td>
                               <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                <select 
+                                <select
                                   className="form-select text-sm md:text-sm lg:text-sm mr-2 border-2 select-code"
                                   onChange={handleSubjectCodeChange}
                                 >
@@ -544,17 +672,24 @@ const ExamTimeTable = () => {
                                 <input
                                   className="shadow appearance-none border rounded w-40 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                   id=""
+                                  onChange={(e) => setDate(e.target.value)}
                                   type="date"
-                                  placeholder="Day and Date"
+                                  required
                                 />
                               </td>
                               <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                                <input
-                                  className="shadow appearance-none border rounded w-40 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                  id=""
-                                  type="text"
-                                  placeholder="Time"
-                                />
+                                <select
+                                  className="form-select text-sm md:text-sm lg:text-sm mr-2 border-2 select-code"
+                                  onChange={(e) => setTime(e.target.value)}
+                                >
+                                  <option value="">Select time</option>
+                                  <option value="10:30 A.M to 01:00 P.M">
+                                    10:30 A.M to 01:00 P.M
+                                  </option>
+                                  <option value="03:00 P.M to 05:30 P.M">
+                                    03:00 P.M to 05:30 P.M
+                                  </option>
+                                </select>
                               </td>
                             </tr>
                           </tbody>
@@ -564,12 +699,71 @@ const ExamTimeTable = () => {
                   </div>
                 </div>
                 <div className="flex justify-evenly text-center mt-10">
-                  <button className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold">
-                    Submit
+                  <button
+                    className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold"
+                    onClick={handleSubmitTimeTable}
+                  >
+                    Create
                   </button>
                   <button className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold">
                     Download
                   </button>
+                </div>
+                <div className="flex flex-col">
+                  <div className="overflow-x-auto">
+                    <div className="p-1.5 w-full inline-block align-middle">
+                      <div className="overflow-hidden border rounded-lg">
+                        <table className="min-w-full divide-y divide-gray-200">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
+                                Subject Name
+                              </th>
+                              <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
+                                Subject Code
+                              </th>
+                              <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
+                                Day And Date
+                              </th>
+                              <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
+                                Time
+                              </th>
+                              {/* <th className="px-6 py-3 text-xs font-bold text-right text-gray-500 uppercase ">
+                          Action
+                        </th> */}
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-200">
+                            {displayTimeTable.map((time_table) => (
+                              <tr>
+                                <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
+                                  {time_table.subject_name}
+                                </td>
+                                <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                  {time_table.subject_code}
+                                </td>
+                                <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                  {time_table.date}
+                                  {time_table.day}
+                                </td>
+                                <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                  {time_table.time}
+                                </td>
+
+                                {/* <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
+                          <button
+                            className="text-red-500 hover:text-red-700"
+                            href="#"
+                            // onClick={handleRemoveRole}
+                          >Remove</button>
+                        </td> */}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
               {/* Button Content 2 */}
@@ -579,8 +773,97 @@ const ExamTimeTable = () => {
                   activeButton === "button2" ? "block" : "hidden"
                 }`}
               >
-                <div className="text-center text-2xl">University Name</div>
-                <div className="text-center text-2xl">Block Wise Report</div>
+                <div className="flex justify-center ml-28">
+
+                  {/* Select Examination option in BlockWise Report */}
+
+                  <label
+                    htmlFor=""
+                    className="text-sm md:text-base lg:text-base mr-4"
+                  >
+                    Select Examination:
+                  </label>
+                  <select
+                    className="form-select text-sm md:text-base lg:text-base mr-2 border-2 px-3 py-2"
+                    // onChange={(e) => setExaminationName(e.target.value)}
+                    onChange={(e) => {
+                      setExaminationName2(e.target.value)
+                      // handleExaminationChange(e.target.value);
+                    }}
+                  >
+                    <option>Select Examination</option>
+                    <option value="Winter">Winter</option>
+                    <option value="Summer">Summer</option>
+                  </select>
+                  {/* Select Year option in BlockWise Report */}
+
+                  <label
+                    htmlFor="year-picker"
+                    className="text-sm md:text-base lg:text-base mr-4 ml-10"
+                  >
+                    Select year:
+                  </label>
+                  <DatePicker
+                    id="year-picker2"
+                    selected={selectedYear2}
+                    onChange={(date) => {
+                      setSelectedYear2(date);
+                    }}
+                    showYearPicker
+                    dateFormat="yyyy"
+                    className="border rounded px-3 py-2 w-52 justify-center"
+                  />
+                </div>
+                <div className="flex justify-center mt-5">
+                  <label
+                    htmlFor=""
+                    className="text-sm md:text-base lg:text-base mr-2"
+                  >
+                    Select Course:
+                  </label>
+                  <select
+                    className="form-select text-sm md:text-base lg:text-base mr-2 border-2 px-3 py-2"
+                    // onChange={handleCourseChange}
+                  >
+                    <option>Select course</option>
+                    {/* {courses.map((course, index) => (
+                      <option value={course.id}>{course.name}</option>
+                    ))} */}
+                  </select>
+                  <label
+                    htmlFor=""
+                    className="text-sm md:text-base lg:text-base mr-2"
+                  >
+                    Select Branch:
+                  </label>
+                  <select
+                    className="form-select text-sm md:text-base lg:text-base mr-2 border-2 px-3 py-2"
+                    // onChange={handleBranchChange}
+                  >
+                    <option>Select Branch</option>
+                    {/* {branches.map((branch) => (
+                      <option value={branch.id}>{branch.name}</option>
+                    ))} */}
+                  </select>
+                  <label
+                    htmlFor=""
+                    className="text-sm md:text-base lg:text-base mr-2"
+                  >
+                    Select Semester
+                  </label>
+                  <select
+                    className="form-select text-sm md:text-base lg:text-base mr-2 border-2 px-3 py-2"
+                    // onChange={handleSemesterChange}
+                  >
+                    <option>Select Semester</option>
+                    {/* {semesters.map((semester) => (
+                      <option value={semester.id}>{semester.name}</option>
+                    ))} */}
+                  </select>
+                </div>
+
+                {/* Displayed table in BlockWise Report */}
+
                 <div className="flex flex-col mt-5">
                   <div className="overflow-x-auto">
                     <div className="p-1.5 w-full inline-block align-middle">
@@ -632,28 +915,37 @@ const ExamTimeTable = () => {
                               </th>
                             </tr>
                           </thead>
+
+                          {/* Body of the BlockWise Report */}
+
                           <tbody className="divide-y divide-gray-200">
                             <tr>
                               <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                1
+                                <select name="" id="">
+                                  <option value="">Select Subject Name</option>
+                                  <option value="">{}</option>
+                                </select>
                               </td>
                               <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                2
+                                <select name="" id="">
+                                  <option value="">Select Subject Code</option>
+                                  <option value="">{}</option>
+                                </select>
                               </td>
                               <td className="px-6 py-4 text-sm  whitespace-nowrap">
-                                3
+                                
                               </td>
                               <td className="px-6 py-4 text-sm  whitespace-nowrap">
-                                4
+                                
                               </td>
                               <td className="px-6 py-4 text-sm  whitespace-nowrap">
-                                5
+                                
                               </td>
                               <td className="px-6 py-4 text-sm  whitespace-nowrap">
-                                6
+                                
                               </td>
                               <td className="px-6 py-4 text-sm  whitespace-nowrap">
-                                7
+                                
                               </td>
                             </tr>
                           </tbody>
@@ -675,7 +967,7 @@ const ExamTimeTable = () => {
                   activeButton === "button3" ? "block" : "hidden"
                 }`}
               >
-                <div className="text-center text-2xl">University Name</div>
+                <div className="text-center text-2xl">{uniName}</div>
                 <div className="text-center text-2xl">
                   Junior Supervisor List
                 </div>
@@ -939,7 +1231,7 @@ const ExamTimeTable = () => {
                   activeButton === "button5" ? "block" : "hidden"
                 }`}
               >
-                <div className="text-center text-2xl">University Name</div>
+                <div className="text-center text-2xl">{uniName}</div>
                 <div className="text-center text-2xl">Other Duties</div>
                 <div className="flex flex-col mt-5">
                   <div className="overflow-x-auto">
@@ -997,6 +1289,7 @@ const ExamTimeTable = () => {
           </div>
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 };
