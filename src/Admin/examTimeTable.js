@@ -1,15 +1,19 @@
 import axios from "axios";
 import moment from "moment/moment";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState ,useRef } from "react";
 import DatePicker from "react-datepicker";
 import { ToastContainer, toast } from "react-toastify";
 import "react-datepicker/dist/react-datepicker.css";
 import "tailwindcss/tailwind.css";
 
+import { useReactToPrint } from 'react-to-print';
+
 var acces_token;
 var subdomain;
 
 const ExamTimeTable = () => {
+  const componentRef = useRef();
+  const componentRef2 = useRef();
   const [uniName, setUniName] = useState("");
   const [courses, setCourses] = useState([]);
   const [branches, setBranches] = useState([]);
@@ -34,6 +38,12 @@ const ExamTimeTable = () => {
   const [noOfStudent, setNoOfStudent] = useState();
   const [examTimeTableId, setExamTimeTableId] = useState("");
   const [displayBlockWiseTable, setDisplayBlockWiseTable] = useState([]);
+  const [buttonDisabled, setButtonDisabled] = useState(true);
+
+  // Junior SuperVisor Report
+  const [selectedYear3, setSelectedYear3] = useState();
+  const [examinationName3, setExaminationName3] = useState("");
+  const [subjectDates, setSubjectDates] = useState([]);
 
   useEffect(() => {
     acces_token = localStorage.getItem("access_token");
@@ -279,13 +289,15 @@ const ExamTimeTable = () => {
         console.log(err.message);
       });
   };
+  const handlePrint = useReactToPrint({
+    content: () => componentRef.current,
+  });
   // BlokWise API
-
-  const handleExaminationChange2 = (examination) => {
+    const handleExaminationChange2 = (examination) => {
     // console.log(examinationName);
     setExaminationName2(examination);
     let access_token = localStorage.getItem("access_token");
-    console.log(access_token);
+    // console.log(access_token);
     const headers = { Authorization: `Bearer ${access_token}` };
     const host = window.location.host;
     const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
@@ -300,6 +312,7 @@ const ExamTimeTable = () => {
         )
         .then((response) => {
           console.log(response.data.data);
+          setDisplayBlockWiseTable(response.data.data.reports)
           // setDisplayTimeTable(response.data.data.time_tables);
         })
         .catch((error) => console.log(error));
@@ -309,6 +322,7 @@ const ExamTimeTable = () => {
   const handleYearChange2 = (date) => {
     // console.log(examinationName);
     // setDisplayTimeTable([]);
+    setDisplayBlockWiseTable([]);
     setSelectedYear2(date);
     let access_token = localStorage.getItem("access_token");
     console.log(access_token);
@@ -327,7 +341,8 @@ const ExamTimeTable = () => {
           { headers }
         )
         .then((response) => {
-          console.log(response.data.data.time_tables);
+          // console.log(response.data.data.time_tables);
+          setDisplayBlockWiseTable(response.data.data.reports);
           // setDisplayTimeTable(response.data.data.time_tables);
           // setBranches(response.data.data);
         })
@@ -433,10 +448,12 @@ const ExamTimeTable = () => {
         )
         .then((response) => {
           if (response.data.status == "ok") {
+            setButtonDisabled(false);
             setDate2(response.data.data.time_table.date);
             setTime2(response.data.data.time_table.time);
             setExamTimeTableId(response.data.data.time_table.id)
           } else {
+            setButtonDisabled(true);
             setDate2("");
             setTime2("");
             toast.error(response.data.message, {
@@ -480,10 +497,9 @@ const ExamTimeTable = () => {
         }
       )
       .then((responce) => {
-        console.log(responce.data);
         if (responce.data.status == "created") {
           toast.success(responce.data.message, {
-            position: toast.POSITION.TOP_CENTER,
+            position: toast.POSITION.BOTTOM_LEFT,
           });
         } else {
           toast.error(responce.data.message, {
@@ -492,7 +508,7 @@ const ExamTimeTable = () => {
         }
         axios
           .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/time_table_block_wise_reports?subdomain=${subdomain}`,
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/time_table_block_wise_reports?academic_year=${moment(selectedYear2).format("YYYY")}&subdomain=${subdomain}&examination_name=${examinationName2}`,
             {
               headers: {
                 Authorization: `Bearer ${acces_token}`,
@@ -501,15 +517,47 @@ const ExamTimeTable = () => {
           )
           .then((response) => {
             console.log(response.data.data.time_tables);
+            setDisplayBlockWiseTable(response.data.data.reports);
             // setDisplayTimeTable(response.data.data.time_tables);
             // setBranches(response.data.data);
-            console.log(branches);
+            // console.log(branches);
           })
           .catch((error) => console.log(error));
       })
       .catch(function (err) {
         console.log(err.message);
       });
+  };
+
+  const handlePrint2 = useReactToPrint({
+    content: () => componentRef2.current,
+  });
+  
+  // Junior Supervisor API
+  const handleExaminationChange3 = (examination) => {
+    // console.log(examinationName);
+    setExaminationName3(examination);
+    let access_token = localStorage.getItem("access_token");
+    // console.log(access_token);
+    const headers = { Authorization: `Bearer ${access_token}` };
+    const host = window.location.host;
+    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
+    if (arr.length > 0) {
+      subdomain = arr[0];
+    }
+    if (subdomain !== null || subdomain !== "") {
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates?examination_name=${examination}&academic_year=${selectedYear3}&subdomain=${subdomain}`,
+          { headers }
+        )
+        .then((response) => {
+          console.log(response.data);
+          setSubjectDates(response.data.data.dates)
+          // setDisplayTimeTable(response.data.data.time_tables);
+        })
+        .catch((error) => console.log(error));
+    }
   };
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -939,11 +987,11 @@ const ExamTimeTable = () => {
                   >
                     Create
                   </button>
-                  <button className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold">
+                  <button onClick={handlePrint} className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold">
                     Download
                   </button>
                 </div>
-                <div className="flex flex-col">
+                <div className="flex flex-col" ref={componentRef}>
                   <div className="overflow-x-auto">
                     <div className="p-1.5 w-full inline-block align-middle">
                       <div className="overflow-hidden border rounded-lg">
@@ -1206,6 +1254,8 @@ const ExamTimeTable = () => {
                                 <button
                                   className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold"
                                   onClick={handleSubmitBlockWiseReport}
+                                  id="displayBlockReportSubmit"
+                                  disabled={buttonDisabled}
                                 >
                                   Submit
                                 </button>
@@ -1218,11 +1268,11 @@ const ExamTimeTable = () => {
                   </div>
                 </div>
                 <div className="text-center mt-10">
-                  <button className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold">
+                  <button onClick={handlePrint2} className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold">
                     Download
                   </button>
                 </div>
-                <div className="flex flex-col">
+                <div className="flex flex-col" ref={componentRef2}>
                   <div className="overflow-x-auto">
                     <div className="p-1.5 w-full inline-block align-middle">
                       <div className="overflow-hidden border rounded-lg">
@@ -1276,16 +1326,25 @@ const ExamTimeTable = () => {
                           <tbody className="divide-y divide-gray-200">
                             {displayBlockWiseTable.map((time_table) => (
                               <tr>
-                                <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
+                                <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">{time_table.subject_name}
                                 </td>
                                 <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                  
+                                  {time_table.subject_code}
                                 </td>
                                 <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                  
+                                  {time_table.data}
                                 </td>
                                 <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                  
+                                  {time_table.time}
+                                </td>
+                                <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                  {time_table.rooms}
+                                </td>
+                                <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                  {time_table.blocks}
+                                </td>
+                                <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                  {time_table.no_of_students}
                                 </td>
 
                                 {/* <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
@@ -1322,10 +1381,15 @@ const ExamTimeTable = () => {
                   >
                     Select Examination:
                   </label>
-                  <select className="form-select text-sm md:text-base lg:text-base mr-2 border-2">
+                  <select 
+                    className="form-select text-sm md:text-base lg:text-base mr-2 border-2"
+                    onChange={(e) => {
+                      handleExaminationChange3(e.target.value)
+                    }}  
+                  >
                     <option>Select Examination</option>
-                    <option>Winter</option>
-                    <option>Summers</option>
+                    <option value="Winter">Winter</option>
+                    <option value="Summer">Summer</option>
                   </select>
                   <label
                     htmlFor=""
@@ -1335,8 +1399,8 @@ const ExamTimeTable = () => {
                   </label>
                   <DatePicker
                     id="year-picker"
-                    selected={selectedYear}
-                    onChange={handleYearChange}
+                    selected={selectedYear3}
+                    // onChange={handleYearChange3}
                     showYearPicker
                     dateFormat="yyyy"
                     className="border rounded px-3 py-2"
@@ -1367,30 +1431,14 @@ const ExamTimeTable = () => {
                               >
                                 Department
                               </th>
+                              {subjectDates.map((e)=> (
                               <th
                                 scope="col"
                                 className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
                               >
-                                Date & Morning
+                                Date 
                               </th>
-                              <th
-                                scope="col"
-                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                              >
-                                Date & Morning
-                              </th>
-                              <th
-                                scope="col"
-                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                              >
-                                Date & Evening
-                              </th>
-                              <th
-                                scope="col"
-                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                              >
-                                Date & Evening
-                              </th>
+                              ))}
                               <th
                                 scope="col"
                                 className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
@@ -1402,28 +1450,27 @@ const ExamTimeTable = () => {
                           <tbody className="divide-y divide-gray-200">
                             <tr>
                               <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                1
+                                harsh
                               </td>
                               <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                2
+                                HOD
                               </td>
                               <td className="px-6 py-4 text-sm  whitespace-nowrap">
-                                3
+                                BE
+                              </td>
+                              {subjectDates.map((e,index)=> (
+                              <td className="px-6 py-4 text-sm  whitespace-nowrap">
+                                {e}
+                              </td>
+                              ))}
+                              <td className="px-6 py-4 text-sm  whitespace-nowrap">
+                                
                               </td>
                               <td className="px-6 py-4 text-sm  whitespace-nowrap">
-                                4
+                                
                               </td>
                               <td className="px-6 py-4 text-sm  whitespace-nowrap">
-                                5
-                              </td>
-                              <td className="px-6 py-4 text-sm  whitespace-nowrap">
-                                6
-                              </td>
-                              <td className="px-6 py-4 text-sm  whitespace-nowrap">
-                                7
-                              </td>
-                              <td className="px-6 py-4 text-sm  whitespace-nowrap">
-                                8
+                                
                               </td>
                             </tr>
                           </tbody>
