@@ -1450,25 +1450,19 @@ const ExamTimeTable = () => {
                           <tbody className="divide-y divide-gray-200">
                             <tr>
                               <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                harsh
+                                
                               </td>
                               <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                HOD
+                                
                               </td>
                               <td className="px-6 py-4 text-sm  whitespace-nowrap">
-                                BE
+                                
                               </td>
                               {subjectDates.map((e,index)=> (
                               <td className="px-6 py-4 text-sm  whitespace-nowrap">
                                 {e}
                               </td>
                               ))}
-                              <td className="px-6 py-4 text-sm  whitespace-nowrap">
-                                
-                              </td>
-                              <td className="px-6 py-4 text-sm  whitespace-nowrap">
-                                
-                              </td>
                               <td className="px-6 py-4 text-sm  whitespace-nowrap">
                                 
                               </td>
