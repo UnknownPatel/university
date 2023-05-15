@@ -5,6 +5,7 @@ import DatePicker from "react-datepicker";
 import { ToastContainer, toast } from "react-toastify";
 import "react-datepicker/dist/react-datepicker.css";
 import "tailwindcss/tailwind.css";
+import {FcCheckmark} from "react-icons/fc"
 
 import { useReactToPrint } from "react-to-print";
 
@@ -59,7 +60,7 @@ const ExamTimeTable = () => {
   const [srFacultyName, setSrFacultyName] = useState([{}]);
   const [srUserId, setSrUserId] = useState("");
   const [srSupervisionDesignation, setSrSupervisionDesignation] = useState("");
-  const [srsupervisionDepartment, setSrSupervisionDepartment] = useState("");
+  const [srSupervisionDepartment, setSrSupervisionDepartment] = useState("");
   const [srDisplaySupervisionTable, setSrDisplaySupervisionTable] = useState(
     []
   );
@@ -568,6 +569,7 @@ const ExamTimeTable = () => {
       subdomain = arr[0];
     }
     if (subdomain !== null || subdomain !== "") {
+      // Get Examination Dates
       axios
         .get(
           `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates?examination_name=${examination}&academic_year=${selectedYear3}&subdomain=${subdomain}`,
@@ -580,6 +582,7 @@ const ExamTimeTable = () => {
         })
         .catch((error) => console.log(error));
 
+      //  Get Faculty names
       axios
         .get(
           `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/faculty_names?subdomain=${subdomain}`,
@@ -596,7 +599,7 @@ const ExamTimeTable = () => {
             selectedYear3
           ).format(
             "YYYY"
-          )}&subdomain=${subdomain}&examination_name=${examinationName3}`,
+          )}&subdomain=${subdomain}&examination_name=${examination}`,
           {
             headers: {
               Authorization: `Bearer ${acces_token}`,
@@ -604,8 +607,12 @@ const ExamTimeTable = () => {
           }
         )
         .then((response) => {
-          console.log(response.data.data);
           setDisplaySupervisionTable(response.data.data.supervisions);
+          console.log(
+            JSON.parse(response.data.data.supervisions[0].metadata.metadata)[
+              "2023-05-12"
+            ]
+          );
           // setDisplayTimeTable(response.data.data.time_tables);
         })
         .catch((error) => console.log(error));
@@ -691,7 +698,7 @@ const ExamTimeTable = () => {
         `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions?subdomain=${subdomain}`,
         {
           supervision: {
-            academic_year: selectedYear3,
+            academic_year: moment(selectedYear3).format("YYYY"),
             user_id: userId,
             list_type: "Junior",
             metadata: {
@@ -732,8 +739,9 @@ const ExamTimeTable = () => {
             }
           )
           .then((response) => {
-            console.log(response.data.data);
+            // console.log(response.data.data);
             setDisplaySupervisionTable(response.data.data.supervisions);
+            console.log(response.data.data.supervisions[0]);
             // setDisplayTimeTable(response.data.data.time_tables);
           })
           .catch((error) => console.log(error));
@@ -846,7 +854,7 @@ const ExamTimeTable = () => {
       axios
         .get(
           `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions?type=Senior&academic_year=${moment(
-            selectedYear4
+            date
           ).format(
             "YYYY"
           )}&subdomain=${subdomain}&examination_name=${examinationName4}`,
@@ -866,17 +874,16 @@ const ExamTimeTable = () => {
   const handleSeniorSupervisionSubmit = (e) => {
     e.preventDefault();
     acces_token = localStorage.getItem("access_token");
-    const metadata = JSON.stringify(dateCheckBox);
     axios
       .post(
         `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions?subdomain=${subdomain}`,
         {
           supervision: {
-            academic_year: selectedYear4,
+            academic_year: moment(selectedYear4).format("YYYY"),
             user_id: srUserId,
             list_type: "Senior",
             metadata: {
-              metadata,
+              srDateCheckBox,
             },
             examination_name: examinationName4,
           },
@@ -915,6 +922,7 @@ const ExamTimeTable = () => {
           .then((response) => {
             console.log(response.data.data);
             setSrDisplaySupervisionTable(response.data.data.supervisions);
+            console.log(response.data.data.supervisions[0].metadata);
           })
           .catch((error) => console.log(error));
       })
@@ -1913,7 +1921,7 @@ const ExamTimeTable = () => {
                                   scope="col"
                                   className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
                                 >
-                                  {e}
+                                  <p className="flex justify-center">{e}</p>
                                 </th>
                               ))}
                               <th
@@ -1936,11 +1944,18 @@ const ExamTimeTable = () => {
                                 <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                                   {supervision.department}
                                 </td>
-                                {subjectDates.map((e) => (
+                                {Object.entries(
+                                  JSON.parse(supervision.metadata.metadata)
+                                ).map((value) => {
+                                  if (value[1] === true) {
+                                    return <td className="px-6 py-4 text-sm text-gray-800 "><p className="flex justify-center"><FcCheckmark/></p></td>;
+                                  }
+                                })}
+                                {/* {subjectDates.map((value) => (
                                   <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                    {supervision.metadata.metadata}
+                                    {Object.entries(JSON.parse(supervision.metadata.metadata))[value]}
                                   </td>
-                                ))}
+                                ))} */}
                               </tr>
                             ))}
                           </tbody>
@@ -2064,7 +2079,7 @@ const ExamTimeTable = () => {
                                 {srSupervisionDesignation}
                               </td>
                               <td className="px-6 py-4 text-sm  whitespace-nowrap">
-                                {srsupervisionDepartment}
+                                {srSupervisionDepartment}
                               </td>
                               {srSubjectDates.map((e, index) => (
                                 <td className="px-6 py-4 text-sm  whitespace-nowrap">
@@ -2150,7 +2165,7 @@ const ExamTimeTable = () => {
                                 </td>
                                 {subjectDates.map((e) => (
                                   <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                    {supervision.metadata.metadata}
+                                    {supervision.metadata.metadata[e]}
                                   </td>
                                 ))}
                               </tr>
