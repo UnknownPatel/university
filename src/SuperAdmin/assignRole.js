@@ -56,7 +56,7 @@ const AssignRole = () => {
         .then((response) => {
           setData(response.data.data.users);
           console.log(response.data.data.users);
-        })
+        })  
         .catch((error) => console.log(error));
 
         axios

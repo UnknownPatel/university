@@ -1,12 +1,12 @@
 import axios from "axios";
 import moment from "moment/moment";
-import React, { useEffect, useState ,useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import DatePicker from "react-datepicker";
 import { ToastContainer, toast } from "react-toastify";
 import "react-datepicker/dist/react-datepicker.css";
 import "tailwindcss/tailwind.css";
 
-import { useReactToPrint } from 'react-to-print';
+import { useReactToPrint } from "react-to-print";
 
 var acces_token;
 var subdomain;
@@ -44,6 +44,25 @@ const ExamTimeTable = () => {
   const [selectedYear3, setSelectedYear3] = useState();
   const [examinationName3, setExaminationName3] = useState("");
   const [subjectDates, setSubjectDates] = useState([]);
+  const [dateCheckBox, setDateCheckBox] = useState([]);
+  const [facultyName, setFacultyName] = useState([{}]);
+  const [userId, setUserId] = useState("");
+  const [supervisionDesignation, setSupervisionDesignation] = useState("");
+  const [supervisionDepartment, setSupervisionDepartment] = useState("");
+  const [displaySupervisionTable, setDisplaySupervisionTable] = useState([]);
+
+  // Senior SuperVisor Report
+  const [selectedYear4, setSelectedYear4] = useState();
+  const [examinationName4, setExaminationName4] = useState("");
+  const [srSubjectDates, setSrSubjectDates] = useState([]);
+  const [srDateCheckBox, setSrDateCheckBox] = useState([]);
+  const [srFacultyName, setSrFacultyName] = useState([{}]);
+  const [srUserId, setSrUserId] = useState("");
+  const [srSupervisionDesignation, setSrSupervisionDesignation] = useState("");
+  const [srsupervisionDepartment, setSrSupervisionDepartment] = useState("");
+  const [srDisplaySupervisionTable, setSrDisplaySupervisionTable] = useState(
+    []
+  );
 
   useEffect(() => {
     acces_token = localStorage.getItem("access_token");
@@ -76,10 +95,8 @@ const ExamTimeTable = () => {
         .then((response) => {
           setCourses(response.data.data.courses);
           setCourses2(response.data.data.courses);
-          console.log(courses);
         })
         .catch((error) => console.log(error));
-
     }
   }, []);
 
@@ -292,8 +309,9 @@ const ExamTimeTable = () => {
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
   });
+
   // BlokWise API
-    const handleExaminationChange2 = (examination) => {
+  const handleExaminationChange2 = (examination) => {
     // console.log(examinationName);
     setExaminationName2(examination);
     let access_token = localStorage.getItem("access_token");
@@ -312,7 +330,7 @@ const ExamTimeTable = () => {
         )
         .then((response) => {
           console.log(response.data.data);
-          setDisplayBlockWiseTable(response.data.data.reports)
+          setDisplayBlockWiseTable(response.data.data.reports);
           // setDisplayTimeTable(response.data.data.time_tables);
         })
         .catch((error) => console.log(error));
@@ -451,7 +469,7 @@ const ExamTimeTable = () => {
             setButtonDisabled(false);
             setDate2(response.data.data.time_table.date);
             setTime2(response.data.data.time_table.time);
-            setExamTimeTableId(response.data.data.time_table.id)
+            setExamTimeTableId(response.data.data.time_table.id);
           } else {
             setButtonDisabled(true);
             setDate2("");
@@ -484,11 +502,11 @@ const ExamTimeTable = () => {
       .post(
         `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/time_table_block_wise_reports?subdomain=${subdomain}`,
         {
-          report:{
+          report: {
             academic_year: moment(selectedYear2).format("YYYY"),
             exam_time_table_id: examTimeTableId,
             no_of_students: noOfStudent,
-          }
+          },
         },
         {
           headers: {
@@ -508,7 +526,11 @@ const ExamTimeTable = () => {
         }
         axios
           .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/time_table_block_wise_reports?academic_year=${moment(selectedYear2).format("YYYY")}&subdomain=${subdomain}&examination_name=${examinationName2}`,
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/time_table_block_wise_reports?academic_year=${moment(
+              selectedYear2
+            ).format(
+              "YYYY"
+            )}&subdomain=${subdomain}&examination_name=${examinationName2}`,
             {
               headers: {
                 Authorization: `Bearer ${acces_token}`,
@@ -532,7 +554,7 @@ const ExamTimeTable = () => {
   const handlePrint2 = useReactToPrint({
     content: () => componentRef2.current,
   });
-  
+
   // Junior Supervisor API
   const handleExaminationChange3 = (examination) => {
     // console.log(examinationName);
@@ -553,11 +575,352 @@ const ExamTimeTable = () => {
         )
         .then((response) => {
           console.log(response.data);
-          setSubjectDates(response.data.data.dates)
+          setSubjectDates(response.data.data.dates);
+          // setDisplayTimeTable(response.data.data.time_tables);
+        })
+        .catch((error) => console.log(error));
+
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/faculty_names?subdomain=${subdomain}`,
+          { headers }
+        )
+        .then((response) => {
+          setFacultyName(response.data.data.users);
+        })
+        .catch((error) => console.log(error));
+
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions?type=Junior&academic_year=${moment(
+            selectedYear3
+          ).format(
+            "YYYY"
+          )}&subdomain=${subdomain}&examination_name=${examinationName3}`,
+          {
+            headers: {
+              Authorization: `Bearer ${acces_token}`,
+            },
+          }
+        )
+        .then((response) => {
+          console.log(response.data.data);
+          setDisplaySupervisionTable(response.data.data.supervisions);
           // setDisplayTimeTable(response.data.data.time_tables);
         })
         .catch((error) => console.log(error));
     }
+  };
+  const handleonChangeFacultyName = (event) => {
+    setUserId(event.target.value);
+    var selectedIndex = event.target.options.selectedIndex;
+    setSupervisionDesignation(
+      event.target.options[selectedIndex].getAttribute("data-designation")
+    );
+    setSupervisionDepartment(
+      event.target.options[selectedIndex].getAttribute("data-department")
+    );
+  };
+  const handlechangeDateCheckBox = (event) => {
+    setDateCheckBox({
+      ...dateCheckBox,
+      [event.target.name]: event.target.checked,
+    });
+  };
+  const handleYearChange3 = (date) => {
+    // console.log(examinationName);
+    // setDisplayTimeTable([]);
+    setSelectedYear3(date);
+    let access_token = localStorage.getItem("access_token");
+    const headers = { Authorization: `Bearer ${access_token}` };
+    const host = window.location.host;
+    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
+    if (arr.length > 0) {
+      subdomain = arr[0];
+    }
+    if (subdomain !== null || subdomain !== "") {
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates?examination_name=${examinationName3}&academic_year=${moment(
+            date
+          ).format("YYYY")}&subdomain=${subdomain}`,
+          { headers }
+        )
+        .then((response) => {
+          setSubjectDates(response.data.data.dates);
+        })
+        .catch((error) => console.log(error));
+
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/faculty_names?subdomain=${subdomain}`,
+          { headers }
+        )
+        .then((response) => {
+          setFacultyName(response.data.data.users);
+        })
+        .catch((error) => console.log(error));
+
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions?type=Junior&academic_year=${moment(
+            selectedYear3
+          ).format(
+            "YYYY"
+          )}&subdomain=${subdomain}&examination_name=${examinationName3}`,
+          {
+            headers: {
+              Authorization: `Bearer ${acces_token}`,
+            },
+          }
+        )
+        .then((response) => {
+          console.log(response.data.data);
+          setDisplaySupervisionTable(response.data.data.supervisions);
+          // setDisplayTimeTable(response.data.data.time_tables);
+        })
+        .catch((error) => console.log(error));
+    }
+  };
+  const handleJuniorSupervisionSubmit = (e) => {
+    e.preventDefault();
+    acces_token = localStorage.getItem("access_token");
+    const metadata = JSON.stringify(dateCheckBox);
+    axios
+      .post(
+        `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions?subdomain=${subdomain}`,
+        {
+          supervision: {
+            academic_year: selectedYear3,
+            user_id: userId,
+            list_type: "Junior",
+            metadata: {
+              metadata,
+            },
+            examination_name: examinationName3,
+          },
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${acces_token}`,
+          },
+        }
+      )
+      .then((responce) => {
+        console.log(responce.data);
+        if (responce.data.status == "created") {
+          toast.success(responce.data.message, {
+            position: toast.POSITION.TOP_CENTER,
+          });
+        } else {
+          toast.error(responce.data.message, {
+            position: toast.POSITION.TOP_CENTER,
+          });
+        }
+
+        axios
+          .get(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions?type=Junior&academic_year=${moment(
+              selectedYear3
+            ).format(
+              "YYYY"
+            )}&subdomain=${subdomain}&examination_name=${examinationName3}`,
+            {
+              headers: {
+                Authorization: `Bearer ${acces_token}`,
+              },
+            }
+          )
+          .then((response) => {
+            console.log(response.data.data);
+            setDisplaySupervisionTable(response.data.data.supervisions);
+            // setDisplayTimeTable(response.data.data.time_tables);
+          })
+          .catch((error) => console.log(error));
+      })
+      .catch(function (err) {
+        console.log(err.message);
+      });
+  };
+
+  // Senior Supervision API
+  const handleExaminationChange4 = (examination) => {
+    setExaminationName4(examination);
+    let access_token = localStorage.getItem("access_token");
+    const headers = { Authorization: `Bearer ${access_token}` };
+    const host = window.location.host;
+    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
+    if (arr.length > 0) {
+      subdomain = arr[0];
+    }
+    if (subdomain !== null || subdomain !== "") {
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates?examination_name=${examination}&academic_year=${selectedYear4}&subdomain=${subdomain}`,
+          { headers }
+        )
+        .then((response) => {
+          console.log(response.data);
+          setSrSubjectDates(response.data.data.dates);
+        })
+        .catch((error) => console.log(error));
+
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/faculty_names?subdomain=${subdomain}`,
+          { headers }
+        )
+        .then((response) => {
+          setSrFacultyName(response.data.data.users);
+        })
+        .catch((error) => console.log(error));
+
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions?type=Senior&academic_year=${moment(
+            selectedYear4
+          ).format(
+            "YYYY"
+          )}&subdomain=${subdomain}&examination_name=${examinationName4}`,
+          {
+            headers: {
+              Authorization: `Bearer ${acces_token}`,
+            },
+          }
+        )
+        .then((response) => {
+          console.log(response.data.data);
+          setSrDisplaySupervisionTable(response.data.data.supervisions);
+        })
+        .catch((error) => console.log(error));
+    }
+  };
+  const handleonChangeFacultyName4 = (event) => {
+    setSrUserId(event.target.value);
+    var selectedIndex = event.target.options.selectedIndex;
+    setSrSupervisionDesignation(
+      event.target.options[selectedIndex].getAttribute("data-designation")
+    );
+    setSrSupervisionDepartment(
+      event.target.options[selectedIndex].getAttribute("data-department")
+    );
+  };
+  const handlechangeDateCheckBox4 = (event) => {
+    setSrDateCheckBox({
+      ...srDateCheckBox,
+      [event.target.name]: event.target.checked,
+    });
+  };
+  const handleYearChange4 = (date) => {
+    setSelectedYear4(date);
+    let access_token = localStorage.getItem("access_token");
+    const headers = { Authorization: `Bearer ${access_token}` };
+    const host = window.location.host;
+    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
+    if (arr.length > 0) {
+      subdomain = arr[0];
+    }
+    if (subdomain !== null || subdomain !== "") {
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates?examination_name=${examinationName4}&academic_year=${moment(
+            date
+          ).format("YYYY")}&subdomain=${subdomain}`,
+          { headers }
+        )
+        .then((response) => {
+          setSrSubjectDates(response.data.data.dates);
+        })
+        .catch((error) => console.log(error));
+
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/faculty_names?subdomain=${subdomain}`,
+          { headers }
+        )
+        .then((response) => {
+          setSrFacultyName(response.data.data.users);
+        })
+        .catch((error) => console.log(error));
+
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions?type=Senior&academic_year=${moment(
+            selectedYear4
+          ).format(
+            "YYYY"
+          )}&subdomain=${subdomain}&examination_name=${examinationName4}`,
+          {
+            headers: {
+              Authorization: `Bearer ${acces_token}`,
+            },
+          }
+        )
+        .then((response) => {
+          console.log(response.data.data);
+          setSrDisplaySupervisionTable(response.data.data.supervisions);
+        })
+        .catch((error) => console.log(error));
+    }
+  };
+  const handleSeniorSupervisionSubmit = (e) => {
+    e.preventDefault();
+    acces_token = localStorage.getItem("access_token");
+    const metadata = JSON.stringify(dateCheckBox);
+    axios
+      .post(
+        `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions?subdomain=${subdomain}`,
+        {
+          supervision: {
+            academic_year: selectedYear4,
+            user_id: srUserId,
+            list_type: "Senior",
+            metadata: {
+              metadata,
+            },
+            examination_name: examinationName4,
+          },
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${acces_token}`,
+          },
+        }
+      )
+      .then((responce) => {
+        console.log(responce.data);
+        if (responce.data.status == "created") {
+          toast.success(responce.data.message, {
+            position: toast.POSITION.TOP_CENTER,
+          });
+        } else {
+          toast.error(responce.data.message, {
+            position: toast.POSITION.TOP_CENTER,
+          });
+        }
+
+        axios
+          .get(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions?type=Senior&academic_year=${moment(
+              selectedYear4
+            ).format(
+              "YYYY"
+            )}&subdomain=${subdomain}&examination_name=${examinationName4}`,
+            {
+              headers: {
+                Authorization: `Bearer ${acces_token}`,
+              },
+            }
+          )
+          .then((response) => {
+            console.log(response.data.data);
+            setSrDisplaySupervisionTable(response.data.data.supervisions);
+          })
+          .catch((error) => console.log(error));
+      })
+      .catch(function (err) {
+        console.log(err.message);
+      });
   };
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -987,8 +1350,11 @@ const ExamTimeTable = () => {
                   >
                     Create
                   </button>
-                  <button onClick={handlePrint} className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold">
-                    Download
+                  <button
+                    onClick={handlePrint}
+                    className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold"
+                  >
+                    Print
                   </button>
                 </div>
                 <div className="flex flex-col" ref={componentRef}>
@@ -1244,7 +1610,9 @@ const ExamTimeTable = () => {
                                 <input
                                   className="shadow appearance-none border rounded w-44 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                   id=""
-                                  onChange={(e) => setNoOfStudent(parseInt(e.target.value))}
+                                  onChange={(e) =>
+                                    setNoOfStudent(parseInt(e.target.value))
+                                  }
                                   type="text"
                                   placeholder="Enter Student Number"
                                   required
@@ -1268,7 +1636,10 @@ const ExamTimeTable = () => {
                   </div>
                 </div>
                 <div className="text-center mt-10">
-                  <button onClick={handlePrint2} className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold">
+                  <button
+                    onClick={handlePrint2}
+                    className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold"
+                  >
                     Download
                   </button>
                 </div>
@@ -1278,7 +1649,7 @@ const ExamTimeTable = () => {
                       <div className="overflow-hidden border rounded-lg">
                         <table className="min-w-full divide-y divide-gray-200">
                           <thead className="bg-gray-50">
-                          <tr>
+                            <tr>
                               <th
                                 scope="col"
                                 className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
@@ -1326,7 +1697,8 @@ const ExamTimeTable = () => {
                           <tbody className="divide-y divide-gray-200">
                             {displayBlockWiseTable.map((time_table) => (
                               <tr>
-                                <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">{time_table.subject_name}
+                                <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
+                                  {time_table.subject_name}
                                 </td>
                                 <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                                   {time_table.subject_code}
@@ -1381,11 +1753,11 @@ const ExamTimeTable = () => {
                   >
                     Select Examination:
                   </label>
-                  <select 
+                  <select
                     className="form-select text-sm md:text-base lg:text-base mr-2 border-2"
                     onChange={(e) => {
-                      handleExaminationChange3(e.target.value)
-                    }}  
+                      handleExaminationChange3(e.target.value);
+                    }}
                   >
                     <option>Select Examination</option>
                     <option value="Winter">Winter</option>
@@ -1398,9 +1770,11 @@ const ExamTimeTable = () => {
                     Select Year:
                   </label>
                   <DatePicker
-                    id="year-picker"
+                    id="year-picker3"
                     selected={selectedYear3}
-                    // onChange={handleYearChange3}
+                    onChange={(date) => {
+                      handleYearChange3(date);
+                    }}
                     showYearPicker
                     dateFormat="yyyy"
                     className="border rounded px-3 py-2"
@@ -1431,40 +1805,71 @@ const ExamTimeTable = () => {
                               >
                                 Department
                               </th>
-                              {subjectDates.map((e)=> (
-                              <th
-                                scope="col"
-                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                              >
-                                Date 
-                              </th>
+                              {subjectDates.map((e) => (
+                                <th
+                                  scope="col"
+                                  className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                                >
+                                  {e}
+                                </th>
                               ))}
                               <th
                                 scope="col"
                                 className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
                               >
-                                Sign
+                                Action
                               </th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-gray-200">
                             <tr>
                               <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                
+                                <select
+                                  className="form-select text-sm md:text-lg lg:text-xl mr-2 border-2"
+                                  id="select_name"
+                                  onChange={handleonChangeFacultyName}
+                                >
+                                  <option>Select Name</option>
+                                  {facultyName.map((item) => {
+                                    // console.log( item.id)
+                                    return (
+                                      <>
+                                        {/* <p id="designation_store" style={{display:"none"}} >{item.designation}</p> */}
+                                        <option
+                                          // id={item.designation}
+                                          data-department={item.department}
+                                          value={item.id}
+                                          data-designation={item.designation}
+                                        >
+                                          {item.first_name}
+                                        </option>
+                                      </>
+                                    );
+                                  })}
+                                </select>
                               </td>
                               <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                
+                                {supervisionDesignation}
                               </td>
                               <td className="px-6 py-4 text-sm  whitespace-nowrap">
-                                
+                                {supervisionDepartment}
                               </td>
-                              {subjectDates.map((e,index)=> (
-                              <td className="px-6 py-4 text-sm  whitespace-nowrap">
-                                {e}
-                              </td>
+                              {subjectDates.map((e, index) => (
+                                <td className="px-6 py-4 text-sm  whitespace-nowrap">
+                                  <input
+                                    type="checkbox"
+                                    name={e}
+                                    onChange={handlechangeDateCheckBox}
+                                  />
+                                </td>
                               ))}
                               <td className="px-6 py-4 text-sm  whitespace-nowrap">
-                                
+                                <button
+                                  className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold"
+                                  onClick={handleJuniorSupervisionSubmit}
+                                >
+                                  Submit
+                                </button>
                               </td>
                             </tr>
                           </tbody>
@@ -1477,6 +1882,72 @@ const ExamTimeTable = () => {
                   <button className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold">
                     Download
                   </button>
+                </div>
+                <div className="flex flex-col">
+                  <div className="overflow-x-auto">
+                    <div className="p-1.5 w-full inline-block align-middle">
+                      <div className="overflow-hidden border rounded-lg">
+                        <table className="min-w-full divide-y divide-gray-200">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                              >
+                                Name
+                              </th>
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                              >
+                                Designation
+                              </th>
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                              >
+                                Department
+                              </th>
+                              {subjectDates.map((e) => (
+                                <th
+                                  scope="col"
+                                  className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                                >
+                                  {e}
+                                </th>
+                              ))}
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                              >
+                                Sign
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-200">
+                            {displaySupervisionTable.map((supervision) => (
+                              <tr>
+                                <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
+                                  {supervision.faculty_name}
+                                </td>
+                                <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                  {supervision.designation}
+                                </td>
+                                <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                  {supervision.department}
+                                </td>
+                                {subjectDates.map((e) => (
+                                  <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                    {supervision.metadata.metadata}
+                                  </td>
+                                ))}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
               {/* Button Content 4 */}
@@ -1486,6 +1957,10 @@ const ExamTimeTable = () => {
                   activeButton === "button4" ? "block" : "hidden"
                 }`}
               >
+                <div className="text-center text-2xl">{uniName}</div>
+                <div className="text-center text-2xl">
+                  Senior Supervisor List
+                </div>
                 <div className="flex justify-center mt-5 ml-56">
                   <label
                     htmlFor=""
@@ -1493,10 +1968,15 @@ const ExamTimeTable = () => {
                   >
                     Select Examination:
                   </label>
-                  <select className="form-select text-sm md:text-base lg:text-base mr-2 border-2">
+                  <select
+                    className="form-select text-sm md:text-base lg:text-base mr-2 border-2"
+                    onChange={(e) => {
+                      handleExaminationChange4(e.target.value);
+                    }}
+                  >
                     <option>Select Examination</option>
-                    <option>Winter</option>
-                    <option>Summers</option>
+                    <option value="Winter">Winter</option>
+                    <option value="Summer">Summer</option>
                   </select>
                   <label
                     htmlFor=""
@@ -1505,9 +1985,11 @@ const ExamTimeTable = () => {
                     Select Year:
                   </label>
                   <DatePicker
-                    id="year-picker"
-                    selected={selectedYear}
-                    onChange={handleYearChange}
+                    id="year-picker4"
+                    selected={selectedYear4}
+                    onChange={(date) => {
+                      handleYearChange4(date);
+                    }}
                     showYearPicker
                     dateFormat="yyyy"
                     className="border rounded px-3 py-2"
@@ -1538,63 +2020,68 @@ const ExamTimeTable = () => {
                               >
                                 Department
                               </th>
+                              {srSubjectDates.map((e) => (
+                                <th
+                                  scope="col"
+                                  className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                                >
+                                  {e}
+                                </th>
+                              ))}
                               <th
                                 scope="col"
                                 className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
                               >
-                                Date & Morning
-                              </th>
-                              <th
-                                scope="col"
-                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                              >
-                                Date & Morning
-                              </th>
-                              <th
-                                scope="col"
-                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                              >
-                                Date & Evening
-                              </th>
-                              <th
-                                scope="col"
-                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                              >
-                                Date & Evening
-                              </th>
-                              <th
-                                scope="col"
-                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                              >
-                                Sign
+                                Action
                               </th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-gray-200">
                             <tr>
                               <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                1
+                                <select
+                                  className="form-select text-sm md:text-lg lg:text-xl mr-2 border-2"
+                                  id="select_name"
+                                  onChange={handleonChangeFacultyName4}
+                                >
+                                  <option>Select Name</option>
+                                  {srFacultyName.map((item) => {
+                                    return (
+                                      <>
+                                        <option
+                                          data-department={item.department}
+                                          value={item.id}
+                                          data-designation={item.designation}
+                                        >
+                                          {item.first_name}
+                                        </option>
+                                      </>
+                                    );
+                                  })}
+                                </select>
                               </td>
                               <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                2
+                                {srSupervisionDesignation}
                               </td>
                               <td className="px-6 py-4 text-sm  whitespace-nowrap">
-                                3
+                                {srsupervisionDepartment}
                               </td>
+                              {srSubjectDates.map((e, index) => (
+                                <td className="px-6 py-4 text-sm  whitespace-nowrap">
+                                  <input
+                                    type="checkbox"
+                                    name={e}
+                                    onChange={handlechangeDateCheckBox4}
+                                  />
+                                </td>
+                              ))}
                               <td className="px-6 py-4 text-sm  whitespace-nowrap">
-                                4
-                              </td>
-                              <td className="px-6 py-4 text-sm  whitespace-nowrap">
-                                5
-                              </td>
-                              <td className="px-6 py-4 text-sm  whitespace-nowrap">
-                                6
-                              </td>
-                              <td className="px-6 py-4 text-sm  whitespace-nowrap">
-                                7
-                              </td>
-                              <td className="px-6 py-4 text-sm  whitespace-nowrap">
-                                8
+                                <button
+                                  className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold"
+                                  onClick={handleSeniorSupervisionSubmit}
+                                >
+                                  Submit
+                                </button>
                               </td>
                             </tr>
                           </tbody>
@@ -1607,6 +2094,72 @@ const ExamTimeTable = () => {
                   <button className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold">
                     Download
                   </button>
+                </div>
+                <div className="flex flex-col">
+                  <div className="overflow-x-auto">
+                    <div className="p-1.5 w-full inline-block align-middle">
+                      <div className="overflow-hidden border rounded-lg">
+                        <table className="min-w-full divide-y divide-gray-200">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                              >
+                                Name
+                              </th>
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                              >
+                                Designation
+                              </th>
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                              >
+                                Department
+                              </th>
+                              {srSubjectDates.map((e) => (
+                                <th
+                                  scope="col"
+                                  className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                                >
+                                  {e}
+                                </th>
+                              ))}
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                              >
+                                Sign
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-200">
+                            {srDisplaySupervisionTable.map((supervision) => (
+                              <tr>
+                                <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
+                                  {supervision.faculty_name}
+                                </td>
+                                <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                  {supervision.designation}
+                                </td>
+                                <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                  {supervision.department}
+                                </td>
+                                {subjectDates.map((e) => (
+                                  <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                    {supervision.metadata.metadata}
+                                  </td>
+                                ))}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
               {/* Button Content 5 */}
