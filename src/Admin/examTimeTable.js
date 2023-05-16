@@ -5,7 +5,7 @@ import DatePicker from "react-datepicker";
 import { ToastContainer, toast } from "react-toastify";
 import "react-datepicker/dist/react-datepicker.css";
 import "tailwindcss/tailwind.css";
-import {FcCheckmark} from "react-icons/fc"
+import { FcCheckmark } from "react-icons/fc";
 
 import { useReactToPrint } from "react-to-print";
 
@@ -14,7 +14,6 @@ var subdomain;
 
 const ExamTimeTable = () => {
   const componentRef = useRef();
-  const componentRef2 = useRef();
   const [uniName, setUniName] = useState("");
   const [courses, setCourses] = useState([]);
   const [branches, setBranches] = useState([]);
@@ -40,6 +39,7 @@ const ExamTimeTable = () => {
   const [examTimeTableId, setExamTimeTableId] = useState("");
   const [displayBlockWiseTable, setDisplayBlockWiseTable] = useState([]);
   const [buttonDisabled, setButtonDisabled] = useState(true);
+  const componentRef2 = useRef();
 
   // Junior SuperVisor Report
   const [selectedYear3, setSelectedYear3] = useState();
@@ -51,6 +51,7 @@ const ExamTimeTable = () => {
   const [supervisionDesignation, setSupervisionDesignation] = useState("");
   const [supervisionDepartment, setSupervisionDepartment] = useState("");
   const [displaySupervisionTable, setDisplaySupervisionTable] = useState([]);
+  const componentRef3 = useRef();
 
   // Senior SuperVisor Report
   const [selectedYear4, setSelectedYear4] = useState();
@@ -64,6 +65,7 @@ const ExamTimeTable = () => {
   const [srDisplaySupervisionTable, setSrDisplaySupervisionTable] = useState(
     []
   );
+  const componentRef4 = useRef();
 
   useEffect(() => {
     acces_token = localStorage.getItem("access_token");
@@ -750,6 +752,9 @@ const ExamTimeTable = () => {
         console.log(err.message);
       });
   };
+  const handlePrint3 = useReactToPrint({
+    content: () => componentRef3.current,
+  });
 
   // Senior Supervision API
   const handleExaminationChange4 = (examination) => {
@@ -789,7 +794,7 @@ const ExamTimeTable = () => {
             selectedYear4
           ).format(
             "YYYY"
-          )}&subdomain=${subdomain}&examination_name=${examinationName4}`,
+          )}&subdomain=${subdomain}&examination_name=${examination}`,
           {
             headers: {
               Authorization: `Bearer ${acces_token}`,
@@ -930,6 +935,9 @@ const ExamTimeTable = () => {
         console.log(err.message);
       });
   };
+  const handlePrint4 = useReactToPrint({
+    content: () => componentRef4.current,
+  });
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -1887,11 +1895,14 @@ const ExamTimeTable = () => {
                   </div>
                 </div>
                 <div className="text-center mt-10">
-                  <button className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold">
+                  <button
+                    onClick={handlePrint3}
+                    className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold"
+                  >
                     Download
                   </button>
                 </div>
-                <div className="flex flex-col">
+                <div className="flex flex-col" ref={componentRef3}>
                   <div className="overflow-x-auto">
                     <div className="p-1.5 w-full inline-block align-middle">
                       <div className="overflow-hidden border rounded-lg">
@@ -1948,7 +1959,13 @@ const ExamTimeTable = () => {
                                   JSON.parse(supervision.metadata.metadata)
                                 ).map((value) => {
                                   if (value[1] === true) {
-                                    return <td className="px-6 py-4 text-sm text-gray-800 "><p className="flex justify-center"><FcCheckmark/></p></td>;
+                                    return (
+                                      <td className="px-6 py-4 text-sm text-gray-800 ">
+                                        <p className="flex justify-center">
+                                          <FcCheckmark />
+                                        </p>
+                                      </td>
+                                    );
                                   }
                                 })}
                                 {/* {subjectDates.map((value) => (
@@ -2106,11 +2123,14 @@ const ExamTimeTable = () => {
                   </div>
                 </div>
                 <div className="text-center mt-10">
-                  <button className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold">
+                  <button
+                    onClick={handlePrint4}
+                    className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold"
+                  >
                     Download
                   </button>
                 </div>
-                <div className="flex flex-col">
+                <div className="flex flex-col" ref={componentRef4}>
                   <div className="overflow-x-auto">
                     <div className="p-1.5 w-full inline-block align-middle">
                       <div className="overflow-hidden border rounded-lg">
