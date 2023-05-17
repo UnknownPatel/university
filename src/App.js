@@ -22,6 +22,7 @@ import AdminLogin from './Admin/adminLogin';
 import ExamBlockDetails from './Admin/examBlockDetails';
 import ExamAssignSupervision from './Admin/examAssignSupervision';
 import ExamTimeTable from './Admin/examTimeTable';
+import ExamReports from './Admin/examReports';
 
 function App() {
   return (
@@ -44,6 +45,7 @@ function App() {
         <Route path="/examBlockDetails" element={<ExamBlockDetails/>}/>
         <Route path="/examAssignSupervision" element={<ExamAssignSupervision/>}/>
         <Route path="/examTimeTable" element={<ExamTimeTable/>}/>
+        <Route path="/examReports" element={<ExamReports/>}/>
         
 
 

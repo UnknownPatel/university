@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 
 const SignUpSuperAdmin = () => {
@@ -26,10 +28,12 @@ const SignUpSuperAdmin = () => {
     })
     .then(function(response) {
       console.log(response);
-
-      alert("Success");
-
+      toast.success(response.data.message, {
+        position: toast.POSITION.TOP_CENTER
+    });
+    setTimeout(() => {
       navigate("/");
+    },5000)
     })
     .catch(function(error) {
       let message = typeof error.response !== "undefined" ? error.response.data.message

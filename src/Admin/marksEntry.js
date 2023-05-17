@@ -183,12 +183,12 @@ const MarksEntry = () => {
                                     >
                                         Subject Name
                                     </th>
-                                    <th
+                                    {/* <th
                                         scope="col"
                                         className="px-6 py-3 text-xs font-bold text-right text-gray-500 uppercase "
                                     >
                                         Permission
-                                    </th>
+                                    </th> */}
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200">
@@ -210,14 +210,14 @@ const MarksEntry = () => {
                                             
                                         </a>
                                     </td>
-                                    <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
+                                    {/* <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
                                         <a
                                             className="text-red-500 hover:text-red-700"
                                             href="#"
                                         >
                                            
                                         </a>
-                                    </td>
+                                    </td> */}
                                 </tr>
                                 <tr>
                                     <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
@@ -237,14 +237,14 @@ const MarksEntry = () => {
                                             
                                         </a>
                                     </td>
-                                    <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
+                                    {/* <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
                                         <a
                                             className="text-red-500 hover:text-red-700"
                                             href="#"
                                         >
                                            
                                         </a>
-                                    </td>
+                                    </td> */}
                                 </tr>
                                 <tr>
                                     <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
@@ -256,22 +256,22 @@ const MarksEntry = () => {
                                     <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                                         
                                     </td>
-                                    <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
+                                    {/* <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
                                         <a
                                             className="text-green-500 hover:text-green-700"
                                             href="#"
                                         >
                                             
                                         </a>
-                                    </td>
-                                    <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
+                                    </td> */}
+                                    {/* <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
                                         <a
                                             className="text-red-500 hover:text-red-700"
                                             href="#"
                                         >
                                             
                                         </a>
-                                    </td>
+                                    </td> */}
                                 </tr>
                             </tbody>
                         </table>

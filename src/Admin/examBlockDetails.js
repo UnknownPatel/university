@@ -1,11 +1,301 @@
-import React, { useState } from "react";
+import axios from "axios";
+import moment from "moment/moment";
+import React, { useEffect, useState, useRef } from "react";
+import DatePicker from "react-datepicker";
+import { ToastContainer, toast } from "react-toastify";
+import "react-datepicker/dist/react-datepicker.css";
+import "tailwindcss/tailwind.css";
+import { FcCheckmark } from "react-icons/fc";
+
+import { useReactToPrint } from "react-to-print";
+
+var acces_token;
+var subdomain;
 
 const ExamBlockDetails = () => {
-  // const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [uniName, setUniName] = useState("");
+  const [selectedYear2, setSelectedYear2] = useState();
+  const [examinationName2, setExaminationName2] = useState("");
+  const [courses2, setCourses2] = useState([]);
+  const [branches2, setBranches2] = useState([]);
+  const [semesters2, setSemesters2] = useState([]);
+  const [subjects2, setSubjects2] = useState([]);
+  const [subjectId2, setSubjectId2] = useState("");
+  const [date2, setDate2] = useState("");
+  const [time2, setTime2] = useState("");
+  const [noOfStudent, setNoOfStudent] = useState();
+  const [examTimeTableId, setExamTimeTableId] = useState("");
+  const [displayBlockWiseTable, setDisplayBlockWiseTable] = useState([]);
+  const [buttonDisabled, setButtonDisabled] = useState(true);
+  const componentRef2 = useRef();
+  const [storedTimeTable, setStoredTimeTable] = useState([]);
+  // const []
 
-  // function toggleDropdown() {
-  //   setIsDropdownOpen(!isDropdownOpen);
-  // }
+  useEffect(() => {
+    acces_token = localStorage.getItem("access_token");
+
+    const headers = { Authorization: `Bearer ${acces_token}` };
+    const host = window.location.host;
+    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
+    if (arr.length > 0) {
+      subdomain = arr[0];
+    }
+
+    if (subdomain !== null || subdomain !== "") {
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
+        )
+        .then((response) => {
+          //   console.log(response.data.university.name);
+          setUniName(response.data.university.name);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/courses?subdomain=${subdomain}`,
+          { headers }
+        )
+        .then((response) => {
+          setCourses2(response.data.data.courses);
+        })
+        .catch((error) => console.log(error));
+    }
+  }, []);
+
+  const handleExaminationChange2 = (examination) => {
+    // console.log(examinationName);
+    setExaminationName2(examination);
+  };
+
+  const handleYearChange2 = (date) => {
+    // console.log(examinationName);
+    // setDisplayTimeTable([]);
+    setSelectedYear2(date);
+  };
+
+  const handleCourseChange2 = (e) => {
+    e.preventDefault();
+    var course_id = e.target.value;
+    acces_token = localStorage.getItem("access_token");
+    const headers = { Authorization: `Bearer ${acces_token}` };
+    const host = window.location.host;
+    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
+    if (arr.length > 0) {
+      subdomain = arr[0];
+    }
+    if (subdomain !== null || subdomain !== "") {
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/branches?subdomain=${subdomain}&course_id=${course_id}`,
+          { headers }
+        )
+        .then((response) => {
+          console.log(response.data.data.branches);
+          setBranches2(response.data.data.branches);
+        })
+        .catch((error) => console.log(error));
+    }
+  };
+  const handleBranchChange2 = (e) => {
+    e.preventDefault();
+    var branch_id = e.target.value;
+    acces_token = localStorage.getItem("access_token");
+    const headers = { Authorization: `Bearer ${acces_token}` };
+    const host = window.location.host;
+    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
+    if (arr.length > 0) {
+      subdomain = arr[0];
+    }
+    if (subdomain !== null || subdomain !== "") {
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/semesters?subdomain=${subdomain}&branch_id=${branch_id}`,
+          { headers }
+        )
+        .then((response) => {
+          console.log(response.data.data.semesters);
+          setSemesters2(response.data.data.semesters);
+          // console.log(branches);
+        })
+        .catch((error) => console.log(error));
+    }
+  };
+  const handleSemesterChange2 = (e) => {
+    e.preventDefault();
+    var semester_id = e.target.value;
+    acces_token = localStorage.getItem("access_token");
+    const headers = { Authorization: `Bearer ${acces_token}` };
+    const host = window.location.host;
+    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
+    if (arr.length > 0) {
+      subdomain = arr[0];
+    }
+    if (subdomain !== null || subdomain !== "") {
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/subjects?subdomain=${subdomain}&semester_id=${semester_id}`,
+          { headers }
+        )
+        .then((response) => {
+          console.log(response.data.data.subjects);
+          setSubjects2(response.data.data.subjects);
+          response.data.data.subjects.map((subject) => {
+            axios
+              .get(
+                `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/${subject.id}/fetch_details?subdomain=${subdomain}`,
+                { headers }
+              )
+              .then((response) => {
+                if (response.data.status == "ok") {
+                  // setButtonDisabled(false);
+                  // setDate2(response.data.data.time_table.date);
+                  // setTime2(response.data.data.time_table.time);
+                  console.log(response.data.data.time_table)
+                  setStoredTimeTable(time_table => [...time_table, response.data.data.time_table]);
+
+                } else {
+                  // setButtonDisabled(true);
+                  // setDate2("");
+                  // setTime2("");
+                  toast.error(response.data.message, {
+                    position: toast.POSITION.TOP_CENTER,
+                  });
+                }
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+          });
+
+          // setSubjectId2(response.data.data.subjects.)
+          //   axios
+          // .get(
+          //   `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/${}/fetch_details?subdomain=${subdomain}`,
+          //   { headers }
+          // )
+          // .then((response) => {
+          //   if (response.data.status == "ok") {
+          //     setButtonDisabled(false);
+          //     setDate2(response.data.data.time_table.date);
+          //     setTime2(response.data.data.time_table.time);
+          //     setStoredTimeTable(response.data.data.time_table);
+          //   } else {
+          //     setButtonDisabled(true);
+          //     setDate2("");
+          //     setTime2("");
+          //     toast.error(response.data.message, {
+          //       position: toast.POSITION.TOP_CENTER,
+          //     });
+          //   }
+          // })
+          // .catch((err) => {
+          //   console.log(err);
+          // });
+          // console.log(branches);
+        })
+        .catch((error) => console.log(error));
+    }
+  };
+  const handleSubjectNameChange2 = (e) => {
+    e.preventDefault();
+    console.log(e.target.selectedIndex);
+    let codeSelect2 = document.getElementsByClassName("select-code2")[0];
+    codeSelect2.selectedIndex = e.target.selectedIndex;
+    setSubjectId2(e.target.value);
+    console.log(codeSelect2);
+
+    acces_token = localStorage.getItem("access_token");
+    const headers = { Authorization: `Bearer ${acces_token}` };
+    const host = window.location.host;
+    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
+    if (arr.length > 0) {
+      subdomain = arr[0];
+    }
+
+    if (subdomain !== null || subdomain !== "") {
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/${e.target.value}/fetch_details?subdomain=${subdomain}`,
+          { headers }
+        )
+        .then((response) => {
+          if (response.data.status == "ok") {
+            setButtonDisabled(false);
+            setDate2(response.data.data.time_table.date);
+            setTime2(response.data.data.time_table.time);
+          } else {
+            setButtonDisabled(true);
+            setDate2("");
+            setTime2("");
+            toast.error(response.data.message, {
+              position: toast.POSITION.TOP_CENTER,
+            });
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+  };
+  const handleSubjectCodeChange2 = (e) => {
+    e.preventDefault();
+    console.log(e.target.selectedIndex);
+    let codeSelect2 = document.getElementsByClassName(
+      "select-subject-name2"
+    )[0];
+    codeSelect2.selectedIndex = e.target.selectedIndex;
+    setSubjectId2(e.target.value);
+    console.log(codeSelect2);
+  };
+  const handleSubmitBlockWiseReport = (e ,time_table_id, no_of_students) => {
+    e.preventDefault();
+    acces_token = localStorage.getItem("access_token");
+
+    axios
+      .post(
+        `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/time_table_block_wise_reports?subdomain=${subdomain}`,
+        {
+          report: {
+            academic_year: moment(selectedYear2).format("YYYY"),
+            exam_time_table_id: time_table_id,
+            no_of_students: no_of_students,
+          },
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${acces_token}`,
+          },
+        }
+      )
+      .then((responce) => {
+        if (responce.data.status == "created") {
+          const button = document.getElementById("button-subject-" + time_table_id);
+          const student_input = document.getElementById("input-time-table-" + time_table_id);
+          student_input.disabled = true;
+          student_input.classList.add('cursor-not-allowed');
+          button.classList.add('cursor-not-allowed');
+          button.innerHTML = "Created"
+          toast.success(responce.data.message, {
+            position: toast.POSITION.BOTTOM_LEFT,
+          });
+        } else {
+          toast.error(responce.data.message, {
+            position: toast.POSITION.TOP_CENTER,
+          });
+        }
+      })
+      .catch(function (err) {
+        console.log(err.message);
+      });
+  };
+  const handlePrint2 = useReactToPrint({
+    content: () => componentRef2.current,
+  });
+
   return (
     <div>
       <div>
@@ -38,7 +328,7 @@ const ExamBlockDetails = () => {
                 <a href="" className="flex ml-2 md:mr-24">
                   <img src="" className="h-8 mr-3" alt="Logo" />
                   <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
-                    Institute Name
+                    {uniName}
                   </span>
                 </a>
               </div>
@@ -117,38 +407,14 @@ const ExamBlockDetails = () => {
         >
           <div className="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
             <ul className="space-y-2 font-medium">
-              {/* <li>
-                <button
-                  className="bg-gray-300 py-2 px-4 rounded-md"
-                  onClick={toggleDropdown}
-                >
-                  Examination
-                </button>
-                <div
-                  className={`bg-white shadow rounded-md mt-2 py-2 ${
-                    isDropdownOpen ? "block" : "hidden"
-                  }`}
-                >
-                  <a
-                  href="/examBlockDetails"
-                  className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                >
-                  Enter Block Details
-                </a>
+              <li>
                 <a
-                  href="/examAssignSupervision"
-                  className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
+                  href="/examTimetable"
+                  className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
-                  Assign Supervision
+                  <span className="ml-3">Time Table</span>
                 </a>
-                <a
-                  href="/examTimeTable"
-                  className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                >
-                  Time Table
-                </a>
-                </div>
-              </li> */}
+              </li>
               <li>
                 <a
                   href="/examBlockDetails"
@@ -163,18 +429,16 @@ const ExamBlockDetails = () => {
                   className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   <span className="flex-1 ml-3 whitespace-nowrap">
-                  Assign Supervision
+                    Assign Supervision
                   </span>
                 </a>
               </li>
               <li>
                 <a
-                  href="/examTimeTable"
-                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                  href="/examReports"
+                  className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
-                  <span className="flex-1 ml-3 whitespace-nowrap">
-                  Time Table
-                  </span>
+                  <span className="flex-1 ml-3 whitespace-nowrap">Reports</span>
                 </a>
               </li>
             </ul>
@@ -188,98 +452,200 @@ const ExamBlockDetails = () => {
             </div>
             <hr />
           </div>
-          <div>
-            <div className="flex flex-wrap mt-5 justify-center">
-              <div className="w-full sm:w-1/2 md:w-1/3 lg:w-1/6 pr-4 mb-4">
-                <label className="block text-gray-700 font-bold mb-2" for="select1">
-                  Select Department
-                </label>
-                <select
-                  className="block w-full p-2 text-gray-700 bg-gray-100 border border-gray-400 rounded-md leading-tight focus:outline-none focus:bg-white focus:border-gray-500 sm:text-sm sm:leading-5"
-                  id="select1"
-                >
-                  <option value="option1">Option 1</option>
-                  <option value="option2">Option 2</option>
-                  <option value="option3">Option 3</option>
-                  <option value="option4">Option 4</option>
-                </select>
-              </div>
-              <div className="w-full sm:w-1/2 md:w-1/3 lg:w-1/6 pr-4 mb-4">
-                <label className="block text-gray-700 font-bold mb-2" for="select2">
-                  Select Branch
-                </label>
-                <select
-                  className="block w-full p-2 text-gray-700 bg-gray-100 border border-gray-400 rounded-md leading-tight focus:outline-none focus:bg-white focus:border-gray-500 sm:text-sm sm:leading-5"
-                  id="select2"
-                >
-                  <option value="option1">Option 1</option>
-                  <option value="option2">Option 2</option>
-                  <option value="option3">Option 3</option>
-                  <option value="option4">Option 4</option>
-                </select>
-              </div>
-              <div className="w-full sm:w-1/2 md:w-1/3 lg:w-1/6 pr-4 mb-4">
-                <label className="block text-gray-700 font-bold mb-2" for="select3">
-                  Select Semester
-                </label>
-                <select
-                  className="block w-full p-2 text-gray-700 bg-gray-100 border border-gray-400 rounded-md leading-tight focus:outline-none focus:bg-white focus:border-gray-500 sm:text-sm sm:leading-5"
-                  id="select3"
-                >
-                  <option value="option1">Option 1</option>
-                  <option value="option2">Option 2</option>
-                  <option value="option3">Option 3</option>
-                  <option value="option4">Option 4</option>
-                </select>
-              </div>
-              <div className="w-full sm:w-1/2 md:w-1/3 lg:w-1/6 pr-4 mb-4">
-                <label className="block text-gray-700 font-bold mb-2" for="select4">
-                  Select Subject Code
-                </label>
-                <select
-                  className="block w-full p-2 text-gray-700 bg-gray-100 border border-gray-400 rounded-md leading-tight focus:outline-none focus:bg-white focus:border-gray-500 sm:text-sm sm:leading-5"
-                  id="select4"
-                >
-                  <option value="option1">Option 1</option>
-                  <option value="option2">Option 2</option>
-                  <option value="option3">Option 3</option>
-                  <option value="option4">Option 4</option>
-                </select>
-              </div>
-              <div className="w-full sm:w-1/2 md:w-1/3 lg:w-1/6 pr-4 mb-4">
-                <label className="block text-gray-700 font-bold mb-2" for="select4">
-                  Select Subject
-                </label>
-                <select
-                  className="block w-full p-2 text-gray-700 bg-gray-100 border border-gray-400 rounded-md leading-tight focus:outline-none focus:bg-white focus:border-gray-500 sm:text-sm sm:leading-5"
-                  id="select4"
-                >
-                  <option value="option1">Option 1</option>
-                  <option value="option2">Option 2</option>
-                  <option value="option3">Option 3</option>
-                  <option value="option4">Option 4</option>
-                </select>
-              </div>
-            </div>
-            <div className="flex justify-center mt-5">
-              <label className="block text-gray-700 font-bold mb-2" for="date">
-                Date:
-              </label>
-              <input
-                className="ml-5 appearance-none border rounded w-80 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                id="date"
-                type="date"
-                placeholder="YYYY-MM-DD"
-              />
-            </div>
-            <div className="text-center mt-10">
-            <button className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold">
-              Submit
-            </button>
+          <div className="flex justify-center ml-28">
+            {/* Select Examination option in BlockWise Report */}
+
+            <label
+              htmlFor=""
+              className="text-sm md:text-base lg:text-base mr-4"
+            >
+              Select Examination:
+            </label>
+            <select
+              className="form-select text-sm md:text-base lg:text-base mr-2 border-2 px-3 py-2"
+              // onChange={(e) => setExaminationName(e.target.value)}
+              onChange={(e) => {
+                // setExaminationName2(e.target.value);
+                handleExaminationChange2(e.target.value);
+              }}
+            >
+              <option>Select Examination</option>
+              <option value="Winter">Winter</option>
+              <option value="Summer">Summer</option>
+            </select>
+            {/* Select Year option in BlockWise Report */}
+
+            <label
+              htmlFor="year-picker"
+              className="text-sm md:text-base lg:text-base mr-4 ml-10"
+            >
+              Select year:
+            </label>
+            <DatePicker
+              id="year-picker2"
+              selected={selectedYear2}
+              onChange={(date) => {
+                handleYearChange2(date);
+              }}
+              showYearPicker
+              dateFormat="yyyy"
+              className="border rounded px-3 py-2 w-52 justify-center"
+              placeholderText="Select Year"
+            />
           </div>
+          <div className="flex justify-center mt-5">
+            <label
+              htmlFor=""
+              className="text-sm md:text-base lg:text-base mr-2"
+            >
+              Select Course:
+            </label>
+            <select
+              className="form-select text-sm md:text-base lg:text-base mr-2 border-2 px-3 py-2"
+              onChange={handleCourseChange2}
+            >
+              <option>Select course</option>
+              {courses2.map((course) => (
+                <option value={course.id}>{course.name}</option>
+              ))}
+            </select>
+            <label
+              htmlFor=""
+              className="text-sm md:text-base lg:text-base mr-2"
+            >
+              Select Branch:
+            </label>
+            <select
+              className="form-select text-sm md:text-base lg:text-base mr-2 border-2 px-3 py-2"
+              onChange={handleBranchChange2}
+            >
+              <option>Select Branch</option>
+              {branches2.map((branch) => (
+                <option value={branch.id}>{branch.name}</option>
+              ))}
+            </select>
+            <label
+              htmlFor=""
+              className="text-sm md:text-base lg:text-base mr-2"
+            >
+              Select Semester
+            </label>
+            <select
+              className="form-select text-sm md:text-base lg:text-base mr-2 border-2 px-3 py-2"
+              onChange={handleSemesterChange2}
+            >
+              <option>Select Semester</option>
+              {semesters2.map((semester) => (
+                <option value={semester.id}>{semester.name}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Displayed table in BlockWise Report */}
+
+          <div className="flex flex-col mt-5">
+            <div className="overflow-x-auto">
+              <div className="p-1.5 w-full inline-block align-middle">
+                <div className="overflow-hidden border rounded-lg">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                        >
+                          Subject Name
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                        >
+                          Subject Code
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                        >
+                          Date
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                        >
+                          Time
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                        >
+                          No. of Students
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                        >
+                          Action
+                        </th>
+                      </tr>
+                    </thead>
+
+                    {/* Body of the BlockWise Report */}
+
+                    <tbody className="divide-y divide-gray-200">
+                      {storedTimeTable.map((time_table) => (
+                        <tr>
+                          <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                            {time_table.subject_name}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                            {time_table.subject_code}
+                          </td>
+                          <td className="px-6 py-4 text-sm  whitespace-nowrap">
+                            {time_table.date}
+                          </td>
+                          <td className="px-6 py-4 text-sm  whitespace-nowrap">
+                            {time_table.time}
+                          </td>
+                          <td className="px-6 py-4 text-sm  whitespace-nowrap">
+                            <input
+                              className="shadow appearance-none border rounded w-44 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                              id={"input-time-table-" + time_table.id}
+                              onChange={(e) =>
+                                setNoOfStudent(parseInt(e.target.value))
+                              }
+                              type="text"
+                              placeholder="Enter Student Number"
+                              required
+                            />
+                          </td>
+                          <td className="px-6 py-4 text-sm  whitespace-nowrap">
+                            <button
+                              className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold"
+                              onClick={(e) => handleSubmitBlockWiseReport(e,time_table.id, noOfStudent)}
+                              id={'button-subject-' + time_table.id}
+                            >
+                              Submit
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="text-center mt-10">
+            <button
+              onClick={handlePrint2}
+              className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold"
+            >
+              Download
+            </button>
           </div>
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 };
