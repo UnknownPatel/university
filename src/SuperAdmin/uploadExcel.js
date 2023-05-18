@@ -43,6 +43,10 @@ const UploadExcel = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    const submit_button = document.getElementById('button-submit-excel-sheet');
+    submit_button.disabled = true;
+    submit_button.innerHTML = "Uploading ...";
+    submit_button.classList.add("cursor-not-allowed");
     if (selectedFile !== null || selectedFile !== "") {
       axios
         .post(
@@ -63,13 +67,16 @@ const UploadExcel = () => {
         )
         .then((responce) => {
           console.log(responce.data)
+          submit_button.disabled = false;
+          submit_button.innerHTML = "Upload";
+          submit_button.classList.remove("cursor-not-allowed");
           if (responce.data.status == "created") {
             toast.success(responce.data.message, {
-              position: toast.POSITION.TOP_CENTER,
+              position: toast.POSITION.BOTTOM_LEFT,
             });
           } else {
             toast.error(responce.data.message, {
-              position: toast.POSITION.TOP_CENTER,
+              position: toast.POSITION.BOTTOM_LEFT,
             });
           }
         })
@@ -314,14 +321,16 @@ const UploadExcel = () => {
             <div className="text-center mt-10">
               <button
                 type="submit"
+                id="button-submit-excel-sheet"
                 className="py-3 px-8 bg-black rounded-2xl text-white font-bold"
               >
-                Submit
+                Upload
               </button>
             </div>
           </form>
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 };

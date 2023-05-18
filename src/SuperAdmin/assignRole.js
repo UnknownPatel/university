@@ -27,7 +27,7 @@ const AssignRole = () => {
 
   useEffect(() => {
     acces_token = localStorage.getItem("access_token");
-
+    console.log(acces_token);
     const headers = { Authorization: `Bearer ${acces_token}` };
     const host = window.location.host;
     const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);

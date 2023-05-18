@@ -17,6 +17,7 @@ const ExamReports = () => {
   const [uniName, setUniName] = useState("");
   const [courses, setCourses] = useState([]);
   const [branches, setBranches] = useState([]);
+  const [branchesName, setBranchesName] = useState("");
   const [semesters, setSemesters] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [selectedYear, setSelectedYear] = useState();
@@ -74,10 +75,7 @@ const ExamReports = () => {
   const [staffUserId, setStaffUserId] = useState("");
   const [staffDesignation, setStaffDesignation] = useState("");
   const [assignDuty, setAssignDuty] = useState();
-  const [displayOtherDutyTable,setDisplayOtherDutyTable] = useState([]);
-
-
-
+  const [displayOtherDutyTable, setDisplayOtherDutyTable] = useState([]);
 
   useEffect(() => {
     acces_token = localStorage.getItem("access_token");
@@ -199,6 +197,10 @@ const ExamReports = () => {
 
   const handleBranchChange = (e) => {
     e.preventDefault();
+    var selectedIndex = e.target.options.selectedIndex;
+    setBranchesName(
+      e.target.options[selectedIndex].getAttribute('data-name')
+    );
     var branch_id = e.target.value;
     acces_token = localStorage.getItem("access_token");
     const headers = { Authorization: `Bearer ${acces_token}` };
@@ -291,11 +293,11 @@ const ExamReports = () => {
         console.log(responce.data);
         if (responce.data.status == "created") {
           toast.success(responce.data.message, {
-            position: toast.POSITION.TOP_CENTER,
+            position: toast.POSITION.BOTTOM_LEFT,
           });
         } else {
           toast.error(responce.data.message, {
-            position: toast.POSITION.TOP_CENTER,
+            position: toast.POSITION.BOTTOM_LEFT,
           });
         }
         axios
@@ -490,7 +492,7 @@ const ExamReports = () => {
             setDate2("");
             setTime2("");
             toast.error(response.data.message, {
-              position: toast.POSITION.TOP_CENTER,
+              position: toast.POSITION.BOTTOM_LEFT,
             });
           }
         })
@@ -536,7 +538,7 @@ const ExamReports = () => {
           });
         } else {
           toast.error(responce.data.message, {
-            position: toast.POSITION.TOP_CENTER,
+            position: toast.POSITION.BOTTOM_LEFT,
           });
         }
         axios
@@ -726,11 +728,11 @@ const ExamReports = () => {
         console.log(responce.data);
         if (responce.data.status == "created") {
           toast.success(responce.data.message, {
-            position: toast.POSITION.TOP_CENTER,
+            position: toast.POSITION.BOTTOM_LEFT,
           });
         } else {
           toast.error(responce.data.message, {
-            position: toast.POSITION.TOP_CENTER,
+            position: toast.POSITION.BOTTOM_LEFT,
           });
         }
 
@@ -776,7 +778,9 @@ const ExamReports = () => {
     if (subdomain !== null || subdomain !== "") {
       axios
         .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates?examination_name=${examination2}&academic_year=${moment(selectedYear4).format("YYYY")}&subdomain=${subdomain}`,
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates?examination_name=${examination2}&academic_year=${moment(
+            selectedYear4
+          ).format("YYYY")}&subdomain=${subdomain}`,
           { headers }
         )
         .then((response) => {
@@ -911,11 +915,11 @@ const ExamReports = () => {
         console.log(responce.data);
         if (responce.data.status == "created") {
           toast.success(responce.data.message, {
-            position: toast.POSITION.TOP_CENTER,
+            position: toast.POSITION.BOTTOM_LEFT,
           });
         } else {
           toast.error(responce.data.message, {
-            position: toast.POSITION.TOP_CENTER,
+            position: toast.POSITION.BOTTOM_LEFT,
           });
         }
 
@@ -960,7 +964,6 @@ const ExamReports = () => {
       subdomain = arr[0];
     }
     if (subdomain !== null || subdomain !== "") {
-
       axios
         .get(
           `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/faculty_names?subdomain=${subdomain}`,
@@ -998,7 +1001,6 @@ const ExamReports = () => {
       subdomain = arr[0];
     }
     if (subdomain !== null || subdomain !== "") {
-
       axios
         .get(
           `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/faculty_names?subdomain=${subdomain}`,
@@ -1059,11 +1061,11 @@ const ExamReports = () => {
         console.log(responce.data);
         if (responce.data.status == "created") {
           toast.success(responce.data.message, {
-            position: toast.POSITION.TOP_CENTER,
+            position: toast.POSITION.BOTTOM_LEFT,
           });
         } else {
           toast.error(responce.data.message, {
-            position: toast.POSITION.TOP_CENTER,
+            position: toast.POSITION.BOTTOM_LEFT,
           });
         }
 
@@ -1090,7 +1092,6 @@ const ExamReports = () => {
         console.log(err.message);
       });
   };
-  
 
   const [activeButton, setActiveButton] = useState("button1");
 
@@ -1240,9 +1241,7 @@ const ExamReports = () => {
                   href="/examReports"
                   className="flex items-center p-2 text-gray-900 rounded-lg bg-slate-600 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
-                  <span className="flex-1 ml-3 whitespace-nowrap">
-                    Reports
-                  </span>
+                  <span className="flex-1 ml-3 whitespace-nowrap">Reports</span>
                 </a>
               </li>
             </ul>
@@ -1250,12 +1249,7 @@ const ExamReports = () => {
         </aside>
 
         <div className="p-4 sm:ml-64">
-          <div className="p-4 rounded-lg mt-10">
-            <div className="text-center text-4xl">
-              <p>Examination</p>
-            </div>
-            <hr className="mt-1" />
-          </div>
+          <div className="p-4 rounded-lg mt-10"></div>
           <div className="flex flex-col items-center">
             <div className="flex justify-center space-x-4 mb-4">
               <button
@@ -1299,7 +1293,7 @@ const ExamReports = () => {
                 Other Duties
               </button>
             </div>
-            <div className="flex flex-col items-center space-y-4">
+            <div className="flex items-center space-x-4">
               {/* Button Content 1 */}
               <div
                 id="content1"
@@ -1307,16 +1301,9 @@ const ExamReports = () => {
                   activeButton === "button1" ? "block" : "hidden"
                 }`}
               >
-                <br />
-                <div className="flex justify-center ml-28">
-                  <label
-                    htmlFor=""
-                    className="text-sm md:text-base lg:text-base mr-4"
-                  >
-                    Select Examination:
-                  </label>
+                <div className="flex mt-5">
                   <select
-                    className="form-select text-sm md:text-base lg:text-base mr-2 border-2 px-3 py-2"
+                    className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
                     // onChange={(e) => setExaminationName(e.target.value)}
                     onChange={(e) => {
                       // setExaminationName(e.target.value)
@@ -1328,32 +1315,30 @@ const ExamReports = () => {
                     <option value="Summer">Summer</option>
                   </select>
 
-                  <label
+                  {/* <label
                     htmlFor="year-picker"
                     className="text-sm md:text-base lg:text-base mr-4 ml-10"
                   >
                     Select year:
-                  </label>
+                  </label> */}
                   <DatePicker
                     id="year-picker1"
                     selected={selectedYear}
+                    startDate={null}
                     onChange={(date) => {
                       handleYearChange(date);
                     }}
+                    defaultValue={null}
                     showYearPicker
                     dateFormat="yyyy"
-                    className="border rounded px-3 py-2 w-52 justify-center"
+                    placeholderText="Select Year"
+                    className="form-select text-sm md:text-base lg:text-base mr-2 ml-4 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
                   />
                 </div>
-                {/* <div className="flex justify-center mt-5">
-                  <label
-                    htmlFor=""
-                    className="text-sm md:text-base lg:text-base mr-2"
-                  >
-                    Select Course:
-                  </label>
+                <div className="flex mt-5">
+                  {/* Course Select Button 1 */}
                   <select
-                    className="form-select text-sm md:text-base lg:text-base mr-2 border-2 px-3 py-2"
+                    className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
                     onChange={handleCourseChange}
                   >
                     <option>Select course</option>
@@ -1361,29 +1346,21 @@ const ExamReports = () => {
                       <option value={course.id}>{course.name}</option>
                     ))}
                   </select>
-                  <label
-                    htmlFor=""
-                    className="text-sm md:text-base lg:text-base mr-2"
-                  >
-                    Select Branch:
-                  </label>
+                  
+                  {/* Branch Select Button 1 */}
                   <select
-                    className="form-select text-sm md:text-base lg:text-base mr-2 border-2 px-3 py-2"
-                    onChange={handleBranchChange}
+                    className="form-select text-sm md:text-base lg:text-base mr-2 ml-4 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+                    onChange={(e) => {handleBranchChange(e)}}
                   >
                     <option>Select Branch</option>
                     {branches.map((branch) => (
-                      <option value={branch.id}>{branch.name}</option>
+                      <option value={branch.id} data-name={branch.name} >{branch.name}</option>
                     ))}
                   </select>
-                  <label
-                    htmlFor=""
-                    className="text-sm md:text-base lg:text-base mr-2"
-                  >
-                    Select Semester
-                  </label>
+                  
+                  {/* Semester Select Button 1 */}
                   <select
-                    className="form-select text-sm md:text-base lg:text-base mr-2 border-2 px-3 py-2"
+                    className="form-select text-sm md:text-base lg:text-base mr-2 ml-4 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
                     onChange={handleSemesterChange}
                   >
                     <option>Select Semester</option>
@@ -1391,111 +1368,21 @@ const ExamReports = () => {
                       <option value={semester.id}>{semester.name}</option>
                     ))}
                   </select>
-                </div> */}
-                {/* <div className="flex flex-col mt-5">
-                  <div className="overflow-x-auto">
-                    <div className="p-1.5 w-full inline-block align-middle">
-                      <div className="overflow-hidden border rounded-lg">
-                        <table className="min-w-full divide-y divide-gray-200">
-                          <thead className="bg-gray-50">
-                            <tr>
-                              <th
-                                scope="col"
-                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                              >
-                                Subject Name
-                              </th>
-                              <th
-                                scope="col"
-                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                              >
-                                Subject Code
-                              </th>
-                              <th
-                                scope="col"
-                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                              >
-                                Date
-                              </th>
-                              <th
-                                scope="col"
-                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                              >
-                                Time
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-gray-200">
-                            <tr>
-                              <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                <select
-                                  className="form-select text-sm md:text-sm lg:text-sm mr-2 border-2 select-subject-name"
-                                  onChange={handleSubjectNameChange}
-                                >
-                                  <option>Select Subject Name</option>
-                                  {subjects.map((subject) => (
-                                    <option value={subject.id}>
-                                      {subject.name}
-                                    </option>
-                                  ))}
-                                </select>
-                              </td>
-                              <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                <select
-                                  className="form-select text-sm md:text-sm lg:text-sm mr-2 border-2 select-code"
-                                  onChange={handleSubjectCodeChange}
-                                >
-                                  <option value="0">Select Code</option>
-                                  {subjects.map((subject) => (
-                                    <option value={subject.id}>
-                                      {subject.code}
-                                    </option>
-                                  ))}
-                                </select>
-                              </td>
-                              <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                                <input
-                                  className="shadow appearance-none border rounded w-40 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                  id=""
-                                  onChange={(e) => setDate(e.target.value)}
-                                  type="date"
-                                  required
-                                />
-                              </td>
-                              <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                                <select
-                                  className="form-select text-sm md:text-sm lg:text-sm mr-2 border-2 select-code"
-                                  onChange={(e) => setTime(e.target.value)}
-                                >
-                                  <option value="">Select time</option>
-                                  <option value="10:30 A.M to 01:00 P.M">
-                                    10:30 A.M to 01:00 P.M
-                                  </option>
-                                  <option value="03:00 P.M to 05:30 P.M">
-                                    03:00 P.M to 05:30 P.M
-                                  </option>
-                                </select>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  </div>
-                </div> */}
-                <div className="flex justify-evenly text-center mt-10">
-                  <button
-                    onClick={handlePrint}
-                    className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold"
-                  >
-                    Print
-                  </button>
+
+                  <a href="#" onClick={handlePrint} className="ml-4 px-3 py-2">
+                    Download
+                  </a>
                 </div>
-                <div className="flex flex-col" ref={componentRef}>
+                <div className="flex flex-col mt-5" ref={componentRef}>
+                  <div className=""> 
+                    <p className="text-center">{uniName}</p>
+                    <p className="text-center">{branchesName}</p>
+                    <p className="text-center">{examinationName} {moment(selectedYear).format('YYYY')} Examination Time Table</p>
+                  </div>
                   <div className="overflow-x-auto">
-                    <div className="p-1.5 w-full inline-block align-middle">
+                    <div className="w-full align-middle">
                       <div className="overflow-hidden border rounded-lg">
-                        <table className="min-w-full divide-y divide-gray-200">
+                        <table className="min-w-full table-fixed divide-y divide-gray-200">
                           <thead className="bg-gray-50">
                             <tr>
                               <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
@@ -1554,20 +1441,11 @@ const ExamReports = () => {
                   activeButton === "button2" ? "block" : "hidden"
                 }`}
               >
-                <div className="flex justify-center ml-28">
+                <div className="flex justify-center mt-5 ml-24">
                   {/* Select Examination option in BlockWise Report */}
-
-                  <label
-                    htmlFor=""
-                    className="text-sm md:text-base lg:text-base mr-4"
-                  >
-                    Select Examination:
-                  </label>
                   <select
-                    className="form-select text-sm md:text-base lg:text-base mr-2 border-2 px-3 py-2"
-                    // onChange={(e) => setExaminationName(e.target.value)}
+                    className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
                     onChange={(e) => {
-                      // setExaminationName2(e.target.value);
                       handleExaminationChange2(e.target.value);
                     }}
                   >
@@ -1575,14 +1453,8 @@ const ExamReports = () => {
                     <option value="Winter">Winter</option>
                     <option value="Summer">Summer</option>
                   </select>
-                  {/* Select Year option in BlockWise Report */}
 
-                  <label
-                    htmlFor="year-picker"
-                    className="text-sm md:text-base lg:text-base mr-4 ml-10"
-                  >
-                    Select year:
-                  </label>
+                  {/* Select Year option in BlockWise Report */}
                   <DatePicker
                     id="year-picker2"
                     selected={selectedYear2}
@@ -1591,19 +1463,13 @@ const ExamReports = () => {
                     }}
                     showYearPicker
                     dateFormat="yyyy"
-                    className="border rounded px-3 py-2 w-52 justify-center"
+                    className="form-select text-sm md:text-base lg:text-base mr-2 ml-9 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
                     placeholderText="Select Year"
                   />
                 </div>
-                <div className="flex justify-center mt-5">
-                  <label
-                    htmlFor=""
-                    className="text-sm md:text-base lg:text-base mr-2"
-                  >
-                    Select Course:
-                  </label>
+                <div className="flex mt-5">
                   <select
-                    className="form-select text-sm md:text-base lg:text-base mr-2 border-2 px-3 py-2"
+                    className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
                     onChange={handleCourseChange2}
                   >
                     <option>Select course</option>
@@ -1611,14 +1477,9 @@ const ExamReports = () => {
                       <option value={course.id}>{course.name}</option>
                     ))}
                   </select>
-                  <label
-                    htmlFor=""
-                    className="text-sm md:text-base lg:text-base mr-2"
-                  >
-                    Select Branch:
-                  </label>
+                  
                   <select
-                    className="form-select text-sm md:text-base lg:text-base mr-2 border-2 px-3 py-2"
+                    className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
                     onChange={handleBranchChange2}
                   >
                     <option>Select Branch</option>
@@ -1626,14 +1487,9 @@ const ExamReports = () => {
                       <option value={branch.id}>{branch.name}</option>
                     ))}
                   </select>
-                  <label
-                    htmlFor=""
-                    className="text-sm md:text-base lg:text-base mr-2"
-                  >
-                    Select Semester
-                  </label>
+                  
                   <select
-                    className="form-select text-sm md:text-base lg:text-base mr-2 border-2 px-3 py-2"
+                    className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
                     onChange={handleSemesterChange2}
                   >
                     <option>Select Semester</option>
@@ -1644,15 +1500,17 @@ const ExamReports = () => {
                 </div>
 
                 {/* Displayed table in BlockWise Report */}
-                <div className="text-center mt-10">
-                  <button
-                    onClick={handlePrint2}
-                    className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold"
-                  >
+                <div className="text-right mt-10">
+                  <a href="#" onClick={handlePrint2} className="">
                     Download
-                  </button>
+                  </a>
                 </div>
-                <div className="flex flex-col" ref={componentRef2}>
+                <div className="flex flex-col mt-5" ref={componentRef2}>
+                  <div>
+                  <p className="text-center">{uniName}</p>
+                  <p className="text-center">{examinationName2} {moment(selectedYear2).format('YYYY')} Examination Time Table</p>
+                  <p className="text-center">BlockWise Report</p>
+                  </div>
                   <div className="overflow-x-auto">
                     <div className="p-1.5 w-full inline-block align-middle">
                       <div className="overflow-hidden border rounded-lg">
@@ -1751,19 +1609,10 @@ const ExamReports = () => {
                   activeButton === "button3" ? "block" : "hidden"
                 }`}
               >
-                <div className="text-center text-2xl">{uniName}</div>
-                <div className="text-center text-2xl">
-                  Junior Supervisor List
-                </div>
-                <div className="flex justify-center mt-5 ml-56">
-                  <label
-                    htmlFor=""
-                    className="text-sm md:text-base lg:text-base mr-2"
-                  >
-                    Select Examination:
-                  </label>
+                <div className="flex justify-center mt-5 ml-24">
                   <select
-                    className="form-select text-sm md:text-base lg:text-base mr-2 border-2"
+                    className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+                    id="select-examination"
                     onChange={(e) => {
                       handleExaminationChange3(e.target.value);
                     }}
@@ -1772,12 +1621,7 @@ const ExamReports = () => {
                     <option value="Winter">Winter</option>
                     <option value="Summer">Summer</option>
                   </select>
-                  <label
-                    htmlFor=""
-                    className="text-sm md:text-base lg:text-base mr-2"
-                  >
-                    Select Year:
-                  </label>
+                 
                   <DatePicker
                     id="year-picker3"
                     selected={selectedYear3}
@@ -1786,7 +1630,8 @@ const ExamReports = () => {
                     }}
                     showYearPicker
                     dateFormat="yyyy"
-                    className="border rounded px-3 py-2"
+                    placeholderText="Select Year"
+                    className="form-select text-sm md:text-base lg:text-base mr-2 ml-9 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
                   />
                 </div>
                 <div className="flex flex-col mt-5">
@@ -2189,7 +2034,6 @@ const ExamReports = () => {
                                     );
                                   }
                                 })}
-                                
                               </tr>
                             ))}
                           </tbody>
@@ -2207,9 +2051,7 @@ const ExamReports = () => {
                 }`}
               >
                 <div className="text-center text-2xl">{uniName}</div>
-                <div className="text-center text-2xl">
-                  Other Duties
-                </div>
+                <div className="text-center text-2xl">Other Duties</div>
                 <div className="flex justify-center mt-5 ml-16">
                   <label
                     htmlFor=""
@@ -2280,7 +2122,7 @@ const ExamReports = () => {
                           <tbody className="divide-y divide-gray-200">
                             <tr>
                               <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                              <select
+                                <select
                                   className="form-select text-sm md:text-lg lg:text-xl mr-2 border-2"
                                   id="select_namesr"
                                   onChange={handleonChangeFacultyName5}
@@ -2300,9 +2142,11 @@ const ExamReports = () => {
                                   })}
                                 </select>
                               </td>
-                              <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">{staffDesignation}</td>
+                              <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                {staffDesignation}
+                              </td>
                               <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                              <input
+                                <input
                                   className="shadow appearance-none border rounded w-44 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                   id=""
                                   onChange={(e) =>
@@ -2314,7 +2158,7 @@ const ExamReports = () => {
                                 />
                               </td>
                               <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                              <button
+                                <button
                                   className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold"
                                   onClick={handleOtherDutySubmit}
                                 >
@@ -2368,13 +2212,9 @@ const ExamReports = () => {
                           </thead>
                           <tbody className="divide-y divide-gray-200">
                             <tr>
-                              <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                              
-                              </td>
                               <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap"></td>
-                              <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                              
-                              </td>
+                              <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap"></td>
+                              <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap"></td>
                               <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap"></td>
                             </tr>
                           </tbody>
@@ -2391,6 +2231,6 @@ const ExamReports = () => {
       <ToastContainer />
     </div>
   );
-}
+};
 
-export default ExamReports
+export default ExamReports;

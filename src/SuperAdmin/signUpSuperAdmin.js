@@ -29,7 +29,7 @@ const SignUpSuperAdmin = () => {
     .then(function(response) {
       console.log(response);
       toast.success(response.data.message, {
-        position: toast.POSITION.TOP_CENTER
+        position: toast.POSITION.BOTTOM_LEFT
     });
     setTimeout(() => {
       navigate("/");

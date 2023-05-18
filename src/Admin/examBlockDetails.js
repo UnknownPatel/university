@@ -162,7 +162,7 @@ const ExamBlockDetails = () => {
                   // setDate2("");
                   // setTime2("");
                   toast.error(response.data.message, {
-                    position: toast.POSITION.TOP_CENTER,
+                    position: toast.POSITION.BOTTOM_LEFT,
                   });
                 }
               })
@@ -188,7 +188,7 @@ const ExamBlockDetails = () => {
           //     setDate2("");
           //     setTime2("");
           //     toast.error(response.data.message, {
-          //       position: toast.POSITION.TOP_CENTER,
+          //       position: toast.POSITION.BOTTOM_LEFT,
           //     });
           //   }
           // })
@@ -232,7 +232,7 @@ const ExamBlockDetails = () => {
             setDate2("");
             setTime2("");
             toast.error(response.data.message, {
-              position: toast.POSITION.TOP_CENTER,
+              position: toast.POSITION.BOTTOM_LEFT,
             });
           }
         })
@@ -284,7 +284,7 @@ const ExamBlockDetails = () => {
           });
         } else {
           toast.error(responce.data.message, {
-            position: toast.POSITION.TOP_CENTER,
+            position: toast.POSITION.BOTTOM_LEFT,
           });
         }
       })

@@ -20,6 +20,10 @@ const SignInSuperAdmin = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const login_btn = document.getElementById("login-btn");
+    login_btn.disabled = true;
+    login_btn.innerHTML = "Please wait ...";
+    login_btn.classList.add("cursor-not-allowed");
     axios
       .get(
         ` http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
@@ -41,20 +45,44 @@ const SignInSuperAdmin = () => {
             }
           )
           .then((response) => {
-            console.log(response.data);
-
-            if (response.data.success === false) {
-            } else {
-              // alert("logged in successfully !!");
-              toast.success('Login Successfully !!', {
-                position: toast.POSITION.TOP_CENTER
-            });
-            setTimeout(() => {
+            console.log(response.data.accessToken);
+            login_btn.disabled = false;
+            login_btn.innerHTML = "Login";
+            login_btn.classList.remove("cursor-not-allowed");
+            if (response.data.accessToken !== "") {
               const accessToken = response.data.access_token;
               localStorage.setItem("access_token", accessToken);
-              navigate("/home");
-            },5000)
-             
+              axios
+                .get(
+                  `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/find_user?subdomain=${subdomain}`,
+                  {
+                    headers: {
+                      Authorization: `Bearer ${response.data.access_token}`,
+                    },
+                  }
+                )
+                .then((responce) => {
+                  console.log(responce.data.roles)
+                  console.log(responce.data.roles.includes("examination_controller"));
+                  if (responce.data.roles.includes("super_admin")) {
+                    toast.success("Login Successfully !!", {
+                      position: toast.POSITION.BOTTOM_LEFT,
+                    });
+                    setTimeout(() => {
+                      navigate("/home");
+                    }, 5000);
+                  } else if (
+                    responce.data.roles.includes("Examination Controller")
+                  ) {
+                    toast.success("Login Successfully !!", {
+                      position: toast.POSITION.BOTTOM_LEFT,
+                    });
+                    setTimeout(() => {
+                      navigate("/examTimeTable");
+                    }, 5000);
+                  }
+                })
+                .catch((error) => console.log(error));
             }
           })
           .catch((err) => {
@@ -129,6 +157,7 @@ const SignInSuperAdmin = () => {
               className="w-full block bg-indigo-500 hover:bg-indigo-400 focus:bg-indigo-400 text-white font-semibold rounded-lg
             px-4 py-3 mt-6"
               onClick={handleSubmit}
+              id="login-btn"
             >
               Log In
             </button>

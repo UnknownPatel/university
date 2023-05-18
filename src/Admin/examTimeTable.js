@@ -5,7 +5,6 @@ import DatePicker from "react-datepicker";
 import { ToastContainer, toast } from "react-toastify";
 import "react-datepicker/dist/react-datepicker.css";
 import "tailwindcss/tailwind.css";
-import { FcCheckmark } from "react-icons/fc";
 
 import { useReactToPrint } from "react-to-print";
 
@@ -117,7 +116,7 @@ const ExamTimeTable = () => {
             });
           } else {
             toast.error(responce.data.message, {
-              position: toast.POSITION.TOP_CENTER,
+              position: toast.POSITION.BOTTOM_LEFT,
             });
           }
         })
@@ -126,7 +125,7 @@ const ExamTimeTable = () => {
         });
     } else {
       toast.error("Please select academic year", {
-        position: toast.POSITION.TOP_CENTER,
+        position: toast.POSITION.BOTTOM_LEFT,
       });
     }
   };
@@ -319,11 +318,11 @@ const ExamTimeTable = () => {
     //     console.log(responce.data);
     //     if (responce.data.status == "created") {
     //       toast.success(responce.data.message, {
-    //         position: toast.POSITION.TOP_CENTER,
+    //         position: toast.POSITION.BOTTOM_LEFT,
     //       });
     //     } else {
     //       toast.error(responce.data.message, {
-    //         position: toast.POSITION.TOP_CENTER,
+    //         position: toast.POSITION.BOTTOM_LEFT,
     //       });
     //     }
     //   })

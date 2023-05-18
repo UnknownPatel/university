@@ -156,6 +156,14 @@ const ExamAssignSupervision = () => {
               </li> */}
               <li>
                 <a
+                  href="/examTimetable"
+                  className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <span className="ml-3">Time Table</span>
+                </a>
+              </li>
+              <li>
+                <a
                   href="/examBlockDetails"
                   className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
@@ -165,20 +173,20 @@ const ExamAssignSupervision = () => {
               <li>
                 <a
                   href="/examAssignSupervision"
-                  className="flex items-center p-2 text-gray-900 rounded-lg bg-slate-600 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white bg-slate-600 hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   <span className="flex-1 ml-3 whitespace-nowrap">
-                  Assign Supervision
+                    Assign Supervision
                   </span>
                 </a>
               </li>
               <li>
                 <a
-                  href="/examTimeTable"
-                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                  href="/examReports"
+                  className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   <span className="flex-1 ml-3 whitespace-nowrap">
-                  Time Table
+                    Reports
                   </span>
                 </a>
               </li>
@@ -187,13 +195,9 @@ const ExamAssignSupervision = () => {
         </aside>
 
         <div className="p-4 sm:ml-64">
-          <div className="p-4 rounded-lg mt-14">
-            <div className="text-center text-4xl">
-              <p>Assign Supervision</p>
-            </div>
-            <hr className="mt-2" />
-          </div>
-          <div className="flex flex-col items-center">
+          {/* <div className="p-4 rounded-lg mt-14">
+          </div> */}
+          <div className="flex flex-col items-center mt-14">
             <div className="flex justify-center space-x-4 mb-4">
               <button
                 className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg ${
@@ -228,6 +232,7 @@ const ExamAssignSupervision = () => {
                 }`}
               >
                 <div className="flex justify-center">
+                  
                   <label
                     htmlFor=""
                     className="text-sm md:text-base lg:text-base mr-2"
