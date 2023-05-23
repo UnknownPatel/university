@@ -43,11 +43,15 @@ const UploadExcel = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const submit_button = document.getElementById('button-submit-excel-sheet');
+    acces_token = localStorage.getItem("access_token");
+    const submit_button = document.getElementById("button-submit-excel-sheet");
+    const file_select = document.getElementById("file_select");
+    const file_input = document.getElementById("file_input");
     submit_button.disabled = true;
     submit_button.innerHTML = "Uploading ...";
     submit_button.classList.add("cursor-not-allowed");
     if (selectedFile !== null || selectedFile !== "") {
+      console.log("Uploading");
       axios
         .post(
           " http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/excel_sheets",
@@ -66,11 +70,15 @@ const UploadExcel = () => {
           }
         )
         .then((responce) => {
-          console.log(responce.data)
+          console.log(responce.data);
           submit_button.disabled = false;
           submit_button.innerHTML = "Upload";
           submit_button.classList.remove("cursor-not-allowed");
           if (responce.data.status == "created") {
+            file_select.options[file_select.options.selectedIndex].text = "Select Sheet name";
+            file_input.value = null;
+            setSelectedFile("");
+            setSelectedValue("");
             toast.success(responce.data.message, {
               position: toast.POSITION.BOTTOM_LEFT,
             });
@@ -81,6 +89,9 @@ const UploadExcel = () => {
           }
         })
         .catch(function (err) {
+          submit_button.disabled = false;
+          submit_button.innerHTML = "Upload";
+          submit_button.classList.remove("cursor-not-allowed");
           console.log(err.message);
         });
     }
@@ -123,6 +134,19 @@ const UploadExcel = () => {
         // Handle error
         console.error(error);
       });
+  };
+
+  const handleSheetNameChange = (e) => {
+    setSelectedValue(e.target.value);
+    setSelectedFile("");
+    const hidden_div = document.getElementById("hidden_div");
+    const file_input = document.getElementById("file_input");
+    file_input.value = null;
+    if (e.target.value !== "Select Sheet name") {
+      hidden_div.classList.remove("hidden");
+    } else {
+      hidden_div.classList.add("hidden");
+    }
   };
 
   return (
@@ -280,54 +304,102 @@ const UploadExcel = () => {
 
       <div className="p-4 sm:ml-64">
         <div className="p-4 rounded-lg mt-14">
-          <div className="text-center text-4xl">
-            <p>{uniName}</p>
+          <div className="text-center text-4xl mb-5">
+            <h3 className="mt-2 text-3xl font-bold text-gray-900">
+              Upload Excel Sheet
+            </h3>
           </div>
-          <br />
-          <br />
-          <form onSubmit={handleSubmit}>
-            <div className="flex justify-center">
-              <label
-                htmlFor="File_Name"
-                className="block text-lg font-bold mb-2"
-              >
-                Select File:
-              </label>
-              <select
-                className="py-3 px-4 pr-9 block w-96 rounded-2xl text-sm border-2 "
-                onChange={(e) => {
-                  setSelectedValue(e.target.value);
-                }}
-              >
-                <option>Select File</option>
-                <option>Faculty Details</option>
-                <option>Course and Semester Details</option>
-                <option>Subject Details</option>
-              </select>
-            </div>
 
-            <div className="text-center text-2xl mt-10">
-              <h1>Get Started By Uploading Excel File</h1>
-            </div>
-            <div className="flex justify-center">
-              <input
-                className="mt-5 text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none  dark:border-gray-600 dark:placeholder-gray-400"
-                onChange={(e) => setSelectedFile(e.target.files[0])}
-                id="default_size"
-                type="file"
-                accept=".xls,.xlsx"
-              />
-            </div>
-            <div className="text-center mt-10">
-              <button
-                type="submit"
-                id="button-submit-excel-sheet"
-                className="py-3 px-8 bg-black rounded-2xl text-white font-bold"
-              >
-                Upload
-              </button>
-            </div>
-          </form>
+          <div className="flex justify-center">
+            <form
+              onSubmit={handleSubmit}
+              class="sm:max-w-lg w-full p-10 bg-white rounded-xl z-10"
+            >
+              <div className="flex">
+                <select
+                  id="file_select"
+                  className="form-select w-full rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+                  // className="block p-2 mb-6 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  onChange={(e) => {
+                    handleSheetNameChange(e);
+                  }}
+                >
+                  <option>Select Sheet name</option>
+                  <option>Faculty Details</option>
+                  <option>Course and Semester Details</option>
+                  <option>Subject Details</option>
+                </select>
+              </div>
+
+              <div id="hidden_div" className="hidden">
+                <div className="text-center text-2xl mt-5"></div>
+
+                <div className="grid grid-cols-1 space-y-2">
+                  <label className="text-start text-sm font-bold text-gray-500 tracking-wide">
+                    Choose {selectedValue} Sheet
+                  </label>
+                  <div className="flex justify-center w-full">
+                  <span class="sr-only">Choose {selectedValue} Sheet</span>
+                  <input
+                    type="file"
+                    id="file_input"
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-blue-100"
+                    onChange={(e) => setSelectedFile(e.target.files[0])}
+                    accept=".xls,.xlsx"
+                  />
+                  </div>
+                </div>
+
+                {/* <div className="grid grid-cols-1 space-y-2">
+                  <label className="text-start text-sm font-bold text-gray-500 tracking-wide">
+                    Attach {selectedValue} Sheet
+                  </label>
+                  <div className="flex items-center justify-center w-full">
+                    <label className="flex flex-col rounded-lg w-full border-4 border-dashed h-60 p-10 group text-center">
+                      <div className="h-full w-full text-center flex flex-col justify-center items-center  ">
+                        <div className="flex flex-auto max-h-48 w-2/5 mx-auto -mt-10">
+                          <img
+                            className="has-mask h-36 object-center"
+                            src="https://img.freepik.com/free-vector/image-upload-concept-landing-page_52683-27130.jpg?size=338&ext=jpg"
+                            alt="freepik image"
+                          />
+                        </div>
+                        <p className="pointer-none text-gray-500 ">
+                          <span className="text-sm">Drag and drop</span> files
+                          here <br /> or{" "}
+                          <a
+                            href=""
+                            id=""
+                            className="text-blue-600 hover:underline"
+                          >
+                            select a file
+                          </a>{" "}
+                          from your computer
+                        </p>
+                      </div>
+                      <input
+                        type="file"
+                        className="hidden"
+                        onChange={(e) => setSelectedFile(e.target.files[0])}
+                        accept=".xls,.xlsx"
+                      />
+                    </label>
+                  </div>
+                </div> */}
+                <div className="flex justify-center mt-5">
+                  <button
+                    type="submit"
+                    id="button-submit-excel-sheet"
+                    // className="py-3 px-8 bg-black rounded-2xl text-white font-bold"
+                    className="text-center w-full bg-green-600 text-gray-100 p-4 rounded-full tracking-wide
+                font-semibold  focus:outline-none focus:shadow-outline hover:bg-green-700 shadow-lg cursor-pointer transition ease-in duration-300"
+                  >
+                    Upload
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
       <ToastContainer />

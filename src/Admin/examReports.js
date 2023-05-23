@@ -573,7 +573,7 @@ const ExamReports = () => {
   });
 
   // Junior Supervisor API
-  const handleExaminationChange3 = (examination) => {
+  const handleExaminationChange3 = (examination) => { 
     // console.log(examinationName);
     setExaminationName3(examination);
     let access_token = localStorage.getItem("access_token");
@@ -701,6 +701,7 @@ const ExamReports = () => {
     }
   };
   const handleJuniorSupervisionSubmit = (e) => {
+    
     e.preventDefault();
     acces_token = localStorage.getItem("access_token");
     const metadata = JSON.stringify(dateCheckBox);
@@ -1248,9 +1249,8 @@ const ExamReports = () => {
           </div>
         </aside>
 
-        <div className="p-4 sm:ml-64">
-          <div className="p-4 rounded-lg mt-10"></div>
-          <div className="flex flex-col items-center">
+        <div className="pt-4 sm:ml-64">
+          <div className="flex flex-col items-center mt-14">
             <div className="flex justify-center space-x-4 mb-4">
               <button
                 className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg ${
@@ -1741,10 +1741,10 @@ const ExamReports = () => {
                   </button>
                 </div>
                 <div className="flex flex-col" ref={componentRef3}>
-                  <div className="overflow-x-auto">
-                    <div className="p-1.5 w-full inline-block align-middle">
-                      <div className="overflow-hidden border rounded-lg">
-                        <table className="min-w-full divide-y divide-gray-200">
+                  <div className="overflow-x-auto table-auto">
+                    <div className="p-1.5 min-w-full w-auto inline-block align-middle">
+                      <div className="overflow-hidden rounded-lg">
+                        <table className="min-w-full border divide-y divide-x rounded-lg divide-gray-200">
                           <thead className="bg-gray-50">
                             <tr>
                               <th

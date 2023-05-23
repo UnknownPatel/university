@@ -7,7 +7,6 @@ var acces_token;
 var subdomain;
 var id;
 const AssignRole = () => {
-  
   const navigate = useNavigate();
   const [uniName, setUniName] = useState("");
   const [clientId, setClentId] = useState("");
@@ -23,9 +22,11 @@ const AssignRole = () => {
   const [designation, setDesignation] = useState([]);
   const [role, setRole] = useState([]);
   const [roleName, setRoleName] = useState("");
-  const [remove,setRemove] = useState("");
+  const [remove, setRemove] = useState("");
+  const [faculties, setFaculties] = useState([]);
 
   useEffect(() => {
+    setFaculties([]);
     acces_token = localStorage.getItem("access_token");
     console.log(acces_token);
     const headers = { Authorization: `Bearer ${acces_token}` };
@@ -41,7 +42,6 @@ const AssignRole = () => {
           `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
         )
         .then((response) => {
-          // console.log(response.data.university.name);
           setUniName(response.data.university.name);
         })
         .catch((err) => {
@@ -55,19 +55,31 @@ const AssignRole = () => {
         )
         .then((response) => {
           setData(response.data.data.users);
-          console.log(response.data.data.users);
-        })  
+        })
         .catch((error) => console.log(error));
 
-        axios
-          .get(`http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/roles?subdomain=${subdomain}`,
-            {headers}
-          )
-          .then((response) => {
-            setRoleData(response.data.data.role_names);
-            console.log(response.data.data.role_names);
-          })
-          .catch((error) => console.log(error));
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/roles?subdomain=${subdomain}`,
+          { headers }
+        )
+        .then((response) => {
+          setRoleData(response.data.data.role_names);
+        })
+        .catch((error) => console.log(error));
+
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/assigned_role_users?subdomain=${subdomain}`,
+          { headers }
+        )
+        .then((get_response) => {
+          if (get_response.data.message === "Details found") {
+            console.log(get_response.data.data.users);
+            setFaculties(get_response.data.data.users);
+          }
+        })
+        .catch((error) => console.log(error));
     }
 
     // axios
@@ -92,7 +104,7 @@ const AssignRole = () => {
     //   setRole(responce.data.data.role)
     //   console.warn(responce.data.data.user.designation)
     //   // console.log(responce.data.data.user.first_name);
-    
+
     //   if (responce.data.success === false) {
     //   // } else {
     //   //   alert("successfully updated");
@@ -101,11 +113,10 @@ const AssignRole = () => {
     // .catch(function (err) {
     //   console.log(err.message);
     // });
-    
-
   }, []);
 
   const toggleContent = () => {
+    console.log("Button Clicked");
     setIsHidden(!isHidden);
   };
 
@@ -119,12 +130,13 @@ const AssignRole = () => {
         {
           user: {
             role_name: selectedValue,
-          },subdomain: subdomain
+          },
+          subdomain: subdomain,
         },
         {
           headers: {
-            'Authorization' : `Bearer ${acces_token}`
-          }
+            Authorization: `Bearer ${acces_token}`,
+          },
         }
       )
       .then((responce) => {
@@ -132,13 +144,13 @@ const AssignRole = () => {
         setFacultyId([...facultyId, responce.data.data.user.id]);
         setFacultyName([...facultyName, responce.data.data.user.first_name]);
         setDesignation([...designation, responce.data.data.user.designation]);
-        setRole([...role, responce.data.data.role])
-        console.log(responce.data.data.role)
+        setRole([...role, responce.data.data.role]);
+        console.log(responce.data.data.role);
         // console.log(responce.data.data.user.first_name);
-      
+
         if (responce.data.success === false) {
-        // } else {
-        //   alert("successfully updated");
+          // } else {
+          //   alert("successfully updated");
         }
       })
       .catch(function (err) {
@@ -148,24 +160,25 @@ const AssignRole = () => {
 
   const handleRemoveRole = (e) => {
     e.preventDefault();
-    console.log(e.target.getAttribute('data-id'));
+    console.log(e.target.getAttribute("data-id"));
     acces_token = localStorage.getItem("access_token");
 
-    const faculty_id = e.target.getAttribute('data-id')
-    const role_name = e.target.getAttribute('data-role-name')
+    const faculty_id = e.target.getAttribute("data-id");
+    const role_name = e.target.getAttribute("data-role-name");
 
     axios
-      .post(`http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/${faculty_id}/deassign_role`,
+      .post(
+        `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/${faculty_id}/deassign_role`,
         {
           user: {
-            role_name: role_name
+            role_name: role_name,
           },
-          subdomain: subdomain
+          subdomain: subdomain,
         },
         {
           headers: {
-            'Authorization' : `Bearer ${acces_token}`
-          }
+            Authorization: `Bearer ${acces_token}`,
+          },
         }
       )
       .then((responce) => {
@@ -174,23 +187,25 @@ const AssignRole = () => {
       .catch(function (err) {
         console.log(err.message);
       });
-  }
+  };
 
   const handleCreateRole = (e) => {
     e.preventDefault();
     acces_token = localStorage.getItem("access_token");
 
     axios
-      .post('http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/roles',
+      .post(
+        "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/roles",
         {
           role: {
-            name: roleName
-          },subdomain: subdomain
+            name: roleName,
+          },
+          subdomain: subdomain,
         },
         {
           headers: {
-            'Authorization' : `Bearer ${acces_token}`
-          }
+            Authorization: `Bearer ${acces_token}`,
+          },
         }
       )
       .then((responce) => {
@@ -200,13 +215,17 @@ const AssignRole = () => {
       .catch(function (err) {
         console.log(err.message);
       });
-  }
+  };
 
   const handleonChange = (event) => {
     setId(event.target.value);
     var selectedIndex = event.target.options.selectedIndex;
-    setFname(event.target.options[selectedIndex].getAttribute('data-designation'));
-    console.log(event.target.options[selectedIndex].getAttribute('data-designation'));
+    setFname(
+      event.target.options[selectedIndex].getAttribute("data-designation")
+    );
+    console.log(
+      event.target.options[selectedIndex].getAttribute("data-designation")
+    );
     // const node = document.getElementById('select_name');
     // console.log(e.target.getAttribute("data-designation"));
   };
@@ -406,114 +425,99 @@ const AssignRole = () => {
 
       <div className="p-4 sm:ml-64">
         <div className="p-4 rounded-lg mt-14">
-          <div className="text-center text-4xl">
-            <p>{uniName}</p>
-          </div>
-          <div className="flex items-center justify-center mt-10">
-            <label htmlFor="" className="text-sm md:text-lg lg:text-xl mr-2">
-              Select Faculty Name:
-            </label>
-            <select
-              className="form-select text-sm md:text-lg lg:text-xl mr-2 border-2"
-              id="select_name"
-              onChange={handleonChange}
-            >
-              <option>Select Name</option>
-              {data.map((item) => {
-            
-                // console.log( item.id)
-                return (
-                  <>
-                  {/* <p id="designation_store" style={{display:"none"}} >{item.designation}</p> */}
-                  <option id={item.designation} value={item.id} data-designation={item.designation}  >
-                   
-                    {item.first_name}
-                  </option>
-                  </>
-                );
-              })}
-            </select>
-            <label htmlFor="" className="text-sm md:text-lg lg:text-xl mr-2">
-              Designation:
-            </label>
-            <div className="">
-              <input
-                type="text"
-                name=""
-                id=""
-                value={fName}
-                autoComplete=""
-                className="form-input pl-1 text-sm md:text-lg lg:text-xl border border-gray-400 rounded"
-              />
-            </div>
-          </div>
-          <div className="flex mt-5 justify-center items-center">
-            <label
-              htmlFor="hs-select-label"
-              className="text-sm md:text-lg lg:text-xl mr-2"
-            >
-              Assign Role:
-            </label>
-            <select
-              className="form-select text-sm md:text-lg lg:text-xl mr-2 border-2 "
-              onChange={(e) => {
-                setSelectedValue(e.target.value);
-                console.log(selectedValue);
-              }}
-            >
-              <option>Select Role</option>
-              {roleData.map((item) => {
-            
-                // console.log( item.id)
-                return (
-                  <>
-                  <option value={item.name}> {item.name} </option>
-                  </>
-                );
-              })}
-            </select>
+          <div className="text-center text-4xl mb-10">
+            <h3 className="mt-2 text-3xl font-bold text-gray-900">
+              Assign Roles
+            </h3>
           </div>
 
-          <div className="flex justify-evenly mt-10">
-            <div className="text-center">
+          <div className="flex justify-start mt-5">
+            <div className="bg-white rounded-lg">
+              <select
+                className="form-select rounded ml-2 justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+                id="select_name"
+                onChange={handleonChange}
+              >
+                <option>Select Faculty name</option>
+                {data.map((item) => {
+                  // console.log( item.id)
+                  return (
+                    <>
+                      {/* <p id="designation_store" style={{display:"none"}} >{item.designation}</p> */}
+                      <option
+                        id={item.designation}
+                        value={item.id}
+                        data-designation={item.designation}
+                      >
+                        {item.first_name} {item.last_name}
+                      </option>
+                    </>
+                  );
+                })}
+              </select>
+
+              <select
+                className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+                onChange={(e) => {
+                  setSelectedValue(e.target.value);
+                  console.log(selectedValue);
+                }}
+              >
+                <option>Select Role</option>
+                {roleData.map((item) => {
+                  // console.log( item.id)
+                  return (
+                    <>
+                      <option value={item.name}> {item.name} </option>
+                    </>
+                  );
+                })}
+              </select>
+
               <button
-                className="py-3 px-8 bg-black rounded-2xl text-white font-bold"
+                className="text-center mr-24 bg-green-600 text-gray-100 p-2 rounded tracking-wide
+                font-semibold  focus:outline-none focus:shadow-outline hover:bg-green-700 shadow-md cursor-pointer transition ease-in duration-300"
                 onClick={handleSubmit}
+              >
+                Assign
+              </button>
+
+              <button
+                onClick={toggleContent}
+                className="absolute p-2 mr-10 bg-black rounded right-0 text-white font-bold"
+              >
+                Create Role
+              </button>
+            </div>
+          </div>
+          <p class="text-sm mt-2 ml-2 text-gray-300">
+            <span>{fName}</span>
+          </p>
+
+          <div className="flex justify-end mr-2 mt-1">
+            {/* Toggle Button */}
+            <div
+              className={`${
+                isHidden ? "hidden" : "block"
+              } rounded-md flex justify-center`}
+            >
+              <div className="flex items-center">
+                <label className="mr-2">Role Name: </label>
+                <input
+                  type="text"
+                  value={roleName}
+                  onChange={(e) => setRoleName(e.target.value)}
+                  className="form-input border border-gray-400 rounded p-2"
+                />
+              </div>
+              <button
+                type="submit"
+                className="text-center ml-2 bg-green-600 text-gray-100 p-2 rounded tracking-wide
+                font-semibold  focus:outline-none focus:shadow-outline hover:bg-green-700 shadow-md cursor-pointer transition ease-in duration-300"
+                onClick={handleCreateRole}
               >
                 Submit
               </button>
-            </div>
-
-            {/* Toggle Button */}
-            <div>
-              <button
-                onClick={toggleContent}
-                className="py-3 px-8 bg-black rounded-2xl text-white font-bold"
-              >
-                {/* {isHidden ? 'Show Content' : 'Hide Content'} */}Create Role
-              </button>
-              <div
-                className={`${
-                  isHidden ? "hidden" : "block"
-                } mt-4  bg-gray-100 rounded-md flex justify-evenly`}
-              >
-                <div className="flex items-center">
-                  <label className="mr-2">Role Name:</label>
-                  <input
-                    type="text"
-                    value={roleName}
-                    onChange={(e) => setRoleName(e.target.value)}
-                    className="form-input border border-gray-400 rounded py-2 px-3"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="bg-slate-500 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded"
-                  onClick={handleCreateRole}
-                >
-                  Submit
-                </button>
-              </div>
             </div>
           </div>
 
@@ -531,7 +535,7 @@ const AssignRole = () => {
                           Designation
                         </th>
                         <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
-                          Assign Role
+                          Assigned Role
                         </th>
 
                         <th className="px-6 py-3 text-xs font-bold text-right text-gray-500 uppercase ">
@@ -540,23 +544,30 @@ const AssignRole = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                      {facultyName.map((facultyName, index) => (
-                      <tr>
-                        <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">{facultyName}</td>
-                        <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">{designation[index]}</td>
-                        <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">{role[index]}
+                      {faculties.map((faculty, index) => (
+                        <tr>
+                          <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
+                            {faculty.first_name} {faculty.last_name}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                            {faculty.designation}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                            {faculty.role_names}
                           </td>
 
-                        <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                          <a
-                            className="text-red-500 hover:text-red-700"
-                            href="#"
-                            data-id={facultyId}
-                            data-role-name={role[index]}
-                            onClick={handleRemoveRole}
-                          >Revoke Role</a>
-                        </td>
-                      </tr>
+                          <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
+                            <a
+                              className="text-red-500 hover:text-red-700"
+                              href="#"
+                              data-id={faculty.id}
+                              data-role-name={faculty.role_names}
+                              onClick={handleRemoveRole}
+                            >
+                              Revoke Role
+                            </a>
+                          </td>
+                        </tr>
                       ))}
                     </tbody>
                   </table>

@@ -45,7 +45,7 @@ const SignInSuperAdmin = () => {
             }
           )
           .then((response) => {
-            console.log(response.data.accessToken);
+            console.log(response.data.access_token);
             login_btn.disabled = false;
             login_btn.innerHTML = "Login";
             login_btn.classList.remove("cursor-not-allowed");
@@ -57,7 +57,7 @@ const SignInSuperAdmin = () => {
                   `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/find_user?subdomain=${subdomain}`,
                   {
                     headers: {
-                      Authorization: `Bearer ${response.data.access_token}`,
+                      Authorization: `Bearer ${accessToken}`,
                     },
                   }
                 )

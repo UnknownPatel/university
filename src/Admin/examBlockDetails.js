@@ -6,10 +6,12 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-datepicker/dist/react-datepicker.css";
 import "tailwindcss/tailwind.css";
 import { FcCheckmark } from "react-icons/fc";
+import { FcDownload } from "react-icons/fc";
 
 import { useReactToPrint } from "react-to-print";
 
 var acces_token;
+var headers;
 var subdomain;
 
 const ExamBlockDetails = () => {
@@ -17,8 +19,11 @@ const ExamBlockDetails = () => {
   const [selectedYear2, setSelectedYear2] = useState();
   const [examinationName2, setExaminationName2] = useState("");
   const [courses2, setCourses2] = useState([]);
+  const [courseId, setCourseId] = useState("");
   const [branches2, setBranches2] = useState([]);
+  const [branchId, setBranchId] = useState("");
   const [semesters2, setSemesters2] = useState([]);
+  const [semesterId, setSemesterId] = useState("");
   const [subjects2, setSubjects2] = useState([]);
   const [subjectId2, setSubjectId2] = useState("");
   const [date2, setDate2] = useState("");
@@ -28,13 +33,22 @@ const ExamBlockDetails = () => {
   const [displayBlockWiseTable, setDisplayBlockWiseTable] = useState([]);
   const [buttonDisabled, setButtonDisabled] = useState(true);
   const componentRef2 = useRef();
-  const [storedTimeTable, setStoredTimeTable] = useState([]);
-  // const []
+  const [timeTables, setTimeTables] = useState([]);
+  const [academic_years, setAcademicYears] = useState([]);
+  const [minDate, setMinDate] = useState("");
+  const [maxDate, setMaxDate] = useState("");
+  var year;
 
   useEffect(() => {
     acces_token = localStorage.getItem("access_token");
-
-    const headers = { Authorization: `Bearer ${acces_token}` };
+    year = new Date().getFullYear();
+    setAcademicYears(
+      Array.from(
+        new Array(20),
+        (val, index) => year - (index + 1) + " - " + (year - index)
+      )
+    );
+    headers = { Authorization: `Bearer ${acces_token}` };
     const host = window.location.host;
     const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
     if (arr.length > 0) {
@@ -67,191 +81,241 @@ const ExamBlockDetails = () => {
   }, []);
 
   const handleExaminationChange2 = (examination) => {
-    // console.log(examinationName);
     setExaminationName2(examination);
   };
 
   const handleYearChange2 = (date) => {
-    // console.log(examinationName);
-    // setDisplayTimeTable([]);
-    setSelectedYear2(date);
+    if (date !== "Select Year") {
+      setSelectedYear2(date);
+      setMinDate(date.split(" - ")[0] + "-01-01");
+      setMaxDate(date.split(" - ")[1] + "-12-31");
+    } else {
+      setSelectedYear2("");
+      setMinDate("");
+      setMaxDate("");
+    }
   };
 
   const handleCourseChange2 = (e) => {
     e.preventDefault();
-    var course_id = e.target.value;
-    acces_token = localStorage.getItem("access_token");
-    const headers = { Authorization: `Bearer ${acces_token}` };
-    const host = window.location.host;
-    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
-    if (arr.length > 0) {
-      subdomain = arr[0];
-    }
-    if (subdomain !== null || subdomain !== "") {
-      axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/branches?subdomain=${subdomain}&course_id=${course_id}`,
-          { headers }
-        )
-        .then((response) => {
-          console.log(response.data.data.branches);
-          setBranches2(response.data.data.branches);
-        })
-        .catch((error) => console.log(error));
+    if (e.target.value !== "Select Course") {
+      const time_table_viewport = document.getElementById(
+        "time_table_viewport"
+      );
+      time_table_viewport.classList.add("hidden");
+      time_table_viewport.classList.remove("flex");
+      setCourseId(e.target.value);
+      acces_token = localStorage.getItem("access_token");
+      const headers = { Authorization: `Bearer ${acces_token}` };
+      const host = window.location.host;
+      const arr = host
+        .split(".")
+        .slice(0, host.includes("localhost") ? -1 : -2);
+      if (arr.length > 0) {
+        subdomain = arr[0];
+      }
+      if (subdomain !== null || subdomain !== "") {
+        axios
+          .get(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/branches`,
+            {
+              headers,
+              params: {
+                subdomain: subdomain,
+                course_id: e.target.value,
+              },
+            }
+          )
+          .then((response) => {
+            console.log(response);
+            setBranches2(response.data.data.branches);
+          })
+          .catch((error) => console.log(error));
+      }
+    } else {
+      setCourseId("");
+      setBranches2([]);
+      setBranchId("");
+      setSemesters2([]);
+      setSemesterId("");
     }
   };
+
   const handleBranchChange2 = (e) => {
     e.preventDefault();
-    var branch_id = e.target.value;
-    acces_token = localStorage.getItem("access_token");
-    const headers = { Authorization: `Bearer ${acces_token}` };
-    const host = window.location.host;
-    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
-    if (arr.length > 0) {
-      subdomain = arr[0];
-    }
-    if (subdomain !== null || subdomain !== "") {
-      axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/semesters?subdomain=${subdomain}&branch_id=${branch_id}`,
-          { headers }
-        )
-        .then((response) => {
-          console.log(response.data.data.semesters);
-          setSemesters2(response.data.data.semesters);
-          // console.log(branches);
-        })
-        .catch((error) => console.log(error));
+    if (e.target.value !== "Select Branch") {
+      const time_table_viewport = document.getElementById(
+        "time_table_viewport"
+      );
+      time_table_viewport.classList.add("hidden");
+      time_table_viewport.classList.remove("flex");
+      setBranchId(e.target.value);
+      acces_token = localStorage.getItem("access_token");
+      const headers = { Authorization: `Bearer ${acces_token}` };
+      const host = window.location.host;
+      const arr = host
+        .split(".")
+        .slice(0, host.includes("localhost") ? -1 : -2);
+      if (arr.length > 0) {
+        subdomain = arr[0];
+      }
+      if (subdomain !== null || subdomain !== "") {
+        axios
+          .get(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/semesters`,
+            {
+              headers,
+              params: {
+                subdomain: subdomain,
+                branch_id: e.target.value,
+              },
+            }
+          )
+          .then((response) => {
+            if (response.data.status === "ok") {
+              setSemesters2(response.data.data.semesters);
+            }
+          })
+          .catch((error) => console.log(error));
+      }
+    } else {
+      setBranchId("");
+      setSemesters2([]);
+      setSemesterId("");
     }
   };
   const handleSemesterChange2 = (e) => {
     e.preventDefault();
-    var semester_id = e.target.value;
-    acces_token = localStorage.getItem("access_token");
-    const headers = { Authorization: `Bearer ${acces_token}` };
-    const host = window.location.host;
-    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
-    if (arr.length > 0) {
-      subdomain = arr[0];
-    }
-    if (subdomain !== null || subdomain !== "") {
-      axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/subjects?subdomain=${subdomain}&semester_id=${semester_id}`,
-          { headers }
-        )
-        .then((response) => {
-          console.log(response.data.data.subjects);
-          setSubjects2(response.data.data.subjects);
-          response.data.data.subjects.map((subject) => {
-            axios
-              .get(
-                `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/${subject.id}/fetch_details?subdomain=${subdomain}`,
-                { headers }
-              )
-              .then((response) => {
-                if (response.data.status == "ok") {
-                  // setButtonDisabled(false);
-                  // setDate2(response.data.data.time_table.date);
-                  // setTime2(response.data.data.time_table.time);
-                  console.log(response.data.data.time_table)
-                  setStoredTimeTable(time_table => [...time_table, response.data.data.time_table]);
-
-                } else {
-                  // setButtonDisabled(true);
-                  // setDate2("");
-                  // setTime2("");
-                  toast.error(response.data.message, {
-                    position: toast.POSITION.BOTTOM_LEFT,
-                  });
-                }
-              })
-              .catch((err) => {
-                console.log(err);
-              });
-          });
-
-          // setSubjectId2(response.data.data.subjects.)
-          //   axios
-          // .get(
-          //   `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/${}/fetch_details?subdomain=${subdomain}`,
-          //   { headers }
-          // )
-          // .then((response) => {
-          //   if (response.data.status == "ok") {
-          //     setButtonDisabled(false);
-          //     setDate2(response.data.data.time_table.date);
-          //     setTime2(response.data.data.time_table.time);
-          //     setStoredTimeTable(response.data.data.time_table);
-          //   } else {
-          //     setButtonDisabled(true);
-          //     setDate2("");
-          //     setTime2("");
-          //     toast.error(response.data.message, {
-          //       position: toast.POSITION.BOTTOM_LEFT,
-          //     });
-          //   }
-          // })
-          // .catch((err) => {
-          //   console.log(err);
-          // });
-          // console.log(branches);
-        })
-        .catch((error) => console.log(error));
+    if (e.target.value !== "Select Semester") {
+      setSemesterId(e.target.value);
+    } else {
+      setSemesterId("");
     }
   };
-  const handleSubjectNameChange2 = (e) => {
-    e.preventDefault();
-    console.log(e.target.selectedIndex);
-    let codeSelect2 = document.getElementsByClassName("select-code2")[0];
-    codeSelect2.selectedIndex = e.target.selectedIndex;
-    setSubjectId2(e.target.value);
-    console.log(codeSelect2);
 
-    acces_token = localStorage.getItem("access_token");
-    const headers = { Authorization: `Bearer ${acces_token}` };
-    const host = window.location.host;
-    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
-    if (arr.length > 0) {
-      subdomain = arr[0];
+  const handleFilterSubmit = (e) => {
+    console.log("button clicked!");
+    let selectedFilter = {};
+
+    if (examinationName2 === "") {
+      toast.error("Please select examination name", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (selectedYear2 === "") {
+      toast.error("Please select year", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (courseId === "" || courseId === "Select Course") {
+      toast.error("Please select course", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else {
+      selectedFilter = {
+        name: examinationName2,
+        academic_year: selectedYear2,
+        course_id: courseId,
+      };
+
+      if (branchId !== "") {
+        selectedFilter = {
+          name: examinationName2,
+          academic_year: selectedYear2,
+          course_id: courseId,
+          branch_id: branchId,
+        };
+      }
+
+      if (semesterId !== "") {
+        selectedFilter = {
+          name: examinationName2,
+          academic_year: selectedYear2,
+          course_id: courseId,
+          branch_id: branchId,
+          semester_id: semesterId,
+        };
+      }
     }
+
+    console.log(selectedFilter);
 
     if (subdomain !== null || subdomain !== "") {
       axios
         .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/${e.target.value}/fetch_details?subdomain=${subdomain}`,
-          { headers }
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables`,
+          {
+            headers,
+            params: {
+              subdomain: subdomain,
+              time_table: selectedFilter,
+            },
+          }
         )
-        .then((response) => {
-          if (response.data.status == "ok") {
-            setButtonDisabled(false);
-            setDate2(response.data.data.time_table.date);
-            setTime2(response.data.data.time_table.time);
-          } else {
-            setButtonDisabled(true);
-            setDate2("");
-            setTime2("");
-            toast.error(response.data.message, {
-              position: toast.POSITION.BOTTOM_LEFT,
-            });
+        .then((res) => {
+          console.log(res);
+          if (res.data.status === "ok") {
+            const time_table_viewport = document.getElementById(
+              "time_table_viewport"
+            );
+            if (res.data.data.time_tables.length !== 0) {
+              time_table_viewport.classList.remove("hidden");
+              time_table_viewport.classList.add("flex");
+              setTimeTables(res.data.data.time_tables);
+              res.data.data.time_tables.map((time_table) => {
+                axios
+                  .get(
+                    `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/time_table_block_wise_reports/${time_table.id}/fetch_details`,
+                    {
+                      headers,
+                      params: {
+                        subdomain: subdomain,
+                      },
+                    }
+                  )
+                  .then((res) => {
+                    console.log(res);
+                    const no_of_students = document.getElementById(
+                      "input-time-table-" + time_table.id
+                    );
+                    const button_submit = document.getElementById(
+                      "button-subject-" + time_table.id
+                    );
+                    if (res.data.message === "Details found") {
+                      no_of_students.disabled = true;
+                      no_of_students.classList.add("cursor-not-allowed");
+                      no_of_students.value =
+                        res.data.data.report.no_of_students;
+
+                      button_submit.disabled = true;
+                      button_submit.classList.add("cursor-not-allowed");
+                      button_submit.innerHTML = "Created";
+                    } else {
+                      no_of_students.disabled = false;
+                      no_of_students.value = "";
+                      no_of_students.classList.remove("cursor-not-allowed");
+
+                      button_submit.disable = false;
+                      button_submit.value = "";
+                      button_submit.innerHTML = "Create";
+                    }
+                  })
+                  .catch((err) => {
+                    console.error(err);
+                  });
+              });
+            }else{
+              toast.error(`No timetable found for ${examinationName2} ${selectedYear2}, please create!`, {
+                position: toast.POSITION.BOTTOM_LEFT,
+              });
+            }
           }
         })
         .catch((err) => {
-          console.log(err);
+          console.error(err);
         });
     }
   };
-  const handleSubjectCodeChange2 = (e) => {
-    e.preventDefault();
-    console.log(e.target.selectedIndex);
-    let codeSelect2 = document.getElementsByClassName(
-      "select-subject-name2"
-    )[0];
-    codeSelect2.selectedIndex = e.target.selectedIndex;
-    setSubjectId2(e.target.value);
-    console.log(codeSelect2);
-  };
-  const handleSubmitBlockWiseReport = (e ,time_table_id, no_of_students) => {
+
+  const handleSubmitBlockWiseReport = (e, time_table_id, no_of_students) => {
     e.preventDefault();
     acces_token = localStorage.getItem("access_token");
 
@@ -260,7 +324,7 @@ const ExamBlockDetails = () => {
         `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/time_table_block_wise_reports?subdomain=${subdomain}`,
         {
           report: {
-            academic_year: moment(selectedYear2).format("YYYY"),
+            academic_year: selectedYear2,
             exam_time_table_id: time_table_id,
             no_of_students: no_of_students,
           },
@@ -273,12 +337,16 @@ const ExamBlockDetails = () => {
       )
       .then((responce) => {
         if (responce.data.status == "created") {
-          const button = document.getElementById("button-subject-" + time_table_id);
-          const student_input = document.getElementById("input-time-table-" + time_table_id);
+          const button = document.getElementById(
+            "button-subject-" + time_table_id
+          );
+          const student_input = document.getElementById(
+            "input-time-table-" + time_table_id
+          );
           student_input.disabled = true;
-          student_input.classList.add('cursor-not-allowed');
-          button.classList.add('cursor-not-allowed');
-          button.innerHTML = "Created"
+          student_input.classList.add("cursor-not-allowed");
+          button.classList.add("cursor-not-allowed");
+          button.innerHTML = "Created";
           toast.success(responce.data.message, {
             position: toast.POSITION.BOTTOM_LEFT,
           });
@@ -292,9 +360,6 @@ const ExamBlockDetails = () => {
         console.log(err.message);
       });
   };
-  const handlePrint2 = useReactToPrint({
-    content: () => componentRef2.current,
-  });
 
   return (
     <div>
@@ -446,26 +511,17 @@ const ExamBlockDetails = () => {
         </aside>
 
         <div className="p-4 sm:ml-64">
-          <div className="p-4 rounded-lg mt-14">
+          <div className="p-4 rounded-lg mt-10">
             <div className="text-center text-4xl">
-              <p>Enter Block Details:</p>
+              <p>Enter Block Details</p>
             </div>
-            <hr />
           </div>
-          <div className="flex justify-center ml-28">
+          <div className="flex ml-2 mt-5">
             {/* Select Examination option in BlockWise Report */}
 
-            <label
-              htmlFor=""
-              className="text-sm md:text-base lg:text-base mr-4"
-            >
-              Select Examination:
-            </label>
             <select
-              className="form-select text-sm md:text-base lg:text-base mr-2 border-2 px-3 py-2"
-              // onChange={(e) => setExaminationName(e.target.value)}
+              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md rounded justify-center px-3 py-2"
               onChange={(e) => {
-                // setExaminationName2(e.target.value);
                 handleExaminationChange2(e.target.value);
               }}
             >
@@ -474,34 +530,18 @@ const ExamBlockDetails = () => {
               <option value="Summer">Summer</option>
             </select>
             {/* Select Year option in BlockWise Report */}
-
-            <label
-              htmlFor="year-picker"
-              className="text-sm md:text-base lg:text-base mr-4 ml-10"
-            >
-              Select year:
-            </label>
-            <DatePicker
-              id="year-picker2"
-              selected={selectedYear2}
-              onChange={(date) => {
-                handleYearChange2(date);
-              }}
-              showYearPicker
-              dateFormat="yyyy"
-              className="border rounded px-3 py-2 w-52 justify-center"
-              placeholderText="Select Year"
-            />
-          </div>
-          <div className="flex justify-center mt-5">
-            <label
-              htmlFor=""
-              className="text-sm md:text-base lg:text-base mr-2"
-            >
-              Select Course:
-            </label>
             <select
-              className="form-select text-sm md:text-base lg:text-base mr-2 border-2 px-3 py-2"
+              className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+              onChange={(e) => handleYearChange2(e.target.value)}
+            >
+              <option value="Select Year">Select Year</option>
+              {academic_years.map((year) => {
+                return <option value={year}>{year}</option>;
+              })}
+            </select>
+
+            <select
+              className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
               onChange={handleCourseChange2}
             >
               <option>Select course</option>
@@ -509,14 +549,9 @@ const ExamBlockDetails = () => {
                 <option value={course.id}>{course.name}</option>
               ))}
             </select>
-            <label
-              htmlFor=""
-              className="text-sm md:text-base lg:text-base mr-2"
-            >
-              Select Branch:
-            </label>
+
             <select
-              className="form-select text-sm md:text-base lg:text-base mr-2 border-2 px-3 py-2"
+              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded justify-center shadow-md px-3 py-2"
               onChange={handleBranchChange2}
             >
               <option>Select Branch</option>
@@ -524,14 +559,9 @@ const ExamBlockDetails = () => {
                 <option value={branch.id}>{branch.name}</option>
               ))}
             </select>
-            <label
-              htmlFor=""
-              className="text-sm md:text-base lg:text-base mr-2"
-            >
-              Select Semester
-            </label>
+
             <select
-              className="form-select text-sm md:text-base lg:text-base mr-2 border-2 px-3 py-2"
+              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded justify-center shadow-md px-3 py-2"
               onChange={handleSemesterChange2}
             >
               <option>Select Semester</option>
@@ -539,14 +569,23 @@ const ExamBlockDetails = () => {
                 <option value={semester.id}>{semester.name}</option>
               ))}
             </select>
+            <button
+              className="py-2 px-3 absolute right-0 mr-7 bg-gray-800 rounded-2xl text-white font-bold"
+              // id={"button-subject-" + subject.id}
+              onClick={handleFilterSubmit}
+            >
+              Submit
+            </button>
           </div>
 
-          {/* Displayed table in BlockWise Report */}
-
-          <div className="flex flex-col mt-5">
-            <div className="overflow-x-auto">
+          <div
+            id="time_table_viewport"
+            className="hidden flex-col overflow-y-scroll mt-5"
+            style={{ height: 445 }}
+          >
+            <div className="">
               <div className="p-1.5 w-full inline-block align-middle">
-                <div className="overflow-hidden border rounded-lg">
+                <div className="border rounded-lg">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
@@ -592,7 +631,7 @@ const ExamBlockDetails = () => {
                     {/* Body of the BlockWise Report */}
 
                     <tbody className="divide-y divide-gray-200">
-                      {storedTimeTable.map((time_table) => (
+                      {timeTables.map((time_table) => (
                         <tr>
                           <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                             {time_table.subject_name}
@@ -621,10 +660,16 @@ const ExamBlockDetails = () => {
                           <td className="px-6 py-4 text-sm  whitespace-nowrap">
                             <button
                               className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold"
-                              onClick={(e) => handleSubmitBlockWiseReport(e,time_table.id, noOfStudent)}
-                              id={'button-subject-' + time_table.id}
+                              onClick={(e) =>
+                                handleSubmitBlockWiseReport(
+                                  e,
+                                  time_table.id,
+                                  noOfStudent
+                                )
+                              }
+                              id={"button-subject-" + time_table.id}
                             >
-                              Submit
+                              Create
                             </button>
                           </td>
                         </tr>
@@ -634,14 +679,6 @@ const ExamBlockDetails = () => {
                 </div>
               </div>
             </div>
-          </div>
-          <div className="text-center mt-10">
-            <button
-              onClick={handlePrint2}
-              className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold"
-            >
-              Download
-            </button>
           </div>
         </div>
       </div>
