@@ -29,6 +29,8 @@ const ExamTimeTable = () => {
   const [academic_years, setAcademicYears] = useState([]);
   const [minDate, setMinDate] = useState("");
   const [maxDate, setMaxDate] = useState("");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
   var year;
 
   useEffect(() => {
@@ -71,6 +73,9 @@ const ExamTimeTable = () => {
         .catch((error) => console.log(error));
     }
   }, []);
+  function toggleDropdown() {
+    setIsDropdownOpen(!isDropdownOpen);
+  }
 
   const handleExaminationChange = (examination) => {
     setExaminationName(examination);
@@ -469,13 +474,49 @@ const ExamTimeTable = () => {
                 </a>
               </li>
               <li>
+              <button
+                className="w-full bg-slate-600 text-white py-2 px-4 text-left rounded-md"
+                onClick={toggleDropdown}
+              >
+                Reports
+              </button>
+              <div
+                className={`bg-white shadow rounded-md mt-2 py-2 ${
+                  isDropdownOpen ? "block" : "hidden"
+                }`}
+              >
                 <a
-                  href="/examReports"
-                  className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                  href="/examViewTimeTable"
+                  className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
                 >
-                  <span className="flex-1 ml-3 whitespace-nowrap">Reports</span>
+                  Time Table
                 </a>
-              </li>
+                <a
+                  href="/examViewBlockDetails"
+                  className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
+                >
+                  BlockWise Report
+                </a>
+                <a
+                  href="/examViewJrSupervision"
+                  className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
+                >
+                  Jr. Supervision Report
+                </a>
+                <a
+                  href="/examViewSrSupervision"
+                  className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
+                >
+                  Sr. Supervision Report
+                </a>
+                <a
+                  href="/examViewOtherDuty"
+                  className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
+                >
+                  Other Duty Report
+                </a>
+              </div>
+            </li>
             </ul>
           </div>
         </aside>
