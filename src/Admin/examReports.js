@@ -13,6 +13,7 @@ var acces_token;
 var subdomain;
 
 const ExamReports = () => {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const componentRef = useRef();
   const [uniName, setUniName] = useState("");
   const [courses, setCourses] = useState([]);
@@ -26,6 +27,8 @@ const ExamReports = () => {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [displayTimeTable, setDisplayTimeTable] = useState([]);
+  const [academic_years, setAcademicYears] = useState([]);
+
   // BlockWise Report
   const [selectedYear2, setSelectedYear2] = useState();
   const [examinationName2, setExaminationName2] = useState("");
@@ -77,9 +80,17 @@ const ExamReports = () => {
   const [assignDuty, setAssignDuty] = useState();
   const [displayOtherDutyTable, setDisplayOtherDutyTable] = useState([]);
 
+  var year;
+
   useEffect(() => {
     acces_token = localStorage.getItem("access_token");
-
+    year = new Date().getFullYear();
+    setAcademicYears(
+      Array.from(
+        new Array(20),
+        (val, index) => year - (index + 1) + " - " + (year - index)
+      )
+    );
     const headers = { Authorization: `Bearer ${acces_token}` };
     const host = window.location.host;
     const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
@@ -142,33 +153,143 @@ const ExamReports = () => {
   };
 
   const handleYearChange = (date) => {
-    // console.log(examinationName);
-    setDisplayTimeTable([]);
     setSelectedYear(date);
-    let access_token = localStorage.getItem("access_token");
-    console.log(access_token);
-    const headers = { Authorization: `Bearer ${access_token}` };
-    const host = window.location.host;
-    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
-    if (arr.length > 0) {
-      subdomain = arr[0];
-    }
-    if (subdomain !== null || subdomain !== "") {
-      axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables?examination_name=${examinationName}&academic_year=${moment(
-            date
-          ).format("YYYY")}&subdomain=${subdomain}`,
-          { headers }
-        )
-        .then((response) => {
-          console.log(response.data.data.time_tables);
-          setDisplayTimeTable(response.data.data.time_tables);
-          // setBranches(response.data.data);
-        })
-        .catch((error) => console.log(error));
-    }
+    // let access_token = localStorage.getItem("access_token");
+    // console.log(access_token);
+    // const headers = { Authorization: `Bearer ${access_token}` };
+    // const host = window.location.host;
+    // const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
+    // if (arr.length > 0) {
+    //   subdomain = arr[0];
+    // }
+    // if (subdomain !== null || subdomain !== "") {
+    //   axios
+    //     .get(
+    //       `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables?examination_name=${examinationName}&academic_year=${moment(
+    //         date
+    //       ).format("YYYY")}&subdomain=${subdomain}`,
+    //       { headers }
+    //     )
+    //     .then((response) => {
+    //       console.log(response.data.data.time_tables);
+    //       setDisplayTimeTable(response.data.data.time_tables);
+    //       // setBranches(response.data.data);
+    //     })
+    //     .catch((error) => console.log(error));
+    // }
   };
+  // const handleFilterSubmit = (e) => {
+  //   let selectedFilter = {};
+
+  //   if (examinationName === "") {
+  //     toast.error("Please select examination name", {
+  //       position: toast.POSITION.BOTTOM_LEFT,
+  //     });
+  //   } else if (selectedYear === "") {
+  //     toast.error("Please select year", {
+  //       position: toast.POSITION.BOTTOM_LEFT,
+  //     });
+  //   } else if (courseId === "" || courseId === "Select Course") {
+  //     toast.error("Please select course", {
+  //       position: toast.POSITION.BOTTOM_LEFT,
+  //     });
+  //   } else {
+  //     selectedFilter = {
+  //       course_id: courseId,
+  //     };
+
+  //     if (branchId !== "") {
+  //       selectedFilter = {
+  //         course_id: courseId,
+  //         branch_id: branchId,
+  //       };
+  //     }
+
+  //     if (semesterId !== "") {
+  //       selectedFilter = {
+  //         course_id: courseId,
+  //         branch_id: branchId,
+  //         semester_id: semesterId,
+  //       };
+  //     }
+  //   }
+
+  //   console.log(selectedFilter);
+
+  //   if (subdomain !== null || subdomain !== "") {
+  //     axios
+  //       .get(
+  //         `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/subjects`,
+  //         {
+  //           headers,
+  //           params: {
+  //             subdomain: subdomain,
+  //             subject: selectedFilter,
+  //           },
+  //         }
+  //       )
+  //       .then((res) => {
+  //         console.log(res);
+  //         if (res.data.status == "ok") {
+  //           const time_table_viewport = document.getElementById(
+  //             "time_table_viewport"
+  //           );
+  //           if (res.data.data.subjects.length !== 0) {
+  //             time_table_viewport.classList.remove("hidden");
+  //             time_table_viewport.classList.add("flex");
+  //             setSubjects(res.data.data.subjects);
+  //             res.data.data.subjects.map((subject) => {
+  //               axios
+  //                 .get(
+  //                   `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/${subject.id}/fetch_details?subdomain=${subdomain}`,
+  //                   { headers }
+  //                 )
+  //                 .then((get_response) => {
+  //                   const button = document.getElementById(
+  //                     "button-subject-" + subject.id
+  //                   );
+  //                   const table_date = document.getElementById(
+  //                     "date-select-subject-" + subject.id
+  //                   );
+  //                   const table_time = document.getElementById(
+  //                     "select-time-subject-" + subject.id
+  //                   );
+  //                   if (get_response.data.message === "Details found") {
+  //                     button.disabled = true;
+  //                     button.innerHTML = "Created";
+  //                     table_date.disabled = true;
+  //                     table_date.value = get_response.data.data.time_table.date;
+  //                     table_time.disabled = true;
+  //                     table_time.options[table_time.options.selectedIndex].text =
+  //                       get_response.data.data.time_table.time;
+  //                     table_date.classList.add("cursor-not-allowed");
+  //                     table_time.classList.add("cursor-not-allowed");
+  //                     button.classList.add("cursor-not-allowed");
+  //                   } else {
+  //                     button.disabled = false;
+  //                     button.innerHTML = "Create";
+  //                     table_date.disabled = false;
+  //                     table_date.value = "";
+  //                     table_time.disabled = false;
+  //                     table_time.options[table_time.options.selectedIndex].text =
+  //                       "Select time";
+  //                     table_date.classList.remove("cursor-not-allowed");
+  //                     table_time.classList.remove("cursor-not-allowed");
+  //                     button.classList.remove("cursor-not-allowed");
+  //                   }
+  //                 })
+  //                 .catch((err) => {
+  //                   console.log(err);
+  //                 });
+  //             });
+  //           }
+  //         }
+  //       })
+  //       .catch((err) => {
+  //         console.error(err);
+  //       });
+  //   }
+  // };
 
   const handleCourseChange = (e) => {
     e.preventDefault();
@@ -198,9 +319,7 @@ const ExamReports = () => {
   const handleBranchChange = (e) => {
     e.preventDefault();
     var selectedIndex = e.target.options.selectedIndex;
-    setBranchesName(
-      e.target.options[selectedIndex].getAttribute('data-name')
-    );
+    setBranchesName(e.target.options[selectedIndex].getAttribute("data-name"));
     var branch_id = e.target.value;
     acces_token = localStorage.getItem("access_token");
     const headers = { Authorization: `Bearer ${acces_token}` };
@@ -573,7 +692,7 @@ const ExamReports = () => {
   });
 
   // Junior Supervisor API
-  const handleExaminationChange3 = (examination) => { 
+  const handleExaminationChange3 = (examination) => {
     // console.log(examinationName);
     setExaminationName3(examination);
     let access_token = localStorage.getItem("access_token");
@@ -701,7 +820,6 @@ const ExamReports = () => {
     }
   };
   const handleJuniorSupervisionSubmit = (e) => {
-    
     e.preventDefault();
     acces_token = localStorage.getItem("access_token");
     const metadata = JSON.stringify(dateCheckBox);
@@ -1099,6 +1217,9 @@ const ExamReports = () => {
   function toggleContent(buttonId) {
     setActiveButton(buttonId);
   }
+  function toggleDropdown() {
+    setIsDropdownOpen(!isDropdownOpen);
+  }
 
   return (
     <div>
@@ -1245,6 +1366,50 @@ const ExamReports = () => {
                   <span className="flex-1 ml-3 whitespace-nowrap">Reports</span>
                 </a>
               </li>
+              <li>
+                <button
+                  className="w-full bg-slate-600 text-white py-2 px-4 text-left rounded-md"
+                  onClick={toggleDropdown}
+                >
+                  Reports
+                </button>
+                <div
+                  className={`bg-white shadow rounded-md mt-2 py-2 ${
+                    isDropdownOpen ? "block" : "hidden"
+                  }`}
+                >
+                  <a
+                    href="#"
+                    className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
+                  >
+                    Time Table
+                  </a>
+                  <a
+                    href="#"
+                    className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
+                  >
+                    BlockWise Report
+                  </a>
+                  <a
+                    href="#"
+                    className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
+                  >
+                    Jr. Supervision Report
+                  </a>
+                  <a
+                    href="#"
+                    className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
+                  >
+                    Sr. Supervision Report
+                  </a>
+                  <a
+                    href="#"
+                    className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
+                  >
+                    Other Duty Report
+                  </a>
+                </div>
+              </li>
             </ul>
           </div>
         </aside>
@@ -1293,20 +1458,18 @@ const ExamReports = () => {
                 Other Duties
               </button>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex w-full">
               {/* Button Content 1 */}
               <div
                 id="content1"
-                className={`w-full p-4 rounded-lg ${
+                className={`min-w-full p-4 rounded-lg ${
                   activeButton === "button1" ? "block" : "hidden"
                 }`}
               >
-                <div className="flex mt-5">
+                <div className="flex ml-2">
                   <select
-                    className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                    // onChange={(e) => setExaminationName(e.target.value)}
+                    className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
                     onChange={(e) => {
-                      // setExaminationName(e.target.value)
                       handleExaminationChange(e.target.value);
                     }}
                   >
@@ -1315,13 +1478,16 @@ const ExamReports = () => {
                     <option value="Summer">Summer</option>
                   </select>
 
-                  {/* <label
-                    htmlFor="year-picker"
-                    className="text-sm md:text-base lg:text-base mr-4 ml-10"
+                  <select
+                    className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+                    onChange={(e) => handleYearChange(e.target.value)}
                   >
-                    Select year:
-                  </label> */}
-                  <DatePicker
+                    <option value="Select Year">Select Year</option>
+                    {academic_years.map((year) => {
+                      return <option value={year}>{year}</option>;
+                    })}
+                  </select>
+                  {/* <DatePicker
                     id="year-picker1"
                     selected={selectedYear}
                     startDate={null}
@@ -1333,10 +1499,7 @@ const ExamReports = () => {
                     dateFormat="yyyy"
                     placeholderText="Select Year"
                     className="form-select text-sm md:text-base lg:text-base mr-2 ml-4 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                  />
-                </div>
-                <div className="flex mt-5">
-                  {/* Course Select Button 1 */}
+                  /> */}
                   <select
                     className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
                     onChange={handleCourseChange}
@@ -1346,21 +1509,21 @@ const ExamReports = () => {
                       <option value={course.id}>{course.name}</option>
                     ))}
                   </select>
-                  
-                  {/* Branch Select Button 1 */}
                   <select
-                    className="form-select text-sm md:text-base lg:text-base mr-2 ml-4 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                    onChange={(e) => {handleBranchChange(e)}}
+                    className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+                    onChange={(e) => {
+                      handleBranchChange(e);
+                    }}
                   >
                     <option>Select Branch</option>
                     {branches.map((branch) => (
-                      <option value={branch.id} data-name={branch.name} >{branch.name}</option>
+                      <option value={branch.id} data-name={branch.name}>
+                        {branch.name}
+                      </option>
                     ))}
                   </select>
-                  
-                  {/* Semester Select Button 1 */}
                   <select
-                    className="form-select text-sm md:text-base lg:text-base mr-2 ml-4 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+                    className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
                     onChange={handleSemesterChange}
                   >
                     <option>Select Semester</option>
@@ -1369,15 +1532,26 @@ const ExamReports = () => {
                     ))}
                   </select>
 
+                  <button
+                    className="py-2 px-3 absolute right-0 mr-7 bg-gray-800 rounded-2xl text-white font-bold"
+                    // onClick={handleFilterSubmit}
+                  >
+                    Submit
+                  </button>
+                </div>
+                <div className="flex mt-5">
                   <a href="#" onClick={handlePrint} className="ml-4 px-3 py-2">
                     Download
                   </a>
                 </div>
                 <div className="flex flex-col mt-5" ref={componentRef}>
-                  <div className=""> 
+                  <div className="">
                     <p className="text-center">{uniName}</p>
                     <p className="text-center">{branchesName}</p>
-                    <p className="text-center">{examinationName} {moment(selectedYear).format('YYYY')} Examination Time Table</p>
+                    <p className="text-center">
+                      {examinationName} {moment(selectedYear).format("YYYY")}{" "}
+                      Examination Time Table
+                    </p>
                   </div>
                   <div className="overflow-x-auto">
                     <div className="w-full align-middle">
@@ -1477,7 +1651,7 @@ const ExamReports = () => {
                       <option value={course.id}>{course.name}</option>
                     ))}
                   </select>
-                  
+
                   <select
                     className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
                     onChange={handleBranchChange2}
@@ -1487,7 +1661,7 @@ const ExamReports = () => {
                       <option value={branch.id}>{branch.name}</option>
                     ))}
                   </select>
-                  
+
                   <select
                     className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
                     onChange={handleSemesterChange2}
@@ -1507,9 +1681,12 @@ const ExamReports = () => {
                 </div>
                 <div className="flex flex-col mt-5" ref={componentRef2}>
                   <div>
-                  <p className="text-center">{uniName}</p>
-                  <p className="text-center">{examinationName2} {moment(selectedYear2).format('YYYY')} Examination Time Table</p>
-                  <p className="text-center">BlockWise Report</p>
+                    <p className="text-center">{uniName}</p>
+                    <p className="text-center">
+                      {examinationName2} {moment(selectedYear2).format("YYYY")}{" "}
+                      Examination Time Table
+                    </p>
+                    <p className="text-center">BlockWise Report</p>
                   </div>
                   <div className="overflow-x-auto">
                     <div className="p-1.5 w-full inline-block align-middle">
@@ -1621,7 +1798,7 @@ const ExamReports = () => {
                     <option value="Winter">Winter</option>
                     <option value="Summer">Summer</option>
                   </select>
-                 
+
                   <DatePicker
                     id="year-picker3"
                     selected={selectedYear3}

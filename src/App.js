@@ -23,6 +23,11 @@ import ExamBlockDetails from './Admin/examBlockDetails';
 import ExamAssignSupervision from './Admin/examAssignSupervision';
 import ExamTimeTable from './Admin/examTimeTable';
 import ExamReports from './Admin/examReports';
+import ExamViewTimeTable from './Admin/examViewTimeTable';
+import ExamViewBlockDetails from './Admin/examViewBlockDetails';
+import ExamViewJrSupervision from './Admin/examViewJrSupervision';
+import ExamViewSrSupervision from './Admin/examViewSrSupervision';
+import ExamViewOtherDuty from './Admin/examViewOtherDuty';
 
 function App() {
   return (
@@ -46,6 +51,14 @@ function App() {
         <Route path="/examAssignSupervision" element={<ExamAssignSupervision/>}/>
         <Route path="/examTimeTable" element={<ExamTimeTable/>}/>
         <Route path="/examReports" element={<ExamReports/>}/>
+        <Route path="/examViewTimeTable" element={<ExamViewTimeTable/>}/>
+        <Route path="/examViewBlockDetails" element={<ExamViewBlockDetails/>}/>
+        <Route path="/examViewJrSupervision" element={<ExamViewJrSupervision/>}/>
+        <Route path="/examViewSrSupervision" element={<ExamViewSrSupervision/>}/>
+        <Route path="/examViewOtherDuty" element={<ExamViewOtherDuty/>}/>
+
+        
+
         
 
 

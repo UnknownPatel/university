@@ -542,7 +542,6 @@ const ExamTimeTable = () => {
             </select>
             <button
               className="py-2 px-3 absolute right-0 mr-7 bg-gray-800 rounded-2xl text-white font-bold"
-              // id={"button-subject-" + subject.id}
               onClick={handleFilterSubmit}
             >
               Submit
