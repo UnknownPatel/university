@@ -455,8 +455,6 @@ const ExamViewJrSupervision = () => {
       <div className="pt-4 sm:ml-64">
         <div className="flex flex-col items-center mt-14">
           <div className="text-3xl">Jr. Supervision Report</div>
-          <hr />
-          <br />
           <div className="flex ml-2">
             <select
               className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
