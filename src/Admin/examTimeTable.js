@@ -550,13 +550,13 @@ const ExamTimeTable = () => {
           <div
             id="time_table_viewport"
             className="hidden flex-col overflow-y-scroll mt-5"
-            style={{ height: 445 }}
+            style={{ height: 390 }}
           >
             <div className="">
               <div className="p-1.5 w-full inline-block align-middle">
                 <div className="border rounded-lg">
                   <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                    <thead className="sticky top-0 bg-gray-50">
                       <tr>
                         <th
                           scope="col"
@@ -572,34 +572,34 @@ const ExamTimeTable = () => {
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                          className="text-center px-6 py-3 text-xs font-bold text-gray-500 uppercase "
                         >
                           Date
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                          className="text-center px-6 py-3 text-xs font-bold text-gray-500 uppercase "
                         >
                           Time
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                          className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
                         >
                           Action
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200">
+                    <tbody className="text-center divide-y divide-gray-200">
                       {subjects.map((subject) => (
                         <tr>
                           <td
-                            className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap"
+                            className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap"
                             data-id={subject.id}
                           >
                             {subject.name}
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                          <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                             {subject.code}
                           </td>
                           <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
@@ -653,7 +653,6 @@ const ExamTimeTable = () => {
               </div>
             </div>
           </div>
-          <div className="flex justify-evenly text-center mt-10"></div>
         </div>
       </div>
       <ToastContainer />

@@ -98,6 +98,11 @@ const ExamBlockDetails = () => {
 
   const handleCourseChange2 = (e) => {
     e.preventDefault();
+    setCourseId("");
+    setBranches2([]);
+    setBranchId("");
+    setSemesters2([]);
+    setSemesterId("");
     if (e.target.value !== "Select Course") {
       const time_table_viewport = document.getElementById(
         "time_table_viewport"
@@ -239,6 +244,7 @@ const ExamBlockDetails = () => {
     console.log(selectedFilter);
 
     if (subdomain !== null || subdomain !== "") {
+      console.log(selectedFilter);
       axios
         .get(
           `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables`,
@@ -302,10 +308,13 @@ const ExamBlockDetails = () => {
                     console.error(err);
                   });
               });
-            }else{
-              toast.error(`No timetable found for ${examinationName2} ${selectedYear2}, please create!`, {
-                position: toast.POSITION.BOTTOM_LEFT,
-              });
+            } else {
+              toast.error(
+                `No timetable found for ${examinationName2} ${selectedYear2}, please create!`,
+                {
+                  position: toast.POSITION.BOTTOM_LEFT,
+                }
+              );
             }
           }
         })
@@ -324,6 +333,7 @@ const ExamBlockDetails = () => {
         `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/time_table_block_wise_reports?subdomain=${subdomain}`,
         {
           report: {
+            examination_name: examinationName2,
             academic_year: selectedYear2,
             exam_time_table_id: time_table_id,
             no_of_students: no_of_students,
