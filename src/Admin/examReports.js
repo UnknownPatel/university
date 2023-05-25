@@ -1416,7 +1416,7 @@ const ExamReports = () => {
 
         <div className="pt-4 sm:ml-64">
           <div className="flex flex-col items-center mt-14">
-            <div className="flex justify-center space-x-4 mb-4">
+            <div className="flex flex-col items-center mt-14">
               <button
                 className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg ${
                   activeButton === "button1" ? "bg-slate-800" : ""

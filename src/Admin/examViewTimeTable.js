@@ -211,9 +211,9 @@ const ExamViewTimeTable = () => {
             const time_table_viewport = document.getElementById(
               "time_table_viewport"
             );
-            const download_button = document.getElementById('download_button');
+            const download_button = document.getElementById("download_button");
             if (res.data.data.time_tables.length !== 0) {
-              download_button.classList.remove("hidden")
+              download_button.classList.remove("hidden");
               time_table_viewport.classList.remove("hidden");
               time_table_viewport.classList.add("flex");
               setDisplayTimeTable(res.data.data.time_tables);
@@ -416,9 +416,38 @@ const ExamViewTimeTable = () => {
         </aside>
 
         <div className="pt-4 sm:ml-64">
-          <div className="p-4 rounded-lg mt-10">
-            <div className="text-center text-4xl">
-              <p>Time Table</p>
+          <div className="flex flex-col items-center mt-14">
+            <div className="flex items-center space-x-4 mb-5">
+              <a
+                className={`text-white font-bold py-2 px-4 rounded-lg bg-slate-800`}
+                href="/examViewTimeTable"
+              >
+                Time Table
+              </a>
+              <a
+                className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg `}
+                href="/examViewBlockDetails"
+              >
+                Blockwise Report
+              </a>
+              <a
+                className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg `}
+                href="/examViewJrSupervision"
+              >
+                Jr.Supervisor Tab
+              </a>
+              <a
+                className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg `}
+                href="/examViewSrSupervision"
+              >
+                Sr.Supervisor Tab
+              </a>
+              <a
+                className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg `}
+              href="/examViewOtherDuty"
+              >
+                Other Duties
+              </a>
             </div>
           </div>
 
@@ -481,9 +510,14 @@ const ExamViewTimeTable = () => {
             >
               Submit
             </button>
-            <a href="#" id="download_button" onClick={handlePrint} className="hidden py-2 px-3 absolute right-0 mt-1 mr-7 bg-blue-200 rounded-2xl text-white font-bold">
-                <FcDownload/>
-              </a>
+            <a
+              href="#"
+              id="download_button"
+              onClick={handlePrint}
+              className="hidden py-2 px-3 absolute right-0 mt-1 mr-7 bg-blue-200 rounded-2xl text-white font-bold"
+            >
+              <FcDownload />
+            </a>
           </div>
           <div
             id="time_table_viewport"
@@ -492,12 +526,14 @@ const ExamViewTimeTable = () => {
           >
             <div className="">
               <p className="text-center">{uniName}</p>
-              <p className="text-center">{branchesName} Semester: {}</p>
+              <p className="text-center">
+                {branchesName} Semester: {}
+              </p>
               <p className="text-center">
                 {examinationName} {selectedYear} Examination Time Table
               </p>
             </div>
-            <div className="overflow-y-scroll" style={{height: 295}}>
+            <div className="overflow-y-scroll" style={{ height: 295 }}>
               <div className="p-1.5 w-full inline-block align-middle">
                 <div className="border rounded-lg">
                   <table className="min-w-full table-fixed divide-y divide-gray-200">

@@ -479,9 +479,38 @@ const ExamViewBlockDetails = () => {
         </aside>
 
         <div className="pt-4 sm:ml-64">
-          <div className="p-4 rounded-lg mt-10">
-            <div className="text-center text-4xl">
-              <p>BlockWise Report</p>
+          <div className="flex flex-col items-center mt-14">
+            <div className="flex items-center space-x-4 mb-5">
+              <a
+                className={`text-white font-bold py-2 px-4 rounded-lg bg-slate-500`}
+                href="/examViewTimeTable"
+              >
+                Time Table
+              </a>
+              <a
+                className={`bg-slate-800 text-white font-bold py-2 px-4 rounded-lg `}
+                href="/examViewBlockDetails"
+              >
+                Blockwise Report
+              </a>
+              <a
+                className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg `}
+                href="/examViewJrSupervision"
+              >
+                Jr.Supervisor Tab
+              </a>
+              <a
+                className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg `}
+                href="/examViewSrSupervision"
+              >
+                Sr.Supervisor Tab
+              </a>
+              <a
+                className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg `}
+              href="/examViewOtherDuty"
+              >
+                Other Duties
+              </a>
             </div>
           </div>
           <div className="flex mt-5 ml-2">
