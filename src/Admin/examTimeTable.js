@@ -474,6 +474,16 @@ const ExamTimeTable = () => {
                 </a>
               </li>
               <li>
+                <a
+                  href="/examViewTimeTable"
+                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <span className="flex-1 ml-3 whitespace-nowrap">
+                    Report
+                  </span>
+                </a>
+              </li>
+              {/* <li>
               <button
                 className="w-full bg-slate-600 text-white py-2 px-4 text-left rounded-md"
                 onClick={toggleDropdown}
@@ -516,7 +526,7 @@ const ExamTimeTable = () => {
                   Other Duty Report
                 </a>
               </div>
-            </li>
+              </li> */}
             </ul>
           </div>
         </aside>

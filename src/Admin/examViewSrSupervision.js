@@ -6,11 +6,13 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-datepicker/dist/react-datepicker.css";
 import "tailwindcss/tailwind.css";
 import { FcCheckmark } from "react-icons/fc";
+import { FcDownload } from "react-icons/fc";
 
 import { useReactToPrint } from "react-to-print";
 
 var acces_token;
 var subdomain;
+var headers;
 
 const ExamViewSrSupervision = () => {
   const [uniName, setUniName] = useState("");
@@ -18,6 +20,14 @@ const ExamViewSrSupervision = () => {
   const [academic_years, setAcademicYears] = useState([]);
   const [selectedYear4, setSelectedYear4] = useState();
   const [examinationName4, setExaminationName4] = useState("");
+  const [courses, setCourses] = useState([]);
+  const [branches, setBranches] = useState([]);
+  const [branchId, setBranchId] = useState("");
+  const [courseId, setCourseId] = useState("");
+  const [branchesName, setBranchesName] = useState("");
+  const [srSupervisionTable, setSrSupervisionTable] = useState([]);
+  const [subjectDates, setSubjectDates] = useState([]);
+
   const [srSubjectDates, setSrSubjectDates] = useState([]);
   const [srDateCheckBox, setSrDateCheckBox] = useState([]);
   const [srFacultyName, setSrFacultyName] = useState([{}]);
@@ -30,7 +40,6 @@ const ExamViewSrSupervision = () => {
   const componentRef4 = useRef();
   var year;
 
-
   useEffect(() => {
     acces_token = localStorage.getItem("access_token");
     year = new Date().getFullYear();
@@ -40,7 +49,7 @@ const ExamViewSrSupervision = () => {
         (val, index) => year - (index + 1) + " - " + (year - index)
       )
     );
-    const headers = { Authorization: `Bearer ${acces_token}` };
+    headers = { Authorization: `Bearer ${acces_token}` };
     const host = window.location.host;
     const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
     if (arr.length > 0) {
@@ -66,194 +75,299 @@ const ExamViewSrSupervision = () => {
           { headers }
         )
         .then((response) => {
-          // setCourses(response.data.data.courses);
+          setCourses(response.data.data.courses);
           // setCourses2(response.data.data.courses);
         })
         .catch((error) => console.log(error));
     }
   }, []);
 
-  const handleExaminationChange4 = (examination2) => {
-    setExaminationName4(examination2);
-    let access_token = localStorage.getItem("access_token");
-    const headers = { Authorization: `Bearer ${access_token}` };
-    const host = window.location.host;
-    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
-    if (arr.length > 0) {
-      subdomain = arr[0];
-    }
-    if (subdomain !== null || subdomain !== "") {
-      axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates?examination_name=${examination2}&academic_year=${moment(
-            selectedYear4
-          ).format("YYYY")}&subdomain=${subdomain}`,
-          { headers }
-        )
-        .then((response) => {
-          console.log(response.data);
-          setSrSubjectDates(response.data.data.dates);
-        })
-        .catch((error) => console.log(error));
-
-      axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/faculty_names?subdomain=${subdomain}`,
-          { headers }
-        )
-        .then((response) => {
-          setSrFacultyName(response.data.data.users);
-        })
-        .catch((error) => console.log(error));
-
-      axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions?type=Senior&academic_year=${moment(
-            selectedYear4
-          ).format(
-            "YYYY"
-          )}&subdomain=${subdomain}&examination_name=${examination2}`,
-          {
-            headers: {
-              Authorization: `Bearer ${acces_token}`,
-            },
-          }
-        )
-        .then((response) => {
-          console.log(response.data.data);
-          setSrDisplaySupervisionTable(response.data.data.supervisions);
-        })
-        .catch((error) => console.log(error));
-    }
-  };
-  const handleonChangeFacultyName4 = (event) => {
-    setSrUserId(event.target.value);
-    var selectedIndex = event.target.options.selectedIndex;
-    setSrSupervisionDesignation(
-      event.target.options[selectedIndex].getAttribute("data-designation")
-    );
-    setSrSupervisionDepartment(
-      event.target.options[selectedIndex].getAttribute("data-department")
-    );
-  };
-  const handlechangeDateCheckBox4 = (event) => {
-    setSrDateCheckBox({
-      ...srDateCheckBox,
-      [event.target.name]: event.target.checked,
-    });
+  const handleExaminationChange4 = (examination) => {
+    setExaminationName4(examination);
   };
   const handleYearChange4 = (date) => {
-    setSelectedYear4(date);
-    let access_token = localStorage.getItem("access_token");
-    const headers = { Authorization: `Bearer ${access_token}` };
-    const host = window.location.host;
-    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
-    if (arr.length > 0) {
-      subdomain = arr[0];
-    }
-    if (subdomain !== null || subdomain !== "") {
-      axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates?examination_name=${examinationName4}&academic_year=${moment(
-            date
-          ).format("YYYY")}&subdomain=${subdomain}`,
-          { headers }
-        )
-        .then((response) => {
-          setSrSubjectDates(response.data.data.dates);
-        })
-        .catch((error) => console.log(error));
-
-      axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/faculty_names?subdomain=${subdomain}`,
-          { headers }
-        )
-        .then((response) => {
-          setSrFacultyName(response.data.data.users);
-        })
-        .catch((error) => console.log(error));
-
-      axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions?type=Senior&academic_year=${moment(
-            selectedYear4
-          ).format(
-            "YYYY"
-          )}&subdomain=${subdomain}&examination_name=${examinationName4}`,
-          {
-            headers: {
-              Authorization: `Bearer ${acces_token}`,
-            },
-          }
-        )
-        .then((response) => {
-          console.log(response.data.data.supervisions);
-          setSrDisplaySupervisionTable(response.data.data.supervisions);
-        })
-        .catch((error) => console.log(error));
+    if (date !== "Select Year") {
+      setSelectedYear4(date);
+    } else {
+      setSelectedYear4("");
     }
   };
-  const handleSeniorSupervisionSubmit = (e) => {
+  const handleCourseChange = (e) => {
     e.preventDefault();
-    acces_token = localStorage.getItem("access_token");
-    const metadata = JSON.stringify(srDateCheckBox);
-    axios
-      .post(
-        `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions?subdomain=${subdomain}`,
-        {
-          supervision: {
-            academic_year: moment(selectedYear4).format("YYYY"),
-            user_id: srUserId,
-            list_type: "Senior",
-            metadata: {
-              metadata,
-            },
-            examination_name: examinationName4,
-          },
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${acces_token}`,
-          },
-        }
-      )
-      .then((responce) => {
-        console.log(responce.data);
-        if (responce.data.status == "created") {
-          toast.success(responce.data.message, {
-            position: toast.POSITION.BOTTOM_LEFT,
-          });
-        } else {
-          toast.error(responce.data.message, {
-            position: toast.POSITION.BOTTOM_LEFT,
-          });
-        }
-
+    setCourseId("");
+    setBranches([]);
+    setBranchId("");
+    const sr_supervision_report_viewport = document.getElementById(
+      "sr_supervision_report_viewport"
+    );
+    sr_supervision_report_viewport.classList.add("hidden");
+    sr_supervision_report_viewport.classList.remove("flex");
+    const download_button = document.getElementById("download_button");
+    download_button.classList.add("hidden");
+    if (e.target.value !== "Select Course") {
+      setCourseId(e.target.value);
+      acces_token = localStorage.getItem("access_token");
+      const headers = { Authorization: `Bearer ${acces_token}` };
+      const host = window.location.host;
+      const arr = host
+        .split(".")
+        .slice(0, host.includes("localhost") ? -1 : -2);
+      if (arr.length > 0) {
+        subdomain = arr[0];
+      }
+      if (subdomain !== null || subdomain !== "") {
         axios
           .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions?type=Senior&academic_year=${moment(
-              selectedYear4
-            ).format(
-              "YYYY"
-            )}&subdomain=${subdomain}&examination_name=${examinationName4}`,
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/branches`,
             {
-              headers: {
-                Authorization: `Bearer ${acces_token}`,
+              headers,
+              params: {
+                subdomain: subdomain,
+                course_id: e.target.value,
               },
             }
           )
           .then((response) => {
-            console.log(response.data.data);
-            setSrDisplaySupervisionTable(response.data.data.supervisions);
-            // console.log(response.data.data.supervisions[0].metadata);
+            console.log(response);
+            setBranches(response.data.data.branches);
           })
           .catch((error) => console.log(error));
-      })
-      .catch(function (err) {
-        console.log(err.message);
-      });
+      }
+    } else {
+      setCourseId("");
+      setBranches([]);
+      setBranchId("");
+    }
   };
+  const handleBranchChange = (e) => {
+    e.preventDefault();
+    var selectedIndex = e.target.options.selectedIndex;
+    setBranchesName(e.target.options[selectedIndex].getAttribute("data-name"));
+    const sr_supervision_report_viewport = document.getElementById(
+      "sr_supervision_report_viewport"
+    );
+    sr_supervision_report_viewport.classList.add("hidden");
+    sr_supervision_report_viewport.classList.remove("flex");
+    const download_button = document.getElementById("download_button");
+    download_button.classList.add("hidden");
+    if (e.target.value !== "Select Branch") {
+      setBranchId(e.target.value);
+      acces_token = localStorage.getItem("access_token");
+      const headers = { Authorization: `Bearer ${acces_token}` };
+      const host = window.location.host;
+      const arr = host
+        .split(".")
+        .slice(0, host.includes("localhost") ? -1 : -2);
+      if (arr.length > 0) {
+        subdomain = arr[0];
+      }
+      if (subdomain !== null || subdomain !== "") {
+        axios
+          .get(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/semesters`,
+            {
+              headers,
+              params: {
+                subdomain: subdomain,
+                branch_id: e.target.value,
+              },
+            }
+          )
+          .then((response) => {
+            if (response.data.status === "ok") {
+              // setSemesters2(response.data.data.semesters);
+            }
+          })
+          .catch((error) => console.log(error));
+      }
+    } else {
+      setBranchId("");
+    }
+  };
+  const handleFilterSubmit = (e) => {
+    console.log("button clicked!");
+    let selectedFilter = {};
+    let timeTableFilter = {};
+
+    if (examinationName4 === "") {
+      toast.error("Please select examination name", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (selectedYear4 === "") {
+      toast.error("Please select year", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (courseId === "" || courseId === "Select Course") {
+      toast.error("Please select course", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else {
+      selectedFilter = {
+        examination_name: examinationName4,
+        academic_year: selectedYear4,
+        course_id: courseId,
+        list_type: 'Senior',
+      };
+
+      timeTableFilter ={
+        name: examinationName4,
+        academic_year: selectedYear4,
+        course_id: courseId
+      }
+
+      if (branchId !== "") {
+        selectedFilter = {
+          examination_name: examinationName4,
+          academic_year: selectedYear4,
+          course_id: courseId,
+          branch_id: branchId,
+          type: "Senior",
+        };
+
+        timeTableFilter = {
+          name: examinationName4,
+          academic_year: selectedYear4,
+          course_id: courseId,
+          branch_id: branchId,
+        }
+      }
+
+      // if (semesterId !== "") {
+      //   selectedFilter = {
+      //     name: examinationName2,
+      //     academic_year: selectedYear2,
+      //     course_id: courseId,
+      //     branch_id: branchId,
+      //     semester_id: semesterId,
+      //   };
+      // }
+    }
+
+    console.log(selectedFilter);
+
+    if (subdomain !== null || subdomain !== "") {
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions`,
+          {
+            headers,
+            params: {
+              subdomain: subdomain,
+              supervision: selectedFilter,
+            },
+          }
+        )
+        .then((res) => {
+          console.log(res);
+          if (res.data.status === "ok") {
+            const sr_supervision_report_viewport = document.getElementById(
+              "sr_supervision_report_viewport"
+            );
+            const download_button = document.getElementById("download_button");
+            if (res.data.data.supervisions.length !== 0) {
+              download_button.classList.remove("hidden");
+              sr_supervision_report_viewport.classList.remove("hidden");
+              sr_supervision_report_viewport.classList.add("flex");
+              setSrSupervisionTable(res.data.data.supervisions);
+            } else {
+              toast.error(`No Reports found for selected filters!`, {
+                position: toast.POSITION.BOTTOM_LEFT,
+              });
+            }
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+        axios
+          .get(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
+            {
+              headers,
+              params: {
+                // supervision: selectedFilter,
+                time_table: timeTableFilter,
+                subdomain: subdomain,
+              },
+            }
+          )
+          .then((response) => {
+            const sr_supervision_report = document.getElementById(
+              "sr_supervision_report_viewport"
+            );
+            if (response.data.message === "Examination dates are as below") {
+              if (response.data.data.dates.length !== 0) {
+                console.log(response.data.data.dates);
+                setSubjectDates(response.data.data.dates);
+                sr_supervision_report.classList.remove("hidden");
+                sr_supervision_report.classList.add("flex");
+              }
+            }
+          })
+          .catch((error) => console.log(error));
+    }
+  };
+
+  // const handleSeniorSupervisionSubmit = (e) => {
+  //   e.preventDefault();
+  //   acces_token = localStorage.getItem("access_token");
+  //   const metadata = JSON.stringify(srDateCheckBox);
+  //   axios
+  //     .post(
+  //       `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions?subdomain=${subdomain}`,
+  //       {
+  //         supervision: {
+  //           academic_year: moment(selectedYear4).format("YYYY"),
+  //           user_id: srUserId,
+  //           list_type: "Senior",
+  //           metadata: {
+  //             metadata,
+  //           },
+  //           examination_name: examinationName4,
+  //         },
+  //       },
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${acces_token}`,
+  //         },
+  //       }
+  //     )
+  //     .then((responce) => {
+  //       console.log(responce.data);
+  //       if (responce.data.status == "created") {
+  //         toast.success(responce.data.message, {
+  //           position: toast.POSITION.BOTTOM_LEFT,
+  //         });
+  //       } else {
+  //         toast.error(responce.data.message, {
+  //           position: toast.POSITION.BOTTOM_LEFT,
+  //         });
+  //       }
+
+  //       axios
+  //         .get(
+  //           `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions?type=Senior&academic_year=${moment(
+  //             selectedYear4
+  //           ).format(
+  //             "YYYY"
+  //           )}&subdomain=${subdomain}&examination_name=${examinationName4}`,
+  //           {
+  //             headers: {
+  //               Authorization: `Bearer ${acces_token}`,
+  //             },
+  //           }
+  //         )
+  //         .then((response) => {
+  //           console.log(response.data.data);
+  //           setSrDisplaySupervisionTable(response.data.data.supervisions);
+  //           // console.log(response.data.data.supervisions[0].metadata);
+  //         })
+  //         .catch((error) => console.log(error));
+  //     })
+  //     .catch(function (err) {
+  //       console.log(err.message);
+  //     });
+  // };
   const handlePrint4 = useReactToPrint({
     content: () => componentRef4.current,
   });
@@ -397,6 +511,14 @@ const ExamViewSrSupervision = () => {
               </a>
             </li>
             <li>
+              <a
+                href="/examViewTimeTable"
+                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="flex-1 ml-3 whitespace-nowrap">Report</span>
+              </a>
+            </li>
+            {/* <li>
               <button
                 className="w-full bg-slate-600 text-white py-2 px-4 text-left rounded-md"
                 onClick={toggleDropdown}
@@ -439,165 +561,203 @@ const ExamViewSrSupervision = () => {
                   Other Duty Report
                 </a>
               </div>
-            </li>
+            </li> */}
           </ul>
         </div>
       </aside>
 
       <div className="pt-4 sm:ml-64">
         <div className="flex flex-col items-center mt-14">
-          <div className="text-3xl">Sr. Supervision Report</div>
-          <div className="flex ml-2">
-            <select
-              className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-              // onChange={(e) => {
-              //   handleExaminationChange3(e.target.value);
-              // }}
+          <div className="flex items-center space-x-4 mb-5">
+            <a
+              className={`text-white font-bold py-2 px-4 rounded-lg bg-slate-500`}
+              href="/examViewTimeTable"
             >
-              <option>Select Examination</option>
-              <option value="Winter">Winter</option>
-              <option value="Summer">Summer</option>
-            </select>
-
-            <select
-              className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-              // onChange={(e) => handleYearChange3(e.target.value)}
+              Time Table
+            </a>
+            <a
+              className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg `}
+              href="/examViewBlockDetails"
             >
-              <option value="Select Year">Select Year</option>
-              {academic_years.map((year) => {
-                return <option value={year}>{year}</option>;
-              })}
-            </select>
-            <select
-              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-              // onChange={handleCourseChange}
+              Blockwise Report
+            </a>
+            <a
+              className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg `}
+              href="/examViewJrSupervision"
             >
-              <option>Select course</option>
-              {/* {courses.map((course, index) => (
-                <option value={course.id}>{course.name}</option>
-              ))} */}
-            </select>
-            <select
-              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-              // onChange={(e) => {
-              //   handleBranchChange(e);
-              // }}
+              Jr.Supervisor Tab
+            </a>
+            <a
+              className={`bg-slate-800 text-white font-bold py-2 px-4 rounded-lg `}
+              href="/examViewSrSupervision"
             >
-              <option>Select Branch</option>
-              {/* {branches.map((branch) => (
-                <option value={branch.id} data-name={branch.name}>
-                  {branch.name}
-                </option>
-              ))} */}
-            </select>
-            <select
-              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-              // onChange={handleSemesterChange}
+              Sr.Supervisor Tab
+            </a>
+            <a
+              className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg `}
+              href="/examViewOtherDuty"
             >
-              <option>Select Semester</option>
-              {/* {semesters.map((semester) => (
-                <option value={semester.id}>{semester.name}</option>
-              ))} */}
-            </select>
-
-            <button
-              className="py-2 px-3 ml-20 bg-gray-800 rounded-2xl text-white font-bold"
-              // id={"button-subject-" + subject.id}
-              // onClick={handleFilterSubmit}
-            >
-              Submit
-            </button>
-          </div>
-          <div className="flex mt-5">
-            <a href="#"
-            //  onClick={handlePrint} 
-             className="ml-4 px-3 py-2">
-              Download
+              Other Duties
             </a>
           </div>
-          <div className="flex flex-col" ref={componentRef4}>
-                  <div className="overflow-x-auto table-auto">
-                    <div className="p-1.5 min-w-full w-auto inline-block align-middle">
-                      <div className="overflow-hidden rounded-lg">
-                        <table className="min-w-full border divide-y divide-x rounded-lg divide-gray-200">
-                          <thead className="bg-gray-50">
-                            <tr>
-                              <th
-                                scope="col"
-                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                              >
-                                Name
-                              </th>
-                              <th
-                                scope="col"
-                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                              >
-                                Designation
-                              </th>
-                              <th
-                                scope="col"
-                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                              >
-                                Department
-                              </th>
-                              {srSubjectDates.map((e) => (
-                                <th
-                                  scope="col"
-                                  className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                                >
-                                  <p className="flex justify-center">{e}</p>
-                                </th>
-                              ))}
-                              <th
-                                scope="col"
-                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                              >
-                                Sign
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-gray-200">
-                            {srDisplaySupervisionTable.map((supervision) => (
-                              <tr>
-                                <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
-                                  {supervision.faculty_name}
-                                </td>
-                                <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                  {supervision.designation}
-                                </td>
-                                <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                  {supervision.department}
-                                </td>
-                                {Object.entries(
-                                  JSON.parse(supervision.metadata.metadata)
-                                ).map((value) => {
-                                  if (value[1] === true) {
-                                    return (
-                                      <td className="px-6 py-4 text-sm text-gray-800 ">
-                                        <p className="flex justify-center">
-                                          <FcCheckmark />
-                                        </p>
-                                      </td>
-                                    );
-                                  }
-                                })}
-                                {/* {subjectDates.map((value) => (
+        </div>
+
+        <div className="flex mt-5 ml-2">
+          <select
+            className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+            onChange={(e) => {
+              handleExaminationChange4(e.target.value);
+            }}
+          >
+            <option>Select Examination</option>
+            <option value="Winter">Winter</option>
+            <option value="Summer">Summer</option>
+          </select>
+
+          <select
+            className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+            onChange={(e) => handleYearChange4(e.target.value)}
+          >
+            <option value="Select Year">Select Year</option>
+            {academic_years.map((year) => {
+              return <option value={year}>{year}</option>;
+            })}
+          </select>
+          <select
+            className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+            onChange={handleCourseChange}
+          >
+            <option>Select course</option>
+            {courses.map((course, index) => (
+              <option value={course.id}>{course.name}</option>
+            ))}
+          </select>
+          <select
+            className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+            onChange={(e) => {
+              handleBranchChange(e);
+            }}
+          >
+            <option>Select Branch</option>
+            {branches.map((branch) => (
+              <option value={branch.id} data-name={branch.name}>
+                {branch.name}
+              </option>
+            ))}
+          </select>
+
+          <button
+            className="py-2 px-3 ml-20 bg-gray-800 rounded-2xl text-white font-bold"
+            // id={"button-subject-" + subject.id}
+            onClick={handleFilterSubmit}
+          >
+            Submit
+          </button>
+        </div>
+        <div className="flex mt-5">
+          <a
+            href="#"
+            id="download_button"
+            onClick={handlePrint4}
+            className="hidden py-2 px-3 absolute right-0 mt-1 mr-7 bg-blue-200 rounded-2xl text-white font-bold"
+          >
+            <FcDownload />
+          </a>
+        </div>
+        <div
+          className="hidden flex-col mt-5"
+          ref={componentRef4}
+          id="sr_supervision_report_viewport"
+        >
+          <div>
+            <p className="text-center">{uniName}</p>
+            <p className="text-center">
+              {examinationName4} {selectedYear4} Examination Time Table
+            </p>
+          </div>
+          <div className="overflow-y-scroll" style={{ height: 295 }}>
+            <div className="p-1.5 w-full inline-block align-middle">
+              <div className="border rounded-lg">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="sticky top-0 bg-gray-50">
+                    <tr>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                      >
+                        Name
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                      >
+                        Designation
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                      >
+                        Department
+                      </th>
+                      {subjectDates.map((e) => (
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                        >
+                          {e}
+                        </th>
+                      ))}
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                      >
+                        Sign
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {srSupervisionTable.map((supervision) => (
+                      <tr>
+                        <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
+                          {supervision.faculty_name}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                          {supervision.designation}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                          {supervision.department}
+                        </td>
+                        {/* {Object.entries(
+                          JSON.parse(supervision.metadata.metadata)
+                        ).map((value) => {
+                          if (value[1] === true) {
+                            return (
+                              <td className="px-6 py-4 text-sm text-gray-800 ">
+                                <p className="flex justify-center">
+                                  <FcCheckmark />
+                                </p>
+                              </td>
+                            );
+                          }
+                        })} */}
+                        {/* {subjectDates.map((value) => (
                                   <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                                     {Object.entries(JSON.parse(supervision.metadata.metadata))[value]}
                                   </td>
                                 ))} */}
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-evenly text-center mt-10"></div>
         </div>
       </div>
+      <ToastContainer />
     </div>
-  )
-}
+  );
+};
 
-export default ExamViewSrSupervision
+export default ExamViewSrSupervision;
