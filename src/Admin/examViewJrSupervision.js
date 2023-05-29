@@ -1,13 +1,11 @@
 import axios from "axios";
-import moment from "moment/moment";
 import React, { useEffect, useState, useRef } from "react";
-import DatePicker from "react-datepicker";
 import { ToastContainer, toast } from "react-toastify";
 import "react-datepicker/dist/react-datepicker.css";
 import "tailwindcss/tailwind.css";
-import { FcCheckmark } from "react-icons/fc";
 import { FcDownload } from "react-icons/fc";
-
+import * as XLSX from "xlsx";
+import { FcCheckmark } from "react-icons/fc";
 
 import { useReactToPrint } from "react-to-print";
 
@@ -23,17 +21,13 @@ const ExamViewJrSupervision = () => {
   const [examinationName3, setExaminationName3] = useState("");
   const [courses, setCourses] = useState([]);
   const [branches, setBranches] = useState([]);
-  const [selectedYear, setSelectedYear] = useState();
   const [branchId, setBranchId] = useState("");
   const [courseId, setCourseId] = useState("");
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
   const [branchesName, setBranchesName] = useState("");
-
+  const [storeDates, setStoreDates] = useState([]);
   const [subjectDates, setSubjectDates] = useState([]);
-  const [dateCheckBox, setDateCheckBox] = useState([]);
-  const [facultyName, setFacultyName] = useState([{}]);
-  const [userId, setUserId] = useState("");
-  const [supervisionDesignation, setSupervisionDesignation] = useState("");
-  const [supervisionDepartment, setSupervisionDepartment] = useState("");
   const [jrSupervisionTable, setJrSupervisionTable] = useState([]);
   const componentRef3 = useRef();
   var year;
@@ -83,6 +77,7 @@ const ExamViewJrSupervision = () => {
   const handleExaminationChange3 = (examination) => {
     setExaminationName3(examination);
   };
+
   const handleYearChange3 = (date) => {
     if (date !== "Select Year") {
       setSelectedYear3(date);
@@ -90,11 +85,33 @@ const ExamViewJrSupervision = () => {
       setSelectedYear3("");
     }
   };
+
   const handleCourseChange = (e) => {
     e.preventDefault();
     setCourseId("");
     setBranches([]);
     setBranchId("");
+    var selectedFilter = {};
+    setStoreDates([]);
+    if (examinationName3 !== "Select Examination") {
+      selectedFilter["name"] = examinationName3;
+    }
+
+    if (selectedYear3 !== "Select Year") {
+      selectedFilter["academic_year"] = selectedYear3;
+    }
+
+    if (time !== "") {
+      if (time === "0") {
+        selectedFilter["time"] = "morning";
+      } else {
+        selectedFilter["time"] = "evening";
+      }
+    }
+
+    if (e.target.value !== "Select Course") {
+      selectedFilter["course_id"] = e.target.value;
+    }
     const jr_supervision_report_viewport = document.getElementById(
       "jr_supervision_report_viewport"
     );
@@ -130,6 +147,26 @@ const ExamViewJrSupervision = () => {
             setBranches(response.data.data.branches);
           })
           .catch((error) => console.log(error));
+
+        axios
+          .get(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
+            {
+              headers,
+              params: {
+                time_table: selectedFilter,
+                subdomain: subdomain,
+              },
+            }
+          )
+          .then((response) => {
+            if (response.data.message === "Examination dates are as below") {
+              if (response.data.data.dates.length !== 0) {
+                setStoreDates(response.data.data.dates);
+              }
+            }
+          })
+          .catch((error) => console.log(error));
       }
     } else {
       setCourseId("");
@@ -137,10 +174,37 @@ const ExamViewJrSupervision = () => {
       setBranchId("");
     }
   };
+
   const handleBranchChange = (e) => {
     e.preventDefault();
     var selectedIndex = e.target.options.selectedIndex;
     setBranchesName(e.target.options[selectedIndex].getAttribute("data-name"));
+    var selectedFilter = {};
+    setStoreDates([]);
+
+    if (examinationName3 !== "Select Examination") {
+      selectedFilter["name"] = examinationName3;
+    }
+
+    if (selectedYear3 !== "Select Year") {
+      selectedFilter["academic_year"] = selectedYear3;
+    }
+
+    if (time !== "") {
+      if (time === "0") {
+        selectedFilter["time"] = "morning";
+      } else {
+        selectedFilter["time"] = "evening";
+      }
+    }
+
+    if (courseId !== "Select Course") {
+      selectedFilter["course_id"] = courseId;
+    }
+
+    if (e.target.value !== "Select Branch") {
+      selectedFilter["branch_id"] = e.target.value;
+    }
     const jr_supervision_report_viewport = document.getElementById(
       "jr_supervision_report_viewport"
     );
@@ -162,18 +226,20 @@ const ExamViewJrSupervision = () => {
       if (subdomain !== null || subdomain !== "") {
         axios
           .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/semesters`,
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
             {
               headers,
               params: {
+                time_table: selectedFilter,
                 subdomain: subdomain,
-                branch_id: e.target.value,
               },
             }
           )
           .then((response) => {
-            if (response.data.status === "ok") {
-              // setSemesters2(response.data.data.semesters);
+            if (response.data.message === "Examination dates are as below") {
+              if (response.data.data.dates.length !== 0) {
+                setStoreDates(response.data.data.dates);
+              }
             }
           })
           .catch((error) => console.log(error));
@@ -182,10 +248,19 @@ const ExamViewJrSupervision = () => {
       setBranchId("");
     }
   };
+
   const handleFilterSubmit = (e) => {
     console.log("button clicked!");
+    const jr_supervision_report_viewport = document.getElementById(
+      "jr_supervision_report_viewport"
+    );
+    const download_button = document.getElementById("download_button");
+    jr_supervision_report_viewport.classList.add("hidden");
+    jr_supervision_report_viewport.classList.remove("flex");
+    download_button.classList.add("hidden");
     let selectedFilter = {};
     let timeTableFilter = {};
+    let time_table_time = "";
 
     if (examinationName3 === "") {
       toast.error("Please select examination name", {
@@ -204,14 +279,18 @@ const ExamViewJrSupervision = () => {
         examination_name: examinationName3,
         academic_year: selectedYear3,
         course_id: courseId,
-        list_type:'Junior',
+        list_type: "Junior",
       };
+
+      time === "0"
+        ? (time_table_time = "morning")
+        : (time_table_time = "evening");
 
       timeTableFilter = {
         name: examinationName3,
         academic_year: selectedYear3,
-        course_id: courseId
-      }
+        course_id: courseId,
+      };
 
       if (branchId !== "") {
         selectedFilter = {
@@ -219,29 +298,28 @@ const ExamViewJrSupervision = () => {
           academic_year: selectedYear3,
           course_id: courseId,
           branch_id: branchId,
-          list_type:'Junior',
+          list_type: "Junior",
+          time: time,
         };
 
         timeTableFilter = {
           name: examinationName3,
           academic_year: selectedYear3,
           course_id: courseId,
-          branch_id: branchId
-        }
+          branch_id: branchId,
+          time: time_table_time,
+        };
       }
 
-      // if (semesterId !== "") {
-      //   selectedFilter = {
-      //     name: examinationName2,
-      //     academic_year: selectedYear2,
-      //     course_id: courseId,
-      //     branch_id: branchId,
-      //     semester_id: semesterId,
-      //   };
-      // }
-    }
+      if (date !== "") {
+        selectedFilter["date"] = date;
+      }
 
-    console.log(selectedFilter);
+      if (time !== "") {
+        selectedFilter["time"] = time;
+        timeTableFilter["time"] = time_table_time;
+      }
+    }
 
     if (subdomain !== null || subdomain !== "") {
       axios
@@ -258,16 +336,15 @@ const ExamViewJrSupervision = () => {
         .then((res) => {
           console.log(res);
           if (res.data.status === "ok") {
-            const jr_supervision_report_viewport = document.getElementById(
-              "jr_supervision_report_viewport"
-            );
-            const download_button = document.getElementById("download_button");
             if (res.data.data.supervisions.length !== 0) {
               download_button.classList.remove("hidden");
               jr_supervision_report_viewport.classList.remove("hidden");
               jr_supervision_report_viewport.classList.add("flex");
               setJrSupervisionTable(res.data.data.supervisions);
             } else {
+              download_button.classList.add("hidden");
+              jr_supervision_report_viewport.classList.add("hidden");
+              jr_supervision_report_viewport.classList.remove("flex");
               toast.error(`No Reports found for selected filters!`, {
                 position: toast.POSITION.BOTTOM_LEFT,
               });
@@ -277,6 +354,10 @@ const ExamViewJrSupervision = () => {
         .catch((err) => {
           console.error(err);
         });
+
+      if (date !== "") {
+        setSubjectDates([date]);
+      } else {
         axios
           .get(
             `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
@@ -290,23 +371,96 @@ const ExamViewJrSupervision = () => {
             }
           )
           .then((response) => {
-            const jr_supervision_report = document.getElementById(
-              "jr_supervision_report_viewport"
-            );
             if (response.data.message === "Examination dates are as below") {
               if (response.data.data.dates.length !== 0) {
                 console.log(response.data.data.dates);
                 setSubjectDates(response.data.data.dates);
-                jr_supervision_report.classList.remove("hidden");
-                jr_supervision_report.classList.add("flex");
               }
             }
           })
           .catch((error) => console.log(error));
+      }
     }
   };
 
+  const downloadExcel = () => {
+    const wrapper = document.getElementById("jr_supervision_report_viewport"); // Replace 'table' with the ID of your div element containing the table
+    const table = wrapper.querySelector("table");
+    const additionalData = wrapper.querySelectorAll("#selected_filters p");
+    const worksheetData = [];
 
+    additionalData.forEach((p) => {
+      const rowData = [
+        {
+          v: p.textContent,
+          t: "s",
+          s: { alignment: { horizontal: "center" } },
+        },
+      ];
+      worksheetData.push(rowData);
+    });
+
+    worksheetData.push([]);
+
+    const tableRows = table.querySelectorAll("tr");
+    // Prepare the worksheet data
+    tableRows.forEach((row) => {
+      const rowData = [];
+      const cells = row.querySelectorAll("th, td");
+      cells.forEach((cell) => {
+        let cellData = cell.textContent;
+        // Check if cell content includes the checkmark icon
+        if (
+          cell.innerHTML.includes(
+            '<svg stroke="currentColor" fill="currentColor" stroke-width="0" version="1" viewBox="0 0 48 48" enable-background="new 0 0 48 48" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><polygon fill="#43A047" points="40.6,12.1 17,35.7 7.4,26.1 4.6,29 17,41.3 43.4,14.9"></polygon></svg>'
+          )
+        ) {
+          cellData = "1";
+        }
+        rowData.push({ v: cellData });
+      });
+      worksheetData.push(rowData);
+    });
+    // Create a new workbook
+    const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+    const workbook = XLSX.utils.book_new();
+    // Create a new worksheet
+    // Add the worksheet to the workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, "JrSuperVisionData"); // Replace 'Sheet1' with your desired sheet name
+    // Generate an Excel file
+    const excelBuffer = XLSX.write(workbook, {
+      type: "buffer",
+      bookType: "xlsx",
+    });
+    // Create a Blob object from the Excel buffer
+    const blob = new Blob([excelBuffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    // Create a download link
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "JrSuperVisionData.xlsx"; // Replace 'table.xlsx' with your desired file name
+    // Trigger the download
+    link.click();
+  };
+
+  const download_report = () => {
+    const pageHTML = document.querySelector(
+      "#jr_supervision_report_viewport"
+    ).outerHTML;
+    const blob_data = new Blob([pageHTML], { type: "text/html" });
+    const url = window.URL.createObjectUrl(blob_data);
+    const tempEl = document.createElement("a");
+    document.body.appendChild(tempEl);
+    tempEl.href = url;
+    tempEl.download = "thispage.html";
+    tempEl.click();
+    setTimeout(() => {
+      URL.revokeObjectUrl(url);
+      tempEl.parentNode.removeChild(tempEl);
+    }, 2000);
+  };
 
   const handlePrint3 = useReactToPrint({
     content: () => componentRef3.current,
@@ -460,50 +614,6 @@ const ExamViewJrSupervision = () => {
                 <span className="flex-1 ml-3 whitespace-nowrap">Report</span>
               </a>
             </li>
-            {/* <li>
-              <button
-                className="w-full bg-slate-600 text-white py-2 px-4 text-left rounded-md"
-                onClick={toggleDropdown}
-              >
-                Reports
-              </button>
-              <div
-                className={`bg-white shadow rounded-md mt-2 py-2 ${
-                  isDropdownOpen ? "block" : "hidden"
-                }`}
-              >
-                <a
-                  href="/examViewTimeTable"
-                  className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                >
-                  Time Table
-                </a>
-                <a
-                  href="/examViewBlockDetails"
-                  className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                >
-                  BlockWise Report
-                </a>
-                <a
-                  href="/examViewJrSupervision"
-                  className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                >
-                  Jr. Supervision Report
-                </a>
-                <a
-                  href="/examViewSrSupervision"
-                  className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                >
-                  Sr. Supervision Report
-                </a>
-                <a
-                  href="/examViewOtherDuty"
-                  className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                >
-                  Other Duty Report
-                </a>
-              </div>
-            </li> */}
           </ul>
         </div>
       </aside>
@@ -571,8 +681,8 @@ const ExamViewJrSupervision = () => {
           >
             <option>Select course</option>
             {courses.map((course, index) => (
-                <option value={course.id}>{course.name}</option>
-              ))}
+              <option value={course.id}>{course.name}</option>
+            ))}
           </select>
           <select
             className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
@@ -582,14 +692,45 @@ const ExamViewJrSupervision = () => {
           >
             <option>Select Branch</option>
             {branches.map((branch) => (
-                <option value={branch.id} data-name={branch.name}>
-                  {branch.name}
-                </option>
-              ))}
+              <option value={branch.id} data-name={branch.name}>
+                {branch.name}
+              </option>
+            ))}
+          </select>
+
+          <select
+            className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+            onChange={(e) => {
+              if (e.target.value !== "Select Date") {
+                setDate(e.target.value);
+              } else {
+                setDate("");
+              }
+            }}
+          >
+            <option>Select Date</option>
+            {storeDates.map((date) => (
+              <option value={date}>{date}</option>
+            ))}
+          </select>
+
+          <select
+            className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+            onChange={(e) => {
+              if (e.target.value !== "Select Time") {
+                setTime(e.target.value);
+              } else {
+                setTime("");
+              }
+            }}
+          >
+            <option>Select Time</option>
+            <option value="0">10:30 A.M to 01:00 P.M</option>
+            <option value="1">03:00 P.M to 05:30 P.M</option>
           </select>
 
           <button
-            className="py-2 px-3 ml-20 bg-gray-800 rounded-2xl text-white font-bold"
+            className="py-2 px-3 bg-gray-800 rounded-2xl text-white font-bold"
             // id={"button-subject-" + subject.id}
             onClick={handleFilterSubmit}
           >
@@ -600,19 +741,27 @@ const ExamViewJrSupervision = () => {
           <a
             href="#"
             id="download_button"
-             onClick={handlePrint3}
+            onClick={downloadExcel}
             className="hidden py-2 px-3 absolute right-0 mt-1 mr-7 bg-blue-200 rounded-2xl text-white font-bold"
           >
-              <FcDownload />
+            <FcDownload />
           </a>
         </div>
-        <div className="hidden flex-col mt-5" ref={componentRef3} id="jr_supervision_report_viewport">
-        <div>
-              <p className="text-center">{uniName}</p>
-              <p className="text-center">
-                {examinationName3} {selectedYear3} Examination Time Table
-              </p>
-            </div>
+        <div
+          className="hidden flex-col mt-5"
+          ref={componentRef3}
+          id="jr_supervision_report_viewport"
+        >
+          <div id="selected_filters">
+            <p className="text-center">{uniName}</p>
+            <p className="text-center">{branchesName} </p>
+            <p className="text-center">
+              {date} {time === "0" ? "Morning" : "Evening"}
+            </p>
+            <p className="text-center">
+              {examinationName3} {selectedYear3} Examination Time Table
+            </p>
+          </div>
           <div className="overflow-y-scroll" style={{ height: 295 }}>
             <div className="p-1.5 w-full inline-block align-middle">
               <div className="border rounded-lg">
@@ -665,24 +814,17 @@ const ExamViewJrSupervision = () => {
                         <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                           {supervision.department}
                         </td>
-                        {/* {Object.entries(
-                          JSON.parse(supervision.metadata.metadata)
-                        ).map((value) => {
-                          if (value[1] === true) {
-                            return (
-                              <td className="px-6 py-4 text-sm text-gray-800 ">
-                                <p className="flex justify-center">
+                        {subjectDates.map((value) => {
+                          if (supervision.metadata !== null) {
+                            if (supervision.metadata[value]) {
+                              return (
+                                <td className="px-6 py-4 flex-row justify-center items-center text-sm text-gray-800 ">
                                   <FcCheckmark />
-                                </p>
-                              </td>
-                            );
+                                </td>
+                              );
+                            }
                           }
-                        })} */}
-                        {/* {subjectDates.map((value) => (
-                                  <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                    {Object.entries(JSON.parse(supervision.metadata.metadata))[value]}
-                                  </td>
-                                ))} */}
+                        })}
                       </tr>
                     ))}
                   </tbody>

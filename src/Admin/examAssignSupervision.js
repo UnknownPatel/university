@@ -26,19 +26,21 @@ const ExamAssignSupervision = () => {
   const [storedTimeTables, setStoredTimeTable] = useState([]);
   const [supervisionData, setSupervisionData] = useState([]);
   const [academic_years, setAcademicYears] = useState([]);
+  const [jrTime, setJrTime] = useState("0");
 
   const [srExaminationName, setSrExaminationName] = useState("");
   const [srSelectedYear, setSrSelectedYear] = useState("");
   const [srCourses, setSrCourses] = useState([]);
   const [srBranches, setSrBranches] = useState([]);
-  const [srCourseId, setSrCourseId] = useState([]);
-  const [srBranchId, setSrBranchId] = useState([]);
+  const [srCourseId, setSrCourseId] = useState("");
+  const [srBranchId, setSrBranchId] = useState("");
   const [srFacultyName, setSrFacultyName] = useState([]);
   const [srNoOfSupervisions, setSrNoOfSupervisions] = useState();
   const [srSupervisionData, setSrSupervisionData] = useState([]);
   const [srStoredTimeTables, setSrStoredTimeTable] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [srDateCheckBox, setSrDateCheckBox] = useState([]);
+  const [srTime, setSrTime] = useState("");
 
   const [odExaminationName, setOdExaminationName] = useState("");
   const [odSelectedYear, setOdSelectedYear] = useState("");
@@ -104,10 +106,12 @@ const ExamAssignSupervision = () => {
   }
 
   const handleJrExaminationChange = (examination) => {
+    setSupervisionData([]);
     setExaminationName(examination);
   };
 
   const handleJrYearChange = (date) => {
+    setSupervisionData([]);
     setSelectedYear(date);
   };
 
@@ -115,10 +119,16 @@ const ExamAssignSupervision = () => {
     e.preventDefault();
     setBranches([]);
     setFacultyName([]);
+    setSupervisionData([]);
     setCourseId(e.target.value);
+    const faculty_listing_viewport = document.getElementById(
+      "faculty_listing_viewport"
+    );
     const supervision_listing_table = document.getElementById(
       "supervision_list_table"
     );
+    faculty_listing_viewport.classList.add("hidden");
+    faculty_listing_viewport.classList.remove("flex");
     supervision_listing_table.classList.add("hidden");
     supervision_listing_table.classList.remove("flex");
     var course_id = e.target.value;
@@ -139,6 +149,16 @@ const ExamAssignSupervision = () => {
 
   const handleJrBranchChange = (e) => {
     e.preventDefault();
+    setSupervisionData([]);
+    const faculty_listing_viewport = document.getElementById(
+      "faculty_listing_viewport"
+    );
+    const supervision_listing_table = document.getElementById(
+      "supervision_list_table"
+    );
+    faculty_listing_viewport.classList.add("hidden");
+    faculty_listing_viewport.classList.remove("flex");
+    supervision_listing_table.classList.add("hidden");
     if (e.target.value === "Select Branch") {
       setBranchId("");
     } else {
@@ -146,9 +166,27 @@ const ExamAssignSupervision = () => {
     }
   };
 
-  const createObject = (user_id, no_of_supervisions) => {
+  const handleJrTimeChange = (e) => {
+    e.preventDefault();
+    setFacultyName([]);
+    setSupervisionData([]);
+    setJrTime(e.target.value);
+    const faculty_listing_viewport = document.getElementById(
+      "faculty_listing_viewport"
+    );
+    const supervision_listing_table = document.getElementById(
+      "supervision_list_table"
+    );
+    faculty_listing_viewport.classList.add("hidden");
+    faculty_listing_viewport.classList.remove("flex");
+    supervision_listing_table.classList.add("hidden");
+    supervision_listing_table.classList.remove("flex");
+  }
+
+  const createObject = (e, user_id, no_of_supervisions) => {
     console.log(user_id);
     console.log(no_of_supervisions);
+    var selectedFilter = {};
     if (examinationName === "") {
       toast.error("Please select examination name", {
         position: toast.POSITION.BOTTOM_LEFT,
@@ -158,60 +196,142 @@ const ExamAssignSupervision = () => {
         position: toast.POSITION.BOTTOM_LEFT,
       });
     } else {
-      axios
-        .post(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions?subdomain=${subdomain}`,
-          {
-            supervision: {
-              examination_name: examinationName,
-              academic_year: selectedYear,
-              course_id: courseId,
-              user_id: user_id,
-              list_type: "Junior",
-              no_of_supervisions: no_of_supervisions,
+      selectedFilter = {
+        examination_name: examinationName,
+        academic_year: selectedYear,
+        course_id: courseId,
+        user_type: 0,
+        list_type: "Junior",
+        time: parseInt(jrTime)
+      };
+
+      if (branchId !== "") {
+        selectedFilter = {
+          examination_name: examinationName,
+          academic_year: selectedYear,
+          course_id: courseId,
+          branch_id: branchId,
+          user_type: 0,
+          list_type: "Junior",
+          time: parseInt(jrTime)
+        };
+      }
+
+      if (e.target.innerHTML === "Update") {
+        var supervision_id = e.target.getAttribute("data-supervision-id");
+        axios
+          .put(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions/${supervision_id}?subdomain=${subdomain}`,
+            {
+              supervision: {
+                no_of_supervisions: no_of_supervisions,
+              },
             },
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${acces_token}`,
+            {
+              headers,
+            }
+          )
+          .then((res) => {
+            if (res.data.message == "Supervision Altered") {
+              toast.success(res.data.message, {
+                position: toast.POSITION.BOTTOM_LEFT,
+              });
+            } else {
+              toast.error(res.data.message, {
+                position: toast.POSITION.BOTTOM_LEFT,
+              });
+            }
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+      } else {
+        axios
+          .post(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions?subdomain=${subdomain}`,
+            {
+              supervision: {
+                examination_name: examinationName,
+                academic_year: selectedYear,
+                course_id: courseId,
+                user_id: user_id,
+                list_type: "Junior",
+                no_of_supervisions: no_of_supervisions,
+                time: parseInt(jrTime)
+              },
             },
-          }
-        )
-        .then((res) => {
-          const jr_no_of_supervisions_input = document.getElementById(
-            "jr-student-input-user-" + user_id
-          );
-          const jr_supervision_submit_button = document.getElementById(
-            "jr-supervision-button-" + user_id
-          );
-          if (res.data.status === "created") {
-            jr_no_of_supervisions_input.disabled = true;
-            jr_no_of_supervisions_input.value =
-              res.data.data.supervision.no_of_supervisions;
-            jr_no_of_supervisions_input.classList.add("cursor-not-allowed");
-            jr_supervision_submit_button.disabled = true;
-            jr_supervision_submit_button.innerHTML = "Created";
-            jr_supervision_submit_button.classList.add("cursor-not-allowed");
-            toast.success(res.data.message, {
-              position: toast.POSITION.BOTTOM_LEFT,
-            });
-          } else {
-            toast.error(res.data.message, {
-              position: toast.POSITION.BOTTOM_LEFT,
-            });
-          }
-        })
-        .catch((err) => {
-          console.error(err);
-        });
+            {
+              headers: {
+                Authorization: `Bearer ${acces_token}`,
+              },
+            }
+          )
+          .then((res) => {
+            const jr_no_of_supervisions_input = document.getElementById(
+              "jr-student-input-user-" + user_id
+            );
+            const jr_supervision_submit_button = document.getElementById(
+              "jr-supervision-button-" + user_id
+            );
+            if (res.data.status === "created") {
+              e.target.setAttribute(
+                "data-supervision-id",
+                res.data.data.supervision.id
+              );
+
+              jr_no_of_supervisions_input.value =
+                res.data.data.supervision.no_of_supervisions;
+              jr_supervision_submit_button.innerHTML = "Update";
+              toast.success(res.data.message, {
+                position: toast.POSITION.BOTTOM_LEFT,
+              });
+              axios
+                .get(
+                  `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions`,
+                  {
+                    headers,
+                    params: {
+                      supervision: selectedFilter,
+                      subdomain: subdomain,
+                    },
+                  }
+                )
+                .then((res) => {
+                  if (res.data.message === "These are all the supervisions") {
+                    console.log(res.data.data.supervisions);
+                    const supervision_listing_table = document.getElementById(
+                      "supervision_list_table"
+                    );
+                    if (res.data.data.supervisions.length !== 0) {
+                      supervision_listing_table.classList.remove("hidden");
+                      supervision_listing_table.classList.add("flex");
+                      setSupervisionData(res.data.data.supervisions);
+                    } else {
+                      supervision_listing_table.classList.add("hidden");
+                      supervision_listing_table.classList.remove("flex");
+                      setSupervisionData([]);
+                    }
+                  }
+                })
+                .catch((err) => {
+                  console.error(err);
+                });
+            } else {
+              toast.error(res.data.message, {
+                position: toast.POSITION.BOTTOM_LEFT,
+              });
+            }
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+      }
     }
   };
 
   const handlechangeDateCheckBox = (event) => {
-    setDateCheckBox({
-      ...dateCheckBox,
-      [event.target.name]: event.target.checked,
-    });
+    event.target.removeAttribute("checked");
+    event.target.disabled = false;
   };
 
   const handleJuniorSupervisionSubmit = (e) => {
@@ -219,14 +339,35 @@ const ExamAssignSupervision = () => {
     const supervision_id = e.target.getAttribute("data-id");
     const access_token = localStorage.getItem("access_token");
     console.log(acces_token);
-    const metadata = dateCheckBox;
-    const requestBody = {
+    var metadata = {};
+    storedTimeTables.map((time_table) => {
+      const checkbox = document.getElementById(
+        "junior-checkbox-" + time_table + supervision_id
+      );
+      if (checkbox.checked) {
+        metadata[time_table] = true;
+      }
+    });
+
+    var requestBody = {
       supervision: {
         examination_name: examinationName,
         academic_year: selectedYear,
-        metadata: { metadata },
+        metadata: metadata,
       },
     };
+
+    if (jrTime !== "") {
+      requestBody = {
+        supervision: {
+          examination_name: examinationName,
+          academic_year: selectedYear,
+          metadata: metadata,
+          time: parseInt(jrTime),
+        },
+      };
+    }
+
     const config = {
       headers: {
         Authorization: `Bearer ${access_token}`,
@@ -257,6 +398,7 @@ const ExamAssignSupervision = () => {
   const handleFilterSubmit = (e) => {
     console.log("Button clicked");
     let selectedFilter = {};
+    let timeTableSelectedFilter = {};
     if (examinationName === "Select Examination") {
       toast.error("Please select examination name", {
         position: toast.POSITION.BOTTOM_LEFT,
@@ -275,6 +417,17 @@ const ExamAssignSupervision = () => {
         academic_year: selectedYear,
         course_id: courseId,
         user_type: 0,
+        list_type: "Junior",
+        time: parseInt(jrTime)
+      };
+
+      timeTableSelectedFilter = {
+        examination_name: examinationName,
+        academic_year: selectedYear,
+        course_id: courseId,
+        user_type: 0,
+        list_type: "Junior",
+        time: jrTime === "0" ? "morning" : "evening"
       };
 
       if (branchId !== "") {
@@ -284,6 +437,18 @@ const ExamAssignSupervision = () => {
           course_id: courseId,
           branch_id: branchId,
           user_type: 0,
+          list_type: "Junior",
+          time: parseInt(jrTime)
+        };
+
+        timeTableSelectedFilter = {
+          examination_name: examinationName,
+          academic_year: selectedYear,
+          course_id: courseId,
+          branch_id: branchId,
+          user_type: 0,
+          list_type: "Junior",
+          time: jrTime === "0" ? "morning" : "evening"
         };
       }
 
@@ -310,10 +475,17 @@ const ExamAssignSupervision = () => {
                 faculty_listing_viewport.classList.add("flex");
                 setFacultyName(res.data.data.users);
                 res.data.data.users.map((faculty) => {
+                  selectedFilter["user_id"] = faculty.id
                   axios
                     .get(
-                      `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions/${faculty.id}/fetch_details?subdomain=${subdomain}`,
-                      { headers }
+                      `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions/${faculty.id}/fetch_details`,
+                      {
+                        headers,
+                        params: {
+                          subdomain: subdomain,
+                          supervision: selectedFilter,
+                        },
+                      }
                     )
                     .then((res) => {
                       const jr_no_of_supervisions_input =
@@ -325,30 +497,20 @@ const ExamAssignSupervision = () => {
                           "jr-supervision-button-" + faculty.id
                         );
                       if (res.data.message == "Details found") {
-                        jr_supervision_submit_button.disabled = true;
-                        jr_supervision_submit_button.innerHTML = "Created";
-                        jr_supervision_submit_button.classList.add(
-                          "cursor-not-allowed"
+                        const button = document.getElementById(
+                          "jr-supervision-button-" + faculty.id
                         );
-
-                        jr_no_of_supervisions_input.disabled = true;
+                        jr_supervision_submit_button.innerHTML = "Update";
+                        button.setAttribute(
+                          "data-supervision-id",
+                          res.data.data.supervision.id
+                        );
                         jr_no_of_supervisions_input.value =
                           res.data.data.supervision.no_of_supervisions;
-                        jr_no_of_supervisions_input.classList.add(
-                          "cursor-not-allowed"
-                        );
                       } else {
-                        jr_supervision_submit_button.disabled = false;
                         jr_supervision_submit_button.innerHTML = "Create";
-                        jr_supervision_submit_button.classList.remove(
-                          "cursor-not-allowed"
-                        );
 
-                        jr_no_of_supervisions_input.disabled = false;
                         jr_no_of_supervisions_input.value = "";
-                        jr_no_of_supervisions_input.classList.remove(
-                          "cursor-not-allowed"
-                        );
                       }
                     })
                     .catch((err) => {
@@ -364,12 +526,31 @@ const ExamAssignSupervision = () => {
 
         axios
           .get(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
+            {
+              headers,
+              params: {
+                time_table: timeTableSelectedFilter,
+                subdomain: subdomain,
+              },
+            }
+          )
+          .then((response) => {
+            if (response.data.message === "Examination dates are as below") {
+              if (response.data.data.dates.length !== 0) {
+                setStoredTimeTable(response.data.data.dates);
+              }
+            }
+          })
+          .catch((error) => console.log(error));
+
+        axios
+          .get(
             `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions`,
             {
               headers,
               params: {
                 supervision: selectedFilter,
-                type: "Junior",
                 subdomain: subdomain,
               },
             }
@@ -377,39 +558,23 @@ const ExamAssignSupervision = () => {
           .then((res) => {
             if (res.data.message === "These are all the supervisions") {
               console.log(res.data.data.supervisions);
+              const supervision_listing_table = document.getElementById(
+                "supervision_list_table"
+              );
               if (res.data.data.supervisions.length !== 0) {
+                supervision_listing_table.classList.remove("hidden");
+                supervision_listing_table.classList.add("flex");
                 setSupervisionData(res.data.data.supervisions);
+              } else {
+                supervision_listing_table.classList.add("hidden");
+                supervision_listing_table.classList.remove("flex");
+                setSupervisionData([]);
               }
             }
           })
           .catch((err) => {
             console.error(err);
           });
-
-        axios
-          .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
-            {
-              headers,
-              params: {
-                time_table: selectedFilter,
-                subdomain: subdomain,
-              },
-            }
-          )
-          .then((response) => {
-            const supervision_listing_table = document.getElementById(
-              "supervision_list_table"
-            );
-            if (response.data.message === "Examination dates are as below") {
-              if (response.data.data.dates.length !== 0) {
-                setStoredTimeTable(response.data.data.dates);
-                supervision_listing_table.classList.remove("hidden");
-                supervision_listing_table.classList.add("flex");
-              }
-            }
-          })
-          .catch((error) => console.log(error));
       }
     }
   };
@@ -428,12 +593,18 @@ const ExamAssignSupervision = () => {
     e.preventDefault();
     setSrBranches([]);
     setSrFacultyName([]);
+    setSrSupervisionData([]);
     setSrCourseId(e.target.value);
     const sr_supervision_listing_table = document.getElementById(
-      "sr_supervision_listing_table"
+      "sr_supervision_list_table"
     );
-    // supervision_listing_table.classList.add("hidden");
-    // supervision_listing_table.classList.remove("flex");
+    const faculty_listing_viewport = document.getElementById(
+      "sr_faculty_listing_viewport"
+    );
+    faculty_listing_viewport.classList.add("hidden");
+    faculty_listing_viewport.classList.remove("flex");
+    sr_supervision_listing_table.classList.add("hidden");
+    sr_supervision_listing_table.classList.remove("flex");
     if (subdomain !== null || subdomain !== "") {
       if (e.target.value !== "Select Course") {
         axios
@@ -451,6 +622,18 @@ const ExamAssignSupervision = () => {
 
   const handleSrBranchChange = (e) => {
     e.preventDefault();
+    setFacultyName([]);
+    setSupervisionData([]);
+    const sr_supervision_listing_table = document.getElementById(
+      "sr_supervision_list_table"
+    );
+    const faculty_listing_viewport = document.getElementById(
+      "sr_faculty_listing_viewport"
+    );
+    faculty_listing_viewport.classList.add("hidden");
+    faculty_listing_viewport.classList.remove("flex");
+    sr_supervision_listing_table.classList.add("hidden");
+    sr_supervision_listing_table.classList.remove("flex");
     if (e.target.value !== "Select Branch") {
       setSrBranchId(e.target.value);
     } else {
@@ -458,7 +641,7 @@ const ExamAssignSupervision = () => {
     }
   };
 
-  const createSrObject = (user_id, sr_no_of_supervisions) => {
+  const createSrObject = (e, user_id, sr_no_of_supervisions) => {
     let request_body = {};
     if (srExaminationName === "") {
       toast.error("Please select examination name", {
@@ -494,53 +677,121 @@ const ExamAssignSupervision = () => {
         };
       }
 
+      if (srTime !== "") {
+        request_body["time"] = parseInt(srTime);
+      }
+
       console.log("Button Clicked");
 
-      axios
-        .post(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions`,
-          {
-            supervision: request_body,
-            subdomain: subdomain,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${acces_token}`,
+      if (e.target.innerHTML === "Update") {
+        var supervision_id = e.target.getAttribute("data-supervision-id");
+
+        axios
+          .put(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions/${supervision_id}`,
+            {
+              subdomain: subdomain,
+              supervision: {
+                no_of_supervisions: sr_no_of_supervisions,
+              },
             },
-          }
-        )
-        .then((res) => {
-          const sr_no_of_supervisions_input = document.getElementById(
-            "sr-student-input-user-" + user_id
-          );
-          const sr_supervision_submit_button = document.getElementById(
-            "sr-supervision-button-" + user_id
-          );
-          if (res.data.status === "created") {
-            sr_no_of_supervisions_input.disabled = true;
-            sr_no_of_supervisions_input.value =
-              res.data.data.supervision.no_of_supervisions;
-            sr_no_of_supervisions_input.classList.add("cursor-not-allowed");
-            sr_supervision_submit_button.disabled = true;
-            sr_supervision_submit_button.innerHTML = "Created";
-            sr_supervision_submit_button.classList.add("cursor-not-allowed");
-            toast.success(res.data.message, {
-              position: toast.POSITION.BOTTOM_LEFT,
-            });
-          } else {
-            toast.error(res.data.message, {
-              position: toast.POSITION.BOTTOM_LEFT,
-            });
-          }
-        })
-        .catch((err) => {
-          console.error(err);
-        });
+            {
+              headers,
+            }
+          )
+          .then((res) => {
+            if (res.data.message == "Supervision Altered") {
+              toast.success(res.data.message, {
+                position: toast.POSITION.BOTTOM_LEFT,
+              });
+            } else {
+              toast.error(res.data.message, {
+                position: toast.POSITION.BOTTOM_LEFT,
+              });
+            }
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+      } else {
+        axios
+          .post(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions`,
+            {
+              supervision: request_body,
+              subdomain: subdomain,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${acces_token}`,
+              },
+            }
+          )
+          .then((res) => {
+            const sr_no_of_supervisions_input = document.getElementById(
+              "sr-student-input-user-" + user_id
+            );
+            const sr_supervision_submit_button = document.getElementById(
+              "sr-supervision-button-" + user_id
+            );
+            if (res.data.status === "created") {
+              e.target.setAttribute(
+                "data-supervision-id",
+                res.data.data.supervision.id
+              );
+              sr_no_of_supervisions_input.value =
+                res.data.data.supervision.no_of_supervisions;
+              sr_supervision_submit_button.innerHTML = "Update";
+              toast.success(res.data.message, {
+                position: toast.POSITION.BOTTOM_LEFT,
+              });
+              axios
+                .get(
+                  `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions`,
+                  {
+                    headers,
+                    params: {
+                      supervision: request_body,
+                      subdomain: subdomain,
+                    },
+                  }
+                )
+                .then((res) => {
+                  if (res.data.message === "These are all the supervisions") {
+                    console.log(res.data.data.supervisions);
+                    const supervision_listing_table = document.getElementById(
+                      "sr_supervision_list_table"
+                    );
+                    if (res.data.data.supervisions.length !== 0) {
+                      supervision_listing_table.classList.remove("hidden");
+                      supervision_listing_table.classList.add("flex");
+                      setSrSupervisionData(res.data.data.supervisions);
+                    } else {
+                      supervision_listing_table.classList.add("hidden");
+                      supervision_listing_table.classList.remove("flex");
+                      setSrSupervisionData([]);
+                    }
+                  }
+                })
+                .catch((err) => {
+                  console.error(err);
+                });
+            } else {
+              toast.error(res.data.message, {
+                position: toast.POSITION.BOTTOM_LEFT,
+              });
+            }
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+      }
     }
   };
 
   const handleSrFilterSubmit = (e) => {
     let selectedFilter = {};
+    let timeTableSelectedFilter = {};
     if (srExaminationName === "Select Examination") {
       toast.error("Please select examination name", {
         position: toast.POSITION.BOTTOM_LEFT,
@@ -559,6 +810,15 @@ const ExamAssignSupervision = () => {
         academic_year: srSelectedYear,
         course_id: srCourseId,
         user_type: 1,
+        list_type: "Senior",
+      };
+
+      timeTableSelectedFilter = {
+        examination_name: srExaminationName,
+        academic_year: srSelectedYear,
+        course_id: srCourseId,
+        user_type: 1,
+        list_type: "Senior",
       };
 
       if (srBranchId !== "") {
@@ -568,8 +828,26 @@ const ExamAssignSupervision = () => {
           course_id: srCourseId,
           branch_id: srBranchId,
           user_type: 1,
+          list_type: "Senior",
+        };
+
+        timeTableSelectedFilter = {
+          examination_name: srExaminationName,
+          academic_year: srSelectedYear,
+          course_id: srCourseId,
+          branch_id: srBranchId,
+          user_type: 1,
+          list_type: "Senior",
         };
       }
+
+      if (srTime !== "") {
+        timeTableSelectedFilter["time"] =
+          parseInt(srTime) === 0 ? "morning" : "evening";
+        selectedFilter["time"] = parseInt(srTime);
+      }
+
+      console.log(timeTableSelectedFilter);
 
       if (subdomain !== null || subdomain !== "") {
         axios
@@ -609,30 +887,21 @@ const ExamAssignSupervision = () => {
                           "sr-supervision-button-" + faculty.id
                         );
                       if (res.data.message == "Details found") {
-                        sr_supervision_submit_button.disabled = true;
-                        sr_supervision_submit_button.innerHTML = "Created";
-                        sr_supervision_submit_button.classList.add(
-                          "cursor-not-allowed"
+                        const button = document.getElementById(
+                          "sr-supervision-button-" + faculty.id
+                        );
+                        sr_supervision_submit_button.innerHTML = "Update";
+                        button.setAttribute(
+                          "data-supervision-id",
+                          res.data.data.supervision.id
                         );
 
-                        sr_no_of_supervisions_input.disabled = true;
                         sr_no_of_supervisions_input.value =
                           res.data.data.supervision.no_of_supervisions;
-                        sr_no_of_supervisions_input.classList.add(
-                          "cursor-not-allowed"
-                        );
                       } else {
-                        sr_supervision_submit_button.disabled = false;
                         sr_supervision_submit_button.innerHTML = "Create";
-                        sr_supervision_submit_button.classList.remove(
-                          "cursor-not-allowed"
-                        );
 
-                        sr_no_of_supervisions_input.disabled = false;
                         sr_no_of_supervisions_input.value = "";
-                        sr_no_of_supervisions_input.classList.remove(
-                          "cursor-not-allowed"
-                        );
                       }
                     })
                     .catch((err) => {
@@ -648,12 +917,33 @@ const ExamAssignSupervision = () => {
 
         axios
           .get(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
+            {
+              headers,
+              params: {
+                time_table: timeTableSelectedFilter,
+                subdomain: subdomain,
+              },
+            }
+          )
+          .then((response) => {
+            console.log(response);
+            if (response.data.message === "Examination dates are as below") {
+              if (response.data.data.dates.length !== 0) {
+                setSrStoredTimeTable(response.data.data.dates);
+                console.log(response.data.data.dates);
+              }
+            }
+          })
+          .catch((error) => console.log(error));
+
+        axios
+          .get(
             `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions`,
             {
               headers,
               params: {
                 supervision: selectedFilter,
-                type: "Senior",
                 subdomain: subdomain,
               },
             }
@@ -661,39 +951,23 @@ const ExamAssignSupervision = () => {
           .then((res) => {
             if (res.data.message === "These are all the supervisions") {
               console.log(res.data.data.supervisions);
+              const supervision_listing_table = document.getElementById(
+                "sr_supervision_list_table"
+              );
               if (res.data.data.supervisions.length !== 0) {
+                supervision_listing_table.classList.remove("hidden");
+                supervision_listing_table.classList.add("flex");
                 setSrSupervisionData(res.data.data.supervisions);
+              } else {
+                supervision_listing_table.classList.add("hidden");
+                supervision_listing_table.classList.remove("flex");
+                setSrSupervisionData([]);
               }
             }
           })
           .catch((err) => {
             console.error(err);
           });
-
-        axios
-          .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
-            {
-              headers,
-              params: {
-                time_table: selectedFilter,
-                subdomain: subdomain,
-              },
-            }
-          )
-          .then((response) => {
-            const supervision_listing_table = document.getElementById(
-              "sr_supervision_list_table"
-            );
-            if (response.data.message === "Examination dates are as below") {
-              if (response.data.data.dates.length !== 0) {
-                setSrStoredTimeTable(response.data.data.dates);
-                supervision_listing_table.classList.remove("hidden");
-                supervision_listing_table.classList.add("flex");
-              }
-            }
-          })
-          .catch((error) => console.log(error));
       }
     }
   };
@@ -710,14 +984,37 @@ const ExamAssignSupervision = () => {
     const supervision_id = e.target.getAttribute("data-id");
     const access_token = localStorage.getItem("access_token");
     console.log(acces_token);
-    const metadata = srDateCheckBox;
-    const requestBody = {
+    var metadata = {};
+    srStoredTimeTables.map((time_table) => {
+      const checkbox = document.getElementById(
+        "senior-checkbox-" + time_table + supervision_id
+      );
+      if (checkbox.checked) {
+        metadata[time_table] = true;
+      }
+    });
+
+    var requestBody = {
       supervision: {
-        examination_name: examinationName,
-        academic_year: selectedYear,
-        metadata: { metadata },
+        examination_name: srExaminationName,
+        academic_year: srSelectedYear,
+        metadata: metadata,
       },
     };
+
+    if (srTime !== "") {
+      requestBody = {
+        supervision: {
+          examination_name: srExaminationName,
+          academic_year: srSelectedYear,
+          metadata: metadata,
+          time: parseInt(srTime),
+        },
+      };
+    }
+
+    console.log(requestBody);
+
     const config = {
       headers: {
         Authorization: `Bearer ${access_token}`,
@@ -757,13 +1054,15 @@ const ExamAssignSupervision = () => {
   const handleODCourseChange = (e) => {
     e.preventDefault();
     setOdBranches([]);
+    setOdFacultyName([]);
+    setOtherDutyData([]);
     // setSrFacultyName([]);
     setOdCourseId(e.target.value);
-    const sr_supervision_listing_table = document.getElementById(
-      "sr_supervision_listing_table"
+    const faculty_listing_viewport = document.getElementById(
+      "od_faculty_listing_viewport"
     );
-    // supervision_listing_table.classList.add("hidden");
-    // supervision_listing_table.classList.remove("flex");
+    faculty_listing_viewport.classList.add("hidden");
+    faculty_listing_viewport.classList.remove("flex");
     if (subdomain !== null || subdomain !== "") {
       if (e.target.value !== "Select Course") {
         axios
@@ -781,6 +1080,12 @@ const ExamAssignSupervision = () => {
 
   const handleODBranchChange = (e) => {
     e.preventDefault();
+    setFacultyName([]);
+    const faculty_listing_viewport = document.getElementById(
+      "od_faculty_listing_viewport"
+    );
+    faculty_listing_viewport.classList.add("hidden");
+    faculty_listing_viewport.classList.remove("flex");
     if (e.target.value !== "Select Branch") {
       setOdBranchId(e.target.value);
     } else {
@@ -834,7 +1139,7 @@ const ExamAssignSupervision = () => {
         .then((res) => {
           console.log(res);
           const faculty_listing_viewport = document.getElementById(
-            "od_faculty_list_viewport"
+            "od_faculty_listing_viewport"
           );
 
           if (res.data.status === "ok") {
@@ -851,38 +1156,28 @@ const ExamAssignSupervision = () => {
                   .then((res) => {
                     console.log(res);
                     const od_assigned_duty_input = document.getElementById(
-                      "od-student-input-user-" + faculty.id
+                      "od-assigned-duty-user-" + faculty.id
                     );
-                    const other_duty_submit_button =
-                      document.getElementById(
-                        "other-duty-button-" + faculty.id
+                    const other_duty_submit_button = document.getElementById(
+                      "other-duty-button-" + faculty.id
+                    );
+                    if (res.data.message == "Details found") {
+                      other_duty_submit_button.setAttribute(
+                        "data-other-duty-id",
+                        res.data.data.other_duty.id
                       );
-                      if (res.data.message == "Details found") {
-                        other_duty_submit_button.disabled = true;
-                        other_duty_submit_button.innerHTML = "Created";
-                        other_duty_submit_button.classList.add(
-                          "cursor-not-allowed"
-                        );
+                      other_duty_submit_button.innerHTML = "Update";
 
-                        od_assigned_duty_input.disabled = true;
-                        od_assigned_duty_input.value =
-                          res.data.data.other_duty.assigned_duties;
-                        od_assigned_duty_input.classList.add(
-                          "cursor-not-allowed"
-                        );
-                      } else {
-                        other_duty_submit_button.disabled = false;
-                        other_duty_submit_button.innerHTML = "Create";
-                        other_duty_submit_button.classList.remove(
-                          "cursor-not-allowed"
-                        );
+                      od_assigned_duty_input.value =
+                        res.data.data.other_duty.assigned_duties;
+                    } else {
+                      other_duty_submit_button.removeAttribute(
+                        "data-other-duty-id" + res.data.data.other_duty.id
+                      );
+                      other_duty_submit_button.innerHTML = "Create";
 
-                        od_assigned_duty_input.disabled = false;
-                        od_assigned_duty_input.value = "";
-                        od_assigned_duty_input.classList.remove(
-                          "cursor-not-allowed"
-                        );
-                      }
+                      od_assigned_duty_input.value = "";
+                    }
                   })
                   .catch((err) => {
                     console.error(err);
@@ -894,6 +1189,7 @@ const ExamAssignSupervision = () => {
         .catch((err) => {
           console.error(err);
         });
+
       axios
         .get(
           `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/other_duties`,
@@ -918,7 +1214,7 @@ const ExamAssignSupervision = () => {
     }
   };
 
-  const createODObject = (user_id, od_assigned_duty) => {
+  const createODObject = (e, user_id, od_assigned_duty) => {
     let request_body = {};
     if (odExaminationName === "") {
       toast.error("Please select examination name", {
@@ -954,46 +1250,77 @@ const ExamAssignSupervision = () => {
 
       console.log("Button Clicked");
 
-      axios
-        .post(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/other_duties`,
-          {
-            other_duty: request_body,
-            subdomain: subdomain,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${acces_token}`,
+      if (e.target.innerHTML === "Update") {
+        var other_duty_id = e.target.getAttribute("data-other-duty-id");
+
+        axios
+          .put(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/other_duties/${other_duty_id}`,
+            {
+              subdomain: subdomain,
+              other_duty: {
+                assigned_duties: od_assigned_duty,
+              },
             },
-          }
-        )
-        .then((res) => {
-          const od_assogned_duty_input = document.getElementById(
-            "sr-student-input-user-" + user_id
-          );
-          const od_other_duty_submit_button = document.getElementById(
-            "sr-supervision-button-" + user_id
-          );
-          if (res.data.status === "created") {
-            od_assogned_duty_input.disabled = true;
-            od_assogned_duty_input.value =
-              res.data.data.supervision.no_of_supervisions;
-            od_assogned_duty_input.classList.add("cursor-not-allowed");
-            od_other_duty_submit_button.disabled = true;
-            od_other_duty_submit_button.innerHTML = "Created";
-            od_other_duty_submit_button.classList.add("cursor-not-allowed");
-            toast.success(res.data.message, {
-              position: toast.POSITION.BOTTOM_LEFT,
-            });
-          } else {
-            toast.error(res.data.message, {
-              position: toast.POSITION.BOTTOM_LEFT,
-            });
-          }
-        })
-        .catch((err) => {
-          console.error(err);
-        });
+            {
+              headers,
+            }
+          )
+          .then((res) => {
+            if (res.data.message == "Updated!") {
+              toast.success(res.data.message, {
+                position: toast.POSITION.BOTTOM_LEFT,
+              });
+            } else {
+              toast.error(res.data.message, {
+                position: toast.POSITION.BOTTOM_LEFT,
+              });
+            }
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+      } else {
+        axios
+          .post(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/other_duties`,
+            {
+              other_duty: request_body,
+              subdomain: subdomain,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${acces_token}`,
+              },
+            }
+          )
+          .then((res) => {
+            const od_assigned_duty_input = document.getElementById(
+              "od-assigned-duty-user-" + user_id
+            );
+            const od_submit_button = document.getElementById(
+              "other-duty-button-" + user_id
+            );
+            if (res.data.status === "Created") {
+              e.target.setAttribute(
+                "data-other-duty-id" + res.data.data.other_duty.id
+              );
+              od_assigned_duty_input.value =
+                res.data.data.other_duty.assigned_duties;
+              od_submit_button.innerHTML = "Update";
+              toast.success(res.data.message, {
+                position: toast.POSITION.BOTTOM_LEFT,
+              });
+            } else {
+              toast.error(res.data.message, {
+                position: toast.POSITION.BOTTOM_LEFT,
+              });
+            }
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+      }
     }
   };
 
@@ -1139,55 +1466,9 @@ const ExamAssignSupervision = () => {
                   href="/examViewTimeTable"
                   className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
-                  <span className="flex-1 ml-3 whitespace-nowrap">
-                    Report
-                  </span>
+                  <span className="flex-1 ml-3 whitespace-nowrap">Report</span>
                 </a>
               </li>
-              {/* <li>
-              <button
-                className="w-full bg-slate-600 text-white py-2 px-4 text-left rounded-md"
-                onClick={toggleDropdown}
-              >
-                Reports
-              </button>
-              <div
-                className={`bg-white shadow rounded-md mt-2 py-2 ${
-                  isDropdownOpen ? "block" : "hidden"
-                }`}
-              >
-                <a
-                  href="/examViewTimeTable"
-                  className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                >
-                  Time Table
-                </a>
-                <a
-                  href="/examViewBlockDetails"
-                  className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                >
-                  BlockWise Report
-                </a>
-                <a
-                  href="/examViewJrSupervision"
-                  className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                >
-                  Jr. Supervision Report
-                </a>
-                <a
-                  href="/examViewSrSupervision"
-                  className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                >
-                  Sr. Supervision Report
-                </a>
-                <a
-                  href="/examViewOtherDuty"
-                  className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                >
-                  Other Duty Report
-                </a>
-              </div>
-            </li> */}
             </ul>
           </div>
         </aside>
@@ -1267,6 +1548,22 @@ const ExamAssignSupervision = () => {
                     {branches.map((branch) => (
                       <option value={branch.id}>{branch.name}</option>
                     ))}
+                  </select>
+
+                  <select
+                    className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+                    onChange={(e) => {
+                      handleJrTimeChange(e);
+                      setSupervisionData([]);
+                      if (e.target.value !== "Select Time") {
+                        setJrTime(e.target.value);
+                      } else {
+                        setJrTime("");
+                      }
+                    }}
+                  >
+                    <option value="0">10:30 A.M to 01:00 P.M</option>
+                    <option value="1">03:00 P.M to 05:30 P.M</option>
                   </select>
 
                   <button
@@ -1353,8 +1650,9 @@ const ExamAssignSupervision = () => {
                                       <button
                                         className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold"
                                         id={"jr-supervision-button-" + item.id}
-                                        onClick={() =>
+                                        onClick={(e) =>
                                           createObject(
+                                            e,
                                             item.id,
                                             noOfSupervisions
                                           )
@@ -1405,9 +1703,9 @@ const ExamAssignSupervision = () => {
                               return (
                                 <th
                                   scope="col"
-                                  className="px-6 py-3 text-xs font-bold text-gray-500 uppercase "
+                                  className="px-6 py-3 text-xs text-left font-bold text-gray-500 uppercase "
                                 >
-                                  {time_table.subject_name}({time_table.date})
+                                  {time_table}
                                 </th>
                               );
                             })}
@@ -1421,6 +1719,8 @@ const ExamAssignSupervision = () => {
                         </thead>
                         <tbody className="divide-y divide-gray-200">
                           {supervisionData.map((item) => {
+                            var metadata = item.metadata;
+                            var isChecked = false;
                             return (
                               <tr>
                                 <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
@@ -1433,25 +1733,42 @@ const ExamAssignSupervision = () => {
                                   {item.department}
                                 </td>
                                 {storedTimeTables.map((time_table) => {
-                                  return (
-                                    <td className="px-6 py-4 text-sm  whitespace-nowrap">
-                                      <input
-                                        type="checkbox"
-                                        // checked={
-                                        //   item.metadata === null
-                                        //     ? false
-                                        //     : item.metadata.metadata[key]
-                                        // }
-                                        name={
-                                          time_table.subject_name +
-                                          "(" +
-                                          time_table.date +
-                                          ")"
-                                        }
-                                        onChange={handlechangeDateCheckBox}
-                                      />
-                                    </td>
-                                  );
+                                  if (item.metadata !== null) {
+                                    return (
+                                      <td className="px-6 py-4 text-sm items-center whitespace-nowrap">
+                                        <input
+                                          type="checkbox"
+                                          id={
+                                            "junior-checkbox-" +
+                                            time_table +
+                                            item.id
+                                          }
+                                          name={time_table}
+                                          onClick={(e) =>
+                                            handlechangeDateCheckBox(e)
+                                          }
+                                          defaultChecked={
+                                            item.metadata[time_table]
+                                          }
+                                        />
+                                      </td>
+                                    );
+                                  } else {
+                                    return (
+                                      <td className="px-6 py-4 text-sm  whitespace-nowrap">
+                                        <input
+                                          type="checkbox"
+                                          name={time_table}
+                                          id={
+                                            "junior-checkbox-" +
+                                            time_table +
+                                            item.id
+                                          }
+                                          // onChange={handlechangeDateCheckBox}
+                                        />
+                                      </td>
+                                    );
+                                  }
                                 })}
                                 <td className="px-6 py-4 text-sm  whitespace-nowrap">
                                   <button
@@ -1518,6 +1835,21 @@ const ExamAssignSupervision = () => {
                       <option value={branch.id}>{branch.name}</option>
                     ))}
                   </select>
+
+                  <select
+                    className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+                    onChange={(e) => {
+                      if (e.target.value !== "Select Time") {
+                        setSrTime(e.target.value);
+                      } else {
+                        setSrTime("");
+                      }
+                    }}
+                  >
+                    <option>Select Time</option>
+                    <option value="0">10:30 A.M to 01:00 P.M</option>
+                    <option value="1">03:00 P.M to 05:30 P.M</option>
+                  </select>
                   <button
                     className="py-2 px-3 absolute right-0 mr-7 bg-gray-800 rounded-2xl text-white font-bold"
                     // id={"button-subject-" + subject.id}
@@ -1580,7 +1912,7 @@ const ExamAssignSupervision = () => {
                                       {item.designation}
                                     </td>
                                     <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                      {item.course_name}
+                                      {item.department}
                                     </td>
                                     <td className="px-6 py-4 text-sm font-medium text-left whitespace-nowrap">
                                       <input
@@ -1602,8 +1934,9 @@ const ExamAssignSupervision = () => {
                                       <button
                                         className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold"
                                         id={"sr-supervision-button-" + item.id}
-                                        onClick={() =>
+                                        onClick={(e) =>
                                           createSrObject(
+                                            e,
                                             item.id,
                                             srNoOfSupervisions
                                           )
@@ -1653,9 +1986,9 @@ const ExamAssignSupervision = () => {
                               return (
                                 <th
                                   scope="col"
-                                  className="px-6 py-3 text-xs font-bold text-gray-500 uppercase "
+                                  className="px-6 py-3 text-xs text-left font-bold text-gray-500 uppercase "
                                 >
-                                  {time_table.subject_name}({time_table.date})
+                                  {time_table}
                                 </th>
                               );
                             })}
@@ -1681,25 +2014,42 @@ const ExamAssignSupervision = () => {
                                   {item.department}
                                 </td>
                                 {srStoredTimeTables.map((time_table) => {
-                                  return (
-                                    <td className="px-6 py-4 text-sm  whitespace-nowrap">
-                                      <input
-                                        type="checkbox"
-                                        // checked={
-                                        //   item.metadata === null
-                                        //     ? false
-                                        //     : item.metadata.metadata[key]
-                                        // }
-                                        name={
-                                          time_table.subject_name +
-                                          "(" +
-                                          time_table.date +
-                                          ")"
-                                        }
-                                        onChange={handlechangeSrDateCheckBox}
-                                      />
-                                    </td>
-                                  );
+                                  if (item.metadata !== null) {
+                                    return (
+                                      <td className="px-6 py-4 text-sm whitespace-nowrap">
+                                        <input
+                                          type="checkbox"
+                                          id={
+                                            "senior-checkbox-" +
+                                            time_table +
+                                            item.id
+                                          }
+                                          name={time_table}
+                                          // onClick={(e) =>
+                                          //   handlechangeDateCheckBox(e)
+                                          // }
+                                          defaultChecked={
+                                            item.metadata[time_table]
+                                          }
+                                        />
+                                      </td>
+                                    );
+                                  } else {
+                                    return (
+                                      <td className="px-6 py-4 text-sm  whitespace-nowrap">
+                                        <input
+                                          type="checkbox"
+                                          name={time_table}
+                                          id={
+                                            "senior-checkbox-" +
+                                            time_table +
+                                            item.id
+                                          }
+                                          // onChange={handlechangeDateCheckBox}
+                                        />
+                                      </td>
+                                    );
+                                  }
                                 })}
                                 <td className="px-6 py-4 text-sm  whitespace-nowrap">
                                   <button
@@ -1775,8 +2125,9 @@ const ExamAssignSupervision = () => {
                   </button>
                 </div>
                 <div
-                  id="od_faculty_list_viewport"
-                  className="hidden overflow-y-scroll flex-col mt-5" style={{height: 445}}
+                  id="od_faculty_listing_viewport"
+                  className="hidden overflow-y-scroll flex-col mt-5"
+                  style={{ height: 445 }}
                 >
                   <div className="">
                     <div className="p-1.5 w-full inline-block align-middle">
@@ -1833,7 +2184,7 @@ const ExamAssignSupervision = () => {
                                     <td className="px-6 py-4 text-sm font-medium text-left whitespace-nowrap">
                                       <input
                                         className="shadow appearance-none border rounded w-52 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                        id={"od-student-input-user-" + item.id}
+                                        id={"od-assigned-duty-user-" + item.id}
                                         onChange={(e) =>
                                           setOdAssignedDuty(e.target.value)
                                         }
@@ -1848,8 +2199,9 @@ const ExamAssignSupervision = () => {
                                       <button
                                         className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold"
                                         id={"other-duty-button-" + item.id}
-                                        onClick={() =>
+                                        onClick={(e) =>
                                           createODObject(
+                                            e,
                                             item.id,
                                             odAssignedDuty
                                           )

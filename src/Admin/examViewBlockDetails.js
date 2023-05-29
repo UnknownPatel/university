@@ -27,13 +27,16 @@ const ExamViewBlockDetails = () => {
   const [subjects2, setSubjects2] = useState([]);
   const [subjectId2, setSubjectId2] = useState("");
   const [date2, setDate2] = useState("");
-  const [time2, setTime2] = useState("");
+  const [time2, setTime2] = useState("morning");
+  const [storeDates, setStoreDates] = useState([]);
   const [noOfStudent, setNoOfStudent] = useState();
   const [examTimeTableId, setExamTimeTableId] = useState("");
   const [displayBlockWiseTable, setDisplayBlockWiseTable] = useState([]);
   const [buttonDisabled, setButtonDisabled] = useState(true);
+  const [branchesName, setBranchesName] = useState("");
   const componentRef2 = useRef();
   const [academic_years, setAcademicYears] = useState([]);
+  const [semesterName, setSemesterName] = useState("");
 
   var year;
 
@@ -100,6 +103,19 @@ const ExamViewBlockDetails = () => {
     setBranchId("");
     setSemesters2([]);
     setSemesterId("");
+    var selectedFilter = {};
+    setStoreDates([]);
+    if (examinationName2 !== "Select Examination") {
+      selectedFilter["name"] = examinationName2;
+    }
+
+    if (selectedYear2 !== "Select Year") {
+      selectedFilter["academic_year"] = selectedYear2;
+    }
+    selectedFilter["time"] = time2;
+    if (e.target.value !== "Select Course") {
+      selectedFilter["course_id"] = e.target.value;
+    }
     const block_report_viewport = document.getElementById(
       "block_report_viewport"
     );
@@ -135,6 +151,26 @@ const ExamViewBlockDetails = () => {
             setBranches2(response.data.data.branches);
           })
           .catch((error) => console.log(error));
+
+        axios
+          .get(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
+            {
+              headers,
+              params: {
+                time_table: selectedFilter,
+                subdomain: subdomain,
+              },
+            }
+          )
+          .then((response) => {
+            if (response.data.message === "Examination dates are as below") {
+              if (response.data.data.dates.length !== 0) {
+                setStoreDates(response.data.data.dates);
+              }
+            }
+          })
+          .catch((error) => console.log(error));
       }
     } else {
       setCourseId("");
@@ -147,6 +183,26 @@ const ExamViewBlockDetails = () => {
 
   const handleBranchChange2 = (e) => {
     e.preventDefault();
+    var selectedIndex = e.target.options.selectedIndex;
+    setBranchesName(e.target.options[selectedIndex].getAttribute("data-name"));
+    var selectedFilter = {};
+    setStoreDates([]);
+
+    if (examinationName2 !== "Select Examination") {
+      selectedFilter["name"] = examinationName2;
+    }
+
+    if (selectedYear2 !== "Select Year") {
+      selectedFilter["academic_year"] = selectedYear2;
+    }
+    selectedFilter["time"] = time2;
+    if (courseId !== "Select Course") {
+      selectedFilter["course_id"] = courseId;
+    }
+
+    if (e.target.value !== "Select Branch") {
+      selectedFilter["branch_id"] = e.target.value;
+    }
     const block_report_viewport = document.getElementById(
       "block_report_viewport"
     );
@@ -183,6 +239,25 @@ const ExamViewBlockDetails = () => {
             }
           })
           .catch((error) => console.log(error));
+        axios
+          .get(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
+            {
+              headers,
+              params: {
+                time_table: selectedFilter,
+                subdomain: subdomain,
+              },
+            }
+          )
+          .then((response) => {
+            if (response.data.message === "Examination dates are as below") {
+              if (response.data.data.dates.length !== 0) {
+                setStoreDates(response.data.data.dates);
+              }
+            }
+          })
+          .catch((error) => console.log(error));
       }
     } else {
       setBranchId("");
@@ -192,6 +267,24 @@ const ExamViewBlockDetails = () => {
   };
 
   const handleSemesterChange2 = (e) => {
+    var selectedFilter = {};
+    setStoreDates([]);
+    selectedFilter["time"] = time2;
+    if (examinationName2 !== "Select Examination") {
+      selectedFilter["name"] = examinationName2;
+    }
+
+    if (selectedYear2 !== "Select Year") {
+      selectedFilter["academic_year"] = selectedYear2;
+    }
+
+    if (courseId !== "Select Course") {
+      selectedFilter["course_id"] = courseId;
+    }
+
+    if (courseId !== "Select Branch") {
+      selectedFilter["branch_id"] = branchId;
+    }
     const block_report_viewport = document.getElementById(
       "block_report_viewport"
     );
@@ -201,14 +294,48 @@ const ExamViewBlockDetails = () => {
     download_button.classList.add("hidden");
     e.preventDefault();
     if (e.target.value !== "Select Semester") {
+      selectedFilter["semester_id"] = e.target.value;
       setSemesterId(e.target.value);
     } else {
       setSemesterId("");
     }
+
+    var selectedIndex = e.target.options.selectedIndex;
+    setSemesterName(
+      "Semester : " +
+        e.target.options[selectedIndex].getAttribute("data-semester-name")
+    );
+    acces_token = localStorage.getItem("access_token");
+    const headers = { Authorization: `Bearer ${acces_token}` };
+    const host = window.location.host;
+    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
+    if (arr.length > 0) {
+      subdomain = arr[0];
+    }
+    if (subdomain !== null || subdomain !== "") {
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
+          {
+            headers,
+            params: {
+              time_table: selectedFilter,
+              subdomain: subdomain,
+            },
+          }
+        )
+        .then((response) => {
+          if (response.data.message === "Examination dates are as below") {
+            if (response.data.data.dates.length !== 0) {
+              setStoreDates(response.data.data.dates);
+            }
+          }
+        })
+        .catch((error) => console.log(error));
+    }
   };
 
   const handleFilterSubmit = (e) => {
-    console.log("button clicked!");
     let selectedFilter = {};
 
     if (examinationName2 === "") {
@@ -224,29 +351,28 @@ const ExamViewBlockDetails = () => {
         position: toast.POSITION.BOTTOM_LEFT,
       });
     } else {
-      selectedFilter = {
-        name: examinationName2,
-        academic_year: selectedYear2,
-        course_id: courseId,
-      };
+      selectedFilter["examination_name"] = examinationName2;
+      selectedFilter["academic_year"] = selectedYear2;
+      selectedFilter["course_id"] = courseId;
 
       if (branchId !== "") {
-        selectedFilter = {
-          name: examinationName2,
-          academic_year: selectedYear2,
-          course_id: courseId,
-          branch_id: branchId,
-        };
+        selectedFilter["branch_id"] = branchId;
+      } else {
+        delete selectedFilter["branch_id"];
       }
 
       if (semesterId !== "") {
-        selectedFilter = {
-          name: examinationName2,
-          academic_year: selectedYear2,
-          course_id: courseId,
-          branch_id: branchId,
-          semester_id: semesterId,
-        };
+        selectedFilter["semester_id"] = semesterId;
+      } else {
+        delete selectedFilter["semester_id"];
+      }
+
+      if (date2 !== "") {
+        selectedFilter["date"] = date2;
+      }
+
+      if (time2 !== "") {
+        selectedFilter["time"] = time2;
       }
     }
 
@@ -435,55 +561,9 @@ const ExamViewBlockDetails = () => {
                   href="/examViewTimeTable"
                   className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
-                  <span className="flex-1 ml-3 whitespace-nowrap">
-                    Report
-                  </span>
+                  <span className="flex-1 ml-3 whitespace-nowrap">Report</span>
                 </a>
               </li>
-              {/* <li>
-                <button
-                  className="w-full bg-slate-600 text-white py-2 px-4 text-left rounded-md"
-                  onClick={toggleDropdown}
-                >
-                  Reports
-                </button>
-                <div
-                  className={`bg-white shadow rounded-md mt-2 py-2 ${
-                    isDropdownOpen ? "block" : "hidden"
-                  }`}
-                >
-                  <a
-                    href="/examViewTimeTable"
-                    className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                  >
-                    Time Table
-                  </a>
-                  <a
-                    href="/examViewBlockDetails"
-                    className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                  >
-                    BlockWise Report
-                  </a>
-                  <a
-                    href="/examViewJrSupervision"
-                    className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                  >
-                    Jr. Supervision Report
-                  </a>
-                  <a
-                    href="/examViewSrSupervision"
-                    className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                  >
-                    Sr. Supervision Report
-                  </a>
-                  <a
-                    href="/examViewOtherDuty"
-                    className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                  >
-                    Other Duty Report
-                  </a>
-                </div>
-              </li> */}
             </ul>
           </div>
         </aside>
@@ -517,7 +597,7 @@ const ExamViewBlockDetails = () => {
               </a>
               <a
                 className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg `}
-              href="/examViewOtherDuty"
+                href="/examViewOtherDuty"
               >
                 Other Duties
               </a>
@@ -572,10 +652,43 @@ const ExamViewBlockDetails = () => {
             >
               <option>Select Semester</option>
               {semesters2.map((semester) => (
-                <option value={semester.id}>{semester.name}</option>
+                <option value={semester.id} data-semester-name={semester.name}>{semester.name}</option>
               ))}
             </select>
 
+            <select
+              className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+              onChange={(e) => {
+                if (e.target.value !== "Select Date") {
+                  setDate2(e.target.value);
+                } else {
+                  setDate2("");
+                }
+              }}
+            >
+              <option>Select Date</option>
+              {storeDates.map((date) => (
+                <option value={date}>{date}</option>
+              ))}
+            </select>
+
+            <select
+              className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+              onChange={(e) => {
+                if (e.target.value !== "Select time") {
+                  setTime2(e.target.value);
+                } else {
+                  setTime2("");
+                }
+              }}
+            >
+              <option>Select time</option>
+              <option value="morning">10:30 A.M to 01:00 P.M</option>
+              <option value="evening">03:00 P.M to 05:30 P.M</option>
+            </select>
+          </div>
+
+          <div className="flex justify-center mt-5">
             <button
               className="py-2 px-3 bg-gray-800 rounded-2xl text-white font-bold"
               // id={"button-subject-" + subject.id}
@@ -591,6 +704,15 @@ const ExamViewBlockDetails = () => {
             >
               <FcDownload />
             </a>
+
+            <a
+              href="#"
+              id="download_button"
+              // onClick={handleSavePdf}
+              className="hidden py-2 px-3 mt-1 bg-blue-200 rounded-2xl text-white font-bold"
+            >
+              <FcDownload />
+            </a>
           </div>
 
           <div
@@ -600,11 +722,14 @@ const ExamViewBlockDetails = () => {
           >
             <div>
               <p className="text-center">{uniName}</p>
+              <p className="text-center">{branchesName} {semesterName}</p>
+            <p className="text-center uppercase">{date2} {time2}</p>
+              
               <p className="text-center">
                 {examinationName2} {selectedYear2} Examination Time Table
               </p>
             </div>
-            <div className="overflow-y-scroll" style={{ height: 295 }}>
+            <div>
               <div className="p-1.5 w-full inline-block align-middle">
                 <div className="border rounded-lg">
                   <table className="min-w-full divide-y divide-gray-200">

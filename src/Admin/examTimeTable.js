@@ -30,6 +30,7 @@ const ExamTimeTable = () => {
   const [minDate, setMinDate] = useState("");
   const [maxDate, setMaxDate] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [storedDates, setStoredDates] = useState([]);
 
   var year;
 
@@ -95,7 +96,18 @@ const ExamTimeTable = () => {
 
   const handleCourseChange = (e) => {
     e.preventDefault();
+    var selectedFilter = {};
+    if(examinationName !== "Select Examination"){
+      selectedFilter["name"] = examinationName
+    }else if(selectedYear !== "Select Year"){
+      selectedFilter["academic_year"] = selectedYear
+    }else if(e.target.value !== "Select Course"){
+      selectedFilter["course_id"] = e.target.value;
+    }
+
+    console.log(selectedFilter);
     setSubjects([]);
+    setSemesters([]);
     const time_table_viewport = document.getElementById("time_table_viewport");
     time_table_viewport.classList.add("hidden");
     time_table_viewport.classList.remove("flex");
@@ -159,6 +171,9 @@ const ExamTimeTable = () => {
   const handleSemesterChange = (e) => {
     e.preventDefault();
     setSubjects([]);
+    const time_table_viewport = document.getElementById("time_table_viewport");
+    time_table_viewport.classList.add("hidden");
+    time_table_viewport.classList.remove("flex");
     if (e.target.value === "Select Semester") {
       setSemesterId("");
     } else {
@@ -202,8 +217,6 @@ const ExamTimeTable = () => {
       }
     }
 
-    console.log(selectedFilter);
-
     if (subdomain !== null || subdomain !== "") {
       axios
         .get(
@@ -233,6 +246,7 @@ const ExamTimeTable = () => {
                     { headers }
                   )
                   .then((get_response) => {
+                    console.log(get_response);
                     const button = document.getElementById(
                       "button-subject-" + subject.id
                     );
@@ -243,27 +257,20 @@ const ExamTimeTable = () => {
                       "select-time-subject-" + subject.id
                     );
                     if (get_response.data.message === "Details found") {
-                      button.disabled = true;
-                      button.innerHTML = "Created";
-                      table_date.disabled = true;
+                      button.innerHTML = "Update";
+                      button.setAttribute(
+                        "data-time-table-id",
+                        get_response.data.data.time_table.id
+                      );
                       table_date.value = get_response.data.data.time_table.date;
-                      table_time.disabled = true;
-                      table_time.options[table_time.options.selectedIndex].text =
-                        get_response.data.data.time_table.time;
-                      table_date.classList.add("cursor-not-allowed");
-                      table_time.classList.add("cursor-not-allowed");
-                      button.classList.add("cursor-not-allowed");
+                      var selectedIndex = get_response.data.data.time_table.time === "10:30 A.M to 01:00 P.M" ? 1 : 2
+                      table_time.options.selectedIndex = selectedIndex;
                     } else {
-                      button.disabled = false;
                       button.innerHTML = "Create";
-                      table_date.disabled = false;
                       table_date.value = "";
-                      table_time.disabled = false;
-                      table_time.options[table_time.options.selectedIndex].text =
-                        "Select time";
-                      table_date.classList.remove("cursor-not-allowed");
-                      table_time.classList.remove("cursor-not-allowed");
-                      button.classList.remove("cursor-not-allowed");
+                      table_time.options[
+                        table_time.options.selectedIndex
+                      ].text = "Select time";
                     }
                   })
                   .catch((err) => {
@@ -279,61 +286,88 @@ const ExamTimeTable = () => {
     }
   };
 
-  const createObject = (id, date, time) => {
-    axios
-      .post(
-        `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables?subdomain=${subdomain}`,
-        {
-          time_table: {
-            name: examinationName,
-            academic_year: selectedYear,
-            subject_id: id,
-            date: date,
-            time: time,
-          },
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${acces_token}`,
-          },
-        }
-      )
-      .then((responce) => {
-        console.log(responce.data);
-        if (responce.data.status == "created") {
-          const button = document.getElementById("button-subject-" + id);
-          const date = document.getElementById("date-select-subject-" + id);
-          const time = document.getElementById("select-time-subject-" + id);
-          button.disabled = true;
-          button.innerHTML = "Created";
-          date.disabled = true;
-          date.value = responce.data.data.time_table.date;
-          time.disabled = true;
-          time.options[time.options.selectedIndex].text =
-            responce.data.data.time_table.time;
-          date.classList.add("cursor-not-allowed");
-          time.classList.add("cursor-not-allowed");
+  const createObject = (e, id, date, time) => {
+    e.preventDefault();
+    if (e.target.innerHTML === "Update") {
+      var time_table_id = e.target.getAttribute("data-time-table-id");
+      const date_input = document.getElementById("date-select-subject-" + id);
+      const time_input = document.getElementById("select-time-subject-" + id);
 
-          // const date_select = document.getElementById("date-select-subject-" + id)
-          // const time_select = document.getElementById("select-time-subject-" + id)
-          button.classList.add("cursor-not-allowed");
-          // date_select.classList.add('cursor-not-allowed')
-          // date_select.value = responce.data.time_table.date
-          // date_select.disabled = true
-          // time_select.classList.add('cursor-not-allowed')
-          button.innerHTML = "Created";
-          toast.success(responce.data.message, {
-            position: toast.POSITION.BOTTOM_LEFT,
-          });
-        } else {
-          toast.error(responce.data.message, {
-            position: toast.POSITION.BOTTOM_LEFT,
-          });
-        }
-      })
-      .catch(function (err) {
-        console.log(err.message);
-      });
+      var dateValue = date_input.value;
+      var timeValue =  time_input.options[time_input.options.selectedIndex].value
+
+      axios
+        .put(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/${time_table_id}`,
+          {
+            subdomain: subdomain,
+            time_table: {
+              date: dateValue,
+              time: timeValue,
+            },
+          },
+          { headers }
+        )
+        .then((res) => {
+          if(res.data.status === "ok"){
+            console.log("Status OK");
+            if(res.data.data.time_table.length !== 0){
+              console.log("Updated");
+              toast.success(res.data.message, {
+                position: toast.POSITION.BOTTOM_LEFT,
+              });
+            }
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    } else {
+      axios
+        .post(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables?subdomain=${subdomain}`,
+          {
+            time_table: {
+              name: examinationName,
+              academic_year: selectedYear,
+              subject_id: id,
+              date: date,
+              time: time,
+            },
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${acces_token}`,
+            },
+          }
+        )
+        .then((responce) => {
+          console.log(responce.data);
+          if (responce.data.status == "created") {
+            const button = document.getElementById("button-subject-" + id);
+            const date = document.getElementById("date-select-subject-" + id);
+            const time = document.getElementById("select-time-subject-" + id);
+            button.innerHTML = "Update";
+            button.target.setAttribute(
+              "data-time-table-id",
+              responce.data.data.time_table.id
+            );
+            date.value = responce.data.data.time_table.date;
+            time.options[time.options.selectedIndex].text =
+              responce.data.data.time_table.time;
+            toast.success(responce.data.message, {
+              position: toast.POSITION.BOTTOM_LEFT,
+            });
+          } else {
+            toast.error(responce.data.message, {
+              position: toast.POSITION.BOTTOM_LEFT,
+            });
+          }
+        })
+        .catch(function (err) {
+          console.log(err.message);
+        });
+    }
   };
 
   return (
@@ -517,11 +551,12 @@ const ExamTimeTable = () => {
                   href="/examViewSrSupervision"
                   className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
                 >
-                  Sr. Supervision Report
-                </a>
-                <a
-                  href="/examViewOtherDuty"
-                  className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
+                  Reports
+                </button>
+                <div
+                  className={`bg-white shadow rounded-md mt-2 py-2 ${
+                    isDropdownOpen ? "block" : "hidden"
+                  }`}
                 >
                   Other Duty Report
                 </a>
@@ -563,6 +598,7 @@ const ExamTimeTable = () => {
             </select>
 
             <select
+              aria-label="Select Course"
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2"
               onChange={handleCourseChange}
             >
@@ -670,7 +706,9 @@ const ExamTimeTable = () => {
                             <select
                               id={"select-time-subject-" + subject.id}
                               className="form-select text-sm md:text-sm lg:text-sm mr-2 border-2 select-code"
-                              onChange={(e) => setTime(e.target.value)}
+                              onChange={(e) => {
+                                setTime(e.target.value)
+                              }}
                               // selected={}
                             >
                               <option value="">Select time</option>
@@ -689,8 +727,8 @@ const ExamTimeTable = () => {
                             <button
                               className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold"
                               id={"button-subject-" + subject.id}
-                              onClick={() =>
-                                createObject(subject.id, date, time)
+                              onClick={(e) =>
+                                createObject(e, subject.id, date, time)
                               }
                             >
                               Create

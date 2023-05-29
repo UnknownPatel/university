@@ -5,6 +5,7 @@ import DatePicker from "react-datepicker";
 import { ToastContainer, toast } from "react-toastify";
 import "react-datepicker/dist/react-datepicker.css";
 import "tailwindcss/tailwind.css";
+import * as XLSX from "xlsx";
 import { FcCheckmark } from "react-icons/fc";
 import { FcDownload } from "react-icons/fc";
 
@@ -24,19 +25,13 @@ const ExamViewSrSupervision = () => {
   const [branches, setBranches] = useState([]);
   const [branchId, setBranchId] = useState("");
   const [courseId, setCourseId] = useState("");
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("0");
   const [branchesName, setBranchesName] = useState("");
   const [srSupervisionTable, setSrSupervisionTable] = useState([]);
   const [subjectDates, setSubjectDates] = useState([]);
+  const [storeDates, setStoreDates] = useState([]);
 
-  const [srSubjectDates, setSrSubjectDates] = useState([]);
-  const [srDateCheckBox, setSrDateCheckBox] = useState([]);
-  const [srFacultyName, setSrFacultyName] = useState([{}]);
-  const [srUserId, setSrUserId] = useState("");
-  const [srSupervisionDesignation, setSrSupervisionDesignation] = useState("");
-  const [srSupervisionDepartment, setSrSupervisionDepartment] = useState("");
-  const [srDisplaySupervisionTable, setSrDisplaySupervisionTable] = useState(
-    []
-  );
   const componentRef4 = useRef();
   var year;
 
@@ -85,6 +80,7 @@ const ExamViewSrSupervision = () => {
   const handleExaminationChange4 = (examination) => {
     setExaminationName4(examination);
   };
+
   const handleYearChange4 = (date) => {
     if (date !== "Select Year") {
       setSelectedYear4(date);
@@ -92,11 +88,31 @@ const ExamViewSrSupervision = () => {
       setSelectedYear4("");
     }
   };
+
   const handleCourseChange = (e) => {
     e.preventDefault();
     setCourseId("");
     setBranches([]);
     setBranchId("");
+    var selectedFilter = {};
+    setStoreDates([]);
+    if (examinationName4 !== "Select Examination") {
+      selectedFilter["name"] = examinationName4;
+    }
+
+    if (time === "0") {
+      selectedFilter["time"] = "morning";
+    } else {
+      selectedFilter["time"] = "evening";
+    }
+
+    if (selectedYear4 !== "Select Year") {
+      selectedFilter["academic_year"] = selectedYear4;
+    }
+
+    if (e.target.value !== "Select Course") {
+      selectedFilter["course_id"] = e.target.value;
+    }
     const sr_supervision_report_viewport = document.getElementById(
       "sr_supervision_report_viewport"
     );
@@ -132,6 +148,26 @@ const ExamViewSrSupervision = () => {
             setBranches(response.data.data.branches);
           })
           .catch((error) => console.log(error));
+
+        axios
+          .get(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
+            {
+              headers,
+              params: {
+                time_table: selectedFilter,
+                subdomain: subdomain,
+              },
+            }
+          )
+          .then((response) => {
+            if (response.data.message === "Examination dates are as below") {
+              if (response.data.data.dates.length !== 0) {
+                setStoreDates(response.data.data.dates);
+              }
+            }
+          })
+          .catch((error) => console.log(error));
       }
     } else {
       setCourseId("");
@@ -139,10 +175,35 @@ const ExamViewSrSupervision = () => {
       setBranchId("");
     }
   };
+
   const handleBranchChange = (e) => {
     e.preventDefault();
     var selectedIndex = e.target.options.selectedIndex;
     setBranchesName(e.target.options[selectedIndex].getAttribute("data-name"));
+    var selectedFilter = {};
+    setStoreDates([]);
+
+    if (examinationName4 !== "Select Examination") {
+      selectedFilter["name"] = examinationName4;
+    }
+
+    if (selectedYear4 !== "Select Year") {
+      selectedFilter["academic_year"] = selectedYear4;
+    }
+
+    if (time === "0") {
+      selectedFilter["time"] = "morning";
+    } else {
+      selectedFilter["time"] = "evening";
+    }
+
+    if (courseId !== "Select Course") {
+      selectedFilter["course_id"] = courseId;
+    }
+
+    if (e.target.value !== "Select Branch") {
+      selectedFilter["branch_id"] = e.target.value;
+    }
     const sr_supervision_report_viewport = document.getElementById(
       "sr_supervision_report_viewport"
     );
@@ -164,18 +225,20 @@ const ExamViewSrSupervision = () => {
       if (subdomain !== null || subdomain !== "") {
         axios
           .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/semesters`,
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
             {
               headers,
               params: {
+                time_table: selectedFilter,
                 subdomain: subdomain,
-                branch_id: e.target.value,
               },
             }
           )
           .then((response) => {
-            if (response.data.status === "ok") {
-              // setSemesters2(response.data.data.semesters);
+            if (response.data.message === "Examination dates are as below") {
+              if (response.data.data.dates.length !== 0) {
+                setStoreDates(response.data.data.dates);
+              }
             }
           })
           .catch((error) => console.log(error));
@@ -184,10 +247,19 @@ const ExamViewSrSupervision = () => {
       setBranchId("");
     }
   };
+
   const handleFilterSubmit = (e) => {
     console.log("button clicked!");
+    const sr_supervision_report_viewport = document.getElementById(
+      "sr_supervision_report_viewport"
+    );
+    const download_button = document.getElementById("download_button");
+    sr_supervision_report_viewport.classList.add("hidden");
+    sr_supervision_report_viewport.classList.remove("flex");
+    download_button.classList.add("hidden");
     let selectedFilter = {};
     let timeTableFilter = {};
+    let time_table_time = "";
 
     if (examinationName4 === "") {
       toast.error("Please select examination name", {
@@ -206,14 +278,20 @@ const ExamViewSrSupervision = () => {
         examination_name: examinationName4,
         academic_year: selectedYear4,
         course_id: courseId,
-        list_type: 'Senior',
+        list_type: "Senior",
+        time: time,
       };
 
-      timeTableFilter ={
+      time === "0"
+        ? (time_table_time = "morning")
+        : (time_table_time = "evening");
+
+      timeTableFilter = {
         name: examinationName4,
         academic_year: selectedYear4,
-        course_id: courseId
-      }
+        course_id: courseId,
+        time: time_table_time,
+      };
 
       if (branchId !== "") {
         selectedFilter = {
@@ -221,7 +299,8 @@ const ExamViewSrSupervision = () => {
           academic_year: selectedYear4,
           course_id: courseId,
           branch_id: branchId,
-          type: "Senior",
+          list_type: "Senior",
+          time: time,
         };
 
         timeTableFilter = {
@@ -229,18 +308,13 @@ const ExamViewSrSupervision = () => {
           academic_year: selectedYear4,
           course_id: courseId,
           branch_id: branchId,
-        }
+          time: time_table_time,
+        };
       }
 
-      // if (semesterId !== "") {
-      //   selectedFilter = {
-      //     name: examinationName2,
-      //     academic_year: selectedYear2,
-      //     course_id: courseId,
-      //     branch_id: branchId,
-      //     semester_id: semesterId,
-      //   };
-      // }
+      if (date !== "") {
+        selectedFilter["date"] = date;
+      }
     }
 
     console.log(selectedFilter);
@@ -260,16 +334,15 @@ const ExamViewSrSupervision = () => {
         .then((res) => {
           console.log(res);
           if (res.data.status === "ok") {
-            const sr_supervision_report_viewport = document.getElementById(
-              "sr_supervision_report_viewport"
-            );
-            const download_button = document.getElementById("download_button");
             if (res.data.data.supervisions.length !== 0) {
               download_button.classList.remove("hidden");
               sr_supervision_report_viewport.classList.remove("hidden");
               sr_supervision_report_viewport.classList.add("flex");
               setSrSupervisionTable(res.data.data.supervisions);
             } else {
+              download_button.add("hidden");
+              sr_supervision_report_viewport.classList.add("hidden");
+              sr_supervision_report_viewport.classList.remove("flex");
               toast.error(`No Reports found for selected filters!`, {
                 position: toast.POSITION.BOTTOM_LEFT,
               });
@@ -279,6 +352,9 @@ const ExamViewSrSupervision = () => {
         .catch((err) => {
           console.error(err);
         });
+      if (date !== "") {
+        setSubjectDates([date]);
+      } else {
         axios
           .get(
             `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
@@ -292,82 +368,82 @@ const ExamViewSrSupervision = () => {
             }
           )
           .then((response) => {
-            const sr_supervision_report = document.getElementById(
-              "sr_supervision_report_viewport"
-            );
             if (response.data.message === "Examination dates are as below") {
               if (response.data.data.dates.length !== 0) {
                 console.log(response.data.data.dates);
                 setSubjectDates(response.data.data.dates);
-                sr_supervision_report.classList.remove("hidden");
-                sr_supervision_report.classList.add("flex");
+                sr_supervision_report_viewport.classList.remove("hidden");
+                sr_supervision_report_viewport.classList.add("flex");
               }
             }
           })
           .catch((error) => console.log(error));
+      }
     }
   };
 
-  // const handleSeniorSupervisionSubmit = (e) => {
-  //   e.preventDefault();
-  //   acces_token = localStorage.getItem("access_token");
-  //   const metadata = JSON.stringify(srDateCheckBox);
-  //   axios
-  //     .post(
-  //       `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions?subdomain=${subdomain}`,
-  //       {
-  //         supervision: {
-  //           academic_year: moment(selectedYear4).format("YYYY"),
-  //           user_id: srUserId,
-  //           list_type: "Senior",
-  //           metadata: {
-  //             metadata,
-  //           },
-  //           examination_name: examinationName4,
-  //         },
-  //       },
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${acces_token}`,
-  //         },
-  //       }
-  //     )
-  //     .then((responce) => {
-  //       console.log(responce.data);
-  //       if (responce.data.status == "created") {
-  //         toast.success(responce.data.message, {
-  //           position: toast.POSITION.BOTTOM_LEFT,
-  //         });
-  //       } else {
-  //         toast.error(responce.data.message, {
-  //           position: toast.POSITION.BOTTOM_LEFT,
-  //         });
-  //       }
+  const downloadExcel = () => {
+    const wrapper = document.getElementById("sr_supervision_report_viewport"); // Replace 'table' with the ID of your div element containing the table
+    const table = wrapper.querySelector("table");
+    const additionalData = wrapper.querySelectorAll("#selected_filters p");
+    const worksheetData = [];
 
-  //       axios
-  //         .get(
-  //           `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions?type=Senior&academic_year=${moment(
-  //             selectedYear4
-  //           ).format(
-  //             "YYYY"
-  //           )}&subdomain=${subdomain}&examination_name=${examinationName4}`,
-  //           {
-  //             headers: {
-  //               Authorization: `Bearer ${acces_token}`,
-  //             },
-  //           }
-  //         )
-  //         .then((response) => {
-  //           console.log(response.data.data);
-  //           setSrDisplaySupervisionTable(response.data.data.supervisions);
-  //           // console.log(response.data.data.supervisions[0].metadata);
-  //         })
-  //         .catch((error) => console.log(error));
-  //     })
-  //     .catch(function (err) {
-  //       console.log(err.message);
-  //     });
-  // };
+    additionalData.forEach((p) => {
+      const rowData = [
+        {
+          v: p.textContent,
+          t: "s",
+          s: { alignment: { horizontal: "center" } },
+        },
+      ];
+      worksheetData.push(rowData);
+    });
+
+    worksheetData.push([]);
+
+    const tableRows = table.querySelectorAll("tr");
+    // Prepare the worksheet data
+    tableRows.forEach((row) => {
+      const rowData = [];
+      const cells = row.querySelectorAll("th, td");
+      cells.forEach((cell) => {
+        let cellData = cell.textContent;
+        // Check if cell content includes the checkmark icon
+        if (
+          cell.innerHTML.includes(
+            '<svg stroke="currentColor" fill="currentColor" stroke-width="0" version="1" viewBox="0 0 48 48" enable-background="new 0 0 48 48" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><polygon fill="#43A047" points="40.6,12.1 17,35.7 7.4,26.1 4.6,29 17,41.3 43.4,14.9"></polygon></svg>'
+          )
+        ) {
+          cellData = "1";
+        }
+        rowData.push({ v: cellData });
+      });
+      worksheetData.push(rowData);
+    });
+    // Create a new workbook
+    const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+    const workbook = XLSX.utils.book_new();
+    // Create a new worksheet
+    // Add the worksheet to the workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, "SrSuperVisionData"); // Replace 'Sheet1' with your desired sheet name
+    // Generate an Excel file
+    const excelBuffer = XLSX.write(workbook, {
+      type: "buffer",
+      bookType: "xlsx",
+    });
+    // Create a Blob object from the Excel buffer
+    const blob = new Blob([excelBuffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    // Create a download link
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "SrSuperVisionData.xlsx"; // Replace 'table.xlsx' with your desired file name
+    // Trigger the download
+    link.click();
+  };
+
   const handlePrint4 = useReactToPrint({
     content: () => componentRef4.current,
   });
@@ -518,50 +594,6 @@ const ExamViewSrSupervision = () => {
                 <span className="flex-1 ml-3 whitespace-nowrap">Report</span>
               </a>
             </li>
-            {/* <li>
-              <button
-                className="w-full bg-slate-600 text-white py-2 px-4 text-left rounded-md"
-                onClick={toggleDropdown}
-              >
-                Reports
-              </button>
-              <div
-                className={`bg-white shadow rounded-md mt-2 py-2 ${
-                  isDropdownOpen ? "block" : "hidden"
-                }`}
-              >
-                <a
-                  href="/examViewTimeTable"
-                  className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                >
-                  Time Table
-                </a>
-                <a
-                  href="/examViewBlockDetails"
-                  className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                >
-                  BlockWise Report
-                </a>
-                <a
-                  href="/examViewJrSupervision"
-                  className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                >
-                  Jr. Supervision Report
-                </a>
-                <a
-                  href="/examViewSrSupervision"
-                  className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                >
-                  Sr. Supervision Report
-                </a>
-                <a
-                  href="/examViewOtherDuty"
-                  className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                >
-                  Other Duty Report
-                </a>
-              </div>
-            </li> */}
           </ul>
         </div>
       </aside>
@@ -646,8 +678,34 @@ const ExamViewSrSupervision = () => {
             ))}
           </select>
 
+          <select
+            className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+            onChange={(e) => {
+              if (e.target.value !== "Select Date") {
+                setDate(e.target.value);
+              } else {
+                setDate("");
+              }
+            }}
+          >
+            <option>Select Date</option>
+            {storeDates.map((date) => (
+              <option value={date}>{date}</option>
+            ))}
+          </select>
+
+          <select
+            className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+            onChange={(e) => {
+              setTime(e.target.value);
+            }}
+          >
+            <option value="0">10:30 A.M to 01:00 P.M</option>
+            <option value="1">03:00 P.M to 05:30 P.M</option>
+          </select>
+
           <button
-            className="py-2 px-3 ml-20 bg-gray-800 rounded-2xl text-white font-bold"
+            className="py-2 px-3 bg-gray-800 rounded-2xl text-white font-bold"
             // id={"button-subject-" + subject.id}
             onClick={handleFilterSubmit}
           >
@@ -658,7 +716,7 @@ const ExamViewSrSupervision = () => {
           <a
             href="#"
             id="download_button"
-            onClick={handlePrint4}
+            onClick={downloadExcel}
             className="hidden py-2 px-3 absolute right-0 mt-1 mr-7 bg-blue-200 rounded-2xl text-white font-bold"
           >
             <FcDownload />
@@ -669,15 +727,22 @@ const ExamViewSrSupervision = () => {
           ref={componentRef4}
           id="sr_supervision_report_viewport"
         >
-          <div>
+          <div id="selected_filters">
             <p className="text-center">{uniName}</p>
+            <p className="text-center">{branchesName} </p>
+            <p className="text-center">
+              {date} {time === "0" ? "Morning" : "Evening"}
+            </p>
             <p className="text-center">
               {examinationName4} {selectedYear4} Examination Time Table
             </p>
           </div>
           <div className="overflow-y-scroll" style={{ height: 295 }}>
             <div className="p-1.5 w-full inline-block align-middle">
-              <div className="border rounded-lg">
+              <div
+                id="sr_faculty_supervision_data_table"
+                className="border rounded-lg"
+              >
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="sticky top-0 bg-gray-50">
                     <tr>
@@ -727,24 +792,15 @@ const ExamViewSrSupervision = () => {
                         <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                           {supervision.department}
                         </td>
-                        {/* {Object.entries(
-                          JSON.parse(supervision.metadata.metadata)
-                        ).map((value) => {
-                          if (value[1] === true) {
+                        {subjectDates.map((value) => {
+                          if (supervision.metadata[value]) {
                             return (
-                              <td className="px-6 py-4 text-sm text-gray-800 ">
-                                <p className="flex justify-center">
-                                  <FcCheckmark />
-                                </p>
+                              <td className="px-6 py-4 flex-row justify-center items-center text-sm text-gray-800 ">
+                                <FcCheckmark />
                               </td>
                             );
                           }
-                        })} */}
-                        {/* {subjectDates.map((value) => (
-                                  <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                    {Object.entries(JSON.parse(supervision.metadata.metadata))[value]}
-                                  </td>
-                                ))} */}
+                        })}
                       </tr>
                     ))}
                   </tbody>

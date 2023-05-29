@@ -7,8 +7,31 @@ import "react-datepicker/dist/react-datepicker.css";
 import "tailwindcss/tailwind.css";
 import { FcCheckmark } from "react-icons/fc";
 import { FcDownload } from "react-icons/fc";
+import { FcPrint } from "react-icons/fc";
 
 import { useReactToPrint } from "react-to-print";
+import { saveAs } from "file-saver";
+import {
+  Document,
+  Page,
+  Text,
+  View,
+  StyleSheet,
+  pdf,
+} from "@react-pdf/renderer";
+import html2pdf from "html2pdf.js";
+
+const styles = StyleSheet.create({
+  page: {
+    flexDirection: "row",
+    backgroundColor: "#FFFFFF",
+  },
+  section: {
+    margin: 10,
+    padding: 10,
+    flexGrow: 1,
+  },
+});
 
 var access_token;
 var subdomain;
@@ -17,6 +40,7 @@ var headers;
 
 const ExamViewTimeTable = () => {
   const componentRef = useRef();
+  const tableRef = useRef(null);
   const [uniName, setUniName] = useState("");
   const [courses, setCourses] = useState([]);
   const [courseId, setCourseId] = useState("");
@@ -25,6 +49,7 @@ const ExamViewTimeTable = () => {
   const [branchesName, setBranchesName] = useState("");
   const [semesters, setSemesters] = useState([]);
   const [semesterId, setSemesterId] = useState("");
+  const [semesterName, setSemesterName] = useState("");
   const [selectedYear, setSelectedYear] = useState();
   const [examinationName, setExaminationName] = useState("");
   const [date, setDate] = useState("");
@@ -32,6 +57,12 @@ const ExamViewTimeTable = () => {
   const [displayTimeTable, setDisplayTimeTable] = useState([]);
   const [academic_years, setAcademicYears] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [storeDates, setStoreDates] = useState([]);
+  const [removeOverFlow, setRemoveOverflow] = useState(false);
+  var divStyle = {
+    height: "400px",
+    overflowY: "auto",
+  };
 
   useEffect(() => {
     access_token = localStorage.getItem("access_token");
@@ -93,6 +124,21 @@ const ExamViewTimeTable = () => {
 
   const handleCourseChange = (e) => {
     e.preventDefault();
+    var selectedFilter = {};
+    setStoreDates([]);
+    if (examinationName !== "Select Examination") {
+      selectedFilter["name"] = examinationName;
+    }
+
+    if (selectedYear !== "Select Year") {
+      selectedFilter["academic_year"] = selectedYear;
+    }
+
+    if (e.target.value !== "Select Course") {
+      selectedFilter["course_id"] = e.target.value;
+    }
+
+    console.log(selectedFilter);
     setCourseId(e.target.value);
     var course_id = e.target.value;
     access_token = localStorage.getItem("access_token");
@@ -112,11 +158,51 @@ const ExamViewTimeTable = () => {
           setBranches(response.data.data.branches);
         })
         .catch((error) => console.log(error));
+
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
+          {
+            headers,
+            params: {
+              time_table: selectedFilter,
+              subdomain: subdomain,
+            },
+          }
+        )
+        .then((response) => {
+          if (response.data.message === "Examination dates are as below") {
+            if (response.data.data.dates.length !== 0) {
+              setStoreDates(response.data.data.dates);
+            }
+          }
+        })
+        .catch((error) => console.log(error));
     }
   };
 
   const handleBranchChange = (e) => {
     e.preventDefault();
+    var selectedFilter = {};
+    setStoreDates([]);
+
+    if (examinationName !== "Select Examination") {
+      selectedFilter["name"] = examinationName;
+    }
+
+    if (selectedYear !== "Select Year") {
+      selectedFilter["academic_year"] = selectedYear;
+    }
+
+    if (courseId !== "Select Course") {
+      selectedFilter["course_id"] = courseId;
+    }
+
+    if (e.target.value !== "Select Branch") {
+      selectedFilter["branch_id"] = e.target.value;
+    }
+
+    console.log(selectedFilter);
     var selectedIndex = e.target.options.selectedIndex;
     setBranchesName(e.target.options[selectedIndex].getAttribute("data-name"));
     var branch_id = e.target.value;
@@ -143,15 +229,88 @@ const ExamViewTimeTable = () => {
           setSemesters(response.data.data.semesters);
         })
         .catch((error) => console.log(error));
+
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
+          {
+            headers,
+            params: {
+              time_table: selectedFilter,
+              subdomain: subdomain,
+            },
+          }
+        )
+        .then((response) => {
+          if (response.data.message === "Examination dates are as below") {
+            if (response.data.data.dates.length !== 0) {
+              setStoreDates(response.data.data.dates);
+            }
+          }
+        })
+        .catch((error) => console.log(error));
     }
   };
 
   const handleSemesterChange = (e) => {
     e.preventDefault();
+    var selectedFilter = {};
+    setStoreDates([]);
+
+    if (examinationName !== "Select Examination") {
+      selectedFilter["name"] = examinationName;
+    }
+
+    if (selectedYear !== "Select Year") {
+      selectedFilter["academic_year"] = selectedYear;
+    }
+
+    if (courseId !== "Select Course") {
+      selectedFilter["course_id"] = courseId;
+    }
+
+    if (courseId !== "Select Branch") {
+      selectedFilter["branch_id"] = branchId;
+    }
+
     if (e.target.value === "Select Semester") {
       setSemesterId("");
     } else {
+      selectedFilter["semester_id"] = e.target.value;
       setSemesterId(e.target.value);
+    }
+    var selectedIndex = e.target.options.selectedIndex;
+    setSemesterName(
+      "Semester : " +
+        e.target.options[selectedIndex].getAttribute("data-semester-name")
+    );
+    access_token = localStorage.getItem("access_token");
+    const headers = { Authorization: `Bearer ${access_token}` };
+    const host = window.location.host;
+    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
+    if (arr.length > 0) {
+      subdomain = arr[0];
+    }
+    if (subdomain !== null || subdomain !== "") {
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
+          {
+            headers,
+            params: {
+              time_table: selectedFilter,
+              subdomain: subdomain,
+            },
+          }
+        )
+        .then((response) => {
+          if (response.data.message === "Examination dates are as below") {
+            if (response.data.data.dates.length !== 0) {
+              setStoreDates(response.data.data.dates);
+            }
+          }
+        })
+        .catch((error) => console.log(error));
     }
   };
 
@@ -172,22 +331,25 @@ const ExamViewTimeTable = () => {
       });
     } else {
       selectedFilter = {
+        name: examinationName,
+        academic_year: selectedYear,
         course_id: courseId,
       };
 
       if (branchId !== "") {
-        selectedFilter = {
-          course_id: courseId,
-          branch_id: branchId,
-        };
+        selectedFilter["branch_id"] = branchId;
       }
 
       if (semesterId !== "") {
-        selectedFilter = {
-          course_id: courseId,
-          branch_id: branchId,
-          semester_id: semesterId,
-        };
+        selectedFilter["semester_id"] = semesterId;
+      }
+
+      if (date !== "") {
+        selectedFilter["date"] = date;
+      }
+
+      if (time !== "") {
+        selectedFilter["time"] = time;
       }
     }
 
@@ -212,11 +374,17 @@ const ExamViewTimeTable = () => {
               "time_table_viewport"
             );
             const download_button = document.getElementById("download_button");
+            const save_as_pdf = document.getElementById("save_as_pdf");
             if (res.data.data.time_tables.length !== 0) {
               download_button.classList.remove("hidden");
+              save_as_pdf.classList.remove("hidden");
               time_table_viewport.classList.remove("hidden");
               time_table_viewport.classList.add("flex");
               setDisplayTimeTable(res.data.data.time_tables);
+            } else {
+              toast.error("NO TimeTable found for the selected Filters", {
+                position: toast.POSITION.BOTTOM_LEFT,
+              });
             }
           }
         })
@@ -229,6 +397,44 @@ const ExamViewTimeTable = () => {
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
   });
+
+  // const handleSavePdf = async () => {
+  //   const element = document.getElementById('time_table_viewport');
+  //   const options = { unit: 'px', format: 'a4', precision: 5 }
+
+  //   const generatePDF =   new Promise((resolve, reject) => {
+  //     try {
+  //       const blob = await pdf(element, options).toBlob();
+  //       resolve(blob);
+  //     } catch (error) {
+  //       reject(error);
+  //     }
+  //   });
+  //   // Use the BlobProvider to handle the PDF download
+  //   generatePDF.then((blob) => {
+  //     saveAs(blob, 'time_table.pdf');
+  //   });
+  // }
+  const handleSavePDF = () => {
+    const contentElement = document.getElementById("time_table_viewport");
+    contentElement.style = {};
+
+    html2pdf()
+      .set({
+        filename: "TimeTable.pdf",
+        margin: [10, 10, 10, 10],
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: "pt", format: "a4", orientation: "portrait" },
+      })
+      .from(contentElement)
+      .save();
+
+    divStyle = {
+      height: "400px",
+      overflowY: "auto",
+    };
+  };
 
   return (
     <div>
@@ -372,9 +578,7 @@ const ExamViewTimeTable = () => {
                   href="/examViewTimeTable"
                   className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
-                  <span className="flex-1 ml-3 whitespace-nowrap">
-                    Report
-                  </span>
+                  <span className="flex-1 ml-3 whitespace-nowrap">Report</span>
                 </a>
               </li>
               {/* <li>
@@ -454,7 +658,7 @@ const ExamViewTimeTable = () => {
               </a>
               <a
                 className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg `}
-              href="/examViewOtherDuty"
+                href="/examViewOtherDuty"
               >
                 Other Duties
               </a>
@@ -510,12 +714,47 @@ const ExamViewTimeTable = () => {
             >
               <option>Select Semester</option>
               {semesters.map((semester) => (
-                <option value={semester.id}>{semester.name}</option>
+                <option value={semester.id} data-semester-name={semester.name}>
+                  {semester.name}
+                </option>
               ))}
             </select>
 
+            <select
+              className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+              onChange={(e) => {
+                if (e.target.value !== "Select Date") {
+                  setDate(e.target.value);
+                } else {
+                  setDate("");
+                }
+              }}
+            >
+              <option>Select Date</option>
+              {storeDates.map((date) => (
+                <option value={date}>{date}</option>
+              ))}
+            </select>
+
+            <select
+              className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+              onChange={(e) => {
+                if (e.target.value !== "Select time") {
+                  setTime(e.target.value);
+                } else {
+                  setTime("");
+                }
+              }}
+              // selected={}
+            >
+              <option value="">Select time</option>
+              <option value="morning">10:30 A.M to 01:00 P.M</option>
+              <option value="evening">03:00 P.M to 05:30 P.M</option>
+            </select>
+          </div>
+          <div className="flex justify-center mt-5">
             <button
-              className="py-2 px-3  mr-7 bg-gray-800 rounded-2xl text-white font-bold"
+              className="py-2 px-3 mr-7 bg-gray-800 rounded-2xl text-white font-bold"
               onClick={handleFilterSubmit}
             >
               Submit
@@ -524,7 +763,16 @@ const ExamViewTimeTable = () => {
               href="#"
               id="download_button"
               onClick={handlePrint}
-              className="hidden py-2 px-3 absolute right-0 mt-1 mr-7 bg-blue-200 rounded-2xl text-white font-bold"
+              className="hidden py-2 px-3 mt-1 bg-blue-200 rounded-2xl text-white font-bold"
+            >
+              <FcPrint />
+            </a>
+
+            <a
+              href="#"
+              id="save_as_pdf"
+              onClick={handleSavePDF}
+              className="hidden py-2 px-3 ml-2 mt-1 bg-blue-200 rounded-2xl text-white font-bold"
             >
               <FcDownload />
             </a>
@@ -533,17 +781,18 @@ const ExamViewTimeTable = () => {
             id="time_table_viewport"
             className="hidden flex-col mt-5"
             ref={componentRef}
+            style={divStyle}
           >
             <div className="">
               <p className="text-center">{uniName}</p>
               <p className="text-center">
-                {branchesName} Semester: {}
+                {branchesName} {semesterName}
               </p>
               <p className="text-center">
                 {examinationName} {selectedYear} Examination Time Table
               </p>
             </div>
-            <div className="overflow-y-scroll" style={{ height: 295 }}>
+            <div ref={tableRef} id="table-viewport" className="">
               <div className="p-1.5 w-full inline-block align-middle">
                 <div className="border rounded-lg">
                   <table className="min-w-full table-fixed divide-y divide-gray-200">

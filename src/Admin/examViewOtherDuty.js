@@ -608,7 +608,7 @@ const ExamViewOtherDuty = () => {
           </select>
 
           <button
-            className="py-2 px-3 ml-20 bg-gray-800 rounded-2xl text-white font-bold"
+            className="py-2 px-3 bg-gray-800 rounded-2xl text-white font-bold"
             // id={"button-subject-" + subject.id}
             onClick={handleFilterSubmit}
           >
@@ -673,16 +673,16 @@ const ExamViewOtherDuty = () => {
                     {otherDutyTable.map((otherDuty) => (
                       <tr>
                         <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
-                          {otherDuty.faculty_name}
+                          {otherDuty.user_name}
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                           {otherDuty.designation}
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                          {otherDuty.department}
+                          {otherDuty.course_name}
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                          {otherDuty.assignDuty}
+                          {otherDuty.assigned_duties}
                         </td>
                        
                       </tr>
