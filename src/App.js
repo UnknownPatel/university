@@ -28,6 +28,7 @@ import ExamViewBlockDetails from './Admin/examViewBlockDetails';
 import ExamViewJrSupervision from './Admin/examViewJrSupervision';
 import ExamViewSrSupervision from './Admin/examViewSrSupervision';
 import ExamViewOtherDuty from './Admin/examViewOtherDuty';
+import AssignMarksEntry from './Admin/assignMarksEntry';
 
 function App() {
   return (
@@ -56,6 +57,8 @@ function App() {
         <Route path="/examViewJrSupervision" element={<ExamViewJrSupervision/>}/>
         <Route path="/examViewSrSupervision" element={<ExamViewSrSupervision/>}/>
         <Route path="/examViewOtherDuty" element={<ExamViewOtherDuty/>}/>
+        <Route path="/assignMarksEntry" element={<AssignMarksEntry/>}/>
+
 
         
 

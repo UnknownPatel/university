@@ -641,6 +641,23 @@ const ExamAssignSupervision = () => {
     }
   };
 
+  const handleSrTimeChange = (e) => {
+    e.preventDefault();
+    setSrFacultyName([]);
+    setSrSupervisionData([]);
+    setSrTime(e.target.value);
+    const sr_faculty_listing_viewport = document.getElementById(
+      "sr_faculty_listing_viewport"
+    );
+    const supervision_listing_table = document.getElementById(
+      "supervision_list_table"
+    );
+    sr_faculty_listing_viewport.classList.add("hidden");
+    sr_faculty_listing_viewport.classList.remove("flex");
+    supervision_listing_table.classList.add("hidden");
+    supervision_listing_table.classList.remove("flex");
+  }
+
   const createSrObject = (e, user_id, sr_no_of_supervisions) => {
     let request_body = {};
     if (srExaminationName === "") {
@@ -973,10 +990,8 @@ const ExamAssignSupervision = () => {
   };
 
   const handlechangeSrDateCheckBox = (event) => {
-    setSrDateCheckBox({
-      ...dateCheckBox,
-      [event.target.name]: event.target.checked,
-    });
+    event.target.removeAttribute("checked");
+    event.target.disabled = false;
   };
 
   const handleSeniorSupervisionSubmit = (e) => {
@@ -1839,6 +1854,8 @@ const ExamAssignSupervision = () => {
                   <select
                     className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
                     onChange={(e) => {
+                      handleSrTimeChange(e);
+                      setSrSupervisionData([]);
                       if (e.target.value !== "Select Time") {
                         setSrTime(e.target.value);
                       } else {
@@ -1846,7 +1863,6 @@ const ExamAssignSupervision = () => {
                       }
                     }}
                   >
-                    <option>Select Time</option>
                     <option value="0">10:30 A.M to 01:00 P.M</option>
                     <option value="1">03:00 P.M to 05:30 P.M</option>
                   </select>
@@ -2025,9 +2041,9 @@ const ExamAssignSupervision = () => {
                                             item.id
                                           }
                                           name={time_table}
-                                          // onClick={(e) =>
-                                          //   handlechangeDateCheckBox(e)
-                                          // }
+                                          onClick={(e) =>
+                                            handlechangeSrDateCheckBox(e)
+                                          }
                                           defaultChecked={
                                             item.metadata[time_table]
                                           }

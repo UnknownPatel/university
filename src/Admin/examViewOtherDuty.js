@@ -7,8 +7,11 @@ import "react-datepicker/dist/react-datepicker.css";
 import "tailwindcss/tailwind.css";
 import { FcCheckmark } from "react-icons/fc";
 import { FcDownload } from "react-icons/fc";
+import { FcPrint } from "react-icons/fc";
 
 import { useReactToPrint } from "react-to-print";
+import html2pdf from "html2pdf.js";
+
 
 var acces_token;
 var subdomain;
@@ -36,9 +39,15 @@ const ExamViewOtherDuty = () => {
   const [subjectDates, setSubjectDates] = useState([]);
 
   const componentRef5 = useRef();
+  const tableRef = useRef(null);
+
 
   var year;
   var other_duty_date;
+  var divStyle = {
+    height: "400px",
+    overflowY: "auto",
+  };
 
   useEffect(() => {
     acces_token = localStorage.getItem("access_token");
@@ -81,6 +90,7 @@ const ExamViewOtherDuty = () => {
         .catch((error) => console.log(error));
     }
   }, []);
+
   function toggleDropdown() {
     setIsDropdownOpen(!isDropdownOpen);
   }
@@ -251,8 +261,10 @@ const ExamViewOtherDuty = () => {
               "other_duty_report_viewport"
             );
             const download_button = document.getElementById("download_button");
+            const save_as_pdf = document.getElementById("save_as_pdf");
             if (res.data.data.other_duties.length !== 0) {
               download_button.classList.remove("hidden");
+              save_as_pdf.classList.remove("hidden");
               other_duty_report_viewport.classList.remove("hidden");
               other_duty_report_viewport.classList.add("flex");
               setOtherDutyTable(res.data.data.other_duties);
@@ -334,6 +346,26 @@ const ExamViewOtherDuty = () => {
   const handlePrint5 = useReactToPrint({
     content: () => componentRef5.current,
   });
+  const handleSavePDF = () => {
+    const contentElement = document.getElementById("other_duty_report_viewport");
+    contentElement.style = {};
+
+    html2pdf()
+      .set({
+        filename: "OtherDuty Report.pdf",
+        margin: [10, 10, 10, 10],
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: "pt", format: "a4", orientation: "portrait" },
+      })
+      .from(contentElement)
+      .save();
+
+    divStyle = {
+      height: "400px",
+      overflowY: "auto",
+    };
+  };
 
   return (
     <div>
@@ -607,28 +639,37 @@ const ExamViewOtherDuty = () => {
             ))}
           </select>
 
-          <button
-            className="py-2 px-3 bg-gray-800 rounded-2xl text-white font-bold"
-            // id={"button-subject-" + subject.id}
+          
+        </div>
+        <div className="flex justify-center mt-5">
+        <button
+            className="py-2 px-3 mr-7 bg-gray-800 rounded-2xl text-white font-bold"
             onClick={handleFilterSubmit}
           >
             Submit
           </button>
-        </div>
-        <div className="flex mt-5">
           <a
             href="#"
             id="download_button"
             onClick={handlePrint5}
-            className="hidden py-2 px-3 absolute right-0 mt-1 mr-7 bg-blue-200 rounded-2xl text-white font-bold"
+            className="hidden py-2 px-3 mt-1 bg-blue-200 rounded-2xl text-white font-bold"
           >
-            <FcDownload />
+            <FcPrint />
           </a>
+          <a
+              href="#"
+              id="save_as_pdf"
+              onClick={handleSavePDF}
+              className="hidden py-2 px-3 ml-2 mt-1 bg-blue-200 rounded-2xl text-white font-bold"
+            >
+              <FcDownload />
+            </a>
         </div>
         <div
           className="hidden flex-col mt-5"
           ref={componentRef5}
           id="other_duty_report_viewport"
+          style={divStyle}
         >
           <div>
             <p className="text-center">{uniName}</p>
@@ -636,7 +677,7 @@ const ExamViewOtherDuty = () => {
               {examinationName5} {selectedYear5} Examination Time Table
             </p>
           </div>
-          <div className="overflow-y-scroll" style={{ height: 295 }}>
+          <div ref={tableRef} id="table-viewport" className="">
             <div className="p-1.5 w-full inline-block align-middle">
               <div className="border rounded-lg">
                 <table className="min-w-full divide-y divide-gray-200">
