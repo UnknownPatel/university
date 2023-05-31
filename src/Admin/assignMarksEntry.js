@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { Axios } from "axios";
 import React, { useEffect } from "react";
 import { useRef } from "react";
 import { useState } from "react";
@@ -6,12 +6,14 @@ import { FcDownload } from "react-icons/fc";
 import { FcPrint } from "react-icons/fc";
 import { useReactToPrint } from "react-to-print";
 import { ToastContainer, toast } from "react-toastify";
-import Multiselect from 'multiselect-react-dropdown';
+import Multiselect from "multiselect-react-dropdown";
 
 var access_token;
 var subdomain;
 var year;
 var headers;
+var options_2;
+var options;
 
 const AssignMarksEntry = () => {
   const componentRef = useRef();
@@ -29,23 +31,21 @@ const AssignMarksEntry = () => {
   const [examinationName, setExaminationName] = useState("");
   const [faculties, setFaculties] = useState([]);
   const [subjects, setSubjects] = useState([]);
-  const [type, setType] = useState();
+  const [type, setType] = useState("");
   const [time, setTime] = useState("");
   const [displayTimeTable, setDisplayTimeTable] = useState([]);
   const [academic_years, setAcademicYears] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [storeDates, setStoreDates] = useState([]);
   const [removeOverFlow, setRemoveOverflow] = useState(false);
-
-  const options = [
-    { key: 'option1', value: 'Option 1' },
-    { key: 'option2', value: 'Option 2' },
-    { key: 'option3', value: 'Option 3' },
-  ];  
-
-  const [selectedOptions, setSelectedOptions] = useState([]);
+  const [selectedOptions, setSelectedOptions] = useState({});
+  const [subjectIds, setSubjectIds] = useState({});
 
   useEffect(() => {
+    options_2 = subjects.map((subject) => {
+      return { key: `${subject.id}`, value: subject.name };
+    });
+    console.log(options_2);
     access_token = localStorage.getItem("access_token");
     year = new Date().getFullYear();
     setAcademicYears(
@@ -188,28 +188,9 @@ const AssignMarksEntry = () => {
 
   const handleSemesterChange = (e) => {
     e.preventDefault();
-    var selectedFilter = {};
-
-    if (examinationName !== "Select Examination") {
-      selectedFilter["name"] = examinationName;
-    }
-
-    if (selectedYear !== "Select Year") {
-      selectedFilter["academic_year"] = selectedYear;
-    }
-
-    if (courseId !== "Select Course") {
-      selectedFilter["course_id"] = courseId;
-    }
-
-    if (courseId !== "Select Branch") {
-      selectedFilter["branch_id"] = branchId;
-    }
-
     if (e.target.value === "Select Semester") {
       setSemesterId("");
     } else {
-      selectedFilter["semester_id"] = e.target.value;
       setSemesterId(e.target.value);
     }
     var selectedIndex = e.target.options.selectedIndex;
@@ -234,24 +215,27 @@ const AssignMarksEntry = () => {
       toast.error("Please select course", {
         position: toast.POSITION.BOTTOM_LEFT,
       });
+    } else if (branchId === "") {
+      toast.error("Please select branch", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (semesterId === "") {
+      toast.error("Please select semester", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (type === "") {
+      toast.error("Please select type", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
     } else {
       selectedFilter = {
-        name: examinationName,
+        examination_name: examinationName,
         academic_year: selectedYear,
         course_id: courseId,
+        branch_id: branchId,
+        semester_id: semesterId,
+        entry_type: parseInt(type),
       };
-
-      if (branchId !== "") {
-        selectedFilter["branch_id"] = branchId;
-      }
-
-      if (semesterId !== "") {
-        selectedFilter["semester_id"] = semesterId;
-      }
-
-      if (type !== "") {
-        selectedFilter["entry_type"] = type;
-      }
     }
 
     axios
@@ -266,7 +250,35 @@ const AssignMarksEntry = () => {
         }
       )
       .then((response) => {
-        setFaculties(response.data.data.users);
+        if (response.data.status === "ok") {
+          setFaculties(response.data.data.users);
+          response.data.data.users.map((faculty) => {
+            selectedFilter["user_id"] = faculty.id;
+            axios
+              .get(
+                `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/marks_entries/${faculty.id}/fetch_details`,
+                {
+                  headers,
+                  params: {
+                    subdomain: subdomain,
+                    marks_entry: selectedFilter,
+                  },
+                }
+              )
+              .then((res) => {
+                const button = document.getElementById(
+                  "button-faculty-" + faculty.id
+                );
+
+                if(res.data.data.message === "Details found"){
+                  button.innerHTML = "Update"
+                }
+              })
+              .catch((err) => {
+                console.error(err);
+              });
+          });
+        }
       })
       .catch((error) => console.log(error));
 
@@ -282,19 +294,142 @@ const AssignMarksEntry = () => {
         }
       )
       .then((response) => {
-        setSubjects(response.data.data.subjects);
+        console.log(response.data);
+        console.log(selectedOptions);
+        if (response.data.data.subjects.length !== 0) {
+          setSubjects(response.data.data.subjects);
+          options_2 = response.data.data.subjects.map((subject) => {
+            return { key: `${subject.id}`, value: subject.name };
+          });
+          console.log(options_2);
+        } else {
+          setSubjects([]);
+        }
       })
       .catch((error) => console.log(error));
+  };
 
+  const onSelect = (selectedList, faculty_id) => {
+    var subject_ids = selectedList.map((option) => option.key);
+    setSelectedOptions((prevSelectedValues) => ({
+      ...prevSelectedValues,
+      [faculty_id]: selectedList,
+    }));
+
+    setSubjectIds((prevSelectedValues) => ({
+      ...prevSelectedValues,
+      [faculty_id]: subject_ids,
+    }));
+  };
+
+  const onRemove = (selectedList, faculty_id) => {
+    var subject_ids = selectedList.map((option) => option.key);
+
+    setSelectedOptions((prevSelectedValues) => ({
+      ...prevSelectedValues,
+      [faculty_id]: selectedList,
+    }));
+    setSubjectIds((prevSelectedValues) => ({
+      ...prevSelectedValues,
+      [faculty_id]: subject_ids,
+    }));
+  };
+
+  const createObject = (e) => {
+    e.preventDefault();
+    let selectedFilter = {};
+    var faculty_id = e.target.getAttribute("data-id");
+    if (examinationName === "") {
+      toast.error("Please select examination name", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (selectedYear === "") {
+      toast.error("Please select year", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (courseId === "" || courseId === "Select Course") {
+      toast.error("Please select course", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (branchId === "") {
+      toast.error("Please select branch", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (semesterId === "") {
+      toast.error("Please select semester", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (type === "") {
+      toast.error("Please select type", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else {
+      selectedFilter = {
+        examination_name: examinationName,
+        academic_year: selectedYear,
+        course_id: courseId,
+        branch_id: branchId,
+        semester_id: semesterId,
+        entry_type: parseInt(type),
+        user_id: faculty_id,
+        subject_ids: subjectIds[faculty_id],
+      };
+    }
+
+    console.log(selectedOptions);
     console.log(selectedFilter);
-  };
 
-  const onSelect = (selectedList) => {
-    setSelectedOptions(selectedList);
-  };
+    if (subdomain !== null || subdomain !== "") {
+      if (e.target.innerHTML === "Update") {
+      } else {
+        axios
+          .post(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/marks_entries`,
+            {
+              subdomain: subdomain,
+              marks_entry: selectedFilter,
+            },
+            {
+              headers,
+            }
+          )
+          .then((responce) => {
+            console.log(responce.data);
+            const marksEntrySubjectInput = document.getElementById(
+              "marks-entry-" + faculty_id
+            );
 
-  const onRemove = (selectedList) => {
-    setSelectedOptions(selectedList);
+            const marksEntryCreateButton = document.getElementById(
+              "button-faculty-" + faculty_id
+            );
+            if (responce.data.created === "created") {
+              e.target.setAttribute(
+                "data-marks-entry-id-" + responce.data.data.marks_entry.id
+              );
+
+              setSelectedOptions((prevSelectedValues) => ({
+                ...prevSelectedValues,
+                [faculty_id]: responce.data.data.marks_entry.subjects.map(
+                  (subject) => {
+                    return { key: subject.id, value: subject.name };
+                  }
+                ),
+              }));
+              marksEntryCreateButton.innerHTML = "Update";
+              toast.success(responce.data.message, {
+                position: toast.POSITION.BOTTOM_LEFT,
+              });
+            } else {
+              toast.error(responce.data.message, {
+                position: toast.POSITION.BOTTOM_LEFT,
+              });
+            }
+          })
+          .catch(function (err) {
+            console.log(err.message);
+          });
+      }
+    }
   };
 
   return (
@@ -572,34 +707,68 @@ const AssignMarksEntry = () => {
                         <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
                           Subject
                         </th>
+                        <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
+                          Action
+                        </th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                      {faculties.map((supervision) => (
+                      {faculties.map((faculty) => (
                         <tr>
                           <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
-                            {supervision.first_name} {supervision.last_name}
+                            {faculty.first_name} {faculty.last_name}
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                            {supervision.designation}
+                            {faculty.designation}
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                            {supervision.department}
+                            {faculty.department}
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                             <Multiselect
-                              options={options}
+                              options={options_2}
+                              showCheckbox={true}
+                              id={"marks-entry-" + faculty.id}
                               displayValue="value"
-                              selectedValues={selectedOptions}
-                              onSelect={onSelect}
-                              onRemove={onRemove}
+                              selectedValues={selectedOptions[faculty.id]}
+                              onSelect={(e) => onSelect(e, faculty.id)}
+                              onRemove={(e) => onRemove(e, faculty.id)}
+                              style={{
+                                multiselectContainer: {
+                                  width: "250px",
+                                  margin: "10px",
+                                },
+                                searchBox: {
+                                  fontSize: "14px",
+                                  overflowX: "auto",
+                                },
+                                inputField: {
+                                  overflow: "hidden", // Hide overflowing content
+                                },
+                                chips: {
+                                  fontSize: "12px",
+                                },
+                                optionContainer: {
+                                  fontSize: "14px",
+                                },
+                                option: {
+                                  fontSize: "14px",
+                                },
+                              }}
                             />
-                            <div>
-                              <h3>Selected Options:</h3>
-                              {selectedOptions.map((option) => (
-                                <div key={option.key}>{option.value}</div>
-                              ))}
-                            </div>
+                          </td>
+                          <td
+                            className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap"
+                            data-id={faculty.id}
+                          >
+                            <button
+                              className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold"
+                              id={"button-faculty-" + faculty.id}
+                              data-id={faculty.id}
+                              onClick={(e) => createObject(e)}
+                            >
+                              Create
+                            </button>
                           </td>
                         </tr>
                       ))}
