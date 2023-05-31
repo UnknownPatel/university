@@ -1,7 +1,7 @@
-import axios from 'axios';
-import React, { useEffect } from 'react'
-import { useRef } from 'react';
-import { useState } from 'react';
+import axios from "axios";
+import React, { useEffect } from "react";
+import { useRef } from "react";
+import { useState } from "react";
 import { FcDownload } from "react-icons/fc";
 import { FcPrint } from "react-icons/fc";
 import { useReactToPrint } from "react-to-print";
@@ -24,8 +24,10 @@ const AssignMarksEntry = () => {
   const [semesters, setSemesters] = useState([]);
   const [semesterId, setSemesterId] = useState("");
   const [semesterName, setSemesterName] = useState("");
-  const [selectedYear, setSelectedYear] = useState();
+  const [selectedYear, setSelectedYear] = useState("");
   const [examinationName, setExaminationName] = useState("");
+  const [faculties, setFaculties] = useState([]);
+  const [subjects, setSubjects] = useState([]);
   const [type, setType] = useState();
   const [time, setTime] = useState("");
   const [displayTimeTable, setDisplayTimeTable] = useState([]);
@@ -237,33 +239,46 @@ const AssignMarksEntry = () => {
       if (semesterId !== "") {
         selectedFilter["semester_id"] = semesterId;
       }
+
+      if (type !== "") {
+        selectedFilter["entry_type"] = type;
+      }
     }
+
+    axios
+      .get(
+        `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/faculty_names`,
+        {
+          headers,
+          params: {
+            user: selectedFilter,
+            subdomain: subdomain,
+          },
+        }
+      )
+      .then((response) => {
+        setFaculties(response.data.data.users);
+      })
+      .catch((error) => console.log(error));
+
+    axios
+      .get(
+        `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/subjects`,
+        {
+          headers,
+          params: {
+            user: selectedFilter,
+            subdomain: subdomain,
+          },
+        }
+      )
+      .then((response) => {
+        setSubjects(response.data.data.subjects);
+      })
+      .catch((error) => console.log(error));
 
     console.log(selectedFilter);
-
-    if (subdomain !== null || subdomain !== "") {
-      axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables`,
-          {
-            headers,
-            params: {
-              subdomain: subdomain,
-              time_table: selectedFilter,
-            },
-          }
-        )
-        .then((res) => {
-          console.log(res);
-          
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-    }
   };
-
-
 
   return (
     <div>
@@ -426,7 +441,7 @@ const AssignMarksEntry = () => {
 
         <div className="pt-4 sm:ml-64">
           <div className="flex flex-col items-center mt-14">
-          <div className="text-center text-4xl">
+            <div className="text-center text-4xl">
               <p>Assign Marks Entry</p>
             </div>
           </div>
@@ -501,10 +516,7 @@ const AssignMarksEntry = () => {
               <option value={1}>Internal</option>
               <option value={2}>Viva</option>
               <option value={3}>External</option>
-
-              
             </select>
-
           </div>
           <div className="flex justify-center mt-5">
             <button
@@ -513,38 +525,12 @@ const AssignMarksEntry = () => {
             >
               Submit
             </button>
-            <a
-              href="#"
-              id="download_button"
-              // onClick={handlePrint}
-              className="hidden py-2 px-3 mt-1 bg-blue-200 rounded-2xl text-white font-bold"
-            >
-              <FcPrint />
-            </a>
-
-            <a
-              href="#"
-              id="save_as_pdf"
-              // onClick={handleSavePDF}
-              className="hidden py-2 px-3 ml-2 mt-1 bg-blue-200 rounded-2xl text-white font-bold"
-            >
-              <FcDownload />
-            </a>
           </div>
           <div
             id="time_table_viewport"
-            className="hidden flex-col mt-5"
+            className=" flex-col mt-5"
             ref={componentRef}
           >
-            <div className="">
-              <p className="text-center">{uniName}</p>
-              <p className="text-center">
-                {branchesName} {semesterName}
-              </p>
-              <p className="text-center">
-                {examinationName} {selectedYear} Examination Time Table
-              </p>
-            </div>
             <div ref={tableRef} id="table-viewport" className="">
               <div className="p-1.5 w-full inline-block align-middle">
                 <div className="border rounded-lg">
@@ -552,45 +538,56 @@ const AssignMarksEntry = () => {
                     <thead className="sticky top-0 bg-gray-50">
                       <tr>
                         <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
-                          Subject Name
+                          Faculty Name
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                        >
+                          Designation
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                        >
+                          Department
                         </th>
                         <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
-                          Subject Code
+                          Subject
                         </th>
-                        <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
-                          Day And Date
-                        </th>
-                        <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
-                          Time
-                        </th>
-                        {/* <th className="px-6 py-3 text-xs font-bold text-right text-gray-500 uppercase ">
-                          Action
-                        </th> */}
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                      {displayTimeTable.map((time_table) => (
+                      {faculties.map((supervision) => (
                         <tr>
                           <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
-                            {time_table.subject_name}
+                            {supervision.first_name} {supervision.last_name}
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                            {time_table.subject_code}
+                            {supervision.designation}
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                            {time_table.date + " " + time_table.day}
+                            {supervision.department}
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                            {time_table.time}
+                            <select
+                              multiple
+                              className="w-full bg-white border border-gray-300 rounded-md py-2 px-4 pr-8 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                            >
+                              <option>Option 1</option>
+                              <option>Option 2</option>
+                              <option>Option 3</option>
+                              {/* Add more options as needed */}
+                            </select>
+                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                              <svg
+                                className="fill-current h-4 w-4"
+                                viewBox="0 0 20 20"
+                              >
+                                <path d="M9 12l-4 4V4l4 4v4zm2 0l4 4V4l-4 4v4z" />
+                              </svg>
+                            </div>
                           </td>
-
-                          {/* <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                          <button
-                            className="text-red-500 hover:text-red-700"
-                            href="#"
-                            // onClick={handleRemoveRole}
-                          >Remove</button>
-                        </td> */}
                         </tr>
                       ))}
                     </tbody>
@@ -604,7 +601,7 @@ const AssignMarksEntry = () => {
       </div>
       <ToastContainer />
     </div>
-  )
-}
+  );
+};
 
-export default AssignMarksEntry
+export default AssignMarksEntry;
