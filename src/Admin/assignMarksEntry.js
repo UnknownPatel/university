@@ -6,6 +6,7 @@ import { FcDownload } from "react-icons/fc";
 import { FcPrint } from "react-icons/fc";
 import { useReactToPrint } from "react-to-print";
 import { ToastContainer, toast } from "react-toastify";
+import Multiselect from 'multiselect-react-dropdown';
 
 var access_token;
 var subdomain;
@@ -35,6 +36,14 @@ const AssignMarksEntry = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [storeDates, setStoreDates] = useState([]);
   const [removeOverFlow, setRemoveOverflow] = useState(false);
+
+  const options = [
+    { key: 'option1', value: 'Option 1' },
+    { key: 'option2', value: 'Option 2' },
+    { key: 'option3', value: 'Option 3' },
+  ];  
+
+  const [selectedOptions, setSelectedOptions] = useState([]);
 
   useEffect(() => {
     access_token = localStorage.getItem("access_token");
@@ -263,11 +272,11 @@ const AssignMarksEntry = () => {
 
     axios
       .get(
-        `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/subjects`,
+        `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/subjects`,
         {
           headers,
           params: {
-            user: selectedFilter,
+            subject: selectedFilter,
             subdomain: subdomain,
           },
         }
@@ -278,6 +287,14 @@ const AssignMarksEntry = () => {
       .catch((error) => console.log(error));
 
     console.log(selectedFilter);
+  };
+
+  const onSelect = (selectedList) => {
+    setSelectedOptions(selectedList);
+  };
+
+  const onRemove = (selectedList) => {
+    setSelectedOptions(selectedList);
   };
 
   return (
@@ -570,22 +587,18 @@ const AssignMarksEntry = () => {
                             {supervision.department}
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                            <select
-                              multiple
-                              className="w-full bg-white border border-gray-300 rounded-md py-2 px-4 pr-8 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                            >
-                              <option>Option 1</option>
-                              <option>Option 2</option>
-                              <option>Option 3</option>
-                              {/* Add more options as needed */}
-                            </select>
-                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                              <svg
-                                className="fill-current h-4 w-4"
-                                viewBox="0 0 20 20"
-                              >
-                                <path d="M9 12l-4 4V4l4 4v4zm2 0l4 4V4l-4 4v4z" />
-                              </svg>
+                            <Multiselect
+                              options={options}
+                              displayValue="value"
+                              selectedValues={selectedOptions}
+                              onSelect={onSelect}
+                              onRemove={onRemove}
+                            />
+                            <div>
+                              <h3>Selected Options:</h3>
+                              {selectedOptions.map((option) => (
+                                <div key={option.key}>{option.value}</div>
+                              ))}
                             </div>
                           </td>
                         </tr>
