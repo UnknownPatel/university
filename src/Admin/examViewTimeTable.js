@@ -21,17 +21,6 @@ import {
 } from "@react-pdf/renderer";
 import html2pdf from "html2pdf.js";
 
-// const styles = StyleSheet.create({
-//   page: {
-//     flexDirection: "row",
-//     backgroundColor: "#FFFFFF",
-//   },
-//   section: {
-//     margin: 10,
-//     padding: 10,
-//     flexGrow: 1,
-//   },
-// });
 
 var access_token;
 var subdomain;
@@ -398,23 +387,6 @@ const ExamViewTimeTable = () => {
     content: () => componentRef.current,
   });
 
-  // const handleSavePdf = async () => {
-  //   const element = document.getElementById('time_table_viewport');
-  //   const options = { unit: 'px', format: 'a4', precision: 5 }
-
-  //   const generatePDF =   new Promise((resolve, reject) => {
-  //     try {
-  //       const blob = await pdf(element, options).toBlob();
-  //       resolve(blob);
-  //     } catch (error) {
-  //       reject(error);
-  //     }
-  //   });
-  //   // Use the BlobProvider to handle the PDF download
-  //   generatePDF.then((blob) => {
-  //     saveAs(blob, 'time_table.pdf');
-  //   });
-  // }
   const handleSavePDF = () => {
     const contentElement = document.getElementById("time_table_viewport");
     contentElement.style = {};
@@ -547,18 +519,27 @@ const ExamViewTimeTable = () => {
         >
           <div className="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
             <ul className="space-y-2 font-medium">
-              <li>
+            <li>
                 <a
-                  href="/examTimetable"
+                  href="/examinationDetails"
                   className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
-                  <span className="ml-3">Time Table</span>
+                  <span className="ml-3">Examination Details</span>
                 </a>
               </li>
               <li>
                 <a
+                  href="/examTimetable"
+                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <span className="ml-3">Time Table</span>
+                </a>
+              </li>
+              
+              <li>
+                <a
                   href="/examBlockDetails"
-                  className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   <span className="ml-3">Enter Block Details</span>
                 </a>
@@ -566,7 +547,7 @@ const ExamViewTimeTable = () => {
               <li>
                 <a
                   href="/examAssignSupervision"
-                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   <span className="flex-1 ml-3 whitespace-nowrap">
                     Assign Supervision
@@ -575,56 +556,22 @@ const ExamViewTimeTable = () => {
               </li>
               <li>
                 <a
-                  href="/examViewTimeTable"
+                  href="/assignMarksEntry"
                   className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <span className="flex-1 ml-3 whitespace-nowrap">
+                    Assign Marks Entry
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/examViewTimeTable"
+                  className="flex items-center p-2 text-gray-900 bg-slate-600 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   <span className="flex-1 ml-3 whitespace-nowrap">Report</span>
                 </a>
               </li>
-              {/* <li>
-                <button
-                  className="w-full bg-slate-600 text-white py-2 px-4 text-left rounded-md"
-                  onClick={toggleDropdown}
-                >
-                  Reports
-                </button>
-                <div
-                  className={`bg-white shadow rounded-md mt-2 py-2 ${
-                    isDropdownOpen ? "block" : "hidden"
-                  }`}
-                >
-                  <a
-                    href="/examViewTimeTable"
-                    className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                  >
-                    Time Table
-                  </a>
-                  <a
-                    href="/examViewBlockDetails"
-                    className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                  >
-                    BlockWise Report
-                  </a>
-                  <a
-                    href="/examViewJrSupervision"
-                    className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                  >
-                    Jr. Supervision Report
-                  </a>
-                  <a
-                    href="/examViewSrSupervision"
-                    className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                  >
-                    Sr. Supervision Report
-                  </a>
-                  <a
-                    href="/examViewOtherDuty"
-                    className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                  >
-                    Other Duty Report
-                  </a>
-                </div>
-              </li> */}
             </ul>
           </div>
         </aside>

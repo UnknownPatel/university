@@ -228,16 +228,6 @@ const ExamViewOtherDuty = () => {
           branch_id: branchId,
         };
       }
-
-      // if (semesterId !== "") {
-      //   selectedFilter = {
-      //     name: examinationName2,
-      //     academic_year: selectedYear2,
-      //     course_id: courseId,
-      //     branch_id: branchId,
-      //     semester_id: semesterId,
-      //   };
-      // }
     }
 
     console.log(selectedFilter);
@@ -471,93 +461,68 @@ const ExamViewOtherDuty = () => {
       </nav>
 
       <aside
-        id="logo-sidebar"
-        className="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
-        aria-label="Sidebar"
-      >
-        <div className="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
-          <ul className="space-y-2 font-medium">
+          id="logo-sidebar"
+          className="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
+          aria-label="Sidebar"
+        >
+          <div className="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
+            <ul className="space-y-2 font-medium">
             <li>
-              <a
-                href="/examTimetable"
-                className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <span className="ml-3">Time Table</span>
-              </a>
-            </li>
-            <li>
-              <a
-                href="/examBlockDetails"
-                className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <span className="ml-3">Enter Block Details</span>
-              </a>
-            </li>
-            <li>
-              <a
-                href="/examAssignSupervision"
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <span className="flex-1 ml-3 whitespace-nowrap">
-                  Assign Supervision
-                </span>
-              </a>
-            </li>
-            <li>
-              <a
-                href="/examViewTimeTable"
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <span className="flex-1 ml-3 whitespace-nowrap">Report</span>
-              </a>
-            </li>
-            {/* <li>
-              <button
-                className="w-full bg-slate-600 text-white py-2 px-4 text-left rounded-md"
-                onClick={toggleDropdown}
-              >
-                Reports
-              </button>
-              <div
-                className={`bg-white shadow rounded-md mt-2 py-2 ${
-                  isDropdownOpen ? "block" : "hidden"
-                }`}
-              >
+                <a
+                  href="/examinationDetails"
+                  className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <span className="ml-3">Examination Details</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/examTimetable"
+                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <span className="ml-3">Time Table</span>
+                </a>
+              </li>
+              
+              <li>
+                <a
+                  href="/examBlockDetails"
+                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <span className="ml-3">Enter Block Details</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/examAssignSupervision"
+                  className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <span className="flex-1 ml-3 whitespace-nowrap">
+                    Assign Supervision
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/assignMarksEntry"
+                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <span className="flex-1 ml-3 whitespace-nowrap">
+                    Assign Marks Entry
+                  </span>
+                </a>
+              </li>
+              <li>
                 <a
                   href="/examViewTimeTable"
-                  className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
+                  className="flex items-center p-2 text-gray-900 bg-slate-600 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
-                  Time Table
+                  <span className="flex-1 ml-3 whitespace-nowrap">Report</span>
                 </a>
-                <a
-                  href="/examViewBlockDetails"
-                  className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                >
-                  BlockWise Report
-                </a>
-                <a
-                  href="/examViewJrSupervision"
-                  className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                >
-                  Jr. Supervision Report
-                </a>
-                <a
-                  href="/examViewSrSupervision"
-                  className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                >
-                  Sr. Supervision Report
-                </a>
-                <a
-                  href="/examViewOtherDuty"
-                  className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                >
-                  Other Duty Report
-                </a>
-              </div>
-            </li> */}
-          </ul>
-        </div>
-      </aside>
+              </li>
+            </ul>
+          </div>
+        </aside>
 
       <div className="pt-4 sm:ml-64">
         <div className="flex flex-col items-center mt-14">

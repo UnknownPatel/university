@@ -7,6 +7,7 @@ import "tailwindcss/tailwind.css";
 import { IoCreate } from "react-icons/io5";
 import { MdAddCircle } from "react-icons/md";
 import { FiEdit } from "react-icons/fi";
+import { GiArchiveResearch } from "react-icons/gi";
 
 var acces_token;
 var headers;
@@ -24,6 +25,8 @@ const ExamTimeTable = () => {
   const [subjects, setSubjects] = useState([]);
   const [selectedYear, setSelectedYear] = useState("");
   const [examinationName, setExaminationName] = useState("");
+  const [examinationNames, setExaminationNames] = useState([]);
+  const [examinationTypes, setExaminationTypes] = useState([]);
   const [subjectId, setSubjectId] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
@@ -75,6 +78,52 @@ const ExamTimeTable = () => {
           setCourses(response.data.data.courses);
         })
         .catch((error) => console.log(error));
+
+      axios
+        .get(
+          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_names",
+          {
+            headers,
+            params: {
+              subdomain: subdomain,
+            },
+          }
+        )
+        .then((responce) => {
+          if (responce.data.message === "Names found") {
+            if (responce.data.data.examination_names.length !== 0) {
+              setExaminationNames(responce.data.data.examination_names);
+            } else {
+              setExaminationNames([]);
+            }
+          }
+        })
+        .catch(function (err) {
+          console.log(err.message);
+        });
+
+      axios
+        .get(
+          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_types",
+          {
+            headers,
+            params: {
+              subdomain: subdomain,
+            },
+          }
+        )
+        .then((responce) => {
+          if (responce.data.message === "Types found") {
+            if (responce.data.data.examination_types.length !== 0) {
+              setExaminationTypes(responce.data.data.examination_types);
+            } else {
+              setExaminationTypes([]);
+            }
+          }
+        })
+        .catch(function (err) {
+          console.log(err.message);
+        });
     }
   }, []);
   function toggleDropdown() {
@@ -209,7 +258,7 @@ const ExamTimeTable = () => {
       toast.error("Please select year", {
         position: toast.POSITION.BOTTOM_LEFT,
       });
-    } else if (type === "" || type === "Select type"){
+    } else if (type === "" || type === "Select type") {
       toast.error("Please select type", {
         position: toast.POSITION.BOTTOM_LEFT,
       });
@@ -222,7 +271,7 @@ const ExamTimeTable = () => {
         name: examinationName,
         academic_year: selectedYear,
         course_id: courseId,
-        time_table_type: type
+        time_table_type: type,
       };
 
       if (branchId !== "") {
@@ -270,7 +319,7 @@ const ExamTimeTable = () => {
                       headers,
                       params: {
                         time_table: selectedFilter,
-                        subdomain: subdomain
+                        subdomain: subdomain,
                       },
                     }
                   )
@@ -426,7 +475,7 @@ const ExamTimeTable = () => {
           const time = document.getElementById("select-time-subject-" + id);
           if (responce.data.status == "created") {
             button.innerHTML = ReactDOMServer.renderToString(<FiEdit />);
-            button.target.setAttribute(
+            button.setAttribute(
               "data-time-table-id",
               responce.data.data.time_table.id
             );
@@ -561,12 +610,21 @@ const ExamTimeTable = () => {
             <ul className="space-y-2 font-medium">
               <li>
                 <a
+                  href="/examinationDetails"
+                  className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <span className="ml-3">Examination Details</span>
+                </a>
+              </li>
+              <li>
+                <a
                   href="/examTimetable"
                   className="flex items-center p-2 text-gray-900 rounded-lg bg-slate-600 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   <span className="ml-3">Time Table</span>
                 </a>
               </li>
+
               <li>
                 <a
                   href="/examBlockDetails"
@@ -616,25 +674,30 @@ const ExamTimeTable = () => {
           {/* Button Content 1 */}
           <div className="flex mt-5 ml-2">
             <select
-              className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+              className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
               onChange={(e) => {
                 handleExaminationChange(e.target.value);
               }}
               aria-label="Examination Name"
             >
-              <option hidden selected>
-                Select Examination
+              <option value="Select Examination" hidden selected>
+                Examination
               </option>
-              <option value="Winter">Winter</option>
-              <option value="Summer">Summer</option>
+              {examinationNames.map((examination_name) => {
+                return (
+                  <option value={examination_name.name}>
+                    {examination_name.name}
+                  </option>
+                );
+              })}
             </select>
 
             <select
-              className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+              className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
               onChange={(e) => handleYearChange(e.target.value)}
             >
               <option value="Select Year" hidden selected>
-                Select Year
+                Year
               </option>
               {academic_years.map((year) => {
                 return <option value={year}>{year}</option>;
@@ -642,26 +705,28 @@ const ExamTimeTable = () => {
             </select>
 
             <select
-              data-te-select-init
-              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2"
+              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
               onChange={handleTypeChange}
             >
-              <option hidden selected>
-                Select Type
+              <option value="Select Type" hidden selected>
+                Type
               </option>
-              <option>Mid</option>
-              <option>Internal</option>
-              <option>Viva</option>
-              <option>External</option>
+              {examinationTypes.map((examination_type) => {
+                return (
+                  <option value={examination_type.name}>
+                    {examination_type.name}
+                  </option>
+                );
+              })}
             </select>
 
             <select
               aria-label="Select Course"
-              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2"
+              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
               onChange={handleCourseChange}
             >
-              <option hidden selected>
-                Select Course
+              <option value="Select Course" hidden selected>
+                Course
               </option>
               {courses.map((course, index) => (
                 <option value={course.id}>{course.name}</option>
@@ -669,11 +734,12 @@ const ExamTimeTable = () => {
             </select>
 
             <select
-              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2"
+              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
               onChange={handleBranchChange}
+              isSearchable={true}
             >
-              <option hidden selected>
-                Select Branch
+              <option value="Select Branch" hidden selected>
+                Branch
               </option>
               {branches.map((branch) => (
                 <option value={branch.id}>{branch.name}</option>
@@ -681,12 +747,13 @@ const ExamTimeTable = () => {
             </select>
 
             <select
-              data-te-select-init
-              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2"
+              // data-te-select-init
+              // data-te-select-filter="true"
+              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
               onChange={handleSemesterChange}
             >
-              <option hidden selected>
-                Select Semester
+              <option value="Select Semester" hidden selected>
+                Semester
               </option>
               {semesters.map((semester) => (
                 <option value={semester.id}>{semester.name}</option>
@@ -697,7 +764,9 @@ const ExamTimeTable = () => {
               className="py-2 px-3 mr-7 bg-gray-800 rounded-2xl text-white font-bold"
               onClick={handleFilterSubmit}
             >
-              Submit
+              <p className="inline-flex">
+                Search <GiArchiveResearch className="mt-1 ml-2" />
+              </p>
             </button>
           </div>
           <div

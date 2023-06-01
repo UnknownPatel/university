@@ -35,7 +35,7 @@ const ExaminationDetails = () => {
           console.log(err);
         });
 
-        axios
+      axios
         .get(
           "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_names",
           {
@@ -46,9 +46,7 @@ const ExaminationDetails = () => {
           }
         )
         .then((responce) => {
-          const viewport = document.getElementById(
-            "examination_name_viewport"
-          );
+          const viewport = document.getElementById("examination_name_viewport");
           if (responce.data.message === "Names found") {
             if (responce.data.data.examination_names.length !== 0) {
               viewport.classList.remove("hidden");
@@ -65,36 +63,33 @@ const ExaminationDetails = () => {
           console.log(err.message);
         });
 
-        axios
-            .get(
-              "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_types",
-              {
-                headers,
-                params: {
-                  subdomain: subdomain,
-                },
-              }
-            )
-            .then((responce) => {
-              const viewport = document.getElementById(
-                "examination_type_viewport"
-              );
-              if (responce.data.message === "Types found") {
-                if (responce.data.data.examination_types.length !== 0) {
-                  viewport.classList.remove("hidden");
-                  viewport.classList.add("flex");
-                  setExaminationTypes(responce.data.data.examination_types);
-                } else {
-                  viewport.classList.add("hidden");
-                  viewport.classList.remove("flex");
-                  setExaminationTypes([]);
-                }
-              }
-            })
-            .catch(function (err) {
-              console.log(err.message);
-            });
-        
+      axios
+        .get(
+          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_types",
+          {
+            headers,
+            params: {
+              subdomain: subdomain,
+            },
+          }
+        )
+        .then((responce) => {
+          const viewport = document.getElementById("examination_type_viewport");
+          if (responce.data.message === "Types found") {
+            if (responce.data.data.examination_types.length !== 0) {
+              viewport.classList.remove("hidden");
+              viewport.classList.add("flex");
+              setExaminationTypes(responce.data.data.examination_types);
+            } else {
+              viewport.classList.add("hidden");
+              viewport.classList.remove("flex");
+              setExaminationTypes([]);
+            }
+          }
+        })
+        .catch(function (err) {
+          console.log(err.message);
+        });
     }
   }, []);
 
@@ -330,16 +325,25 @@ const ExaminationDetails = () => {
           <ul className="space-y-2 font-medium">
             <li>
               <a
-                href="/examTimetable"
-                className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                href="/examinationDetails"
+                className="flex items-center p-2 text-gray-900 bg-slate-600 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
               >
-                <span className="ml-3">Time Table</span>
+                <span className="ml-3">Examination Details</span>
               </a>
             </li>
             <li>
               <a
+                href="/examTimetable"
+                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="ml-3">Time Table</span>
+              </a>
+            </li>
+
+            <li>
+              <a
                 href="/examBlockDetails"
-                className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 <span className="ml-3">Enter Block Details</span>
               </a>
@@ -347,7 +351,7 @@ const ExaminationDetails = () => {
             <li>
               <a
                 href="/examAssignSupervision"
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white bg-slate-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 <span className="flex-1 ml-3 whitespace-nowrap">
                   Assign Supervision
@@ -356,8 +360,18 @@ const ExaminationDetails = () => {
             </li>
             <li>
               <a
-                href="/examViewTimeTable"
+                href="/assignMarksEntry"
                 className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="flex-1 ml-3 whitespace-nowrap">
+                  Assign Marks Entry
+                </span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="/examViewTimeTable"
+                className="flex items-center p-2 text-gray-900  rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 <span className="flex-1 ml-3 whitespace-nowrap">Report</span>
               </a>

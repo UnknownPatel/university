@@ -59,7 +59,7 @@ function App() {
         <Route path="/examViewSrSupervision" element={<ExamViewSrSupervision/>}/>
         <Route path="/examViewOtherDuty" element={<ExamViewOtherDuty/>}/>
         <Route path="/assignMarksEntry" element={<AssignMarksEntry/>}/>
-        <Route path="/examinationDetais" element={<ExaminationDetails/>}/>
+        <Route path="/examinationDetails" element={<ExaminationDetails/>}/>
 
 
         
