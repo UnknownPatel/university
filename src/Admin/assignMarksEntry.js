@@ -73,7 +73,6 @@ const AssignMarksEntry = () => {
         .catch((err) => {
           console.log(err);
         });
-      console.log(headers);
       axios
         .get(
           `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/courses?subdomain=${subdomain}`,
@@ -113,7 +112,6 @@ const AssignMarksEntry = () => {
       selectedFilter["course_id"] = e.target.value;
     }
 
-    console.log(selectedFilter);
     setCourseId(e.target.value);
     var course_id = e.target.value;
     access_token = localStorage.getItem("access_token");
@@ -156,7 +154,6 @@ const AssignMarksEntry = () => {
       selectedFilter["branch_id"] = e.target.value;
     }
 
-    console.log(selectedFilter);
     var selectedIndex = e.target.options.selectedIndex;
     setBranchesName(e.target.options[selectedIndex].getAttribute("data-name"));
     var branch_id = e.target.value;
@@ -252,6 +249,9 @@ const AssignMarksEntry = () => {
       .then((response) => {
         if (response.data.status === "ok") {
           setFaculties(response.data.data.users);
+          const viewport = document.getElementById("marks_entry_viewport");
+          viewport.classList.remove("hidden");
+          viewport.classList.add("flex");
           response.data.data.users.map((faculty) => {
             selectedFilter["user_id"] = faculty.id;
             axios
@@ -270,8 +270,23 @@ const AssignMarksEntry = () => {
                   "button-faculty-" + faculty.id
                 );
 
-                if(res.data.data.message === "Details found"){
-                  button.innerHTML = "Update"
+                if (res.data.message === "Details found") {
+                  setSelectedOptions((prevSelectedValues) => ({
+                    ...prevSelectedValues,
+                    [faculty.id]: res.data.data.marks_entry.subjects.map(
+                      (subject) => {
+                        return {
+                          key: `${subject.id}`,
+                          value: `${subject.name}`,
+                        };
+                      }
+                    ),
+                  }));
+                  button.setAttribute(
+                    "data-marks-entry-id",
+                    res.data.data.marks_entry.id
+                  );
+                  button.innerHTML = "Update";
                 }
               })
               .catch((err) => {
@@ -294,14 +309,11 @@ const AssignMarksEntry = () => {
         }
       )
       .then((response) => {
-        console.log(response.data);
-        console.log(selectedOptions);
         if (response.data.data.subjects.length !== 0) {
           setSubjects(response.data.data.subjects);
           options_2 = response.data.data.subjects.map((subject) => {
             return { key: `${subject.id}`, value: subject.name };
           });
-          console.log(options_2);
         } else {
           setSubjects([]);
         }
@@ -376,11 +388,34 @@ const AssignMarksEntry = () => {
       };
     }
 
-    console.log(selectedOptions);
-    console.log(selectedFilter);
-
     if (subdomain !== null || subdomain !== "") {
       if (e.target.innerHTML === "Update") {
+        var marks_entry_id = e.target.getAttribute("data-marks-entry-id");
+        axios
+          .put(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/marks_entries/${marks_entry_id}`,
+            {
+              subdomain: subdomain,
+              marks_entry: selectedFilter,
+            },
+            {
+              headers,
+            }
+          )
+          .then((res) => {
+            if (res.data.message === "Update successful") {
+              toast.success(res.data.message, {
+                position: toast.POSITION.BOTTOM_LEFT,
+              });
+            } else {
+              toast.error(res.data.message, {
+                position: toast.POSITION.BOTTOM_LEFT,
+              });
+            }
+          })
+          .catch((err) => {
+            console.error(err);
+          });
       } else {
         axios
           .post(
@@ -394,17 +429,13 @@ const AssignMarksEntry = () => {
             }
           )
           .then((responce) => {
-            console.log(responce.data);
-            const marksEntrySubjectInput = document.getElementById(
-              "marks-entry-" + faculty_id
-            );
-
             const marksEntryCreateButton = document.getElementById(
               "button-faculty-" + faculty_id
             );
-            if (responce.data.created === "created") {
+            if (responce.data.status === "created") {
               e.target.setAttribute(
-                "data-marks-entry-id-" + responce.data.data.marks_entry.id
+                "data-marks-entry-id",
+                responce.data.data.marks_entry.id
               );
 
               setSelectedOptions((prevSelectedValues) => ({
@@ -575,7 +606,7 @@ const AssignMarksEntry = () => {
                   className="flex items-center p-2 text-gray-900 bg-slate-600 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   <span className="flex-1 ml-3 whitespace-nowrap">
-                    Assign faculty to enter marks
+                    Assign Marks Entry
                   </span>
                 </a>
               </li>
@@ -591,8 +622,8 @@ const AssignMarksEntry = () => {
           </div>
         </aside>
 
-        <div className="pt-4 sm:ml-64">
-          <div className="flex flex-col items-center mt-14">
+        <div className="p-4 sm:ml-64">
+          <div className="p-4 rounded-lg mt-10">
             <div className="text-center text-4xl">
               <p>Assign Marks Entry</p>
             </div>
@@ -669,18 +700,19 @@ const AssignMarksEntry = () => {
               <option value={2}>Viva</option>
               <option value={3}>External</option>
             </select>
-          </div>
-          <div className="flex justify-center mt-5">
+
             <button
-              className="py-2 px-3 mr-7 bg-gray-800 rounded-2xl text-white font-bold"
+              className="py-2 px-3 bg-gray-800 rounded-2xl text-white font-bold"
               onClick={handleFilterSubmit}
             >
               Submit
             </button>
           </div>
+
           <div
-            id="time_table_viewport"
-            className=" flex-col mt-5"
+            id="marks_entry_viewport"
+            className="hidden flex-col overflow-y-scroll mt-5"
+            style={{ height: 390 }}
             ref={componentRef}
           >
             <div ref={tableRef} id="table-viewport" className="">
@@ -778,7 +810,6 @@ const AssignMarksEntry = () => {
               </div>
             </div>
           </div>
-          <div className="flex justify-evenly text-center mt-10"></div>
         </div>
       </div>
       <ToastContainer />

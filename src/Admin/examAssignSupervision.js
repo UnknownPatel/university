@@ -1488,7 +1488,7 @@ const ExamAssignSupervision = () => {
           </div>
         </aside>
 
-        <div className="pt-4 sm:ml-64">
+        <div className="p-4 sm:ml-64">
           <div className="flex flex-col items-center mt-14">
             <div className="flex justify-center space-x-4 mb-5">
               <button
@@ -1529,6 +1529,7 @@ const ExamAssignSupervision = () => {
                     onChange={(e) => {
                       handleJrExaminationChange(e.target.value);
                     }}
+                    style={{width: 100}}
                   >
                     <option>Select Examination</option>
                     <option value="Winter">Winter</option>
@@ -1548,6 +1549,7 @@ const ExamAssignSupervision = () => {
                   <select
                     className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
                     onChange={handleJrCourseChange}
+                    style={{width: 100}}
                   >
                     <option>Select Course</option>
                     {courses.map((course) => (
@@ -1558,10 +1560,11 @@ const ExamAssignSupervision = () => {
                   <select
                     className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded justify-center shadow-md px-3 py-2"
                     onChange={handleJrBranchChange}
+                    style={{width: 175}}
                   >
-                    <option>Select Branch</option>
+                    <option style={{width: 175}}>Select Branch</option>
                     {branches.map((branch) => (
-                      <option value={branch.id}>{branch.name}</option>
+                      <option style={{width: 100}} value={branch.id}>{branch.name}</option>
                     ))}
                   </select>
 

@@ -1,10 +1,12 @@
 import axios from "axios";
+import ReactDOMServer from "react-dom/server";
 import React, { useEffect, useState, useRef } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-datepicker/dist/react-datepicker.css";
 import "tailwindcss/tailwind.css";
-
-import { useReactToPrint } from "react-to-print";
+import { IoCreate } from "react-icons/io5";
+import { MdAddCircle } from "react-icons/md";
+import { FiEdit } from "react-icons/fi";
 
 var acces_token;
 var headers;
@@ -30,6 +32,7 @@ const ExamTimeTable = () => {
   const [minDate, setMinDate] = useState("");
   const [maxDate, setMaxDate] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [type, setType] = useState("");
   const [storedDates, setStoredDates] = useState([]);
 
   var year;
@@ -97,11 +100,11 @@ const ExamTimeTable = () => {
   const handleCourseChange = (e) => {
     e.preventDefault();
     var selectedFilter = {};
-    if(examinationName !== "Select Examination"){
-      selectedFilter["name"] = examinationName
-    }else if(selectedYear !== "Select Year"){
-      selectedFilter["academic_year"] = selectedYear
-    }else if(e.target.value !== "Select Course"){
+    if (examinationName !== "Select Examination") {
+      selectedFilter["name"] = examinationName;
+    } else if (selectedYear !== "Select Year") {
+      selectedFilter["academic_year"] = selectedYear;
+    } else if (e.target.value !== "Select Course") {
       selectedFilter["course_id"] = e.target.value;
     }
 
@@ -170,6 +173,7 @@ const ExamTimeTable = () => {
 
   const handleSemesterChange = (e) => {
     e.preventDefault();
+    console.log(e.target.value);
     setSubjects([]);
     const time_table_viewport = document.getElementById("time_table_viewport");
     time_table_viewport.classList.add("hidden");
@@ -178,6 +182,19 @@ const ExamTimeTable = () => {
       setSemesterId("");
     } else {
       setSemesterId(e.target.value);
+    }
+  };
+
+  const handleTypeChange = (e) => {
+    e.preventDefault();
+    setSubjects([]);
+    const time_table_viewport = document.getElementById("time_table_viewport");
+    time_table_viewport.classList.add("hidden");
+    time_table_viewport.classList.remove("flex");
+    if (e.target.value === "Select Type") {
+      setType("");
+    } else {
+      setType(e.target.value);
     }
   };
 
@@ -192,30 +209,36 @@ const ExamTimeTable = () => {
       toast.error("Please select year", {
         position: toast.POSITION.BOTTOM_LEFT,
       });
+    } else if (type === "" || type === "Select type"){
+      toast.error("Please select type", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
     } else if (courseId === "" || courseId === "Select Course") {
       toast.error("Please select course", {
         position: toast.POSITION.BOTTOM_LEFT,
       });
     } else {
       selectedFilter = {
+        name: examinationName,
+        academic_year: selectedYear,
         course_id: courseId,
+        time_table_type: type
       };
 
       if (branchId !== "") {
-        selectedFilter = {
-          course_id: courseId,
-          branch_id: branchId,
-        };
+        selectedFilter["branch_id"] = branchId;
+      } else {
+        delete selectedFilter["branch_id"];
       }
 
       if (semesterId !== "") {
-        selectedFilter = {
-          course_id: courseId,
-          branch_id: branchId,
-          semester_id: semesterId,
-        };
+        selectedFilter["semester_id"] = semesterId;
+      } else {
+        delete selectedFilter["semester_id"];
       }
     }
+
+    console.log(selectedFilter);
 
     if (subdomain !== null || subdomain !== "") {
       axios
@@ -242,11 +265,16 @@ const ExamTimeTable = () => {
               res.data.data.subjects.map((subject) => {
                 axios
                   .get(
-                    `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/${subject.id}/fetch_details?subdomain=${subdomain}`,
-                    { headers }
+                    `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/${subject.id}/fetch_details`,
+                    {
+                      headers,
+                      params: {
+                        time_table: selectedFilter,
+                        subdomain: subdomain
+                      },
+                    }
                   )
                   .then((get_response) => {
-                    console.log(get_response);
                     const button = document.getElementById(
                       "button-subject-" + subject.id
                     );
@@ -257,16 +285,24 @@ const ExamTimeTable = () => {
                       "select-time-subject-" + subject.id
                     );
                     if (get_response.data.message === "Details found") {
-                      button.innerHTML = "Update";
+                      button.innerHTML = ReactDOMServer.renderToString(
+                        <FiEdit />
+                      );
                       button.setAttribute(
                         "data-time-table-id",
                         get_response.data.data.time_table.id
                       );
                       table_date.value = get_response.data.data.time_table.date;
-                      var selectedIndex = get_response.data.data.time_table.time === "10:30 A.M to 01:00 P.M" ? 1 : 2
+                      var selectedIndex =
+                        get_response.data.data.time_table.time ===
+                        "10:30 A.M to 01:00 P.M"
+                          ? 1
+                          : 2;
                       table_time.options.selectedIndex = selectedIndex;
                     } else {
-                      button.innerHTML = "Create";
+                      button.innerHTML = ReactDOMServer.renderToString(
+                        <MdAddCircle />
+                      );
                       table_date.value = "";
                       table_time.options[
                         table_time.options.selectedIndex
@@ -288,30 +324,76 @@ const ExamTimeTable = () => {
 
   const createObject = (e, id, date, time) => {
     e.preventDefault();
-    if (e.target.innerHTML === "Update") {
-      var time_table_id = e.target.getAttribute("data-time-table-id");
-      const date_input = document.getElementById("date-select-subject-" + id);
-      const time_input = document.getElementById("select-time-subject-" + id);
+    let selectedFilter = {};
 
-      var dateValue = date_input.value;
-      var timeValue =  time_input.options[time_input.options.selectedIndex].value
+    if (examinationName === "") {
+      toast.error("Please select examination name", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (selectedYear === "") {
+      toast.error("Please select year", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (courseId === "" || courseId === "Select Course") {
+      toast.error("Please select course", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (type === "") {
+      toast.error("Please select type", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else {
+      selectedFilter = {
+        name: examinationName,
+        academic_year: selectedYear,
+        course_id: courseId,
+        subject_id: id,
+        time_table_type: type,
+      };
 
+      if (branchId !== "") {
+        selectedFilter["branch_id"] = branchId;
+      } else {
+        delete selectedFilter["branch_id"];
+      }
+
+      if (semesterId !== "") {
+        selectedFilter["semester_id"] = semesterId;
+      } else {
+        delete selectedFilter["semester_id"];
+      }
+    }
+    var time_table_id = e.target.getAttribute("data-time-table-id");
+    const date_input = document.getElementById("date-select-subject-" + id);
+    const time_input = document.getElementById("select-time-subject-" + id);
+
+    var dateValue = date_input.value;
+    var timeValue = time_input.options[time_input.options.selectedIndex].value;
+    if (dateValue !== "") {
+      selectedFilter["date"] = dateValue;
+    } else {
+      delete selectedFilter["date"];
+    }
+
+    if (timeValue !== "") {
+      selectedFilter["time"] = timeValue;
+    } else {
+      delete selectedFilter["time"];
+    }
+    if (e.target.innerHTML === ReactDOMServer.renderToString(<FiEdit />)) {
+      // Update TimeTable API
       axios
         .put(
           `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/${time_table_id}`,
           {
             subdomain: subdomain,
-            time_table: {
-              date: dateValue,
-              time: timeValue,
-            },
+            time_table: selectedFilter,
           },
           { headers }
         )
         .then((res) => {
-          if(res.data.status === "ok"){
-            console.log("Status OK");
-            if(res.data.data.time_table.length !== 0){
+          if (res.data.status === "ok") {
+            if (res.data.data.time_table.length !== 0) {
               console.log("Updated");
               toast.success(res.data.message, {
                 position: toast.POSITION.BOTTOM_LEFT,
@@ -323,17 +405,13 @@ const ExamTimeTable = () => {
           console.error(err);
         });
     } else {
+      // Create TimeTable API
       axios
         .post(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables?subdomain=${subdomain}`,
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables`,
           {
-            time_table: {
-              name: examinationName,
-              academic_year: selectedYear,
-              subject_id: id,
-              date: date,
-              time: time,
-            },
+            time_table: selectedFilter,
+            subdomain: subdomain,
           },
           {
             headers: {
@@ -343,11 +421,11 @@ const ExamTimeTable = () => {
         )
         .then((responce) => {
           console.log(responce.data);
+          const button = document.getElementById("button-subject-" + id);
+          const date = document.getElementById("date-select-subject-" + id);
+          const time = document.getElementById("select-time-subject-" + id);
           if (responce.data.status == "created") {
-            const button = document.getElementById("button-subject-" + id);
-            const date = document.getElementById("date-select-subject-" + id);
-            const time = document.getElementById("select-time-subject-" + id);
-            button.innerHTML = "Update";
+            button.innerHTML = ReactDOMServer.renderToString(<FiEdit />);
             button.target.setAttribute(
               "data-time-table-id",
               responce.data.data.time_table.id
@@ -513,7 +591,7 @@ const ExamTimeTable = () => {
                   className="flex items-center p-2 text-gray-900  rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   <span className="flex-1 ml-3 whitespace-nowrap">
-                    Assign faculty to enter marks
+                    Assign Marks Entry
                   </span>
                 </a>
               </li>
@@ -522,56 +600,9 @@ const ExamTimeTable = () => {
                   href="/examViewTimeTable"
                   className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
-                  <span className="flex-1 ml-3 whitespace-nowrap">
-                    Report
-                  </span>
+                  <span className="flex-1 ml-3 whitespace-nowrap">Report</span>
                 </a>
               </li>
-              {/* <li>
-              <button
-                className="w-full bg-slate-600 text-white py-2 px-4 text-left rounded-md"
-                onClick={toggleDropdown}
-              >
-                Reports
-              </button>
-              <div
-                className={`bg-white shadow rounded-md mt-2 py-2 ${
-                  isDropdownOpen ? "block" : "hidden"
-                }`}
-              >
-                <a
-                  href="/examViewTimeTable"
-                  className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                >
-                  Time Table
-                </a>
-                <a
-                  href="/examViewBlockDetails"
-                  className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                >
-                  BlockWise Report
-                </a>
-                <a
-                  href="/examViewJrSupervision"
-                  className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                >
-                  Jr. Supervision Report
-                </a>
-                <a
-                  href="/examViewSrSupervision"
-                  className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                >
-                  Reports
-                </button>
-                <div
-                  className={`bg-white shadow rounded-md mt-2 py-2 ${
-                    isDropdownOpen ? "block" : "hidden"
-                  }`}
-                >
-                  Other Duty Report
-                </a>
-              </div>
-              </li> */}
             </ul>
           </div>
         </aside>
@@ -586,13 +617,14 @@ const ExamTimeTable = () => {
           <div className="flex mt-5 ml-2">
             <select
               className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-              // onChange={(e) => setExaminationName(e.target.value)}
               onChange={(e) => {
-                // setExaminationName(e.target.value)
                 handleExaminationChange(e.target.value);
               }}
+              aria-label="Examination Name"
             >
-              <option>Select Examination</option>
+              <option hidden selected>
+                Select Examination
+              </option>
               <option value="Winter">Winter</option>
               <option value="Summer">Summer</option>
             </select>
@@ -601,10 +633,26 @@ const ExamTimeTable = () => {
               className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
               onChange={(e) => handleYearChange(e.target.value)}
             >
-              <option value="Select Year">Select Year</option>
+              <option value="Select Year" hidden selected>
+                Select Year
+              </option>
               {academic_years.map((year) => {
                 return <option value={year}>{year}</option>;
               })}
+            </select>
+
+            <select
+              data-te-select-init
+              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2"
+              onChange={handleTypeChange}
+            >
+              <option hidden selected>
+                Select Type
+              </option>
+              <option>Mid</option>
+              <option>Internal</option>
+              <option>Viva</option>
+              <option>External</option>
             </select>
 
             <select
@@ -612,7 +660,9 @@ const ExamTimeTable = () => {
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2"
               onChange={handleCourseChange}
             >
-              <option>Select Course</option>
+              <option hidden selected>
+                Select Course
+              </option>
               {courses.map((course, index) => (
                 <option value={course.id}>{course.name}</option>
               ))}
@@ -622,23 +672,29 @@ const ExamTimeTable = () => {
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2"
               onChange={handleBranchChange}
             >
-              <option>Select Branch</option>
+              <option hidden selected>
+                Select Branch
+              </option>
               {branches.map((branch) => (
                 <option value={branch.id}>{branch.name}</option>
               ))}
             </select>
 
             <select
+              data-te-select-init
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2"
               onChange={handleSemesterChange}
             >
-              <option>Select Semester</option>
+              <option hidden selected>
+                Select Semester
+              </option>
               {semesters.map((semester) => (
                 <option value={semester.id}>{semester.name}</option>
               ))}
             </select>
+
             <button
-              className="py-2 px-3 absolute right-0 mr-7 bg-gray-800 rounded-2xl text-white font-bold"
+              className="py-2 px-3 mr-7 bg-gray-800 rounded-2xl text-white font-bold"
               onClick={handleFilterSubmit}
             >
               Submit
@@ -652,7 +708,7 @@ const ExamTimeTable = () => {
             <div className="">
               <div className="p-1.5 w-full inline-block align-middle">
                 <div className="border rounded-lg">
-                  <table className="min-w-full divide-y divide-gray-200">
+                  <table className="min-w-full divide-y table-auto divide-gray-200">
                     <thead className="sticky top-0 bg-gray-50">
                       <tr>
                         <th
@@ -715,9 +771,9 @@ const ExamTimeTable = () => {
                           <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
                             <select
                               id={"select-time-subject-" + subject.id}
-                              className="form-select text-sm md:text-sm lg:text-sm mr-2 border-2 select-code"
+                              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-2 py-1"
                               onChange={(e) => {
-                                setTime(e.target.value)
+                                setTime(e.target.value);
                               }}
                               // selected={}
                             >
@@ -741,7 +797,7 @@ const ExamTimeTable = () => {
                                 createObject(e, subject.id, date, time)
                               }
                             >
-                              Create
+                              <MdAddCircle />
                             </button>
                           </td>
                         </tr>
