@@ -2350,7 +2350,9 @@ const ExamAssignSupervision = () => {
                     // id={"button-subject-" + subject.id}
                     onClick={handleODFilterSubmit}
                   >
-                    Submit
+                    <p className="inline-flex">
+                      Search <GiArchiveResearch className="mt-1 ml-2" />
+                    </p>
                   </button>
                 </div>
                 <div
