@@ -8,6 +8,7 @@ import "tailwindcss/tailwind.css";
 import * as XLSX from "xlsx";
 import { FcCheckmark } from "react-icons/fc";
 import { FcDownload } from "react-icons/fc";
+import { GiArchiveResearch } from "react-icons/gi";
 
 import { useReactToPrint } from "react-to-print";
 
@@ -728,7 +729,9 @@ const ExamViewSrSupervision = () => {
             // id={"button-subject-" + subject.id}
             onClick={handleFilterSubmit}
           >
-            Submit
+            <p className="inline-flex">
+              Search <GiArchiveResearch className="mt-1 ml-2" />
+            </p>
           </button>
         </div>
         <div className="flex mt-5">

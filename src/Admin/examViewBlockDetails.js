@@ -8,6 +8,7 @@ import "tailwindcss/tailwind.css";
 import { FcCheckmark } from "react-icons/fc";
 import { FcDownload } from "react-icons/fc";
 import { FcPrint } from "react-icons/fc";
+import { GiArchiveResearch } from "react-icons/gi";
 import html2pdf from "html2pdf.js";
 
 import { useReactToPrint } from "react-to-print";
@@ -556,7 +557,7 @@ const ExamViewBlockDetails = () => {
         >
           <div className="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
             <ul className="space-y-2 font-medium">
-            <li>
+              <li>
                 <a
                   href="/examinationDetails"
                   className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -572,7 +573,7 @@ const ExamViewBlockDetails = () => {
                   <span className="ml-3">Time Table</span>
                 </a>
               </li>
-              
+
               <li>
                 <a
                   href="/examBlockDetails"
@@ -741,7 +742,9 @@ const ExamViewBlockDetails = () => {
               // id={"button-subject-" + subject.id}
               onClick={handleFilterSubmit}
             >
-              Submit
+              <p className="inline-flex">
+                Search <GiArchiveResearch className="mt-1 ml-2" />
+              </p>
             </button>
             <a
               href="#"

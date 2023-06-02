@@ -7,6 +7,8 @@ import { FcPrint } from "react-icons/fc";
 import { useReactToPrint } from "react-to-print";
 import { ToastContainer, toast } from "react-toastify";
 import Multiselect from "multiselect-react-dropdown";
+import { GiArchiveResearch } from "react-icons/gi";
+
 
 var access_token;
 var subdomain;
@@ -714,7 +716,9 @@ const AssignMarksEntry = () => {
               className="py-2 px-3 bg-gray-800 rounded-2xl text-white font-bold"
               onClick={handleFilterSubmit}
             >
-              Submit
+              <p className="inline-flex">
+                Search <GiArchiveResearch className="mt-1 ml-2" />
+              </p>
             </button>
           </div>
 

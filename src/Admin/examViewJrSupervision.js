@@ -6,7 +6,7 @@ import "tailwindcss/tailwind.css";
 import { FcDownload } from "react-icons/fc";
 import * as XLSX from "xlsx";
 import { FcCheckmark } from "react-icons/fc";
-
+import { GiArchiveResearch } from "react-icons/gi";
 import { useReactToPrint } from "react-to-print";
 
 var acces_token;
@@ -574,68 +574,68 @@ const ExamViewJrSupervision = () => {
       </nav>
 
       <aside
-          id="logo-sidebar"
-          className="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
-          aria-label="Sidebar"
-        >
-          <div className="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
-            <ul className="space-y-2 font-medium">
+        id="logo-sidebar"
+        className="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
+        aria-label="Sidebar"
+      >
+        <div className="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
+          <ul className="space-y-2 font-medium">
             <li>
-                <a
-                  href="/examinationDetails"
-                  className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <span className="ml-3">Examination Details</span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/examTimetable"
-                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <span className="ml-3">Time Table</span>
-                </a>
-              </li>
-              
-              <li>
-                <a
-                  href="/examBlockDetails"
-                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <span className="ml-3">Enter Block Details</span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/examAssignSupervision"
-                  className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <span className="flex-1 ml-3 whitespace-nowrap">
-                    Assign Supervision
-                  </span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/assignMarksEntry"
-                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <span className="flex-1 ml-3 whitespace-nowrap">
-                    Assign Marks Entry
-                  </span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/examViewTimeTable"
-                  className="flex items-center p-2 text-gray-900 bg-slate-600 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <span className="flex-1 ml-3 whitespace-nowrap">Report</span>
-                </a>
-              </li>
-            </ul>
-          </div>
-        </aside>
+              <a
+                href="/examinationDetails"
+                className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="ml-3">Examination Details</span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="/examTimetable"
+                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="ml-3">Time Table</span>
+              </a>
+            </li>
+
+            <li>
+              <a
+                href="/examBlockDetails"
+                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="ml-3">Enter Block Details</span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="/examAssignSupervision"
+                className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="flex-1 ml-3 whitespace-nowrap">
+                  Assign Supervision
+                </span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="/assignMarksEntry"
+                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="flex-1 ml-3 whitespace-nowrap">
+                  Assign Marks Entry
+                </span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="/examViewTimeTable"
+                className="flex items-center p-2 text-gray-900 bg-slate-600 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="flex-1 ml-3 whitespace-nowrap">Report</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </aside>
 
       <div className="pt-4 sm:ml-64">
         <div className="flex flex-col items-center mt-14">
@@ -753,7 +753,9 @@ const ExamViewJrSupervision = () => {
             // id={"button-subject-" + subject.id}
             onClick={handleFilterSubmit}
           >
-            Submit
+            <p className="inline-flex">
+              Search <GiArchiveResearch className="mt-1 ml-2" />
+            </p>
           </button>
         </div>
         <div className="flex mt-5">

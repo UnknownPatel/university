@@ -8,6 +8,7 @@ import "tailwindcss/tailwind.css";
 import { FcCheckmark } from "react-icons/fc";
 import { FcDownload } from "react-icons/fc";
 import { FcPrint } from "react-icons/fc";
+import { GiArchiveResearch } from "react-icons/gi";
 
 import { useReactToPrint } from "react-to-print";
 import html2pdf from "html2pdf.js";
@@ -611,7 +612,9 @@ const ExamViewOtherDuty = () => {
             className="py-2 px-3 mr-7 bg-gray-800 rounded-2xl text-white font-bold"
             onClick={handleFilterSubmit}
           >
-            Submit
+            <p className="inline-flex">
+              Search <GiArchiveResearch className="mt-1 ml-2" />
+            </p>
           </button>
           <a
             href="#"
