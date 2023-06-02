@@ -1,10 +1,14 @@
 import axios, { Axios } from "axios";
 import moment from "moment/moment";
 import React, { useEffect, useState, useRef } from "react";
+import ReactDOMServer from "react-dom/server";
 import DatePicker from "react-datepicker";
 import { ToastContainer, toast } from "react-toastify";
 import "react-datepicker/dist/react-datepicker.css";
 import "tailwindcss/tailwind.css";
+import { GiArchiveResearch } from "react-icons/gi";
+import { MdAddCircle, MdSmartToy } from "react-icons/md";
+import { FiEdit } from "react-icons/fi";
 
 import { useReactToPrint } from "react-to-print";
 
@@ -14,6 +18,9 @@ var subdomain;
 
 const ExamAssignSupervision = () => {
   const [uniName, setUniName] = useState("");
+  const [examinationNames, setExaminationNames] = useState([]);
+  const [jrType, setJrType] = useState("");
+  const [examinationTypes, setExaminationTypes] = useState([]);
   const [dateCheckBox, setDateCheckBox] = useState([]);
   const [examinationName, setExaminationName] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
@@ -30,6 +37,7 @@ const ExamAssignSupervision = () => {
 
   const [srExaminationName, setSrExaminationName] = useState("");
   const [srSelectedYear, setSrSelectedYear] = useState("");
+  const [srType, setSrType] = useState("");
   const [srCourses, setSrCourses] = useState([]);
   const [srBranches, setSrBranches] = useState([]);
   const [srCourseId, setSrCourseId] = useState("");
@@ -93,6 +101,54 @@ const ExamAssignSupervision = () => {
           setOdCourses(response.data.data.courses);
         })
         .catch((error) => console.log(error));
+
+      // Examination Names API
+      axios
+        .get(
+          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_names",
+          {
+            headers,
+            params: {
+              subdomain: subdomain,
+            },
+          }
+        )
+        .then((responce) => {
+          if (responce.data.message === "Names found") {
+            if (responce.data.data.examination_names.length !== 0) {
+              setExaminationNames(responce.data.data.examination_names);
+            } else {
+              setExaminationNames([]);
+            }
+          }
+        })
+        .catch(function (err) {
+          console.log(err.message);
+        });
+
+      // Examination Types API
+      axios
+        .get(
+          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_types",
+          {
+            headers,
+            params: {
+              subdomain: subdomain,
+            },
+          }
+        )
+        .then((responce) => {
+          if (responce.data.message === "Types found") {
+            if (responce.data.data.examination_types.length !== 0) {
+              setExaminationTypes(responce.data.data.examination_types);
+            } else {
+              setExaminationTypes([]);
+            }
+          }
+        })
+        .catch(function (err) {
+          console.log(err.message);
+        });
     }
   }, []);
 
@@ -113,6 +169,25 @@ const ExamAssignSupervision = () => {
   const handleJrYearChange = (date) => {
     setSupervisionData([]);
     setSelectedYear(date);
+  };
+
+  const handleJrTypeChange = (e) => {
+    e.preventDefault();
+    const faculty_listing_viewport = document.getElementById(
+      "faculty_listing_viewport"
+    );
+    const supervision_listing_table = document.getElementById(
+      "supervision_list_table"
+    );
+    faculty_listing_viewport.classList.add("hidden");
+    faculty_listing_viewport.classList.remove("flex");
+    supervision_listing_table.classList.add("hidden");
+    supervision_listing_table.classList.remove("flex");
+    if (e.target.value === "Select Type") {
+      setJrTime("");
+    } else {
+      setJrType(e.target.value);
+    }
   };
 
   const handleJrCourseChange = (e) => {
@@ -181,7 +256,7 @@ const ExamAssignSupervision = () => {
     faculty_listing_viewport.classList.remove("flex");
     supervision_listing_table.classList.add("hidden");
     supervision_listing_table.classList.remove("flex");
-  }
+  };
 
   const createObject = (e, user_id, no_of_supervisions) => {
     console.log(user_id);
@@ -195,6 +270,10 @@ const ExamAssignSupervision = () => {
       toast.error("Please select academic year", {
         position: toast.POSITION.BOTTOM_LEFT,
       });
+    } else if (jrType === "") {
+      toast.error("Please select examination type", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
     } else {
       selectedFilter = {
         examination_name: examinationName,
@@ -202,7 +281,8 @@ const ExamAssignSupervision = () => {
         course_id: courseId,
         user_type: 0,
         list_type: "Junior",
-        time: parseInt(jrTime)
+        supervision_type: jrType,
+        time: parseInt(jrTime),
       };
 
       if (branchId !== "") {
@@ -213,11 +293,12 @@ const ExamAssignSupervision = () => {
           branch_id: branchId,
           user_type: 0,
           list_type: "Junior",
-          time: parseInt(jrTime)
+          supervision_type: jrType,
+          time: parseInt(jrTime),
         };
       }
 
-      if (e.target.innerHTML === "Update") {
+      if (e.target.innerHTML === ReactDOMServer.renderToString(<FiEdit />)) {
         var supervision_id = e.target.getAttribute("data-supervision-id");
         axios
           .put(
@@ -257,7 +338,8 @@ const ExamAssignSupervision = () => {
                 user_id: user_id,
                 list_type: "Junior",
                 no_of_supervisions: no_of_supervisions,
-                time: parseInt(jrTime)
+                supervision_type: jrType,
+                time: parseInt(jrTime),
               },
             },
             {
@@ -281,7 +363,8 @@ const ExamAssignSupervision = () => {
 
               jr_no_of_supervisions_input.value =
                 res.data.data.supervision.no_of_supervisions;
-              jr_supervision_submit_button.innerHTML = "Update";
+              jr_supervision_submit_button.innerHTML =
+                ReactDOMServer.renderToString(<FiEdit />);
               toast.success(res.data.message, {
                 position: toast.POSITION.BOTTOM_LEFT,
               });
@@ -399,15 +482,19 @@ const ExamAssignSupervision = () => {
     console.log("Button clicked");
     let selectedFilter = {};
     let timeTableSelectedFilter = {};
-    if (examinationName === "Select Examination") {
+    if (examinationName === "Select Examination" || examinationName === "") {
       toast.error("Please select examination name", {
         position: toast.POSITION.BOTTOM_LEFT,
       });
-    } else if (selectedYear === "Select Year") {
+    } else if (selectedYear === "Select Year" || selectedYear === "") {
       toast.error("Please select year", {
         position: toast.POSITION.BOTTOM_LEFT,
       });
-    } else if (courseId === "Select Course") {
+    } else if (jrType === "" || jrType === "Select Type") {
+      toast.error("Please select type", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (courseId === "Select Course" || courseId === "") {
       toast.error("Please select course", {
         position: toast.POSITION.BOTTOM_LEFT,
       });
@@ -418,7 +505,8 @@ const ExamAssignSupervision = () => {
         course_id: courseId,
         user_type: 0,
         list_type: "Junior",
-        time: parseInt(jrTime)
+        supervision_type: jrType,
+        time: parseInt(jrTime),
       };
 
       timeTableSelectedFilter = {
@@ -427,7 +515,8 @@ const ExamAssignSupervision = () => {
         course_id: courseId,
         user_type: 0,
         list_type: "Junior",
-        time: jrTime === "0" ? "morning" : "evening"
+        time_table_type: jrType,
+        time: jrTime === "0" ? "morning" : "evening",
       };
 
       if (branchId !== "") {
@@ -438,7 +527,8 @@ const ExamAssignSupervision = () => {
           branch_id: branchId,
           user_type: 0,
           list_type: "Junior",
-          time: parseInt(jrTime)
+          supervision_type: jrType,
+          time: parseInt(jrTime),
         };
 
         timeTableSelectedFilter = {
@@ -448,7 +538,8 @@ const ExamAssignSupervision = () => {
           branch_id: branchId,
           user_type: 0,
           list_type: "Junior",
-          time: jrTime === "0" ? "morning" : "evening"
+          time_table_type: jrType,
+          time: jrTime === "0" ? "morning" : "evening",
         };
       }
 
@@ -475,7 +566,7 @@ const ExamAssignSupervision = () => {
                 faculty_listing_viewport.classList.add("flex");
                 setFacultyName(res.data.data.users);
                 res.data.data.users.map((faculty) => {
-                  selectedFilter["user_id"] = faculty.id
+                  selectedFilter["user_id"] = faculty.id;
                   axios
                     .get(
                       `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions/${faculty.id}/fetch_details`,
@@ -500,7 +591,8 @@ const ExamAssignSupervision = () => {
                         const button = document.getElementById(
                           "jr-supervision-button-" + faculty.id
                         );
-                        jr_supervision_submit_button.innerHTML = "Update";
+                        jr_supervision_submit_button.innerHTML =
+                          ReactDOMServer.renderToString(<FiEdit />);
                         button.setAttribute(
                           "data-supervision-id",
                           res.data.data.supervision.id
@@ -508,7 +600,8 @@ const ExamAssignSupervision = () => {
                         jr_no_of_supervisions_input.value =
                           res.data.data.supervision.no_of_supervisions;
                       } else {
-                        jr_supervision_submit_button.innerHTML = "Create";
+                        jr_supervision_submit_button.innerHTML =
+                          ReactDOMServer.renderToString(<MdAddCircle />);
 
                         jr_no_of_supervisions_input.value = "";
                       }
@@ -589,6 +682,25 @@ const ExamAssignSupervision = () => {
     setSrSelectedYear(date);
   };
 
+  const handleSrTypeChange = (e) => {
+    e.preventDefault();
+    const faculty_listing_viewport = document.getElementById(
+      "sr_faculty_listing_viewport"
+    );
+    const supervision_listing_table = document.getElementById(
+      "sr_supervision_list_table"
+    );
+    faculty_listing_viewport.classList.add("hidden");
+    faculty_listing_viewport.classList.remove("flex");
+    supervision_listing_table.classList.add("hidden");
+    supervision_listing_table.classList.remove("flex");
+    if (e.target.value === "Select Type") {
+      setSrTime("");
+    } else {
+      setSrType(e.target.value);
+    }
+  };
+
   const handleSrCourseChange = (e) => {
     e.preventDefault();
     setSrBranches([]);
@@ -650,13 +762,13 @@ const ExamAssignSupervision = () => {
       "sr_faculty_listing_viewport"
     );
     const supervision_listing_table = document.getElementById(
-      "supervision_list_table"
+      "sr_supervision_list_table"
     );
     sr_faculty_listing_viewport.classList.add("hidden");
     sr_faculty_listing_viewport.classList.remove("flex");
     supervision_listing_table.classList.add("hidden");
     supervision_listing_table.classList.remove("flex");
-  }
+  };
 
   const createSrObject = (e, user_id, sr_no_of_supervisions) => {
     let request_body = {};
@@ -668,7 +780,11 @@ const ExamAssignSupervision = () => {
       toast.error("Please select academic year", {
         position: toast.POSITION.BOTTOM_LEFT,
       });
-    } else if (srCourseId === "Select Course") {
+    } else if (srType === "Select Type" || srType === "") {
+      toast.error("Please select type", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (srCourseId === "Select Course" || srCourseId === "") {
       toast.error("Please select course", {
         position: toast.POSITION.BOTTOM_LEFT,
       });
@@ -681,6 +797,7 @@ const ExamAssignSupervision = () => {
           course_id: srCourseId,
           branch_id: srBranchId,
           list_type: "Senior",
+          supervision_type: srType,
           no_of_supervisions: sr_no_of_supervisions,
         };
       } else {
@@ -690,6 +807,7 @@ const ExamAssignSupervision = () => {
           user_id: user_id,
           course_id: srCourseId,
           list_type: "Senior",
+          supervision_type: srType,
           no_of_supervisions: sr_no_of_supervisions,
         };
       }
@@ -698,9 +816,7 @@ const ExamAssignSupervision = () => {
         request_body["time"] = parseInt(srTime);
       }
 
-      console.log("Button Clicked");
-
-      if (e.target.innerHTML === "Update") {
+      if (e.target.innerHTML === ReactDOMServer.renderToString(<FiEdit />)) {
         var supervision_id = e.target.getAttribute("data-supervision-id");
 
         axios
@@ -758,7 +874,8 @@ const ExamAssignSupervision = () => {
               );
               sr_no_of_supervisions_input.value =
                 res.data.data.supervision.no_of_supervisions;
-              sr_supervision_submit_button.innerHTML = "Update";
+              sr_supervision_submit_button.innerHTML =
+                ReactDOMServer.renderToString(<FiEdit />);
               toast.success(res.data.message, {
                 position: toast.POSITION.BOTTOM_LEFT,
               });
@@ -817,7 +934,11 @@ const ExamAssignSupervision = () => {
       toast.error("Please select year", {
         position: toast.POSITION.BOTTOM_LEFT,
       });
-    } else if (srCourseId === "Select Course") {
+    } else if (srType === "Select Type" || srType === "") {
+      toast.error("Please select type", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (srCourseId === "Select Course" || srCourseId === "") {
       toast.error("Please select course", {
         position: toast.POSITION.BOTTOM_LEFT,
       });
@@ -827,6 +948,7 @@ const ExamAssignSupervision = () => {
         academic_year: srSelectedYear,
         course_id: srCourseId,
         user_type: 1,
+        supervision_type: srType,
         list_type: "Senior",
       };
 
@@ -835,6 +957,7 @@ const ExamAssignSupervision = () => {
         academic_year: srSelectedYear,
         course_id: srCourseId,
         user_type: 1,
+        time_table_type: srType,
         list_type: "Senior",
       };
 
@@ -845,6 +968,7 @@ const ExamAssignSupervision = () => {
           course_id: srCourseId,
           branch_id: srBranchId,
           user_type: 1,
+          supervision_type: srType,
           list_type: "Senior",
         };
 
@@ -854,6 +978,7 @@ const ExamAssignSupervision = () => {
           course_id: srCourseId,
           branch_id: srBranchId,
           user_type: 1,
+          time_table_type: srType,
           list_type: "Senior",
         };
       }
@@ -863,8 +988,6 @@ const ExamAssignSupervision = () => {
           parseInt(srTime) === 0 ? "morning" : "evening";
         selectedFilter["time"] = parseInt(srTime);
       }
-
-      console.log(timeTableSelectedFilter);
 
       if (subdomain !== null || subdomain !== "") {
         axios
@@ -891,8 +1014,14 @@ const ExamAssignSupervision = () => {
                 res.data.data.users.map((faculty) => {
                   axios
                     .get(
-                      `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions/${faculty.id}/fetch_details?subdomain=${subdomain}`,
-                      { headers }
+                      `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions/${faculty.id}/fetch_details`,
+                      {
+                        headers,
+                        params: {
+                          subdomain: subdomain,
+                          supervision: selectedFilter,
+                        },
+                      }
                     )
                     .then((res) => {
                       const sr_no_of_supervisions_input =
@@ -907,7 +1036,8 @@ const ExamAssignSupervision = () => {
                         const button = document.getElementById(
                           "sr-supervision-button-" + faculty.id
                         );
-                        sr_supervision_submit_button.innerHTML = "Update";
+                        sr_supervision_submit_button.innerHTML =
+                          ReactDOMServer.renderToString(<FiEdit />);
                         button.setAttribute(
                           "data-supervision-id",
                           res.data.data.supervision.id
@@ -916,7 +1046,7 @@ const ExamAssignSupervision = () => {
                         sr_no_of_supervisions_input.value =
                           res.data.data.supervision.no_of_supervisions;
                       } else {
-                        sr_supervision_submit_button.innerHTML = "Create";
+                        sr_supervision_submit_button.innerHTML = ReactDOMServer.renderToString(<MdAddCircle />);
 
                         sr_no_of_supervisions_input.value = "";
                       }
@@ -1450,7 +1580,7 @@ const ExamAssignSupervision = () => {
         >
           <div className="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
             <ul className="space-y-2 font-medium">
-            <li>
+              <li>
                 <a
                   href="/examinationDetails"
                   className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -1466,7 +1596,7 @@ const ExamAssignSupervision = () => {
                   <span className="ml-3">Time Table</span>
                 </a>
               </li>
-              
+
               <li>
                 <a
                   href="/examBlockDetails"
@@ -1544,51 +1674,79 @@ const ExamAssignSupervision = () => {
               >
                 <div className="flex ml-2">
                   <select
-                    className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+                    className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
                     onChange={(e) => {
                       handleJrExaminationChange(e.target.value);
                     }}
-                    style={{width: 100}}
                   >
-                    <option>Select Examination</option>
-                    <option value="Winter">Winter</option>
-                    <option value="Summer">Summer</option>
+                    <option value="Select Examination" hidden selected>
+                      Examination
+                    </option>
+                    {examinationNames.map((examination_name) => {
+                      return (
+                        <option value={examination_name.name}>
+                          {examination_name.name}
+                        </option>
+                      );
+                    })}
                   </select>
 
                   <select
-                    className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+                    className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
                     onChange={(e) => handleJrYearChange(e.target.value)}
                   >
-                    <option value="Select Year">Select Year</option>
+                    <option value="Select Year" hidden selected>
+                      Year
+                    </option>
                     {academic_years.map((year) => {
                       return <option value={year}>{year}</option>;
                     })}
                   </select>
 
                   <select
-                    className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                    onChange={handleJrCourseChange}
-                    style={{width: 100}}
+                    className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
+                    onChange={handleJrTypeChange}
                   >
-                    <option>Select Course</option>
+                    <option value="Select Type" hidden selected>
+                      Type
+                    </option>
+                    {examinationTypes.map((examination_type) => {
+                      return (
+                        <option value={examination_type.name}>
+                          {examination_type.name}
+                        </option>
+                      );
+                    })}
+                  </select>
+
+                  <select
+                    className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+                    onChange={handleJrCourseChange}
+                  >
+                    <option value="Select Course" hidden selected>
+                      Course
+                    </option>
                     {courses.map((course) => (
                       <option value={course.id}>{course.name}</option>
                     ))}
                   </select>
 
                   <select
-                    className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded justify-center shadow-md px-3 py-2"
+                    className="w-auto form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded justify-center shadow-md px-3 py-2"
                     onChange={handleJrBranchChange}
-                    style={{width: 175}}
                   >
-                    <option style={{width: 175}}>Select Branch</option>
+                    <option value="Select Branch" hidden selected>
+                      Branch
+                    </option>
                     {branches.map((branch) => (
-                      <option style={{width: 100}} value={branch.id}>{branch.name}</option>
+                      <option style={{ width: 100 }} value={branch.id}>
+                        {branch.name}
+                      </option>
                     ))}
                   </select>
 
                   <select
-                    className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+                    className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
                     onChange={(e) => {
                       handleJrTimeChange(e);
                       setSupervisionData([]);
@@ -1604,11 +1762,13 @@ const ExamAssignSupervision = () => {
                   </select>
 
                   <button
-                    className="py-2 px-3 absolute right-0 mr-7 bg-gray-800 rounded-2xl text-white font-bold"
+                    className="py-2 px-3 bg-gray-800 rounded-2xl text-white font-bold"
                     // id={"button-subject-" + subject.id}
                     onClick={handleFilterSubmit}
                   >
-                    Submit
+                    <p className="inline-flex">
+                      Search <GiArchiveResearch className="mt-1 ml-2" />
+                    </p>
                   </button>
                 </div>
                 <div
@@ -1695,7 +1855,7 @@ const ExamAssignSupervision = () => {
                                           )
                                         }
                                       >
-                                        Create
+                                        <MdAddCircle />
                                       </button>
                                     </td>
                                   </tr>
@@ -1813,7 +1973,7 @@ const ExamAssignSupervision = () => {
                                     data-id={item.id}
                                     onClick={handleJuniorSupervisionSubmit}
                                   >
-                                    Submit
+                                    <FiEdit />
                                   </button>
                                 </td>
                               </tr>
@@ -1838,18 +1998,43 @@ const ExamAssignSupervision = () => {
                       handleSrExaminationChange(e.target.value);
                     }}
                   >
-                    <option>Select Examination</option>
-                    <option value="Winter">Winter</option>
-                    <option value="Summer">Summer</option>
+                    <option value="Select Examination" hidden selected>
+                      Examination
+                    </option>
+                    {examinationNames.map((examination_name) => {
+                      return (
+                        <option value={examination_name.name}>
+                          {examination_name.name}
+                        </option>
+                      );
+                    })}
                   </select>
 
                   <select
                     className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
                     onChange={(e) => handleSrYearChange(e.target.value)}
                   >
-                    <option value="Select Year">Select Year</option>
+                    <option value="Select Year" hidden selected>
+                      Year
+                    </option>
                     {academic_years.map((year) => {
                       return <option value={year}>{year}</option>;
+                    })}
+                  </select>
+
+                  <select
+                    className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
+                    onChange={handleSrTypeChange}
+                  >
+                    <option value="Select Type" hidden selected>
+                      Type
+                    </option>
+                    {examinationTypes.map((examination_type) => {
+                      return (
+                        <option value={examination_type.name}>
+                          {examination_type.name}
+                        </option>
+                      );
                     })}
                   </select>
 
@@ -1857,7 +2042,9 @@ const ExamAssignSupervision = () => {
                     className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
                     onChange={handleSrCourseChange}
                   >
-                    <option>Select Course</option>
+                    <option value="Select Course" hidden selected>
+                      Course
+                    </option>
                     {srCourses.map((course) => (
                       <option value={course.id}>{course.name}</option>
                     ))}
@@ -1867,7 +2054,9 @@ const ExamAssignSupervision = () => {
                     className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded justify-center shadow-md px-3 py-2"
                     onChange={handleSrBranchChange}
                   >
-                    <option>Select Branch</option>
+                    <option value="Select Branch" hidden selected>
+                      Branch
+                    </option>
                     {srBranches.map((branch) => (
                       <option value={branch.id}>{branch.name}</option>
                     ))}
@@ -1889,11 +2078,13 @@ const ExamAssignSupervision = () => {
                     <option value="1">03:00 P.M to 05:30 P.M</option>
                   </select>
                   <button
-                    className="py-2 px-3 absolute right-0 mr-7 bg-gray-800 rounded-2xl text-white font-bold"
+                    className="py-2 px-3 bg-gray-800 rounded-2xl text-white font-bold"
                     // id={"button-subject-" + subject.id}
                     onClick={handleSrFilterSubmit}
                   >
-                    Submit
+                    <p className="inline-flex">
+                      Search <GiArchiveResearch className="mt-1 ml-2" />
+                    </p>
                   </button>
                 </div>
                 <div
@@ -1980,7 +2171,7 @@ const ExamAssignSupervision = () => {
                                           )
                                         }
                                       >
-                                        Create
+                                        <MdAddCircle />
                                       </button>
                                     </td>
                                   </tr>
@@ -2095,7 +2286,7 @@ const ExamAssignSupervision = () => {
                                     data-id={item.id}
                                     onClick={handleSeniorSupervisionSubmit}
                                   >
-                                    Submit
+                                    <FiEdit />
                                   </button>
                                 </td>
                               </tr>

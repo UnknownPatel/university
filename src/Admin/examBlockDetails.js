@@ -1,17 +1,12 @@
 import axios from "axios";
-import moment from "moment/moment";
 import React, { useEffect, useState, useRef } from "react";
 import ReactDOMServer from "react-dom/server";
-
-import DatePicker from "react-datepicker";
 import { ToastContainer, toast } from "react-toastify";
 import "react-datepicker/dist/react-datepicker.css";
 import "tailwindcss/tailwind.css";
-import { FcCheckmark } from "react-icons/fc";
-import { FcDownload } from "react-icons/fc";
 import { GiArchiveResearch } from "react-icons/gi";
-
-import { useReactToPrint } from "react-to-print";
+import { MdAddCircle } from "react-icons/md";
+import { FiEdit } from "react-icons/fi";
 
 var acces_token;
 var headers;
@@ -621,14 +616,18 @@ const ExamBlockDetails = () => {
                     if (res.data.message === "Details found") {
                       no_of_students.value =
                         res.data.data.report.no_of_students;
-                      button_submit.innerHTML = "Update";
+                      button_submit.innerHTML = ReactDOMServer.renderToString(
+                        <FiEdit />
+                      );
                       button_submit.setAttribute(
                         "data-report-id",
                         res.data.data.report.id
                       );
                     } else {
                       no_of_students.value = "";
-                      button_submit.innerHTML = "Create";
+                      button_submit.innerHTML = ReactDOMServer.renderToString(
+                        <MdAddCircle />
+                      );
                       button_submit.removeAttribute("data-report-id");
                     }
                   })
@@ -652,7 +651,7 @@ const ExamBlockDetails = () => {
   const handleSubmitBlockWiseReport = (e, time_table_id, no_of_students) => {
     e.preventDefault();
     let selectedFilter = {};
-    selectedFilter["time_table_id"] = e.target.getAttribute("data-id");
+    selectedFilter["exam_time_table_id"] = time_table_id;
     if (examinationName2 === "") {
       toast.error("Please select examination name", {
         position: toast.POSITION.BOTTOM_LEFT,
@@ -699,13 +698,13 @@ const ExamBlockDetails = () => {
         delete selectedFilter["time"];
       }
     }
+    var no_of_students_input = document.getElementById(
+      "input-time-table-" + time_table_id
+    );
+    selectedFilter["no_of_students"] = no_of_students_input.value;
     acces_token = localStorage.getItem("access_token");
-    if (e.target.innerHTML === "Update") {
+    if (e.target.innerHTML === ReactDOMServer.renderToString(<FiEdit />)) {
       var report_id = e.target.getAttribute("data-report-id");
-      var no_of_students_input = document.getElementById(
-        "input-time-table-" + time_table_id
-      );
-      selectedFilter["no_of_students"] = no_of_students_input.value;
       axios
         .put(
           `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/time_table_block_wise_reports/${report_id}`,
@@ -758,7 +757,7 @@ const ExamBlockDetails = () => {
             const student_input = document.getElementById(
               "input-time-table-" + time_table_id
             );
-            button.innerHTML = "Update";
+            button.innerHTML = ReactDOMServer.renderToString(<FiEdit />);
             button.setAttribute("data-report-id", responce.data.data.report.id);
             student_input.value = responce.data.data.report.no_of_students;
             toast.success(responce.data.message, {
@@ -985,7 +984,6 @@ const ExamBlockDetails = () => {
             </select>
 
             <select
-              data-te-select-init
               className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
               onChange={handleTypeChange}
             >
@@ -1070,15 +1068,15 @@ const ExamBlockDetails = () => {
           </div>
 
           <div className="flex justify-center mt-5">
-              <button
-                className="py-2 px-3 bg-gray-800 rounded-2xl text-white font-bold w-auto"
-                // id={"button-subject-" + subject.id}
-                onClick={handleFilterSubmit}
-              >
-                <p className="inline-flex">
-                  Search  <GiArchiveResearch className="mt-1 ml-2" />
-                </p>
-              </button>
+            <button
+              className="py-2 px-3 bg-gray-800 rounded-2xl text-white font-bold w-auto"
+              // id={"button-subject-" + subject.id}
+              onClick={handleFilterSubmit}
+            >
+              <p className="inline-flex">
+                Search <GiArchiveResearch className="mt-1 ml-2" />
+              </p>
+            </button>
           </div>
 
           <div
@@ -1173,7 +1171,7 @@ const ExamBlockDetails = () => {
                               }
                               id={"button-subject-" + time_table.id}
                             >
-                              Create
+                              <MdAddCircle />
                             </button>
                           </td>
                         </tr>
