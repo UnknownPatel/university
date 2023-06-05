@@ -33,6 +33,10 @@ const ExamViewJrSupervision = () => {
   const componentRef3 = useRef();
   const navigate = useNavigate();
 
+  const [examinationTypes, setExaminationTypes] = useState([]);
+  const [examinationNames, setExaminationNames] = useState([]);
+  const [jrType, setJrType] = useState("");
+
   var year;
 
   useEffect(() => {
@@ -74,6 +78,54 @@ const ExamViewJrSupervision = () => {
           // setCourses2(response.data.data.courses);
         })
         .catch((error) => console.log(error));
+
+      // Examination Names API
+      axios
+        .get(
+          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_names",
+          {
+            headers,
+            params: {
+              subdomain: subdomain,
+            },
+          }
+        )
+        .then((responce) => {
+          if (responce.data.message === "Names found") {
+            if (responce.data.data.examination_names.length !== 0) {
+              setExaminationNames(responce.data.data.examination_names);
+            } else {
+              setExaminationNames([]);
+            }
+          }
+        })
+        .catch(function (err) {
+          console.log(err.message);
+        });
+
+      // Examination Types API
+      axios
+        .get(
+          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_types",
+          {
+            headers,
+            params: {
+              subdomain: subdomain,
+            },
+          }
+        )
+        .then((responce) => {
+          if (responce.data.message === "Types found") {
+            if (responce.data.data.examination_types.length !== 0) {
+              setExaminationTypes(responce.data.data.examination_types);
+            } else {
+              setExaminationTypes([]);
+            }
+          }
+        })
+        .catch(function (err) {
+          console.log(err.message);
+        });
     }
   }, []);
 
@@ -86,6 +138,20 @@ const ExamViewJrSupervision = () => {
       setSelectedYear3(date);
     } else {
       setSelectedYear3("");
+    }
+  };
+
+  const handleJrTypeChange = (e) => {
+    e.preventDefault();
+    const faculty_listing_viewport = document.getElementById(
+      "jr_supervision_report_viewport"
+    );
+    faculty_listing_viewport.classList.add("hidden");
+    faculty_listing_viewport.classList.remove("flex");
+    if (e.target.value === "Select Type") {
+      setTime("");
+    } else {
+      setJrType(e.target.value);
     }
   };
 
@@ -271,6 +337,10 @@ const ExamViewJrSupervision = () => {
       });
     } else if (selectedYear3 === "") {
       toast.error("Please select year", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (jrType === "Select Type" || jrType === "") {
+      toast.error("Please select type", {
         position: toast.POSITION.BOTTOM_LEFT,
       });
     } else if (courseId === "" || courseId === "Select Course") {
@@ -642,16 +712,16 @@ const ExamViewJrSupervision = () => {
               </a>
             </li>
             <li>
-                <div className="p-4">
-                  <button
-                    type="button"
-                    className="inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition"
-                    onClick={handleLogout}
-                  >
-                    <span className="">Logout</span>
-                  </button>
-                </div>
-              </li>
+              <div className="p-4">
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition"
+                  onClick={handleLogout}
+                >
+                  <span className="">Logout</span>
+                </button>
+              </div>
+            </li>
           </ul>
         </div>
       </aside>
@@ -694,30 +764,58 @@ const ExamViewJrSupervision = () => {
 
         <div className="flex mt-5 ml-2">
           <select
-            className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+            className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
             onChange={(e) => {
               handleExaminationChange3(e.target.value);
             }}
           >
-            <option>Select Examination</option>
-            <option value="Winter">Winter</option>
-            <option value="Summer">Summer</option>
+            <option value="Select Examination" hidden selected>
+              Examination
+            </option>
+            {examinationNames.map((examination_name) => {
+              return (
+                <option value={examination_name.name}>
+                  {examination_name.name}
+                </option>
+              );
+            })}
           </select>
 
           <select
-            className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+            className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
             onChange={(e) => handleYearChange3(e.target.value)}
           >
-            <option value="Select Year">Select Year</option>
+            <option value="Select Year" hidden selected>
+              Year
+            </option>
             {academic_years.map((year) => {
               return <option value={year}>{year}</option>;
             })}
           </select>
+
+          <select
+            className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
+            onChange={handleJrTypeChange}
+          >
+            <option value="Select Type" hidden selected>
+              Type
+            </option>
+            {examinationTypes.map((examination_type) => {
+              return (
+                <option value={examination_type.name}>
+                  {examination_type.name}
+                </option>
+              );
+            })}
+          </select>
+
           <select
             className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
             onChange={handleCourseChange}
           >
-            <option>Select course</option>
+            <option value="Select Course" hidden selected>
+              Course
+            </option>
             {courses.map((course, index) => (
               <option value={course.id}>{course.name}</option>
             ))}
@@ -728,7 +826,9 @@ const ExamViewJrSupervision = () => {
               handleBranchChange(e);
             }}
           >
-            <option>Select Branch</option>
+            <option value="Select Branch" hidden selected>
+              Branch
+            </option>
             {branches.map((branch) => (
               <option value={branch.id} data-name={branch.name}>
                 {branch.name}

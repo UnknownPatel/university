@@ -10,7 +10,6 @@ import { FcDownload } from "react-icons/fc";
 import { FcPrint } from "react-icons/fc";
 import { GiArchiveResearch } from "react-icons/gi";
 
-
 import { useReactToPrint } from "react-to-print";
 import { saveAs } from "file-saver";
 import {
@@ -23,7 +22,6 @@ import {
 } from "@react-pdf/renderer";
 import html2pdf from "html2pdf.js";
 import { useNavigate } from "react-router-dom";
-
 
 var access_token;
 var subdomain;
@@ -52,6 +50,9 @@ const ExamViewTimeTable = () => {
   const [storeDates, setStoreDates] = useState([]);
   const [removeOverFlow, setRemoveOverflow] = useState(false);
   const navigate = useNavigate();
+  const [examinationTypes, setExaminationTypes] = useState([]);
+  const [examinationNames, setExaminationNames] = useState([]);
+  const [type, setType] = useState("");
 
   var divStyle = {
     height: "400px",
@@ -98,6 +99,52 @@ const ExamViewTimeTable = () => {
         })
         .catch((error) => console.log(error));
     }
+
+    axios
+      .get(
+        "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_names",
+        {
+          headers,
+          params: {
+            subdomain: subdomain,
+          },
+        }
+      )
+      .then((responce) => {
+        if (responce.data.message === "Names found") {
+          if (responce.data.data.examination_names.length !== 0) {
+            setExaminationNames(responce.data.data.examination_names);
+          } else {
+            setExaminationNames([]);
+          }
+        }
+      })
+      .catch(function (err) {
+        console.log(err.message);
+      });
+
+    axios
+      .get(
+        "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_types",
+        {
+          headers,
+          params: {
+            subdomain: subdomain,
+          },
+        }
+      )
+      .then((responce) => {
+        if (responce.data.message === "Types found") {
+          if (responce.data.data.examination_types.length !== 0) {
+            setExaminationTypes(responce.data.data.examination_types);
+          } else {
+            setExaminationTypes([]);
+          }
+        }
+      })
+      .catch(function (err) {
+        console.log(err.message);
+      });
   }, []);
 
   function toggleDropdown() {
@@ -113,6 +160,18 @@ const ExamViewTimeTable = () => {
       setSelectedYear(date);
     } else {
       setSelectedYear("");
+    }
+  };
+
+  const handleTypeChange = (e) => {
+    e.preventDefault();
+    const time_table_viewport = document.getElementById("time_table_viewport");
+    time_table_viewport.classList.add("hidden");
+    time_table_viewport.classList.remove("flex");
+    if (e.target.value === "Select Type") {
+      setType("");
+    } else {
+      setType(e.target.value);
     }
   };
 
@@ -529,7 +588,7 @@ const ExamViewTimeTable = () => {
         >
           <div className="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
             <ul className="space-y-2 font-medium">
-            <li>
+              <li>
                 <a
                   href="/examinationDetails"
                   className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -545,7 +604,7 @@ const ExamViewTimeTable = () => {
                   <span className="ml-3">Time Table</span>
                 </a>
               </li>
-              
+
               <li>
                 <a
                   href="/examBlockDetails"
@@ -635,56 +694,87 @@ const ExamViewTimeTable = () => {
 
           <div className="flex mt-5 ml-2">
             <select
-              className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+              className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
               onChange={(e) => {
                 handleExaminationChange(e.target.value);
               }}
+              aria-label="Examination Name"
             >
-              <option>Select Examination</option>
-              <option value="Winter">Winter</option>
-              <option value="Summer">Summer</option>
+              <option value="Select Examination" hidden selected>
+                Examination
+              </option>
+              {examinationNames.map((examination_name) => {
+                return (
+                  <option value={examination_name.name}>
+                    {examination_name.name}
+                  </option>
+                );
+              })}
             </select>
 
             <select
-              className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+              className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
               onChange={(e) => handleYearChange(e.target.value)}
             >
-              <option value="Select Year">Select Year</option>
+              <option value="Select Year" hidden selected>
+                Year
+              </option>
               {academic_years.map((year) => {
                 return <option value={year}>{year}</option>;
               })}
             </select>
+
             <select
-              className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
+              onChange={handleTypeChange}
+            >
+              <option value="Select Type" hidden selected>
+                Type
+              </option>
+              {examinationTypes.map((examination_type) => {
+                return (
+                  <option value={examination_type.name}>
+                    {examination_type.name}
+                  </option>
+                );
+              })}
+            </select>
+
+            <select
+              aria-label="Select Course"
+              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
               onChange={handleCourseChange}
             >
-              <option>Select course</option>
+              <option value="Select Course" hidden selected>
+                Course
+              </option>
               {courses.map((course, index) => (
                 <option value={course.id}>{course.name}</option>
               ))}
             </select>
+
             <select
-              className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-              onChange={(e) => {
-                handleBranchChange(e);
-              }}
+              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
+              onChange={handleBranchChange}
+              isSearchable={true}
             >
-              <option>Select Branch</option>
+              <option value="Select Branch" hidden selected>
+                Branch
+              </option>
               {branches.map((branch) => (
-                <option value={branch.id} data-name={branch.name}>
-                  {branch.name}
-                </option>
+                <option value={branch.id}>{branch.name}</option>
               ))}
             </select>
+
             <select
-              className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
               onChange={handleSemesterChange}
             >
-              <option>Select Semester</option>
+              <option value="Select Semester" hidden selected>
+                Semester
+              </option>
               {semesters.map((semester) => (
-                <option value={semester.id} data-semester-name={semester.name}>
-                  {semester.name}
-                </option>
+                <option value={semester.id}>{semester.name}</option>
               ))}
             </select>
 
@@ -725,7 +815,7 @@ const ExamViewTimeTable = () => {
               className="py-2 px-3 mr-7 bg-gray-800 rounded-2xl text-white font-bold"
               onClick={handleFilterSubmit}
             >
-             <p className="inline-flex">
+              <p className="inline-flex">
                 Search <GiArchiveResearch className="mt-1 ml-2" />
               </p>
             </button>

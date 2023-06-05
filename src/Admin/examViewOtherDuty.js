@@ -38,6 +38,7 @@ const ExamViewOtherDuty = () => {
   const [displayOtherDutyTable, setDisplayOtherDutyTable] = useState([]);
   const [displaySupervisionTable, setDisplaySupervisionTable] = useState([]);
   const [subjectDates, setSubjectDates] = useState([]);
+  const [examinationNames, setExaminationNames] = useState([]);
 
   const navigate = useNavigate();
   const componentRef5 = useRef();
@@ -89,6 +90,29 @@ const ExamViewOtherDuty = () => {
           // setCourses2(response.data.data.courses);
         })
         .catch((error) => console.log(error));
+
+      axios
+        .get(
+          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_names",
+          {
+            headers,
+            params: {
+              subdomain: subdomain,
+            },
+          }
+        )
+        .then((responce) => {
+          if (responce.data.message === "Names found") {
+            if (responce.data.data.examination_names.length !== 0) {
+              setExaminationNames(responce.data.data.examination_names);
+            } else {
+              setExaminationNames([]);
+            }
+          }
+        })
+        .catch(function (err) {
+          console.log(err.message);
+        });
     }
   }, []);
 
@@ -529,16 +553,16 @@ const ExamViewOtherDuty = () => {
               </a>
             </li>
             <li>
-                <div className="p-4">
-                  <button
-                    type="button"
-                    className="inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition"
-                    onClick={handleLogout}
-                  >
-                    <span className="">Logout</span>
-                  </button>
-                </div>
-              </li>
+              <div className="p-4">
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition"
+                  onClick={handleLogout}
+                >
+                  <span className="">Logout</span>
+                </button>
+              </div>
+            </li>
           </ul>
         </div>
       </aside>
@@ -586,16 +610,25 @@ const ExamViewOtherDuty = () => {
               handleExaminationChange5(e.target.value);
             }}
           >
-            <option>Select Examination</option>
-            <option value="Winter">Winter</option>
-            <option value="Summer">Summer</option>
+            <option value="Select Examination" hidden selected>
+              Examination
+            </option>
+            {examinationNames.map((examination_name) => {
+              return (
+                <option value={examination_name.name}>
+                  {examination_name.name}
+                </option>
+              );
+            })}
           </select>
 
           <select
             className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
             onChange={(e) => handleYearChange5(e.target.value)}
           >
-            <option value="Select Year">Select Year</option>
+            <option value="Select Year" hidden selected>
+              Year
+            </option>
             {academic_years.map((year) => {
               return <option value={year}>{year}</option>;
             })}
@@ -604,7 +637,9 @@ const ExamViewOtherDuty = () => {
             className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
             onChange={handleCourseChange}
           >
-            <option>Select course</option>
+            <option value="Select Course" hidden selected>
+              Course
+            </option>
             {courses.map((course, index) => (
               <option value={course.id}>{course.name}</option>
             ))}
@@ -615,7 +650,9 @@ const ExamViewOtherDuty = () => {
               handleBranchChange(e);
             }}
           >
-            <option>Select Branch</option>
+            <option value="Select Branch" hidden selected>
+              Branch
+            </option>
             {branches.map((branch) => (
               <option value={branch.id} data-name={branch.name}>
                 {branch.name}
