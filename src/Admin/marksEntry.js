@@ -308,7 +308,7 @@ const MarksEntry = () => {
             <select
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
             >
-              <option value="Select Semester" hidden selected>
+              <option value="Select Division" hidden selected>
                 Division
               </option>
               
@@ -316,7 +316,7 @@ const MarksEntry = () => {
             <select
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
             >
-              <option value="Select Semester" hidden selected>
+              <option value="Select SubjectName" hidden selected>
                 Subject Name
               </option>
             </select>
