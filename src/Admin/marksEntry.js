@@ -2,11 +2,16 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { GiArchiveResearch } from "react-icons/gi";
 import { MdAddCircle } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 
 var acces_token;
 var headers;
 var subdomain;
+var access_token;
+var subdomain;
+var year;
+var headers;
 
 
 const MarksEntry = () => {
@@ -20,7 +25,19 @@ const MarksEntry = () => {
   const [division, setDivision] = useState([]);
   const [subjectName, setSubjectName] = useState([]);
   const [type, setType] = useState("");
-
+  const [courseId, setCourseId] = useState("");
+  const [branchId, setBranchId] = useState("");
+  const [branchesName, setBranchesName] = useState("");
+  const [semesterId, setSemesterId] = useState("");
+  const [semesterName, setSemesterName] = useState("");
+  const [selectedYear, setSelectedYear] = useState();
+  const [examinationName, setExaminationName] = useState("");
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+  const [displayTimeTable, setDisplayTimeTable] = useState([]);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [storeDates, setStoreDates] = useState([]);
+  const [removeOverFlow, setRemoveOverflow] = useState(false);
   var year;
   
 
@@ -110,6 +127,224 @@ const MarksEntry = () => {
         });
     }
   }, []);
+
+  const handleExaminationChange = (examination) => {
+    setExaminationName(examination);
+  };
+
+  const handleYearChange = (date) => {
+    if (date !== "Select Year") {
+      setSelectedYear(date);
+    } else {
+      setSelectedYear("");
+    }
+  };
+
+  const handleTypeChange = (e) => {
+    e.preventDefault();
+    // const time_table_viewport = document.getElementById("time_table_viewport");
+    // time_table_viewport.classList.add("hidden");
+    // time_table_viewport.classList.remove("flex");
+    if (e.target.value === "Select Type") {
+      setType("");
+    } else {
+      setType(e.target.value);
+    }
+  };
+
+  const handleCourseChange = (e) => {
+    e.preventDefault();
+    var selectedFilter = {};
+    setStoreDates([]);
+    if (examinationName !== "Select Examination") {
+      selectedFilter["name"] = examinationName;
+    }
+
+    if (selectedYear !== "Select Year") {
+      selectedFilter["academic_year"] = selectedYear;
+    }
+
+    if (e.target.value !== "Select Course") {
+      selectedFilter["course_id"] = e.target.value;
+    }
+
+    console.log(selectedFilter);
+    setCourseId(e.target.value);
+    var course_id = e.target.value;
+    access_token = localStorage.getItem("access_token");
+    const headers = { Authorization: `Bearer ${access_token}` };
+    const host = window.location.host;
+    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
+    if (arr.length > 0) {
+      subdomain = arr[0];
+    }
+    if (subdomain !== null || subdomain !== "") {
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/branches?subdomain=${subdomain}&course_id=${course_id}`,
+          { headers }
+        )
+        .then((response) => {
+          setBranches(response.data.data.branches);
+        })
+        .catch((error) => console.log(error));
+
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
+          {
+            headers,
+            params: {
+              time_table: selectedFilter,
+              subdomain: subdomain,
+            },
+          }
+        )
+        .then((response) => {
+          if (response.data.message === "Examination dates are as below") {
+            if (response.data.data.dates.length !== 0) {
+              setStoreDates(response.data.data.dates);
+            }
+          }
+        })
+        .catch((error) => console.log(error));
+    }
+  };
+
+  const handleBranchChange = (e) => {
+    e.preventDefault();
+    var selectedFilter = {};
+    setStoreDates([]);
+
+    if (examinationName !== "Select Examination") {
+      selectedFilter["name"] = examinationName;
+    }
+
+    if (selectedYear !== "Select Year") {
+      selectedFilter["academic_year"] = selectedYear;
+    }
+
+    if (courseId !== "Select Course") {
+      selectedFilter["course_id"] = courseId;
+    }
+
+    if (e.target.value !== "Select Branch") {
+      selectedFilter["branch_id"] = e.target.value;
+    }
+
+    console.log(selectedFilter);
+    var selectedIndex = e.target.options.selectedIndex;
+    setBranchesName(e.target.options[selectedIndex].getAttribute("data-name"));
+    var branch_id = e.target.value;
+    if (branch_id === "Select Branch") {
+      setBranchId("");
+      setSemesterId("");
+    } else {
+      setBranchId(e.target.value);
+    }
+    access_token = localStorage.getItem("access_token");
+    const headers = { Authorization: `Bearer ${access_token}` };
+    const host = window.location.host;
+    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
+    if (arr.length > 0) {
+      subdomain = arr[0];
+    }
+    if (subdomain !== null || subdomain !== "") {
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/semesters?subdomain=${subdomain}&branch_id=${branch_id}`,
+          { headers }
+        )
+        .then((response) => {
+          setSemesters(response.data.data.semesters);
+        })
+        .catch((error) => console.log(error));
+
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
+          {
+            headers,
+            params: {
+              time_table: selectedFilter,
+              subdomain: subdomain,
+            },
+          }
+        )
+        .then((response) => {
+          if (response.data.message === "Examination dates are as below") {
+            if (response.data.data.dates.length !== 0) {
+              setStoreDates(response.data.data.dates);
+            }
+          }
+        })
+        .catch((error) => console.log(error));
+    }
+  };
+
+  const handleSemesterChange = (e) => {
+    e.preventDefault();
+    var selectedFilter = {};
+    setStoreDates([]);
+
+    if (examinationName !== "Select Examination") {
+      selectedFilter["name"] = examinationName;
+    }
+
+    if (selectedYear !== "Select Year") {
+      selectedFilter["academic_year"] = selectedYear;
+    }
+
+    if (courseId !== "Select Course") {
+      selectedFilter["course_id"] = courseId;
+    }
+
+    if (courseId !== "Select Branch") {
+      selectedFilter["branch_id"] = branchId;
+    }
+
+    if (e.target.value === "Select Semester") {
+      setSemesterId("");
+    } else {
+      selectedFilter["semester_id"] = e.target.value;
+      setSemesterId(e.target.value);
+    }
+    var selectedIndex = e.target.options.selectedIndex;
+    setSemesterName(
+      "Semester : " +
+        e.target.options[selectedIndex].getAttribute("data-semester-name")
+    );
+    access_token = localStorage.getItem("access_token");
+    const headers = { Authorization: `Bearer ${access_token}` };
+    const host = window.location.host;
+    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
+    if (arr.length > 0) {
+      subdomain = arr[0];
+    }
+    if (subdomain !== null || subdomain !== "") {
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
+          {
+            headers,
+            params: {
+              time_table: selectedFilter,
+              subdomain: subdomain,
+            },
+          }
+        )
+        .then((response) => {
+          if (response.data.message === "Examination dates are as below") {
+            if (response.data.data.dates.length !== 0) {
+              setStoreDates(response.data.data.dates);
+            }
+          }
+        })
+        .catch((error) => console.log(error));
+    }
+  };
+
+
   return (
     <div>
       <nav className="fixed top-0 z-50 w-full bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
@@ -222,9 +457,9 @@ const MarksEntry = () => {
           <div className="flex mt-5 ml-2">
             <select
               className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
-              // onChange={(e) => {
-              //   handleExaminationChange(e.target.value);
-              // }}
+              onChange={(e) => {
+                handleExaminationChange(e.target.value);
+              }}
               aria-label="Examination Name"
             >
               <option value="Select Examination" hidden selected>
@@ -241,7 +476,7 @@ const MarksEntry = () => {
 
             <select
               className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
-              // onChange={(e) => handleYearChange(e.target.value)}
+              onChange={(e) => handleYearChange(e.target.value)}
             >
               <option value="Select Year" hidden selected>
                 Year
@@ -253,7 +488,7 @@ const MarksEntry = () => {
 
             <select
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
-              // onChange={handleTypeChange}
+              onChange={handleTypeChange}
             >
               <option value="Select Type" hidden selected>
                 Type
@@ -270,7 +505,7 @@ const MarksEntry = () => {
             <select
               aria-label="Select Course"
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
-              // onChange={handleCourseChange}
+              onChange={handleCourseChange}
             >
               <option value="Select Course" hidden selected>
                 Course
@@ -282,7 +517,7 @@ const MarksEntry = () => {
 
             <select
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
-              // onChange={handleBranchChange}
+              onChange={handleBranchChange}
               // isSearchable={true}
             >
               <option value="Select Branch" hidden selected>
@@ -295,7 +530,7 @@ const MarksEntry = () => {
 
             <select
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
-              // onChange={handleSemesterChange}
+              onChange={handleSemesterChange}
             >
               <option value="Select Semester" hidden selected>
                 Semester
