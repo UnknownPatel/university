@@ -1,6 +1,115 @@
-import React from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+import { GiArchiveResearch } from "react-icons/gi";
+import { MdAddCircle } from "react-icons/md";
+import { ToastContainer, toast } from "react-toastify";
+
+var acces_token;
+var headers;
+var subdomain;
+
 
 const MarksEntry = () => {
+  const [uniName, setUniName] = useState("");
+  const [courses, setCourses] = useState([]);
+  const [branches, setBranches] = useState([]);
+  const [semesters, setSemesters] = useState([]);
+  const [examinationNames, setExaminationNames] = useState([]);
+  const [examinationTypes, setExaminationTypes] = useState([]);
+  const [academic_years, setAcademicYears] = useState([]);
+  const [division, setDivision] = useState([]);
+  const [subjectName, setSubjectName] = useState([]);
+  const [type, setType] = useState("");
+
+  var year;
+  
+
+  useEffect(() => {
+    acces_token = localStorage.getItem("access_token");
+    year = new Date().getFullYear();
+    setAcademicYears(
+      Array.from(
+        new Array(20),
+        (val, index) => year - (index + 1) + " - " + (year - index)
+      )
+    );
+    headers = { Authorization: `Bearer ${acces_token}` };
+    const host = window.location.host;
+    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
+    if (arr.length > 0) {
+      subdomain = arr[0];
+    }
+
+    if (subdomain !== null || subdomain !== "") {
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
+        )
+        .then((response) => {
+          //   console.log(response.data.university.name);
+          setUniName(response.data.university.name);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/courses?subdomain=${subdomain}`,
+          { headers }
+        )
+        .then((response) => {
+          setCourses(response.data.data.courses);
+        })
+        .catch((error) => console.log(error));
+
+      axios
+        .get(
+          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_names",
+          {
+            headers,
+            params: {
+              subdomain: subdomain,
+            },
+          }
+        )
+        .then((responce) => {
+          if (responce.data.message === "Names found") {
+            if (responce.data.data.examination_names.length !== 0) {
+              setExaminationNames(responce.data.data.examination_names);
+            } else {
+              setExaminationNames([]);
+            }
+          }
+        })
+        .catch(function (err) {
+          console.log(err.message);
+        });
+
+      axios
+        .get(
+          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_types",
+          {
+            headers,
+            params: {
+              subdomain: subdomain,
+            },
+          }
+        )
+        .then((responce) => {
+          if (responce.data.message === "Types found") {
+            if (responce.data.data.examination_types.length !== 0) {
+              setExaminationTypes(responce.data.data.examination_types);
+            } else {
+              setExaminationTypes([]);
+            }
+          }
+        })
+        .catch(function (err) {
+          console.log(err.message);
+        });
+    }
+  }, []);
   return (
     <div>
       <nav className="fixed top-0 z-50 w-full bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
@@ -32,7 +141,7 @@ const MarksEntry = () => {
               <a href="" className="flex ml-2 md:mr-24">
                 <img src="" className="h-8 mr-3" alt="Logo" />
                 <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
-                  Institute Name
+                  {uniName}
                 </span>
               </a>
             </div>
@@ -110,154 +219,163 @@ const MarksEntry = () => {
             <p>Marks Entry </p>
           </div>
 
-          <div className="flex justify-between mt-10">
-            <label
-              htmlFor="hs-select-label"
-              className="block text-sm font-bold mb-2"
+          <div className="flex mt-5 ml-2">
+            <select
+              className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
+              // onChange={(e) => {
+              //   handleExaminationChange(e.target.value);
+              // }}
+              aria-label="Examination Name"
             >
-              Select Faculty:
-            </label>
-            <select className="py-3 px-4 pr-9 block w-56 rounded-2xl text-sm border-2 ">
-              <option></option>
-              <option></option>
-              <option></option>
-              <option></option>
+              <option value="Select Examination" hidden selected>
+                Examination
+              </option>
+              {examinationNames.map((examination_name) => {
+                return (
+                  <option value={examination_name.name}>
+                    {examination_name.name}
+                  </option>
+                );
+              })}
             </select>
-            <label htmlFor="" className="block text-sm font-bold mb-2">
-              Enter Subject Code:
-            </label>
-            <div className="">
-              <input
-                type="text"
-                name=""
-                id=""
-                autoComplete=""
-                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-              />
-            </div>
-          </div>
-          <div className="flex flex-col justify-center items-center mt-5">
-            <label
-              htmlFor="hs-select-label"
-              className="block text-sm font-bold mb-2"
-            >
-              Select Subject Name:
-            </label>
-            <select className="py-3 px-4 pr-9 block w-56 rounded-2xl text-sm border-2 ">
-              <option></option>
-              <option></option>
-              <option></option>
-              <option></option>
-            </select>
-          </div>
 
-          <div class="text-center mt-10">
-            <button class="py-3 px-8 bg-black rounded-2xl text-white font-bold">
-              Submit
+            <select
+              className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
+              // onChange={(e) => handleYearChange(e.target.value)}
+            >
+              <option value="Select Year" hidden selected>
+                Year
+              </option>
+              {academic_years.map((year) => {
+                return <option value={year}>{year}</option>;
+              })}
+            </select>
+
+            <select
+              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
+              // onChange={handleTypeChange}
+            >
+              <option value="Select Type" hidden selected>
+                Type
+              </option>
+              {examinationTypes.map((examination_type) => {
+                return (
+                  <option value={examination_type.name}>
+                    {examination_type.name}
+                  </option>
+                );
+              })}
+            </select>
+
+            <select
+              aria-label="Select Course"
+              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
+              // onChange={handleCourseChange}
+            >
+              <option value="Select Course" hidden selected>
+                Course
+              </option>
+              {courses.map((course, index) => (
+                <option value={course.id}>{course.name}</option>
+              ))}
+            </select>
+
+            <select
+              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
+              // onChange={handleBranchChange}
+              // isSearchable={true}
+            >
+              <option value="Select Branch" hidden selected>
+                Branch
+              </option>
+              {branches.map((branch) => (
+                <option value={branch.id}>{branch.name}</option>
+              ))}
+            </select>
+
+            <select
+              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
+              // onChange={handleSemesterChange}
+            >
+              <option value="Select Semester" hidden selected>
+                Semester
+              </option>
+              {semesters.map((semester) => (
+                <option value={semester.id}>{semester.name}</option>
+              ))}
+            </select>
+
+            <select
+              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
+            >
+              <option value="Select Semester" hidden selected>
+                Division
+              </option>
+              
+            </select>
+            <select
+              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
+            >
+              <option value="Select Semester" hidden selected>
+                Subject Name
+              </option>
+            </select>
+
+            <button
+              className="py-2 px-3 mr-7 ml-2 bg-gray-800 rounded-2xl text-white font-bold"
+              // onClick={handleFilterSubmit}
+            >
+              <p className="inline-flex">
+                Search <GiArchiveResearch className="mt-1 ml-2" />
+              </p>
             </button>
           </div>
-          <br />
-          <hr />
           {/* Table of Faculty List */}
-          <div className="flex flex-col mt-5">
-            <div className="overflow-x-auto">
+          <div
+            id="Marks_viewport"
+            className="flex flex-col mt-5"
+            style={{ height: 390 }}
+          >
+            <div className="">
               <div className="p-1.5 w-full inline-block align-middle">
-                <div className="overflow-hidden border rounded-lg">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                <div className="border rounded-lg">
+                  <table className="min-w-full divide-y table-auto divide-gray-200">
+                    <thead className="sticky top-0 bg-gray-50">
                       <tr>
-                        <th
+                      <th
                           scope="col"
                           className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
                         >
-                          Faculty Name
-                        </th>
-                        <th
-                          scope="col"
-                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                        >
-                          Semester
+                          Sr No.
                         </th>
                         <th
                           scope="col"
                           className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
                         >
-                          Subject Code
+                          Student Name
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-xs font-bold text-right text-gray-500 uppercase "
+                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
                         >
-                          Subject Name
+                          Enrollment No.
                         </th>
-                        {/* <th
-                                        scope="col"
-                                        className="px-6 py-3 text-xs font-bold text-right text-gray-500 uppercase "
-                                    >
-                                        Permission
-                                    </th> */}
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                        >
+                          Enter Marks
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
+                        >
+                          Action
+                        </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200">
-                      <tr>
-                        <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap"></td>
-                        <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap"></td>
-                        <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap"></td>
-                        <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                          <a
-                            className="text-green-500 hover:text-green-700"
-                            href="#"
-                          ></a>
-                        </td>
-                        {/* <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                                        <a
-                                            className="text-red-500 hover:text-red-700"
-                                            href="#"
-                                        >
-                                           
-                                        </a>
-                                    </td> */}
-                      </tr>
-                      <tr>
-                        <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap"></td>
-                        <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap"></td>
-                        <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap"></td>
-                        <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                          <a
-                            className="text-green-500 hover:text-green-700"
-                            href="#"
-                          ></a>
-                        </td>
-                        {/* <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                                        <a
-                                            className="text-red-500 hover:text-red-700"
-                                            href="#"
-                                        >
-                                           
-                                        </a>
-                                    </td> */}
-                      </tr>
-                      <tr>
-                        <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap"></td>
-                        <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap"></td>
-                        <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap"></td>
-                        {/* <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                                        <a
-                                            className="text-green-500 hover:text-green-700"
-                                            href="#"
-                                        >
-                                            
-                                        </a>
-                                    </td> */}
-                        {/* <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                                        <a
-                                            className="text-red-500 hover:text-red-700"
-                                            href="#"
-                                        >
-                                            
-                                        </a>
-                                    </td> */}
-                      </tr>
+                    <tbody className="text-center divide-y divide-gray-200">
+                     
                     </tbody>
                   </table>
                 </div>
@@ -266,6 +384,7 @@ const MarksEntry = () => {
           </div>
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 };

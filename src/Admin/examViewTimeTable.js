@@ -22,6 +22,7 @@ import {
   pdf,
 } from "@react-pdf/renderer";
 import html2pdf from "html2pdf.js";
+import { useNavigate } from "react-router-dom";
 
 
 var access_token;
@@ -50,6 +51,8 @@ const ExamViewTimeTable = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [storeDates, setStoreDates] = useState([]);
   const [removeOverFlow, setRemoveOverflow] = useState(false);
+  const navigate = useNavigate();
+
   var divStyle = {
     height: "400px",
     overflowY: "auto",
@@ -410,6 +413,11 @@ const ExamViewTimeTable = () => {
     };
   };
 
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/");
+  };
+
   return (
     <div>
       <div>
@@ -573,6 +581,17 @@ const ExamViewTimeTable = () => {
                 >
                   <span className="flex-1 ml-3 whitespace-nowrap">Report</span>
                 </a>
+              </li>
+              <li>
+                <div className="p-4">
+                  <button
+                    type="button"
+                    className="inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition"
+                    onClick={handleLogout}
+                  >
+                    <span className="">Logout</span>
+                  </button>
+                </div>
               </li>
             </ul>
           </div>

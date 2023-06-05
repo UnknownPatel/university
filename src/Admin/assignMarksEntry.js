@@ -8,6 +8,7 @@ import { useReactToPrint } from "react-to-print";
 import { ToastContainer, toast } from "react-toastify";
 import Multiselect from "multiselect-react-dropdown";
 import { GiArchiveResearch } from "react-icons/gi";
+import { useNavigate } from "react-router-dom";
 
 
 var access_token;
@@ -42,6 +43,8 @@ const AssignMarksEntry = () => {
   const [removeOverFlow, setRemoveOverflow] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState({});
   const [subjectIds, setSubjectIds] = useState({});
+  const navigate = useNavigate();
+
 
   useEffect(() => {
     options_2 = subjects.map((subject) => {
@@ -464,6 +467,10 @@ const AssignMarksEntry = () => {
       }
     }
   };
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/");
+  };
 
   return (
     <div>
@@ -628,6 +635,17 @@ const AssignMarksEntry = () => {
                 >
                   <span className="flex-1 ml-3 whitespace-nowrap">Report</span>
                 </a>
+              </li>
+              <li>
+                <div className="p-4">
+                  <button
+                    type="button"
+                    className="inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition"
+                    onClick={handleLogout}
+                  >
+                    <span className="">Logout</span>
+                  </button>
+                </div>
               </li>
             </ul>
           </div>

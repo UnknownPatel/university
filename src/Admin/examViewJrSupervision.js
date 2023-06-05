@@ -8,6 +8,7 @@ import * as XLSX from "xlsx";
 import { FcCheckmark } from "react-icons/fc";
 import { GiArchiveResearch } from "react-icons/gi";
 import { useReactToPrint } from "react-to-print";
+import { useNavigate } from "react-router-dom";
 
 var acces_token;
 var subdomain;
@@ -30,6 +31,8 @@ const ExamViewJrSupervision = () => {
   const [subjectDates, setSubjectDates] = useState([]);
   const [jrSupervisionTable, setJrSupervisionTable] = useState([]);
   const componentRef3 = useRef();
+  const navigate = useNavigate();
+
   var year;
 
   useEffect(() => {
@@ -470,6 +473,11 @@ const ExamViewJrSupervision = () => {
     setIsDropdownOpen(!isDropdownOpen);
   }
 
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/");
+  };
+
   return (
     <div>
       <nav className="fixed top-0 z-50 w-full bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
@@ -633,6 +641,17 @@ const ExamViewJrSupervision = () => {
                 <span className="flex-1 ml-3 whitespace-nowrap">Report</span>
               </a>
             </li>
+            <li>
+                <div className="p-4">
+                  <button
+                    type="button"
+                    className="inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition"
+                    onClick={handleLogout}
+                  >
+                    <span className="">Logout</span>
+                  </button>
+                </div>
+              </li>
           </ul>
         </div>
       </aside>

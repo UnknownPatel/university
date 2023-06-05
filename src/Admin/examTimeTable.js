@@ -8,6 +8,7 @@ import { IoCreate } from "react-icons/io5";
 import { MdAddCircle } from "react-icons/md";
 import { FiEdit } from "react-icons/fi";
 import { GiArchiveResearch } from "react-icons/gi";
+import { useNavigate } from "react-router-dom";
 
 var acces_token;
 var headers;
@@ -37,6 +38,7 @@ const ExamTimeTable = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [type, setType] = useState("");
   const [storedDates, setStoredDates] = useState([]);
+  const navigate = useNavigate();
 
   var year;
 
@@ -497,6 +499,11 @@ const ExamTimeTable = () => {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/");
+  };
+
   return (
     <div>
       <div>
@@ -660,6 +667,17 @@ const ExamTimeTable = () => {
                 >
                   <span className="flex-1 ml-3 whitespace-nowrap">Report</span>
                 </a>
+              </li>
+              <li>
+                <div className="p-4">
+                  <button
+                    type="button"
+                    className="inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition"
+                    onClick={handleLogout}
+                  >
+                    <span className="">Logout</span>
+                  </button>
+                </div>
               </li>
             </ul>
           </div>

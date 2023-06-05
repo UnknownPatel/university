@@ -7,6 +7,7 @@ import "tailwindcss/tailwind.css";
 import { GiArchiveResearch } from "react-icons/gi";
 import { MdAddCircle } from "react-icons/md";
 import { FiEdit } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
 
 var acces_token;
 var headers;
@@ -33,6 +34,8 @@ const ExamBlockDetails = () => {
   const [storeDates, setStoreDates] = useState([]);
   const [examinationNames, setExaminationNames] = useState([]);
   const [type, setType] = useState("");
+  const navigate = useNavigate();
+
 
   const [examinationTypes, setExaminationTypes] = useState([]);
 
@@ -775,6 +778,11 @@ const ExamBlockDetails = () => {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/");
+  };
+
   return (
     <div>
       <div>
@@ -938,6 +946,17 @@ const ExamBlockDetails = () => {
                 >
                   <span className="flex-1 ml-3 whitespace-nowrap">Report</span>
                 </a>
+              </li>
+              <li>
+                <div className="p-4">
+                  <button
+                    type="button"
+                    className="inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition"
+                    onClick={handleLogout}
+                  >
+                    <span className="">Logout</span>
+                  </button>
+                </div>
               </li>
             </ul>
           </div>

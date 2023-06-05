@@ -12,6 +12,7 @@ import { GiArchiveResearch } from "react-icons/gi";
 
 import { useReactToPrint } from "react-to-print";
 import html2pdf from "html2pdf.js";
+import { useNavigate } from "react-router-dom";
 
 var acces_token;
 var subdomain;
@@ -38,6 +39,7 @@ const ExamViewOtherDuty = () => {
   const [displaySupervisionTable, setDisplaySupervisionTable] = useState([]);
   const [subjectDates, setSubjectDates] = useState([]);
 
+  const navigate = useNavigate();
   const componentRef5 = useRef();
   const tableRef = useRef(null);
 
@@ -358,6 +360,11 @@ const ExamViewOtherDuty = () => {
     };
   };
 
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/");
+  };
+
   return (
     <div>
       <nav className="fixed top-0 z-50 w-full bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
@@ -521,6 +528,17 @@ const ExamViewOtherDuty = () => {
                 <span className="flex-1 ml-3 whitespace-nowrap">Report</span>
               </a>
             </li>
+            <li>
+                <div className="p-4">
+                  <button
+                    type="button"
+                    className="inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition"
+                    onClick={handleLogout}
+                  >
+                    <span className="">Logout</span>
+                  </button>
+                </div>
+              </li>
           </ul>
         </div>
       </aside>

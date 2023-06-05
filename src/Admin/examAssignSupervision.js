@@ -11,6 +11,7 @@ import { MdAddCircle, MdSmartToy } from "react-icons/md";
 import { FiEdit } from "react-icons/fi";
 
 import { useReactToPrint } from "react-to-print";
+import { useNavigate } from "react-router-dom";
 
 var acces_token;
 var headers;
@@ -59,6 +60,8 @@ const ExamAssignSupervision = () => {
   const [odFacultyName, setOdFacultyName] = useState([]);
   const [otherDutyData, setOtherDutyData] = useState([]);
   const [odAssignedDuty, setOdAssignedDuty] = useState("");
+
+  const navigate = useNavigate();
 
   var year;
 
@@ -1469,6 +1472,11 @@ const ExamAssignSupervision = () => {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/");
+  };
+
   return (
     <div>
       <div>
@@ -1632,6 +1640,17 @@ const ExamAssignSupervision = () => {
                 >
                   <span className="flex-1 ml-3 whitespace-nowrap">Report</span>
                 </a>
+              </li>
+              <li>
+                <div className="p-4">
+                  <button
+                    type="button"
+                    className="inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition"
+                    onClick={handleLogout}
+                  >
+                    <span className="">Logout</span>
+                  </button>
+                </div>
               </li>
             </ul>
           </div>
@@ -2346,7 +2365,7 @@ const ExamAssignSupervision = () => {
                     ))}
                   </select>
                   <button
-                    className="py-2 px-3 absolute right-0 mr-7 bg-gray-800 rounded-2xl text-white font-bold"
+                    className="py-2 px-3 mr-7 bg-gray-800 rounded-2xl text-white font-bold"
                     // id={"button-subject-" + subject.id}
                     onClick={handleODFilterSubmit}
                   >

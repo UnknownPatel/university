@@ -1,5 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 var acces_token;
 var subdomain;
@@ -12,6 +13,8 @@ const ExaminationDetails = () => {
   const [examinationType, setExaminationType] = useState("");
   const [examinationTypes, setExaminationTypes] = useState([]);
   const [uniName, setUniName] = useState("");
+  const navigate = useNavigate();
+
 
   useEffect(() => {
     acces_token = localStorage.getItem("access_token");
@@ -213,6 +216,11 @@ const ExaminationDetails = () => {
       });
   };
 
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/");
+  };
+
   return (
     <div>
       <nav className="fixed top-0 z-50 w-full bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
@@ -376,6 +384,17 @@ const ExaminationDetails = () => {
                 <span className="flex-1 ml-3 whitespace-nowrap">Report</span>
               </a>
             </li>
+            <li>
+                <div className="p-4">
+                  <button
+                    type="button"
+                    className="inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition"
+                    onClick={handleLogout}
+                  >
+                    <span className="">Logout</span>
+                  </button>
+                </div>
+              </li>
           </ul>
         </div>
       </aside>
