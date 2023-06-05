@@ -449,6 +449,10 @@ const ExamViewTimeTable = () => {
 
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
+    onBeforePrint: () => {
+      const contentElement = componentRef.current;
+      contentElement.style = {}; 
+    },
   });
 
   const handleSavePDF = () => {
