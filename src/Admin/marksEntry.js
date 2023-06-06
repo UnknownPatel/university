@@ -8,21 +8,26 @@ var acces_token;
 var headers;
 var subdomain;
 
-
 const MarksEntry = () => {
   const [uniName, setUniName] = useState("");
   const [courses, setCourses] = useState([]);
   const [branches, setBranches] = useState([]);
   const [semesters, setSemesters] = useState([]);
+  const [divisions, setDivisions] = useState([]);
   const [examinationNames, setExaminationNames] = useState([]);
   const [examinationTypes, setExaminationTypes] = useState([]);
   const [academic_years, setAcademicYears] = useState([]);
   const [division, setDivision] = useState([]);
   const [subjectName, setSubjectName] = useState([]);
+  const [examinationName, setExaminationName] = useState("");
+  const [selectedYear, setSelectedYear] = useState("");
   const [type, setType] = useState("");
+  const [courseId, setCourseId] = useState("");
+  const [branchId, setBranchId] = useState("");
+  const [semesterId, setSemesterId] = useState("");
+  const [divisionId, setDivisionId] = useState("");
 
   var year;
-  
 
   useEffect(() => {
     acces_token = localStorage.getItem("access_token");
@@ -110,6 +115,196 @@ const MarksEntry = () => {
         });
     }
   }, []);
+
+  const handleExaminationChange = (examination) => {
+    const marks_entry_viewport = document.getElementById(
+      "marks_entry_viewport"
+    );
+    // marks_entry_viewport.classList.add("hidden");
+    // marks_entry_viewport.classList.remove("flex");
+    setExaminationName(examination);
+  };
+
+  const handleYearChange = (date) => {
+    const marks_entry_viewport = document.getElementById(
+      "marks_entry_viewport"
+    );
+    // marks_entry_viewport.classList.add("hidden");
+    // marks_entry_viewport.classList.remove("flex");
+    if (date !== "Select Year") {
+      setSelectedYear(date);
+    } else {
+      setSelectedYear("");
+    }
+  };
+
+  const handleTypeChange = (e) => {
+    e.preventDefault();
+    const marks_entry_viewport = document.getElementById(
+      "marks_entry_viewport"
+    );
+    // marks_entry_viewport.classList.add("hidden");
+    // marks_entry_viewport.classList.remove("flex");
+    if (e.target.value === "Select Type") {
+      setType("");
+    } else {
+      setType(e.target.value);
+    }
+  };
+
+  const handleCourseChange = (e) => {
+    e.preventDefault();
+    const marks_entry_viewport = document.getElementById(
+      "marks_entry_viewport"
+    );
+    // marks_entry_viewport.classList.add("hidden");
+    // marks_entry_viewport.classList.remove("flex");
+    console.log(e.target.value);
+    if (e.target.value !== "Select course") {
+      setCourseId(e.target.value);
+      var course_id = e.target.value;
+      if (subdomain !== null || subdomain !== "") {
+        axios
+          .get(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/branches?subdomain=${subdomain}&course_id=${course_id}`,
+            { headers }
+          )
+          .then((response) => {
+            setBranches(response.data.data.branches);
+          })
+          .catch((error) => console.log(error));
+      }
+    } else {
+      setCourseId("");
+      setBranches([]);
+    }
+  };
+
+  const handleBranchChange = (e) => {
+    e.preventDefault();
+    const marks_entry_viewport = document.getElementById(
+      "marks_entry_viewport"
+    );
+    // marks_entry_viewport.classList.add("hidden");
+    // marks_entry_viewport.classList.remove("flex");
+
+    // var selectedIndex = e.target.options.selectedIndex;
+    // setBranchesName(e.target.options[selectedIndex].getAttribute("data-name"));
+    var branch_id = e.target.value;
+    if (branch_id === "Select Branch") {
+      setBranchId("");
+      setSemesterId("");
+    } else {
+      setBranchId(e.target.value);
+      if (subdomain !== null || subdomain !== "") {
+        axios
+          .get(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/semesters?subdomain=${subdomain}&branch_id=${branch_id}`,
+            { headers }
+          )
+          .then((response) => {
+            setSemesters(response.data.data.semesters);
+          })
+          .catch((error) => console.log(error));
+      }
+    }
+  };
+
+  const handleSemesterChange = (e) => {
+    e.preventDefault();
+    const marks_entry_viewport = document.getElementById(
+      "marks_entry_viewport"
+    );
+    // marks_entry_viewport.classList.add("hidden");
+    // marks_entry_viewport.classList.remove("flex");
+    if (e.target.value === "Select Semester") {
+      setSemesterId("");
+    } else {
+      setSemesterId(e.target.value);
+      if (subdomain !== null || subdomain !== "") {
+        axios
+          .get(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/divisions`,
+            {
+              headers,
+              params: {
+                subdomain: subdomain,
+                division: {
+                  semester_id: e.target.value,
+                },
+              },
+            }
+          )
+          .then((response) => {
+            setDivisions(response.data.data.divisions);
+          })
+          .catch((error) => console.log(error));
+      } else {
+        setDivisions([]);
+      }
+    }
+  };
+
+  const handleDivisionChange = (e) => {
+    e.preventDefault();
+    const marks_entry_viewport = document.getElementById(
+      "Marks_viewport"
+    );
+    marks_entry_viewport.classList.add("hidden");
+    marks_entry_viewport.classList.remove("flex");
+    console.log("Button clicked");
+    if (e.target.value !== "Select Division") {
+      setDivisionId(e.target.value);
+    } else {
+      setDivisionId("");
+    }
+  };
+
+  const handleFilterSubmit = (e) => {
+    let selectedFilter = {};
+    if (examinationName === "") {
+      toast.error("Please select examination name", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (selectedYear === "") {
+      toast.error("Please select year", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (courseId === "" || courseId === "Select Course") {
+      toast.error("Please select course", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (branchId === "") {
+      toast.error("Please select branch", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (semesterId === "") {
+      toast.error("Please select semester", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (divisionId === "") {
+      toast.error("Please select division", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (type === "") {
+      toast.error("Please select type", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else {
+      selectedFilter = {
+        examination_name: examinationName,
+        academic_year: selectedYear,
+        course_id: courseId,
+        branch_id: branchId,
+        semester_id: semesterId,
+        division_id: divisionId,
+        entry_type: type,
+      };
+
+      console.log(selectedFilter);
+    }
+  };
+
   return (
     <div>
       <nav className="fixed top-0 z-50 w-full bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
@@ -222,9 +417,9 @@ const MarksEntry = () => {
           <div className="flex mt-5 ml-2">
             <select
               className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
-              // onChange={(e) => {
-              //   handleExaminationChange(e.target.value);
-              // }}
+              onChange={(e) => {
+                handleExaminationChange(e.target.value);
+              }}
               aria-label="Examination Name"
             >
               <option value="Select Examination" hidden selected>
@@ -241,7 +436,7 @@ const MarksEntry = () => {
 
             <select
               className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
-              // onChange={(e) => handleYearChange(e.target.value)}
+              onChange={(e) => handleYearChange(e.target.value)}
             >
               <option value="Select Year" hidden selected>
                 Year
@@ -253,7 +448,7 @@ const MarksEntry = () => {
 
             <select
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
-              // onChange={handleTypeChange}
+              onChange={handleTypeChange}
             >
               <option value="Select Type" hidden selected>
                 Type
@@ -270,7 +465,7 @@ const MarksEntry = () => {
             <select
               aria-label="Select Course"
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
-              // onChange={handleCourseChange}
+              onChange={handleCourseChange}
             >
               <option value="Select Course" hidden selected>
                 Course
@@ -282,7 +477,7 @@ const MarksEntry = () => {
 
             <select
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
-              // onChange={handleBranchChange}
+              onChange={handleBranchChange}
               // isSearchable={true}
             >
               <option value="Select Branch" hidden selected>
@@ -295,7 +490,7 @@ const MarksEntry = () => {
 
             <select
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
-              // onChange={handleSemesterChange}
+              onChange={handleSemesterChange}
             >
               <option value="Select Semester" hidden selected>
                 Semester
@@ -307,15 +502,17 @@ const MarksEntry = () => {
 
             <select
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
+              onChange={handleDivisionChange}
             >
               <option value="Select Division" hidden selected>
                 Division
               </option>
-              
+              {divisions.map((division) => (
+                <option value={division.id}>{division.name}</option>
+              ))}
             </select>
-            <select
-              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
-            >
+
+            <select className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto">
               <option value="Select SubjectName" hidden selected>
                 Subject Name
               </option>
@@ -323,7 +520,7 @@ const MarksEntry = () => {
 
             <button
               className="py-2 px-3 mr-7 ml-2 bg-gray-800 rounded-2xl text-white font-bold"
-              // onClick={handleFilterSubmit}
+              onClick={handleFilterSubmit}
             >
               <p className="inline-flex">
                 Search <GiArchiveResearch className="mt-1 ml-2" />
@@ -333,7 +530,7 @@ const MarksEntry = () => {
           {/* Table of Faculty List */}
           <div
             id="Marks_viewport"
-            className="flex flex-col mt-5"
+            className="hidden flex-col mt-5"
             style={{ height: 390 }}
           >
             <div className="">
@@ -342,7 +539,7 @@ const MarksEntry = () => {
                   <table className="min-w-full divide-y table-auto divide-gray-200">
                     <thead className="sticky top-0 bg-gray-50">
                       <tr>
-                      <th
+                        <th
                           scope="col"
                           className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
                         >
@@ -368,15 +565,19 @@ const MarksEntry = () => {
                         </th>
                         <th
                           scope="col"
+                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                        >
+                          QR Code
+                        </th>
+                        <th
+                          scope="col"
                           className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
                         >
                           Action
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="text-center divide-y divide-gray-200">
-                     
-                    </tbody>
+                    <tbody className="text-center divide-y divide-gray-200"></tbody>
                   </table>
                 </div>
               </div>
