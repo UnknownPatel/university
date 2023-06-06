@@ -13,7 +13,6 @@ var subdomain;
 var year;
 var headers;
 
-
 const MarksEntry = () => {
   const [uniName, setUniName] = useState("");
   const [courses, setCourses] = useState([]);
@@ -38,8 +37,9 @@ const MarksEntry = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [storeDates, setStoreDates] = useState([]);
   const [removeOverFlow, setRemoveOverflow] = useState(false);
+  const navigate = useNavigate();
+
   var year;
-  
 
   useEffect(() => {
     acces_token = localStorage.getItem("access_token");
@@ -142,9 +142,6 @@ const MarksEntry = () => {
 
   const handleTypeChange = (e) => {
     e.preventDefault();
-    // const time_table_viewport = document.getElementById("time_table_viewport");
-    // time_table_viewport.classList.add("hidden");
-    // time_table_viewport.classList.remove("flex");
     if (e.target.value === "Select Type") {
       setType("");
     } else {
@@ -155,7 +152,6 @@ const MarksEntry = () => {
   const handleCourseChange = (e) => {
     e.preventDefault();
     var selectedFilter = {};
-    setStoreDates([]);
     if (examinationName !== "Select Examination") {
       selectedFilter["name"] = examinationName;
     }
@@ -214,7 +210,6 @@ const MarksEntry = () => {
   const handleBranchChange = (e) => {
     e.preventDefault();
     var selectedFilter = {};
-    setStoreDates([]);
 
     if (examinationName !== "Select Examination") {
       selectedFilter["name"] = examinationName;
@@ -285,7 +280,6 @@ const MarksEntry = () => {
   const handleSemesterChange = (e) => {
     e.preventDefault();
     var selectedFilter = {};
-    setStoreDates([]);
 
     if (examinationName !== "Select Examination") {
       selectedFilter["name"] = examinationName;
@@ -344,6 +338,10 @@ const MarksEntry = () => {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/");
+  };
 
   return (
     <div>
@@ -448,7 +446,45 @@ const MarksEntry = () => {
         </div>
       </nav>
 
-      <div className="">
+      <aside
+        id="logo-sidebar"
+        className="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
+        aria-label="Sidebar"
+      >
+        <div className="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
+          <ul className="space-y-2 font-medium">
+            <li>
+              <a
+                href="#"
+                className="flex items-center p-2 text-gray-900 bg-slate-600 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="ml-3">Marks Entry</span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="#"
+                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="ml-3">Lock Marks</span>
+              </a>
+            </li>
+            <li>
+              <div className="p-4 absolute inset-x-0 bottom-0">
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition"
+                  onClick={handleLogout}
+                >
+                  <span className="">Logout</span>
+                </button>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </aside>
+
+      <div className="pt-4 sm:ml-64">
         <div className="p-4 rounded-lg mt-14">
           <div className="text-center text-4xl">
             <p>Marks Entry </p>
@@ -540,17 +576,12 @@ const MarksEntry = () => {
               ))}
             </select>
 
-            <select
-              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
-            >
+            <select className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto">
               <option value="Select Division" hidden selected>
                 Division
               </option>
-              
             </select>
-            <select
-              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
-            >
+            <select className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto">
               <option value="Select SubjectName" hidden selected>
                 Subject Name
               </option>
@@ -577,7 +608,7 @@ const MarksEntry = () => {
                   <table className="min-w-full divide-y table-auto divide-gray-200">
                     <thead className="sticky top-0 bg-gray-50">
                       <tr>
-                      <th
+                        <th
                           scope="col"
                           className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
                         >
@@ -609,9 +640,7 @@ const MarksEntry = () => {
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="text-center divide-y divide-gray-200">
-                     
-                    </tbody>
+                    <tbody className="text-center divide-y divide-gray-200"></tbody>
                   </table>
                 </div>
               </div>
