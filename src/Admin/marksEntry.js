@@ -20,12 +20,9 @@ const MarksEntry = () => {
   const [academic_years, setAcademicYears] = useState([]);
   const [division, setDivision] = useState([]);
   const [subjectName, setSubjectName] = useState([]);
-  const [examinationName, setExaminationName] = useState("");
-  const [selectedYear, setSelectedYear] = useState("");
   const [type, setType] = useState("");
   const [courseId, setCourseId] = useState("");
   const [branchId, setBranchId] = useState("");
-  const [semesterId, setSemesterId] = useState("");
   const [divisionId, setDivisionId] = useState("");
   const [branchesName, setBranchesName] = useState("");
   const [semesterId, setSemesterId] = useState("");
@@ -190,59 +187,62 @@ const MarksEntry = () => {
     } else {
       setCourseId("");
       setBranches([]);
-    var selectedFilter = {};
-    if (examinationName !== "Select Examination") {
-      selectedFilter["name"] = examinationName;
-    }
+      var selectedFilter = {};
+      if (examinationName !== "Select Examination") {
+        selectedFilter["name"] = examinationName;
+      }
 
-    if (selectedYear !== "Select Year") {
-      selectedFilter["academic_year"] = selectedYear;
-    }
+      if (selectedYear !== "Select Year") {
+        selectedFilter["academic_year"] = selectedYear;
+      }
 
-    if (e.target.value !== "Select Course") {
-      selectedFilter["course_id"] = e.target.value;
-    }
+      if (e.target.value !== "Select Course") {
+        selectedFilter["course_id"] = e.target.value;
+      }
 
-    console.log(selectedFilter);
-    setCourseId(e.target.value);
-    var course_id = e.target.value;
-    access_token = localStorage.getItem("access_token");
-    const headers = { Authorization: `Bearer ${access_token}` };
-    const host = window.location.host;
-    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
-    if (arr.length > 0) {
-      subdomain = arr[0];
-    }
-    if (subdomain !== null || subdomain !== "") {
-      axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/branches?subdomain=${subdomain}&course_id=${course_id}`,
-          { headers }
-        )
-        .then((response) => {
-          setBranches(response.data.data.branches);
-        })
-        .catch((error) => console.log(error));
+      console.log(selectedFilter);
+      setCourseId(e.target.value);
+      var course_id = e.target.value;
+      access_token = localStorage.getItem("access_token");
+      const headers = { Authorization: `Bearer ${access_token}` };
+      const host = window.location.host;
+      const arr = host
+        .split(".")
+        .slice(0, host.includes("localhost") ? -1 : -2);
+      if (arr.length > 0) {
+        subdomain = arr[0];
+      }
+      if (subdomain !== null || subdomain !== "") {
+        axios
+          .get(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/branches?subdomain=${subdomain}&course_id=${course_id}`,
+            { headers }
+          )
+          .then((response) => {
+            setBranches(response.data.data.branches);
+          })
+          .catch((error) => console.log(error));
 
-      axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
-          {
-            headers,
-            params: {
-              time_table: selectedFilter,
-              subdomain: subdomain,
-            },
-          }
-        )
-        .then((response) => {
-          if (response.data.message === "Examination dates are as below") {
-            if (response.data.data.dates.length !== 0) {
-              setStoreDates(response.data.data.dates);
+        axios
+          .get(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
+            {
+              headers,
+              params: {
+                time_table: selectedFilter,
+                subdomain: subdomain,
+              },
             }
-          }
-        })
-        .catch((error) => console.log(error));
+          )
+          .then((response) => {
+            if (response.data.message === "Examination dates are as below") {
+              if (response.data.data.dates.length !== 0) {
+                setStoreDates(response.data.data.dates);
+              }
+            }
+          })
+          .catch((error) => console.log(error));
+      }
     }
   };
 
@@ -372,9 +372,7 @@ const MarksEntry = () => {
 
   const handleDivisionChange = (e) => {
     e.preventDefault();
-    const marks_entry_viewport = document.getElementById(
-      "Marks_viewport"
-    );
+    const marks_entry_viewport = document.getElementById("Marks_viewport");
     marks_entry_viewport.classList.add("hidden");
     marks_entry_viewport.classList.remove("flex");
     console.log("Button clicked");
@@ -426,64 +424,27 @@ const MarksEntry = () => {
         entry_type: type,
       };
 
-      console.log(selectedFilter);
-    }
-    var selectedFilter = {};
-
-    if (examinationName !== "Select Examination") {
-      selectedFilter["name"] = examinationName;
-    }
-
-    if (selectedYear !== "Select Year") {
-      selectedFilter["academic_year"] = selectedYear;
-    }
-
-    if (courseId !== "Select Course") {
-      selectedFilter["course_id"] = courseId;
-    }
-
-    if (courseId !== "Select Branch") {
-      selectedFilter["branch_id"] = branchId;
-    }
-
-    if (e.target.value === "Select Semester") {
-      setSemesterId("");
-    } else {
-      selectedFilter["semester_id"] = e.target.value;
-      setSemesterId(e.target.value);
-    }
-    var selectedIndex = e.target.options.selectedIndex;
-    setSemesterName(
-      "Semester : " +
-        e.target.options[selectedIndex].getAttribute("data-semester-name")
-    );
-    access_token = localStorage.getItem("access_token");
-    const headers = { Authorization: `Bearer ${access_token}` };
-    const host = window.location.host;
-    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
-    if (arr.length > 0) {
-      subdomain = arr[0];
-    }
-    if (subdomain !== null || subdomain !== "") {
-      axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
-          {
-            headers,
-            params: {
-              time_table: selectedFilter,
-              subdomain: subdomain,
-            },
-          }
-        )
-        .then((response) => {
-          if (response.data.message === "Examination dates are as below") {
-            if (response.data.data.dates.length !== 0) {
-              setStoreDates(response.data.data.dates);
+      if (subdomain !== null || subdomain !== "") {
+        axios
+          .get(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
+            {
+              headers,
+              params: {
+                time_table: selectedFilter,
+                subdomain: subdomain,
+              },
             }
-          }
-        })
-        .catch((error) => console.log(error));
+          )
+          .then((response) => {
+            if (response.data.message === "Examination dates are as below") {
+              if (response.data.data.dates.length !== 0) {
+                setStoreDates(response.data.data.dates);
+              }
+            }
+          })
+          .catch((error) => console.log(error));
+      }
     }
   };
 
