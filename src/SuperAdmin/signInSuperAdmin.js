@@ -47,7 +47,7 @@ const SignInSuperAdmin = () => {
           .then((response) => {
             console.log(response.data.access_token);
             login_btn.disabled = false;
-            login_btn.innerHTML = "Login";
+            login_btn.innerHTML = "Log In";
             login_btn.classList.remove("cursor-not-allowed");
             if (response.data.accessToken !== "") {
               const accessToken = response.data.access_token;
@@ -80,6 +80,15 @@ const SignInSuperAdmin = () => {
                     setTimeout(() => {
                       navigate("/examTimeTable");
                     }, 5000);
+                  } else if (
+                    responce.data.roles.includes("Marks Entry")
+                  ) {
+                    toast.success("Login Successfully !!", {
+                      position: toast.POSITION.BOTTOM_LEFT,
+                    });
+                    setTimeout(() => {
+                      navigate("//marks_entry");
+                    }, 5000);
                   }
                 })
                 .catch((error) => console.log(error));
@@ -89,6 +98,9 @@ const SignInSuperAdmin = () => {
             console.log(err);
             console.log(err.response);
             alert("Incorrect password or email id");
+            login_btn.disabled = false;
+            login_btn.innerHTML = "Log In";
+            login_btn.classList.remove("cursor-not-allowed");
           });
       })
       .catch(function (error) {

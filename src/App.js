@@ -30,6 +30,7 @@ import ExamViewSrSupervision from './Admin/examViewSrSupervision';
 import ExamViewOtherDuty from './Admin/examViewOtherDuty';
 import AssignMarksEntry from './Admin/assignMarksEntry';
 import ExaminationDetails from './Admin/examinationDetails';
+import LockMarks from './Admin/lockMarks';
 
 function App() {
   return (
@@ -46,7 +47,6 @@ function App() {
         <Route path="/facultyViewSupervisionList" element={<ViewSupervisionList/>} />
         <Route path="/create_syllabus" element={<CreateSyllabus/>} />
         <Route path="/view_syllabus" element={<ViewSyllabus/>} />
-        <Route path="/marks_entry" element={<MarksEntry/>} />
         <Route path="/AdminLogin" element={<AdminLogin/>}/>
         <Route path="/examController" element={<ExamController/>}/>
         <Route path="/examBlockDetails" element={<ExamBlockDetails/>}/>
@@ -60,6 +60,9 @@ function App() {
         <Route path="/examViewOtherDuty" element={<ExamViewOtherDuty/>}/>
         <Route path="/assignMarksEntry" element={<AssignMarksEntry/>}/>
         <Route path="/examinationDetails" element={<ExaminationDetails/>}/>
+        <Route path="/marks_entry" element={<MarksEntry/>} />
+        <Route path="/lock_Marks" element={<LockMarks/>}/>
+
 
 
         
