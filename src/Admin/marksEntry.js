@@ -387,7 +387,11 @@ const MarksEntry = () => {
                     aria-expanded="false"
                     data-dropdown-toggle="dropdown-user"
                   >
+                    <span className="self-center text-xl mr-2 font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
+                      Faculty Name
+                    </span>
                     <span className="sr-only">Open user menu</span>
+
                     <img
                       className="w-8 h-8 rounded-full"
                       src=""
