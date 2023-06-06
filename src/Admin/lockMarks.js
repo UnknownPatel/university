@@ -9,7 +9,7 @@ var headers;
 var subdomain;
 var access_token;
 
-const MarksEntry = () => {
+const LockMarks = () => {
   const [uniName, setUniName] = useState("");
   const [courses, setCourses] = useState([]);
   const [branches, setBranches] = useState([]);
@@ -59,7 +59,6 @@ const MarksEntry = () => {
           `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
         )
         .then((response) => {
-          //   console.log(response.data.university.name);
           setUniName(response.data.university.name);
         })
         .catch((err) => {
@@ -124,220 +123,11 @@ const MarksEntry = () => {
     }
   }, []);
 
-  const handleExaminationChange = (examination) => {
-    setExaminationName(examination);
-  };
-
-  const handleYearChange = (date) => {
-    if (date !== "Select Year") {
-      setSelectedYear(date);
-    } else {
-      setSelectedYear("");
-    }
-  };
-
-  const handleTypeChange = (e) => {
-    e.preventDefault();
-    if (e.target.value === "Select Type") {
-      setType("");
-    } else {
-      setType(e.target.value);
-    }
-  };
-
-  const handleCourseChange = (e) => {
-    e.preventDefault();
-    var selectedFilter = {};
-    if (examinationName !== "Select Examination") {
-      selectedFilter["name"] = examinationName;
-    }
-
-    if (selectedYear !== "Select Year") {
-      selectedFilter["academic_year"] = selectedYear;
-    }
-
-    if (e.target.value !== "Select Course") {
-      selectedFilter["course_id"] = e.target.value;
-    }
-
-    console.log(selectedFilter);
-    setCourseId(e.target.value);
-    var course_id = e.target.value;
-    access_token = localStorage.getItem("access_token");
-    const headers = { Authorization: `Bearer ${access_token}` };
-    const host = window.location.host;
-    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
-    if (arr.length > 0) {
-      subdomain = arr[0];
-    }
-    if (subdomain !== null || subdomain !== "") {
-      axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/branches?subdomain=${subdomain}&course_id=${course_id}`,
-          { headers }
-        )
-        .then((response) => {
-          setBranches(response.data.data.branches);
-        })
-        .catch((error) => console.log(error));
-
-      axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
-          {
-            headers,
-            params: {
-              time_table: selectedFilter,
-              subdomain: subdomain,
-            },
-          }
-        )
-        .then((response) => {
-          if (response.data.message === "Examination dates are as below") {
-            if (response.data.data.dates.length !== 0) {
-              setStoreDates(response.data.data.dates);
-            }
-          }
-        })
-        .catch((error) => console.log(error));
-    }
-  };
-
-  const handleBranchChange = (e) => {
-    e.preventDefault();
-    var selectedFilter = {};
-
-    if (examinationName !== "Select Examination") {
-      selectedFilter["name"] = examinationName;
-    }
-
-    if (selectedYear !== "Select Year") {
-      selectedFilter["academic_year"] = selectedYear;
-    }
-
-    if (courseId !== "Select Course") {
-      selectedFilter["course_id"] = courseId;
-    }
-
-    if (e.target.value !== "Select Branch") {
-      selectedFilter["branch_id"] = e.target.value;
-    }
-
-    console.log(selectedFilter);
-    var selectedIndex = e.target.options.selectedIndex;
-    setBranchesName(e.target.options[selectedIndex].getAttribute("data-name"));
-    var branch_id = e.target.value;
-    if (branch_id === "Select Branch") {
-      setBranchId("");
-      setSemesterId("");
-    } else {
-      setBranchId(e.target.value);
-    }
-    access_token = localStorage.getItem("access_token");
-    const headers = { Authorization: `Bearer ${access_token}` };
-    const host = window.location.host;
-    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
-    if (arr.length > 0) {
-      subdomain = arr[0];
-    }
-    if (subdomain !== null || subdomain !== "") {
-      axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/semesters?subdomain=${subdomain}&branch_id=${branch_id}`,
-          { headers }
-        )
-        .then((response) => {
-          setSemesters(response.data.data.semesters);
-        })
-        .catch((error) => console.log(error));
-
-      axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
-          {
-            headers,
-            params: {
-              time_table: selectedFilter,
-              subdomain: subdomain,
-            },
-          }
-        )
-        .then((response) => {
-          if (response.data.message === "Examination dates are as below") {
-            if (response.data.data.dates.length !== 0) {
-              setStoreDates(response.data.data.dates);
-            }
-          }
-        })
-        .catch((error) => console.log(error));
-    }
-  };
-
-  const handleSemesterChange = (e) => {
-    e.preventDefault();
-    var selectedFilter = {};
-
-    if (examinationName !== "Select Examination") {
-      selectedFilter["name"] = examinationName;
-    }
-
-    if (selectedYear !== "Select Year") {
-      selectedFilter["academic_year"] = selectedYear;
-    }
-
-    if (courseId !== "Select Course") {
-      selectedFilter["course_id"] = courseId;
-    }
-
-    if (courseId !== "Select Branch") {
-      selectedFilter["branch_id"] = branchId;
-    }
-
-    if (e.target.value === "Select Semester") {
-      setSemesterId("");
-    } else {
-      selectedFilter["semester_id"] = e.target.value;
-      setSemesterId(e.target.value);
-    }
-    var selectedIndex = e.target.options.selectedIndex;
-    setSemesterName(
-      "Semester : " +
-        e.target.options[selectedIndex].getAttribute("data-semester-name")
-    );
-    access_token = localStorage.getItem("access_token");
-    const headers = { Authorization: `Bearer ${access_token}` };
-    const host = window.location.host;
-    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
-    if (arr.length > 0) {
-      subdomain = arr[0];
-    }
-    if (subdomain !== null || subdomain !== "") {
-      axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
-          {
-            headers,
-            params: {
-              time_table: selectedFilter,
-              subdomain: subdomain,
-            },
-          }
-        )
-        .then((response) => {
-          if (response.data.message === "Examination dates are as below") {
-            if (response.data.data.dates.length !== 0) {
-              setStoreDates(response.data.data.dates);
-            }
-          }
-        })
-        .catch((error) => console.log(error));
-    }
-  };
-
   const handleLogout = () => {
     localStorage.clear();
     navigate("/");
   };
+
 
   return (
     <div>
@@ -456,7 +246,7 @@ const MarksEntry = () => {
             <li>
               <a
                 href="/marks_entry"
-                className="flex items-center p-2 text-gray-900 bg-slate-600 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                className="flex items-center p-2 text-gray-900  rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 <span className="ml-3">Marks Entry</span>
               </a>
@@ -464,7 +254,7 @@ const MarksEntry = () => {
             <li>
               <a
                 href="/lock_Marks"
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                className="flex items-center p-2 text-gray-900 bg-slate-600 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 <span className="ml-3">Lock Marks</span>
               </a>
@@ -487,15 +277,12 @@ const MarksEntry = () => {
       <div className="pt-4 sm:ml-64">
         <div className="p-4 rounded-lg mt-14">
           <div className="text-center text-4xl">
-            <p>Marks Entry </p>
+            <p>Lock Marks Entry </p>
           </div>
 
           <div className="flex mt-5 ml-2">
             <select
               className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
-              onChange={(e) => {
-                handleExaminationChange(e.target.value);
-              }}
               aria-label="Examination Name"
             >
               <option value="Select Examination" hidden selected>
@@ -512,7 +299,6 @@ const MarksEntry = () => {
 
             <select
               className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
-              onChange={(e) => handleYearChange(e.target.value)}
             >
               <option value="Select Year" hidden selected>
                 Year
@@ -524,7 +310,6 @@ const MarksEntry = () => {
 
             <select
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
-              onChange={handleTypeChange}
             >
               <option value="Select Type" hidden selected>
                 Type
@@ -541,7 +326,6 @@ const MarksEntry = () => {
             <select
               aria-label="Select Course"
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
-              onChange={handleCourseChange}
             >
               <option value="Select Course" hidden selected>
                 Course
@@ -553,8 +337,6 @@ const MarksEntry = () => {
 
             <select
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
-              onChange={handleBranchChange}
-              // isSearchable={true}
             >
               <option value="Select Branch" hidden selected>
                 Branch
@@ -566,7 +348,6 @@ const MarksEntry = () => {
 
             <select
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
-              onChange={handleSemesterChange}
             >
               <option value="Select Semester" hidden selected>
                 Semester
@@ -581,11 +362,6 @@ const MarksEntry = () => {
                 Division
               </option>
             </select>
-            <select className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto">
-              <option value="Select SubjectName" hidden selected>
-                Subject Name
-              </option>
-            </select>
 
             <button
               className="py-2 px-3 mr-7 ml-2 bg-gray-800 rounded-2xl text-white font-bold"
@@ -598,7 +374,7 @@ const MarksEntry = () => {
           </div>
           {/* Table of Faculty List */}
           <div
-            id="Marks_viewport"
+            id="lockMarks_viewport"
             className="flex flex-col mt-5"
             style={{ height: 390 }}
           >
@@ -618,19 +394,7 @@ const MarksEntry = () => {
                           scope="col"
                           className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
                         >
-                          Student Name
-                        </th>
-                        <th
-                          scope="col"
-                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                        >
-                          Enrollment No.
-                        </th>
-                        <th
-                          scope="col"
-                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                        >
-                          Enter Marks
+                          Subject Name
                         </th>
                         <th
                           scope="col"
@@ -650,7 +414,7 @@ const MarksEntry = () => {
       </div>
       <ToastContainer />
     </div>
-  );
-};
+  )
+}
 
-export default MarksEntry;
+export default LockMarks
