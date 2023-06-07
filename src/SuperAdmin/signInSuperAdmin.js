@@ -46,6 +46,7 @@ const SignInSuperAdmin = () => {
           )
           .then((response) => {
             console.log(response.data.access_token);
+            console.log(response.data);
             login_btn.disabled = false;
             login_btn.innerHTML = "Log In";
             login_btn.classList.remove("cursor-not-allowed");
@@ -87,7 +88,7 @@ const SignInSuperAdmin = () => {
                       position: toast.POSITION.BOTTOM_LEFT,
                     });
                     setTimeout(() => {
-                      navigate("//marks_entry");
+                      navigate("/marks_entry");
                     }, 5000);
                   }
                 })

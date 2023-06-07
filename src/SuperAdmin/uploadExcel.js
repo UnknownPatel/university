@@ -328,6 +328,8 @@ const UploadExcel = () => {
                   <option>Faculty Details</option>
                   <option>Course and Semester Details</option>
                   <option>Subject Details</option>
+                  <option>Division Details</option>
+                  <option>Student Details</option>
                 </select>
               </div>
 
