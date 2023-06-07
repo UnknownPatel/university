@@ -198,6 +198,7 @@ const AssignMarksEntry = () => {
   };
 
   const handleBranchChange = (e) => {
+    
     e.preventDefault();
     const marks_entry_viewport = document.getElementById(
       "marks_entry_viewport"
@@ -252,6 +253,7 @@ const AssignMarksEntry = () => {
   };
 
   const handleSemesterChange = (e) => {
+    
     e.preventDefault();
     const marks_entry_viewport = document.getElementById(
       "marks_entry_viewport"
