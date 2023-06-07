@@ -448,18 +448,11 @@ const ExamViewTimeTable = () => {
   };
 
   const handlePrint = useReactToPrint({
-    onBeforeGetContent: () => {
+    content: () => componentRef.current,
+    onBeforePrint: () => {
       const contentElement = componentRef.current;
       contentElement.style = {}; 
     },
-    content: () => componentRef.current,
-    onAfterPrint: () => {
-      const contentElement = componentRef.current;
-      contentElement.style = {
-        height: "400px",
-        overflowY: "auto",
-      };
-    }
   });
 
   const handleSavePDF = () => {
