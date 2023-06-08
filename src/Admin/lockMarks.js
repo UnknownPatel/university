@@ -14,6 +14,9 @@ const LockMarks = () => {
   const [courses, setCourses] = useState([]);
   const [branches, setBranches] = useState([]);
   const [semesters, setSemesters] = useState([]);
+  const [divisions, setDivisions] = useState([]);
+  const [subjects, setSubjects] = useState([]);
+  const [subjectId, setSubjectId] = useState("");
   const [examinationNames, setExaminationNames] = useState([]);
   const [examinationTypes, setExaminationTypes] = useState([]);
   const [academic_years, setAcademicYears] = useState([]);
@@ -22,6 +25,7 @@ const LockMarks = () => {
   const [type, setType] = useState("");
   const [courseId, setCourseId] = useState("");
   const [branchId, setBranchId] = useState("");
+  const [divisionId, setDivisionId] = useState("");
   const [branchesName, setBranchesName] = useState("");
   const [semesterId, setSemesterId] = useState("");
   const [semesterName, setSemesterName] = useState("");
@@ -31,13 +35,17 @@ const LockMarks = () => {
   const [time, setTime] = useState("");
   const [displayTimeTable, setDisplayTimeTable] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [storeDates, setStoreDates] = useState([]);
+  const [students, setStudents] = useState([]);
   const [removeOverFlow, setRemoveOverflow] = useState(false);
+  const [selectedFilter, setSelectedFilter] = useState("");
+  const [marksData, setMarksData] = useState([]);
+  const [faculty, setFaculty] = useState("");
   const navigate = useNavigate();
 
   var year;
 
   useEffect(() => {
+    // var selectedFilter = [];
     access_token = localStorage.getItem("access_token");
     year = new Date().getFullYear();
     setAcademicYears(
@@ -54,17 +62,44 @@ const LockMarks = () => {
     }
 
     if (subdomain !== null || subdomain !== "") {
+      // Authorization Details
       axios
         .get(
           `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
         )
         .then((response) => {
+          //   console.log(response.data.university.name);
           setUniName(response.data.university.name);
         })
         .catch((err) => {
           console.log(err);
         });
 
+      //  Get Current User Details
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/find_user?subdomain=${subdomain}`,
+          {
+            headers,
+          }
+        )
+        .then((responce) => {
+          // selectedFilter = responce.data.configuration;
+          setFaculty(
+            responce.data.user.first_name + " " + responce.data.user.last_name
+          );
+          setSelectedFilter(responce.data.configuration);
+          setExaminationName(responce.data.configuration.examination_name);
+          setSelectedYear(responce.data.configuration.academic_year);
+          setType(responce.data.configuration.examination_type);
+          setCourseId(responce.data.configuration.course_id);
+          setBranchId(responce.data.configuration.branch_id);
+          setSemesterId(responce.data.configuration.semester_id);
+          setDivisionId(responce.data.configuration.division_id);
+        })
+        .catch((error) => console.log(error));
+
+      // Get Course
       axios
         .get(
           `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/courses?subdomain=${subdomain}`,
@@ -75,6 +110,7 @@ const LockMarks = () => {
         })
         .catch((error) => console.log(error));
 
+      // Get Examination Names
       axios
         .get(
           "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_names",
@@ -98,6 +134,7 @@ const LockMarks = () => {
           console.log(err.message);
         });
 
+      // Get Examination Types
       axios
         .get(
           "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_types",
@@ -123,11 +160,101 @@ const LockMarks = () => {
     }
   }, []);
 
+  useEffect(() => {
+    if (selectedFilter !== "") {
+      console.log(JSON.parse(JSON.stringify(selectedFilter.subject_ids)));
+      // Get Branches
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/branches?subdomain=${subdomain}&course_id=${selectedFilter.course_id}`,
+          { headers }
+        )
+        .then((response) => {
+          setBranches(response.data.data.branches);
+        })
+        .catch((error) => console.log(error));
+
+      // Get Semesters
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/semesters?subdomain=${subdomain}&branch_id=${selectedFilter.branch_id}`,
+          { headers }
+        )
+        .then((response) => {
+          setSemesters(response.data.data.semesters);
+        })
+        .catch((error) => console.log(error));
+
+      // Get Divisions
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/divisions?subdomain=${subdomain}`,
+          {
+            headers,
+            params: {
+              division: {
+                semester_id: selectedFilter.semester_id,
+              },
+            },
+          }
+        )
+        .then((response) => {
+          setDivisions(response.data.data.divisions);
+        })
+        .catch((error) => console.log(error));
+
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/fetch_subjects`,
+          {
+            headers,
+            params: {
+              student_mark: selectedFilter,
+              subdomain: subdomain,
+            },
+          }
+        )
+        .then((res) => {
+          console.log(res);
+          if (res.data.message === "Details found") {
+            if (res.data.data.subject_ids.length !== 0) {
+              axios
+                .get(
+                  `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/subjects`,
+                  {
+                    headers,
+                    params: {
+                      subject: {
+                        course_id: selectedFilter.course_id,
+                        branch_id: selectedFilter.branch_id,
+                        semester_id: selectedFilter.semester_id,
+                        id: JSON.stringify(res.data.data.subject_ids),
+                      },
+                      subdomain: subdomain,
+                    },
+                  }
+                )
+                .then((response) => {
+                  setSubjects(response.data.data.subjects);
+                })
+                .catch((error) => console.log(error));
+            }
+          } else {
+            toast.error(res.data.message, {
+              position: toast.POSITION.BOTTOM_LEFT,
+            });
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    }
+  }, [selectedFilter]);
+
   const handleLogout = () => {
     localStorage.clear();
     navigate("/");
   };
-
 
   return (
     <div>
@@ -283,7 +410,8 @@ const LockMarks = () => {
           <div className="flex mt-5 ml-2">
             <select
               className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
-              aria-label="Examination Name"
+              value={examinationName}
+              disabled={true}
             >
               <option value="Select Examination" hidden selected>
                 Examination
@@ -299,6 +427,8 @@ const LockMarks = () => {
 
             <select
               className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
+              value={selectedYear}
+              disabled={true}
             >
               <option value="Select Year" hidden selected>
                 Year
@@ -310,6 +440,8 @@ const LockMarks = () => {
 
             <select
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
+              value={type}
+              disabled={true}
             >
               <option value="Select Type" hidden selected>
                 Type
@@ -326,6 +458,8 @@ const LockMarks = () => {
             <select
               aria-label="Select Course"
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
+              value={courseId}
+              disabled={true}
             >
               <option value="Select Course" hidden selected>
                 Course
@@ -337,6 +471,9 @@ const LockMarks = () => {
 
             <select
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
+              value={branchId}
+              // isSearchable={true}
+              disabled={true}
             >
               <option value="Select Branch" hidden selected>
                 Branch
@@ -347,7 +484,9 @@ const LockMarks = () => {
             </select>
 
             <select
-              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
+              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-20"
+              value={semesterId}
+              disabled={true}
             >
               <option value="Select Semester" hidden selected>
                 Semester
@@ -357,20 +496,18 @@ const LockMarks = () => {
               ))}
             </select>
 
-            <select className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto">
+            <select
+              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-28"
+              value={divisionId}
+              disabled={true}
+            >
               <option value="Select Division" hidden selected>
                 Division
               </option>
+              {divisions.map((division) => (
+                <option value={division.id}>{division.name}</option>
+              ))}
             </select>
-
-            <button
-              className="py-2 px-3 mr-7 ml-2 bg-gray-800 rounded-2xl text-white font-bold"
-              // onClick={handleFilterSubmit}
-            >
-              <p className="inline-flex">
-                Search <GiArchiveResearch className="mt-1 ml-2" />
-              </p>
-            </button>
           </div>
           {/* Table of Faculty List */}
           <div
@@ -398,13 +535,37 @@ const LockMarks = () => {
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
+                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
                         >
                           Action
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="text-center divide-y divide-gray-200"></tbody>
+                    <tbody className="text-center divide-y divide-gray-200">
+                      {subjects.map((subject, index) => {
+                        return (
+                          <tr>
+                            <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                              {index + 1}
+                            </td>
+                            <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                              {subject.name}
+                            </td>
+                            <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                              <button
+                                className="py-2 px-3 bg-gray-800 rounded-2xl text-white font-bold"
+                                // onClick={handleSubmitMarks}
+                                id={"lock-marks-button-" + subject.id}
+                              >
+                                <p className="inline-flex">
+                                  Lock Marks
+                                </p>
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
                   </table>
                 </div>
               </div>
@@ -414,7 +575,7 @@ const LockMarks = () => {
       </div>
       <ToastContainer />
     </div>
-  )
-}
+  );
+};
 
-export default LockMarks
+export default LockMarks;

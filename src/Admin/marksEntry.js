@@ -38,6 +38,8 @@ const MarksEntry = () => {
   const [students, setStudents] = useState([]);
   const [removeOverFlow, setRemoveOverflow] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("");
+  const [marksData, setMarksData] = useState([]);
+  const [faculty, setFaculty] = useState("");
   const navigate = useNavigate();
 
   var year;
@@ -83,6 +85,9 @@ const MarksEntry = () => {
         )
         .then((responce) => {
           // selectedFilter = responce.data.configuration;
+          setFaculty(
+            responce.data.user.first_name + " " + responce.data.user.last_name
+          );
           setSelectedFilter(responce.data.configuration);
           setExaminationName(responce.data.configuration.examination_name);
           setSelectedYear(responce.data.configuration.academic_year);
@@ -224,13 +229,81 @@ const MarksEntry = () => {
 
   const handleSubjectChange = (e) => {
     e.preventDefault();
-    const viewport = document.getElementById('marks_entry_viewport')
-    viewport.classList.add('hidden')
-    viewport.classList.remove('flex')
+    const viewport = document.getElementById("marks_entry_viewport");
+    viewport.classList.add("hidden");
+    viewport.classList.remove("flex");
     if (e.target.value === "Select Subject") {
       setSubjectId("");
     } else {
       setSubjectId(e.target.value);
+    }
+  };
+
+  const handleInputChange = (e, studentId) => {
+    const { value } = e.target;
+    var student_mark_id = e.target.getAttribute("data-student-mark-entry-id");
+    console.log(student_mark_id);
+    const existingInputIndex = marksData.findIndex(
+      (input) => input.student_id === studentId
+    );
+
+    if (existingInputIndex !== -1) {
+      const updatedInputValues = [...marksData];
+      updatedInputValues[existingInputIndex].marks = value;
+      setMarksData(updatedInputValues);
+    } else {
+      if (examinationName === "") {
+        toast.error("Please select examination name", {
+          position: toast.POSITION.BOTTOM_LEFT,
+        });
+      } else if (selectedYear === "") {
+        toast.error("Please select year", {
+          position: toast.POSITION.BOTTOM_LEFT,
+        });
+      } else if (courseId === "" || courseId === "Select Course") {
+        toast.error("Please select course", {
+          position: toast.POSITION.BOTTOM_LEFT,
+        });
+      } else if (branchId === "") {
+        toast.error("Please select branch", {
+          position: toast.POSITION.BOTTOM_LEFT,
+        });
+      } else if (semesterId === "") {
+        toast.error("Please select semester", {
+          position: toast.POSITION.BOTTOM_LEFT,
+        });
+      } else if (divisionId === "") {
+        toast.error("Please select division", {
+          position: toast.POSITION.BOTTOM_LEFT,
+        });
+      } else if (type === "") {
+        toast.error("Please select type", {
+          position: toast.POSITION.BOTTOM_LEFT,
+        });
+      } else if (subjectId === "") {
+        toast.error("Please select subject", {
+          position: toast.POSITION.BOTTOM_LEFT,
+        });
+      } else {
+        var newInputValue = {
+          examination_name: examinationName,
+          examination_type: type,
+          academic_year: selectedYear,
+          course_id: courseId,
+          branch_id: branchId,
+          semester_id: semesterId,
+          division_id: divisionId,
+          subject_id: subjectId,
+          student_id: studentId,
+          marks: value,
+        };
+
+        if (student_mark_id !== "" || student_mark_id !== null) {
+          newInputValue["id"] = student_mark_id;
+        }
+
+        setMarksData([...marksData, newInputValue]);
+      }
     }
   };
 
@@ -264,6 +337,10 @@ const MarksEntry = () => {
       toast.error("Please select type", {
         position: toast.POSITION.BOTTOM_LEFT,
       });
+    } else if (subjectId === "") {
+      toast.error("Please select subject", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
     } else {
       selectedFilter = {
         examination_name: examinationName,
@@ -272,13 +349,8 @@ const MarksEntry = () => {
         branch_id: branchId,
         semester_id: semesterId,
         division_id: divisionId,
+        subject_id: subjectId,
       };
-
-      if (subjectId !== "") {
-        selectedFilter["subject_id"] = subjectId;
-      } else {
-        delete selectedFilter["subject_id"];
-      }
 
       if (subdomain !== null || subdomain !== "") {
         axios
@@ -301,10 +373,201 @@ const MarksEntry = () => {
                 viewport.classList.add("flex");
                 viewport.classList.remove("hidden");
                 setStudents(response.data.data.students);
+                response.data.data.students.map((student) => {
+                  selectedFilter["student_id"] = student.id;
+                  axios
+                    .get(
+                      `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/${student.id}/fetch_details`,
+                      {
+                        headers,
+                        params: {
+                          student_mark: selectedFilter,
+                          subdomain: subdomain,
+                        },
+                      }
+                    )
+                    .then((res) => {
+                      console.log(res);
+                      const student_marks_input = document.getElementById(
+                        "input-marks-entry-" + student.id
+                      );
+                      const submit_button =
+                        document.getElementById("submit-button");
+                      if (res.data.message === "Details found") {
+                        student_marks_input.setAttribute(
+                          "data-student-mark-entry-id",
+                          res.data.data.student_mark.id
+                        );
+                        submit_button.innerHTML = "Update Marks";
+                        student_marks_input.value =
+                          res.data.data.student_mark.marks;
+                        submit_button.disabled =
+                          res.data.data.student_mark.lock_marks;
+                        student_marks_input.disabled =
+                          res.data.data.student_mark.lock_marks;
+                      } else {
+                        student_marks_input.value = "";
+                        student_marks_input.disabled = false;
+                      }
+                    })
+                    .catch((err) => {
+                      console.error(err);
+                    });
+                });
               }
             }
           })
           .catch((error) => console.log(error));
+      }
+    }
+  };
+
+  const handleSubmitMarks = (e) => {
+    let selectedFilter = {};
+    if (examinationName === "") {
+      toast.error("Please select examination name", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (selectedYear === "") {
+      toast.error("Please select year", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (courseId === "" || courseId === "Select Course") {
+      toast.error("Please select course", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (branchId === "") {
+      toast.error("Please select branch", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (semesterId === "") {
+      toast.error("Please select semester", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (divisionId === "") {
+      toast.error("Please select division", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (type === "") {
+      toast.error("Please select type", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else {
+      selectedFilter = {
+        examination_name: examinationName,
+        examination_type: type,
+        academic_year: selectedYear,
+        course_id: courseId,
+        branch_id: branchId,
+        semester_id: semesterId,
+        division_id: divisionId,
+      };
+
+      if (subjectId !== "") {
+        selectedFilter["subject_id"] = subjectId;
+      } else {
+        delete selectedFilter["subject_id"];
+      }
+
+      console.log(selectedFilter);
+    }
+
+    if (subdomain !== null || subdomain !== "") {
+      if (e.target.innerHTML === "Update Marks") {
+        console.log("PUT REQUEST");
+        axios
+          .put(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/${branchId}`,
+            {
+              subdomain: subdomain,
+              student_marks: marksData,
+            },
+            { headers }
+          )
+          .then((res) => {
+            if (res.data.status === "ok") {
+              toast.success("The entered marks has been updated!", {
+                position: toast.POSITION.BOTTOM_LEFT,
+              });
+            } else {
+              toast.error(res.data.message, {
+                position: toast.POSITION.BOTTOM_LEFT,
+              });
+            }
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+        // axios
+        //   .put(
+        //     `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/${branchId}`,
+        //     {
+        //       student_marks: marksData,
+        //       subdomain: subdomain,
+        //     },
+        //     {
+        //       headers: {
+        //         Authorization: `Bearer ${access_token}`,
+        //       },
+        //     }
+        //   )
+        //   .then((res) => {
+        //     console.log(res);
+        //     if (res.data.status === "ok") {
+        //       toast.success("The entered marks has been updated!", {
+        //         position: toast.POSITION.BOTTOM_LEFT,
+        //       });
+        //     } else {
+        //       toast.error(res.data.message, {
+        //         position: toast.POSITION.BOTTOM_LEFT,
+        //       });
+        //     }
+        //   })
+        //   .catch((err) => {
+        //     console.error(err.response.data);
+        //   });
+      } else {
+        axios
+          .post(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks`,
+            {
+              student_marks: marksData,
+              subdomain: subdomain,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${access_token}`,
+                "Content-Type": "application/json",
+              },
+            }
+          )
+          .then((responce) => {
+            console.log(responce.data);
+            if (responce.data.status === "created") {
+              setMarksData([]);
+              responce.data.data.student_marks.map((student_mark) => {
+                const marks_entry_input = document.getElementById(
+                  "input-marks-entry-" + student_mark.student_id
+                );
+                marks_entry_input.setAttribute(
+                  "data-student-mark-entry-id",
+                  student_mark.id
+                );
+                marks_entry_input.value = student_mark.marks;
+                marks_entry_input.disabled = student_mark.lock_marks;
+              });
+              const submit_button = document.getElementById("submit-button");
+              submit_button.innerHTML = "Update Marks";
+              submit_button.disabled =
+                responce.data.data.student_marks[0].lock_marks;
+            }
+            toast.success("All Entered marks are been saved!", {
+              position: toast.POSITION.BOTTOM_LEFT,
+            });
+          })
+          .catch(function (err) {
+            console.log(err.response.data);
+          });
       }
     }
   };
@@ -359,7 +622,7 @@ const MarksEntry = () => {
                     data-dropdown-toggle="dropdown-user"
                   >
                     <span className="self-center text-xl mr-2 font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
-                      Faculty Name
+                      {faculty}
                     </span>
                     <span className="sr-only">Open user menu</span>
 
@@ -653,6 +916,9 @@ const MarksEntry = () => {
                                 data-subject-id={student.id}
                                 type="text"
                                 placeholder="Enter Marks"
+                                onChange={(e) => {
+                                  handleInputChange(e, student.id);
+                                }}
                                 required
                               />
                             </td>
@@ -661,6 +927,17 @@ const MarksEntry = () => {
                       })}
                     </tbody>
                   </table>
+                  <div className="flex justify-center mt-5">
+                    <button
+                      className="py-2 px-3 mr-7 ml-2 bg-gray-800 rounded-2xl text-white font-bold"
+                      onClick={handleSubmitMarks}
+                      id="submit-button"
+                    >
+                      <p className="inline-flex">
+                        Submit Marks <GiArchiveResearch className="mt-1 ml-2" />
+                      </p>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
