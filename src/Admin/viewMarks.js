@@ -1,15 +1,16 @@
-import axios from "axios";
-import React, { useEffect, useState } from "react";
-import { GiArchiveResearch } from "react-icons/gi";
-import { MdAddCircle } from "react-icons/md";
-import { useNavigate, useParams } from "react-router-dom";
+import axios from 'axios';
+import React from 'react'
+import { useEffect } from 'react';
+import { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ToastContainer, toast } from "react-toastify";
+
 
 var headers;
 var subdomain;
 var access_token;
 
-const LockMarks = () => {
+const ViewMarks = () => {
   const [uniName, setUniName] = useState("");
   const [courses, setCourses] = useState([]);
   const [branches, setBranches] = useState([]);
@@ -31,18 +32,11 @@ const LockMarks = () => {
   const [semesterName, setSemesterName] = useState("");
   const [selectedYear, setSelectedYear] = useState();
   const [examinationName, setExaminationName] = useState("");
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
-  const [displayTimeTable, setDisplayTimeTable] = useState([]);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [students, setStudents] = useState([]);
-  const [removeOverFlow, setRemoveOverflow] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("");
   const [marksData, setMarksData] = useState([]);
   const [faculty, setFaculty] = useState("");
   const navigate = useNavigate();
-  // const {subject_id} = useParams();
-  const viewNav = useNavigate();
+  const {subject_id} = useParams();
 
   var year;
 
@@ -253,64 +247,11 @@ const LockMarks = () => {
     }
   }, [selectedFilter]);
 
-  const handleLockMarks = (e) => {
-    // e.preventDefault();
-
-    const id = e.target.getAttribute("data-subject-id");
-    console.log(id);
-    selectedFilter["subject_id"] = id;
-
-    if (id !== "") {
-      if (subdomain !== null || subdomain !== "") {
-        axios
-          .put(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/lock_marks`,
-            {
-              subdomain: subdomain,
-              student_mark: selectedFilter,
-            },
-            { headers }
-          )
-          .then((res) => {
-            console.log(res);
-            if (res.data.status === "ok") {
-              if (res.data.data.student_marks.length !== 0) {
-                e.target.disabled = true;
-                e.target.classList.add("cursor-not-allowed");
-                toast.success(res.data.message, {
-                  position: toast.POSITION.BOTTOM_LEFT,
-                });
-              } else {
-                e.target.disabled = false;
-                e.target.classList.remove("cursor-not-allowed");
-              }
-            } else {
-              toast.error(res.data.message, {
-                position: toast.POSITION.BOTTOM_LEFT,
-              });
-            }
-          })
-          .catch((err) => {
-            console.error(err);
-          });
-      }
-    }
-  };
-
-  const handleViewMarks = (e) => {
-    e.preventDefault();
-
-    const subject_id = e.target.getAttribute("data-subject-id");
-    console.log(subject_id);
-    viewNav(`/view_Marks/${subject_id}`);
-
-    console.log(selectedFilter);
-  }
-
   const handleLogout = () => {
     localStorage.clear();
     navigate("/");
   };
+
 
   return (
     <div>
@@ -418,7 +359,6 @@ const LockMarks = () => {
           </div>
         </div>
       </nav>
-
       <aside
         id="logo-sidebar"
         className="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
@@ -460,7 +400,7 @@ const LockMarks = () => {
       <div className="pt-4 sm:ml-64">
         <div className="p-4 rounded-lg mt-14">
           <div className="text-center text-4xl">
-            <p>Lock Marks Entry </p>
+            <p>View Marks</p>
           </div>
 
           <div className="flex mt-5 ml-2">
@@ -565,80 +505,11 @@ const LockMarks = () => {
               ))}
             </select>
           </div>
-          {/* Table of Faculty List */}
-          <div
-            id="lockMarks_viewport"
-            className="flex flex-col mt-5"
-            style={{ height: 390 }}
-          >
-            <div className="">
-              <div className="p-1.5 w-full inline-block align-middle">
-                <div className="border rounded-lg">
-                  <table className="min-w-full divide-y table-auto divide-gray-200">
-                    <thead className="sticky top-0 bg-gray-50">
-                      <tr>
-                        <th
-                          scope="col"
-                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                        >
-                          Sr No.
-                        </th>
-                        <th
-                          scope="col"
-                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                        >
-                          Subject Name
-                        </th>
-                        <th
-                          scope="col"
-                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                        >
-                          Action
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="text-center divide-y divide-gray-200">
-                      {subjects.map((subject, index) => {
-                        return (
-                          <tr>
-                            <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                              {index + 1}
-                            </td>
-                            <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                              {subject.name}
-                            </td>
-                            <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                              <button
-                                className="py-2 px-3 bg-gray-800 rounded-2xl text-white font-bold"
-                                id={"lock-mark-button-" + subject.id}
-                                data-subject-id={subject.id}
-                                onClick={handleLockMarks}
-                              >
-                                Lock Marks
-                              </button>
-                              <button
-                                className="py-2 px-3 ml-2 bg-gray-800 rounded-2xl text-white font-bold"
-                                id={"view-mark-button-" + subject.id}
-                                data-subject-id={subject.id}
-                                onClick={handleViewMarks}
-                              >
-                                View Marks
-                              </button>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
       <ToastContainer />
     </div>
-  );
-};
+  )
+}
 
-export default LockMarks;
+export default ViewMarks

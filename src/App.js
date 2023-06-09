@@ -32,6 +32,7 @@ import AssignMarksEntry from './Admin/assignMarksEntry';
 import ExaminationDetails from './Admin/examinationDetails';
 import LockMarks from './Admin/lockMarks';
 import UnlockMarks from './Admin/unlockMarks';
+import ViewMarks from './Admin/viewMarks';
 
 function App() {
   return (
@@ -64,6 +65,7 @@ function App() {
         <Route path="/marks_entry" element={<MarksEntry/>} />
         <Route path="/lock_Marks" element={<LockMarks/>}/>
         <Route path="/unlock_Marks" element={<UnlockMarks/>}/>
+        <Route path="/view_Marks/:subject_id" element={<ViewMarks/>}/>
 
 
 
