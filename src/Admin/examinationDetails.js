@@ -334,7 +334,7 @@ const ExaminationDetails = () => {
             <li>
               <a
                 href="/examinationDetails"
-                className="flex items-center p-2 text-gray-900 bg-slate-600 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                className="flex items-center p-2 bg-slate-600 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 <span className="ml-3">Examination Details</span>
               </a>
@@ -351,7 +351,7 @@ const ExaminationDetails = () => {
             <li>
               <a
                 href="/examBlockDetails"
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 <span className="ml-3">Enter Block Details</span>
               </a>
@@ -359,7 +359,7 @@ const ExaminationDetails = () => {
             <li>
               <a
                 href="/examAssignSupervision"
-                className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 <span className="flex-1 ml-3 whitespace-nowrap">
                   Assign Supervision
@@ -369,7 +369,7 @@ const ExaminationDetails = () => {
             <li>
               <a
                 href="/assignMarksEntry"
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                className="flex items-center p-2 text-gray-900  rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 <span className="flex-1 ml-3 whitespace-nowrap">
                   Assign Marks Entry
@@ -378,23 +378,31 @@ const ExaminationDetails = () => {
             </li>
             <li>
               <a
+                href="/unlock_Marks"
+                className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="ml-3">Unlock Marks</span>
+              </a>
+            </li>
+            <li>
+              <a
                 href="/examViewTimeTable"
-                className="flex items-center p-2 text-gray-900  rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 <span className="flex-1 ml-3 whitespace-nowrap">Report</span>
               </a>
             </li>
             <li>
-                <div className="p-4">
-                  <button
-                    type="button"
-                    className="inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition"
-                    onClick={handleLogout}
-                  >
-                    <span className="">Logout</span>
-                  </button>
-                </div>
-              </li>
+              <div className="p-4">
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition"
+                  onClick={handleLogout}
+                >
+                  <span className="">Logout</span>
+                </button>
+              </div>
+            </li>
           </ul>
         </div>
       </aside>

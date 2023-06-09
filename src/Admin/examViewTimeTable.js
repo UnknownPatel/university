@@ -619,7 +619,7 @@ const ExamViewTimeTable = () => {
               <li>
                 <a
                   href="/examBlockDetails"
-                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   <span className="ml-3">Enter Block Details</span>
                 </a>
@@ -627,7 +627,7 @@ const ExamViewTimeTable = () => {
               <li>
                 <a
                   href="/examAssignSupervision"
-                  className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   <span className="flex-1 ml-3 whitespace-nowrap">
                     Assign Supervision
@@ -637,7 +637,7 @@ const ExamViewTimeTable = () => {
               <li>
                 <a
                   href="/assignMarksEntry"
-                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="flex items-center p-2  text-gray-900  rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   <span className="flex-1 ml-3 whitespace-nowrap">
                     Assign Marks Entry
@@ -646,8 +646,16 @@ const ExamViewTimeTable = () => {
               </li>
               <li>
                 <a
+                  href="/unlock_Marks"
+                  className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <span className="ml-3">Unlock Marks</span>
+                </a>
+              </li>
+              <li>
+                <a
                   href="/examViewTimeTable"
-                  className="flex items-center p-2 text-gray-900 bg-slate-600 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="flex items-center p-2 bg-slate-600 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   <span className="flex-1 ml-3 whitespace-nowrap">Report</span>
                 </a>

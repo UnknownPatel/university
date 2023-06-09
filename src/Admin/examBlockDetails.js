@@ -36,7 +36,6 @@ const ExamBlockDetails = () => {
   const [type, setType] = useState("");
   const navigate = useNavigate();
 
-
   const [examinationTypes, setExaminationTypes] = useState([]);
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -914,7 +913,7 @@ const ExamBlockDetails = () => {
               <li>
                 <a
                   href="/examBlockDetails"
-                  className="flex items-center p-2 text-gray-900 rounded-lg bg-slate-600 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="flex items-center p-2 bg-slate-600 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   <span className="ml-3">Enter Block Details</span>
                 </a>
@@ -937,6 +936,14 @@ const ExamBlockDetails = () => {
                   <span className="flex-1 ml-3 whitespace-nowrap">
                     Assign Marks Entry
                   </span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/unlock_Marks"
+                  className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <span className="ml-3">Unlock Marks</span>
                 </a>
               </li>
               <li>

@@ -6,6 +6,8 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-datepicker/dist/react-datepicker.css";
 import "tailwindcss/tailwind.css";
 import { FcCheckmark } from "react-icons/fc";
+import { useNavigate } from "react-router-dom";
+
 
 import { useReactToPrint } from "react-to-print";
 
@@ -13,6 +15,7 @@ var acces_token;
 var subdomain;
 
 const ExamReports = () => {
+  const navigate = useNavigate();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const componentRef = useRef();
   const [uniName, setUniName] = useState("");
@@ -1221,6 +1224,11 @@ const ExamReports = () => {
     setIsDropdownOpen(!isDropdownOpen);
   }
 
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/");
+  };
+
   return (
     <div>
       <div>
@@ -1334,12 +1342,21 @@ const ExamReports = () => {
             <ul className="space-y-2 font-medium">
               <li>
                 <a
-                  href="/examTimetable"
+                  href="/examinationDetails"
                   className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <span className="ml-3">Examination Details</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/examTimetable"
+                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   <span className="ml-3">Time Table</span>
                 </a>
               </li>
+
               <li>
                 <a
                   href="/examBlockDetails"
@@ -1360,54 +1377,39 @@ const ExamReports = () => {
               </li>
               <li>
                 <a
-                  href="/examReports"
-                  className="flex items-center p-2 text-gray-900 rounded-lg bg-slate-600 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                  href="/assignMarksEntry"
+                  className="flex items-center p-2  text-gray-900  rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
-                  <span className="flex-1 ml-3 whitespace-nowrap">Reports</span>
+                  <span className="flex-1 ml-3 whitespace-nowrap">
+                    Assign Marks Entry
+                  </span>
                 </a>
               </li>
               <li>
-                <button
-                  className="w-full bg-slate-600 text-white py-2 px-4 text-left rounded-md"
-                  onClick={toggleDropdown}
+                <a
+                  href="/unlock_Marks"
+                  className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
-                  Reports
-                </button>
-                <div
-                  className={`bg-white shadow rounded-md mt-2 py-2 ${
-                    isDropdownOpen ? "block" : "hidden"
-                  }`}
+                  <span className="ml-3">Unlock Marks</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/examViewTimeTable"
+                  className="flex items-center p-2 bg-slate-600 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
-                  <a
-                    href="#"
-                    className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
+                  <span className="flex-1 ml-3 whitespace-nowrap">Report</span>
+                </a>
+              </li>
+              <li>
+                <div className="p-4">
+                  <button
+                    type="button"
+                    className="inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition"
+                    onClick={handleLogout}
                   >
-                    Time Table
-                  </a>
-                  <a
-                    href="#"
-                    className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                  >
-                    BlockWise Report
-                  </a>
-                  <a
-                    href="#"
-                    className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                  >
-                    Jr. Supervision Report
-                  </a>
-                  <a
-                    href="#"
-                    className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                  >
-                    Sr. Supervision Report
-                  </a>
-                  <a
-                    href="#"
-                    className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                  >
-                    Other Duty Report
-                  </a>
+                    <span className="">Logout</span>
+                  </button>
                 </div>
               </li>
             </ul>
@@ -1487,19 +1489,7 @@ const ExamReports = () => {
                       return <option value={year}>{year}</option>;
                     })}
                   </select>
-                  {/* <DatePicker
-                    id="year-picker1"
-                    selected={selectedYear}
-                    startDate={null}
-                    onChange={(date) => {
-                      handleYearChange(date);
-                    }}
-                    defaultValue={null}
-                    showYearPicker
-                    dateFormat="yyyy"
-                    placeholderText="Select Year"
-                    className="form-select text-sm md:text-base lg:text-base mr-2 ml-4 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                  /> */}
+                  
                   <select
                     className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
                     onChange={handleCourseChange}

@@ -29,6 +29,7 @@ const UnlockMarks = () => {
   const [subjectIds, setSubjectIds] = useState({});
   const [examinationNames, setExaminationNames] = useState([]);
   const [examinationTypes, setExaminationTypes] = useState([]);
+  const [status, setStatus] = useState({});
   const navigate = useNavigate();
 
   var year;
@@ -349,7 +350,6 @@ const UnlockMarks = () => {
         .then((res) => {
           console.log(res);
           if (res.data.message === "Details found") {
-
             if (res.data.data.subject_ids.length !== 0) {
               axios
                 .get(
@@ -373,6 +373,33 @@ const UnlockMarks = () => {
                   );
                   unlockMarks_viewport.classList.remove("hidden");
                   unlockMarks_viewport.classList.add("flex");
+                  response.data.data.subjects.map((subject) => {
+                    selectedFilter["subject_id"] = subject.id;
+                    axios
+                      .get(
+                        `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/fetch_status`,
+                        {
+                          headers,
+                          params: {
+                            subdomain: subdomain,
+                            student_mark: selectedFilter,
+                          },
+                        }
+                      )
+                      .then((res) => {
+                        console.log(res);
+                        if (res.data.message === "Details found") {
+                          const updatedCombination = {
+                            ...status,
+                            [subject.id]: res.data.data.locked,
+                          };
+                          setStatus(updatedCombination);
+                        }
+                      })
+                      .catch((err) => {
+                        console.error(err);
+                      });
+                  });
                   setSubjects(response.data.data.subjects);
                 })
                 .catch((error) => console.log(error));
@@ -452,6 +479,8 @@ const UnlockMarks = () => {
             console.log(res);
             if (res.data.status === "ok") {
               if (res.data.data.student_marks.length !== 0) {
+                const updatedCombination = { ...status, [id]: false };
+                setStatus(updatedCombination);
                 e.target.disabled = true;
                 e.target.classList.add("cursor-not-allowed");
                 toast.success(res.data.message, {
@@ -814,7 +843,7 @@ const UnlockMarks = () => {
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
+                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
                         >
                           Status
                         </th>
@@ -822,26 +851,42 @@ const UnlockMarks = () => {
                     </thead>
                     <tbody className="text-center divide-y divide-gray-200">
                       {subjects.map((subject, index) => {
-                        return (
-                          <tr>
-                            <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                              {index + 1}
-                            </td>
-                            <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                              {subject.name}
-                            </td>
-                            <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                              <button
-                                className="py-2 px-3 bg-gray-800 rounded-2xl text-white font-bold"
-                                id={"lock-mark-button-" + subject.id}
-                                data-subject-id={subject.id}
-                                onClick={handleUnlockMarks}
-                              >
-                                Unlock Marks
-                              </button>
-                            </td>
-                          </tr>
-                        );
+                        if (status[subject.id]) {
+                          return (
+                            <tr>
+                              <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                {index + 1}
+                              </td>
+                              <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                {subject.name}
+                              </td>
+                              <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                <button
+                                  className="py-2 px-3 bg-gray-800 rounded-2xl text-white font-bold"
+                                  id={"lock-mark-button-" + subject.id}
+                                  data-subject-id={subject.id}
+                                  onClick={handleUnlockMarks}
+                                >
+                                  Unlock Marks
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        } else {
+                          return (
+                            <tr>
+                              <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                {index + 1}
+                              </td>
+                              <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                {subject.name}
+                              </td>
+                              <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                Pending
+                              </td>
+                            </tr>
+                          );
+                        }
                       })}
                     </tbody>
                   </table>

@@ -40,6 +40,8 @@ const LockMarks = () => {
   const [selectedFilter, setSelectedFilter] = useState("");
   const [marksData, setMarksData] = useState([]);
   const [faculty, setFaculty] = useState("");
+  const [status, setStatus] = useState({});
+
   const navigate = useNavigate();
   // const {subject_id} = useParams();
   const viewNav = useNavigate();
@@ -220,6 +222,8 @@ const LockMarks = () => {
           console.log(res);
           if (res.data.message === "Details found") {
             if (res.data.data.subject_ids.length !== 0) {
+              console.log( "Details : " + selectedFilter.subject_ids);
+              const filterSubjectIds = res.data.data.subject_ids.filter(subjectId => selectedFilter.subject_ids.includes(subjectId));
               axios
                 .get(
                   `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/subjects`,
@@ -230,13 +234,40 @@ const LockMarks = () => {
                         course_id: selectedFilter.course_id,
                         branch_id: selectedFilter.branch_id,
                         semester_id: selectedFilter.semester_id,
-                        id: JSON.stringify(res.data.data.subject_ids),
+                        id: JSON.stringify(filterSubjectIds),
                       },
                       subdomain: subdomain,
                     },
                   }
                 )
                 .then((response) => {
+                  response.data.data.subjects.map((subject) => {
+                    selectedFilter["subject_id"] = subject.id;
+                    axios
+                      .get(
+                        `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/fetch_status`,
+                        {
+                          headers,
+                          params: {
+                            subdomain: subdomain,
+                            student_mark: selectedFilter,
+                          },
+                        }
+                      )
+                      .then((res) => {
+                        console.log(res);
+                        if (res.data.message === "Details found") {
+                          const updatedCombination = {
+                            ...status,
+                            [subject.id]: res.data.data.locked,
+                          };
+                          setStatus(updatedCombination);
+                        }
+                      })
+                      .catch((err) => {
+                        console.error(err);
+                      });
+                  });
                   setSubjects(response.data.data.subjects);
                 })
                 .catch((error) => console.log(error));
@@ -275,6 +306,8 @@ const LockMarks = () => {
             console.log(res);
             if (res.data.status === "ok") {
               if (res.data.data.student_marks.length !== 0) {
+                const updatedCombination = { ...status, [id]: true }
+                setStatus(updatedCombination);
                 e.target.disabled = true;
                 e.target.classList.add("cursor-not-allowed");
                 toast.success(res.data.message, {
