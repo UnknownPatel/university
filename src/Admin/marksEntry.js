@@ -477,7 +477,7 @@ const MarksEntry = () => {
         console.log("PUT REQUEST");
         axios
           .put(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/${branchId}`,
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/${divisionId}`,
             {
               subdomain: subdomain,
               student_marks: marksData,

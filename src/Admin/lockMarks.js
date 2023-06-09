@@ -251,6 +251,50 @@ const LockMarks = () => {
     }
   }, [selectedFilter]);
 
+  const handleLockMarks = (e) => {
+    // e.preventDefault();
+
+    const id = e.target.getAttribute("data-subject-id");
+    console.log(id);
+    selectedFilter["subject_id"] = id;
+
+    if (id !== "") {
+      if (subdomain !== null || subdomain !== "") {
+        axios
+          .put(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/lock_marks`,
+            {
+              subdomain: subdomain,
+              student_mark: selectedFilter,
+            },
+            { headers }
+          )
+          .then((res) => {
+            console.log(res);
+            if (res.data.status === "ok") {
+              if (res.data.data.student_marks.length !== 0) {
+                e.target.disabled = true;
+                e.target.classList.add("cursor-not-allowed");
+                toast.success(res.data.message, {
+                  position: toast.POSITION.BOTTOM_LEFT,
+                });
+              } else {
+                e.target.disabled = false;
+                e.target.classList.remove("cursor-not-allowed");
+              }
+            } else {
+              toast.error(res.data.message, {
+                position: toast.POSITION.BOTTOM_LEFT,
+              });
+            }
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+      }
+    }
+  };
+
   const handleLogout = () => {
     localStorage.clear();
     navigate("/");
@@ -554,12 +598,11 @@ const LockMarks = () => {
                             <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                               <button
                                 className="py-2 px-3 bg-gray-800 rounded-2xl text-white font-bold"
-                                // onClick={handleSubmitMarks}
-                                id={"lock-marks-button-" + subject.id}
+                                id={"lock-mark-button-" + subject.id}
+                                data-subject-id={subject.id}
+                                onClick={handleLockMarks}
                               >
-                                <p className="inline-flex">
-                                  Lock Marks
-                                </p>
+                                Lock Marks
                               </button>
                             </td>
                           </tr>

@@ -11,27 +11,24 @@ var access_token;
 const UnlockMarks = () => {
   const [uniName, setUniName] = useState("");
   const [courses, setCourses] = useState([]);
-  const [branches, setBranches] = useState([]);
-  const [semesters, setSemesters] = useState([]);
-  const [examinationNames, setExaminationNames] = useState([]);
-  const [examinationTypes, setExaminationTypes] = useState([]);
-  const [academic_years, setAcademicYears] = useState([]);
-  const [division, setDivision] = useState([]);
-  const [subjectName, setSubjectName] = useState([]);
-  const [type, setType] = useState("");
   const [courseId, setCourseId] = useState("");
+  const [branches, setBranches] = useState([]);
   const [branchId, setBranchId] = useState("");
   const [branchesName, setBranchesName] = useState("");
+  const [semesters, setSemesters] = useState([]);
   const [semesterId, setSemesterId] = useState("");
-  const [semesterName, setSemesterName] = useState("");
-  const [selectedYear, setSelectedYear] = useState();
+  const [divisions, setDivisions] = useState([]);
+  const [divisionId, setDivisionId] = useState("");
+  const [selectedYear, setSelectedYear] = useState("");
   const [examinationName, setExaminationName] = useState("");
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
-  const [displayTimeTable, setDisplayTimeTable] = useState([]);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [storeDates, setStoreDates] = useState([]);
-  const [removeOverFlow, setRemoveOverflow] = useState(false);
+  const [faculties, setFaculties] = useState([]);
+  const [subjects, setSubjects] = useState([]);
+  const [type, setType] = useState("");
+  const [academic_years, setAcademicYears] = useState([]);
+  const [selectedOptions, setSelectedOptions] = useState({});
+  const [subjectIds, setSubjectIds] = useState({});
+  const [examinationNames, setExaminationNames] = useState([]);
+  const [examinationTypes, setExaminationTypes] = useState([]);
   const navigate = useNavigate();
 
   var year;
@@ -124,6 +121,358 @@ const UnlockMarks = () => {
         });
     }
   }, []);
+
+  const handleExaminationChange = (examination) => {
+    const unlockMarks_viewport = document.getElementById(
+      "unlockMarks_viewport"
+    );
+    unlockMarks_viewport.classList.add("hidden");
+    unlockMarks_viewport.classList.remove("flex");
+    setExaminationName(examination);
+  };
+
+  const handleYearChange = (date) => {
+    const unlockMarks_viewport = document.getElementById(
+      "unlockMarks_viewport"
+    );
+    unlockMarks_viewport.classList.add("hidden");
+    unlockMarks_viewport.classList.remove("flex");
+    if (date !== "Select Year") {
+      setSelectedYear(date);
+    } else {
+      setSelectedYear("");
+    }
+  };
+
+  const handleTypeChange = (e) => {
+    e.preventDefault();
+    setSubjects([]);
+    const unlockMarks_viewport = document.getElementById(
+      "unlockMarks_viewport"
+    );
+    unlockMarks_viewport.classList.add("hidden");
+    unlockMarks_viewport.classList.remove("flex");
+    if (e.target.value === "Select Type") {
+      setType("");
+    } else {
+      setType(e.target.value);
+    }
+  };
+
+  const handleCourseChange = (e) => {
+    e.preventDefault();
+    const unlockMarks_viewport = document.getElementById(
+      "unlockMarks_viewport"
+    );
+    unlockMarks_viewport.classList.add("hidden");
+    unlockMarks_viewport.classList.remove("flex");
+    console.log(e.target.value);
+    if (e.target.value !== "Select course") {
+      setCourseId(e.target.value);
+      var course_id = e.target.value;
+      if (subdomain !== null || subdomain !== "") {
+        axios
+          .get(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/branches?subdomain=${subdomain}&course_id=${course_id}`,
+            { headers }
+          )
+          .then((response) => {
+            setBranches(response.data.data.branches);
+          })
+          .catch((error) => console.log(error));
+      }
+    } else {
+      setCourseId("");
+      setBranches([]);
+    }
+  };
+
+  const handleBranchChange = (e) => {
+    e.preventDefault();
+    const unlockMarks_viewport = document.getElementById(
+      "unlockMarks_viewport"
+    );
+    unlockMarks_viewport.classList.add("hidden");
+    unlockMarks_viewport.classList.remove("flex");
+    var selectedFilter = {};
+
+    if (examinationName !== "Select Examination") {
+      selectedFilter["name"] = examinationName;
+    }
+
+    if (selectedYear !== "Select Year") {
+      selectedFilter["academic_year"] = selectedYear;
+    }
+
+    if (courseId !== "Select Course") {
+      selectedFilter["course_id"] = courseId;
+    }
+
+    if (e.target.value !== "Select Branch") {
+      selectedFilter["branch_id"] = e.target.value;
+    }
+
+    var selectedIndex = e.target.options.selectedIndex;
+    setBranchesName(e.target.options[selectedIndex].getAttribute("data-name"));
+    var branch_id = e.target.value;
+    if (branch_id === "Select Branch") {
+      setBranchId("");
+      setSemesterId("");
+    } else {
+      setBranchId(e.target.value);
+    }
+    access_token = localStorage.getItem("access_token");
+    const headers = { Authorization: `Bearer ${access_token}` };
+    const host = window.location.host;
+    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
+    if (arr.length > 0) {
+      subdomain = arr[0];
+    }
+    if (subdomain !== null || subdomain !== "") {
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/semesters?subdomain=${subdomain}&branch_id=${branch_id}`,
+          { headers }
+        )
+        .then((response) => {
+          setSemesters(response.data.data.semesters);
+        })
+        .catch((error) => console.log(error));
+    }
+  };
+
+  const handleSemesterChange = (e) => {
+    e.preventDefault();
+    const unlockMarks_viewport = document.getElementById(
+      "unlockMarks_viewport"
+    );
+    unlockMarks_viewport.classList.add("hidden");
+    unlockMarks_viewport.classList.remove("flex");
+    if (e.target.value === "Select Semester") {
+      setSemesterId("");
+    } else {
+      setSemesterId(e.target.value);
+      if (subdomain !== null || subdomain !== "") {
+        axios
+          .get(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/divisions`,
+            {
+              headers,
+              params: {
+                subdomain: subdomain,
+                division: {
+                  semester_id: e.target.value,
+                },
+              },
+            }
+          )
+          .then((response) => {
+            setDivisions(response.data.data.divisions);
+          })
+          .catch((error) => console.log(error));
+      } else {
+        setDivisions([]);
+      }
+    }
+  };
+
+  const handleDivisionChange = (e) => {
+    e.preventDefault();
+    setSelectedOptions({});
+    const unlockMarks_viewport = document.getElementById(
+      "unlockMarks_viewport"
+    );
+    unlockMarks_viewport.classList.add("hidden");
+    unlockMarks_viewport.classList.remove("flex");
+    console.log("Button clicked");
+    if (e.target.value !== "Select Division") {
+      setDivisionId(e.target.value);
+    } else {
+      setDivisionId("");
+    }
+  };
+
+  const handleFilterSubmit = (e) => {
+    let selectedFilter = {};
+    if (examinationName === "") {
+      toast.error("Please select examination name", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (selectedYear === "") {
+      toast.error("Please select year", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (courseId === "" || courseId === "Select Course") {
+      toast.error("Please select course", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (branchId === "") {
+      toast.error("Please select branch", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (semesterId === "") {
+      toast.error("Please select semester", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (divisionId === "") {
+      toast.error("Please select division", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (type === "") {
+      toast.error("Please select type", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else {
+      selectedFilter = {
+        examination_name: examinationName,
+        academic_year: selectedYear,
+        course_id: courseId,
+        branch_id: branchId,
+        semester_id: semesterId,
+        division_id: divisionId,
+        entry_type: type,
+      };
+
+      console.log(selectedFilter);
+
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/fetch_subjects`,
+          {
+            headers,
+            params: {
+              student_mark: selectedFilter,
+              subdomain: subdomain,
+            },
+          }
+        )
+        .then((res) => {
+          console.log(res);
+          if (res.data.message === "Details found") {
+
+            if (res.data.data.subject_ids.length !== 0) {
+              axios
+                .get(
+                  `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/subjects`,
+                  {
+                    headers,
+                    params: {
+                      subject: {
+                        course_id: selectedFilter.course_id,
+                        branch_id: selectedFilter.branch_id,
+                        semester_id: selectedFilter.semester_id,
+                        id: JSON.stringify(res.data.data.subject_ids),
+                      },
+                      subdomain: subdomain,
+                    },
+                  }
+                )
+                .then((response) => {
+                  const unlockMarks_viewport = document.getElementById(
+                    "unlockMarks_viewport"
+                  );
+                  unlockMarks_viewport.classList.remove("hidden");
+                  unlockMarks_viewport.classList.add("flex");
+                  setSubjects(response.data.data.subjects);
+                })
+                .catch((error) => console.log(error));
+            }
+          } else {
+            toast.error(res.data.message, {
+              position: toast.POSITION.BOTTOM_LEFT,
+            });
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    }
+  };
+
+  const handleUnlockMarks = (e) => {
+    // e.preventDefault();
+
+    let selectedFilter = {};
+    if (examinationName === "") {
+      toast.error("Please select examination name", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (selectedYear === "") {
+      toast.error("Please select year", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (courseId === "" || courseId === "Select Course") {
+      toast.error("Please select course", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (branchId === "") {
+      toast.error("Please select branch", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (semesterId === "") {
+      toast.error("Please select semester", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (divisionId === "") {
+      toast.error("Please select division", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (type === "") {
+      toast.error("Please select type", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else {
+      selectedFilter = {
+        examination_name: examinationName,
+        academic_year: selectedYear,
+        course_id: courseId,
+        branch_id: branchId,
+        semester_id: semesterId,
+        division_id: divisionId,
+        examination_type: type,
+      };
+    }
+
+    const id = e.target.getAttribute("data-subject-id");
+    console.log(id);
+    selectedFilter["subject_id"] = id;
+
+    if (id !== "") {
+      if (subdomain !== null || subdomain !== "") {
+        axios
+          .put(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/unlock_marks`,
+            {
+              subdomain: subdomain,
+              student_mark: selectedFilter,
+            },
+            { headers }
+          )
+          .then((res) => {
+            console.log(res);
+            if (res.data.status === "ok") {
+              if (res.data.data.student_marks.length !== 0) {
+                e.target.disabled = true;
+                e.target.classList.add("cursor-not-allowed");
+                toast.success(res.data.message, {
+                  position: toast.POSITION.BOTTOM_LEFT,
+                });
+              } else {
+                e.target.disabled = false;
+                e.target.classList.remove("cursor-not-allowed");
+              }
+            } else {
+              toast.error(res.data.message, {
+                position: toast.POSITION.BOTTOM_LEFT,
+              });
+            }
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+      }
+    }
+  };
 
   const handleLogout = () => {
     localStorage.clear();
@@ -237,87 +586,87 @@ const UnlockMarks = () => {
       </nav>
 
       <aside
-          id="logo-sidebar"
-          className="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
-          aria-label="Sidebar"
-        >
-          <div className="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
-            <ul className="space-y-2 font-medium">
-              <li>
-                <a
-                  href="/examinationDetails"
-                  className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <span className="ml-3">Examination Details</span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/examTimetable"
-                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <span className="ml-3">Time Table</span>
-                </a>
-              </li>
+        id="logo-sidebar"
+        className="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
+        aria-label="Sidebar"
+      >
+        <div className="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
+          <ul className="space-y-2 font-medium">
+            <li>
+              <a
+                href="/examinationDetails"
+                className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="ml-3">Examination Details</span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="/examTimetable"
+                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="ml-3">Time Table</span>
+              </a>
+            </li>
 
-              <li>
-                <a
-                  href="/examBlockDetails"
-                  className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+            <li>
+              <a
+                href="/examBlockDetails"
+                className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="ml-3">Enter Block Details</span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="/examAssignSupervision"
+                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="flex-1 ml-3 whitespace-nowrap">
+                  Assign Supervision
+                </span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="/assignMarksEntry"
+                className="flex items-center p-2 text-gray-900  rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="flex-1 ml-3 whitespace-nowrap">
+                  Assign Marks Entry
+                </span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="/unlock_Marks"
+                className="flex items-center p-2 text-gray-900 rounded-lg bg-slate-600 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="ml-3">Unlock Marks</span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="/examViewTimeTable"
+                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="flex-1 ml-3 whitespace-nowrap">Report</span>
+              </a>
+            </li>
+            <li>
+              <div className="p-4">
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition"
+                  onClick={handleLogout}
                 >
-                  <span className="ml-3">Enter Block Details</span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/examAssignSupervision"
-                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <span className="flex-1 ml-3 whitespace-nowrap">
-                    Assign Supervision
-                  </span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/assignMarksEntry"
-                  className="flex items-center p-2 text-gray-900  rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <span className="flex-1 ml-3 whitespace-nowrap">
-                    Assign Marks Entry
-                  </span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/unlock_Marks"
-                  className="flex items-center p-2 text-gray-900 rounded-lg bg-slate-600 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <span className="ml-3">Unlock Marks</span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/examViewTimeTable"
-                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <span className="flex-1 ml-3 whitespace-nowrap">Report</span>
-                </a>
-              </li>
-              <li>
-                <div className="p-4">
-                  <button
-                    type="button"
-                    className="inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition"
-                    onClick={handleLogout}
-                  >
-                    <span className="">Logout</span>
-                  </button>
-                </div>
-              </li>
-            </ul>
-          </div>
-        </aside>
+                  <span className="">Logout</span>
+                </button>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </aside>
 
       <div className="pt-4 sm:ml-64">
         <div className="p-4 rounded-lg mt-14">
@@ -327,7 +676,11 @@ const UnlockMarks = () => {
 
           <div className="flex mt-5 ml-2">
             <select
+              id="examination_name"
               className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
+              onChange={(e) => {
+                handleExaminationChange(e.target.value);
+              }}
               aria-label="Examination Name"
             >
               <option value="Select Examination" hidden selected>
@@ -342,7 +695,10 @@ const UnlockMarks = () => {
               })}
             </select>
 
-            <select className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto">
+            <select
+              className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
+              onChange={(e) => handleYearChange(e.target.value)}
+            >
               <option value="Select Year" hidden selected>
                 Year
               </option>
@@ -351,7 +707,10 @@ const UnlockMarks = () => {
               })}
             </select>
 
-            <select className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto">
+            <select
+              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
+              onChange={handleTypeChange}
+            >
               <option value="Select Type" hidden selected>
                 Type
               </option>
@@ -365,11 +724,10 @@ const UnlockMarks = () => {
             </select>
 
             <select
-              aria-label="Select Course"
-              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
-              value={courseId}
+              className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+              onChange={handleCourseChange}
             >
-              <option value="Select Course" hidden selected>
+              <option value="Select course" hidden selected>
                 Course
               </option>
               {courses.map((course, index) => (
@@ -377,33 +735,53 @@ const UnlockMarks = () => {
               ))}
             </select>
 
-            <select className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto">
+            <select
+              className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+              onChange={(e) => {
+                handleBranchChange(e);
+              }}
+            >
               <option value="Select Branch" hidden selected>
                 Branch
               </option>
               {branches.map((branch) => (
-                <option value={branch.id}>{branch.name}</option>
+                <option value={branch.id} data-name={branch.name}>
+                  {branch.name}
+                </option>
               ))}
             </select>
 
-            <select className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto">
+            <select
+              className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+              onChange={handleSemesterChange}
+            >
               <option value="Select Semester" hidden selected>
                 Semester
               </option>
               {semesters.map((semester) => (
-                <option value={semester.id}>{semester.name}</option>
+                <option value={semester.id} data-semester-name={semester.name}>
+                  {semester.name}
+                </option>
               ))}
             </select>
 
-            <select className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto">
+            <select
+              className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+              onChange={handleDivisionChange}
+            >
               <option value="Select Division" hidden selected>
                 Division
               </option>
+              {divisions.map((division) => (
+                <option value={division.id} data-division-name={division.name}>
+                  {division.name}
+                </option>
+              ))}
             </select>
 
             <button
-              className="py-2 px-3 mr-7 ml-2 bg-gray-800 rounded-2xl text-white font-bold"
-              // onClick={handleFilterSubmit}
+              className="w-auto py-2 px-3 bg-gray-800 rounded-2xl text-white font-bold"
+              onClick={handleFilterSubmit}
             >
               <p className="inline-flex">
                 Search <GiArchiveResearch className="mt-1 ml-2" />
@@ -413,7 +791,7 @@ const UnlockMarks = () => {
           {/* Table of Faculty List */}
           <div
             id="unlockMarks_viewport"
-            className="flex flex-col mt-5"
+            className="hidden flex-col mt-5"
             style={{ height: 390 }}
           >
             <div className="">
@@ -436,19 +814,36 @@ const UnlockMarks = () => {
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                        >
-                          Type
-                        </th>
-                        <th
-                          scope="col"
                           className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
                         >
                           Status
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="text-center divide-y divide-gray-200"></tbody>
+                    <tbody className="text-center divide-y divide-gray-200">
+                      {subjects.map((subject, index) => {
+                        return (
+                          <tr>
+                            <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                              {index + 1}
+                            </td>
+                            <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                              {subject.name}
+                            </td>
+                            <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                              <button
+                                className="py-2 px-3 bg-gray-800 rounded-2xl text-white font-bold"
+                                id={"lock-mark-button-" + subject.id}
+                                data-subject-id={subject.id}
+                                onClick={handleUnlockMarks}
+                              >
+                                Unlock Marks
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
                   </table>
                 </div>
               </div>
