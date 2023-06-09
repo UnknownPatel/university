@@ -1,10 +1,9 @@
-import axios from 'axios';
-import React from 'react'
-import { useEffect } from 'react';
-import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import axios from "axios";
+import React from "react";
+import { useEffect } from "react";
+import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
-
 
 var headers;
 var subdomain;
@@ -36,7 +35,7 @@ const ViewMarks = () => {
   const [marksData, setMarksData] = useState([]);
   const [faculty, setFaculty] = useState("");
   const navigate = useNavigate();
-  const {subject_id} = useParams();
+  const { subject_id } = useParams();
 
   var year;
 
@@ -159,6 +158,7 @@ const ViewMarks = () => {
   useEffect(() => {
     if (selectedFilter !== "") {
       console.log(JSON.parse(JSON.stringify(selectedFilter.subject_ids)));
+      selectedFilter["subject_id"] = subject_id;
       // Get Branches
       axios
         .get(
@@ -201,7 +201,28 @@ const ViewMarks = () => {
 
       axios
         .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/fetch_subjects`,
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/subjects`,
+          {
+            headers,
+            params: {
+              subject: {
+                course_id: selectedFilter.course_id,
+                branch_id: selectedFilter.branch_id,
+                semester_id: selectedFilter.semester_id,
+                id: JSON.stringify(selectedFilter.subject_ids),
+              },
+              subdomain: subdomain,
+            },
+          }
+        )
+        .then((response) => {
+          setSubjects(response.data.data.subjects);
+        })
+        .catch((error) => console.log(error));
+
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks`,
           {
             headers,
             params: {
@@ -211,29 +232,17 @@ const ViewMarks = () => {
           }
         )
         .then((res) => {
-          console.log(res);
+          console.log(res.data);
           if (res.data.message === "Details found") {
-            if (res.data.data.subject_ids.length !== 0) {
-              axios
-                .get(
-                  `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/subjects`,
-                  {
-                    headers,
-                    params: {
-                      subject: {
-                        course_id: selectedFilter.course_id,
-                        branch_id: selectedFilter.branch_id,
-                        semester_id: selectedFilter.semester_id,
-                        id: JSON.stringify(res.data.data.subject_ids),
-                      },
-                      subdomain: subdomain,
-                    },
-                  }
-                )
-                .then((response) => {
-                  setSubjects(response.data.data.subjects);
-                })
-                .catch((error) => console.log(error));
+            const viewport = document.getElementById("marks_entry_viewport");
+            if (res.data.data.student_marks.length !== 0) {
+              viewport.classList.remove("hidden");
+              viewport.classList.add("flex");
+              setMarksData(res.data.data.student_marks);
+            } else {
+              viewport.classList.add("hidden");
+              viewport.classList.remove("flex");
+              setMarksData([]);
             }
           } else {
             toast.error(res.data.message, {
@@ -251,7 +260,6 @@ const ViewMarks = () => {
     localStorage.clear();
     navigate("/");
   };
-
 
   return (
     <div>
@@ -377,7 +385,7 @@ const ViewMarks = () => {
             <li>
               <a
                 href="/lock_Marks"
-                className="flex items-center p-2 text-gray-900 bg-slate-600 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 <span className="ml-3">Lock Marks</span>
               </a>
@@ -504,12 +512,95 @@ const ViewMarks = () => {
                 <option value={division.id}>{division.name}</option>
               ))}
             </select>
+
+            <select
+              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
+              // onChange={handleSubjectChange}
+              value={subject_id}
+              disabled={true}
+            >
+              <option value="Select Subject" selected>
+                Subject
+              </option>
+              {subjects.map((subject) => (
+                <option value={subject.id}>{subject.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div
+            id="marks_entry_viewport"
+            className="hidden flex-col mt-5"
+            style={{ height: 390 }}
+          >
+            <div className="">
+              <div className="p-1.5 w-full inline-block align-middle">
+                <div className="border rounded-lg">
+                  <table className="min-w-full divide-y table-auto divide-gray-200">
+                    <thead className="sticky top-0 bg-gray-50">
+                      <tr>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                        >
+                          Sr No.
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                        >
+                          Student Name
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                        >
+                          Enrollment No.
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                        >
+                          Enter Marks
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="text-center divide-y divide-gray-200">
+                      {marksData.map((data, index) => {
+                        return (
+                          <tr>
+                            <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                              {index + 1}
+                            </td>
+                            <td
+                              className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap"
+                              data-id={data.id}
+                            >
+                              {data.student_name}
+                            </td>
+                            <td
+                              className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap"
+                              data-id={data.id}
+                            >
+                              {data.student_enrollment_number}
+                            </td>
+                            <td className="text-start px-6 py-4 text-sm  whitespace-nowrap">
+                              {data.marks}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
       <ToastContainer />
     </div>
-  )
-}
+  );
+};
 
-export default ViewMarks
+export default ViewMarks;
