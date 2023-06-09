@@ -1,15 +1,22 @@
 import axios from "axios";
-import React from "react";
+import React, { useRef } from "react";
 import { useEffect } from "react";
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
+import { useReactToPrint } from "react-to-print";
+import html2pdf from "html2pdf.js";
+import { FcDownload } from "react-icons/fc";
+import { FcPrint } from "react-icons/fc";
+import { SiMicrosoftexcel } from "react-icons/si";
+import * as XLSX from "xlsx";
 
 var headers;
 var subdomain;
 var access_token;
 
 const ViewMarks = () => {
+  const componentRef = useRef();
   const [uniName, setUniName] = useState("");
   const [courses, setCourses] = useState([]);
   const [branches, setBranches] = useState([]);
@@ -36,6 +43,11 @@ const ViewMarks = () => {
   const [faculty, setFaculty] = useState("");
   const navigate = useNavigate();
   const { subject_id } = useParams();
+
+  var divStyle = {
+    height: "400px",
+    overflowY: "auto",
+  };
 
   var year;
 
@@ -84,6 +96,7 @@ const ViewMarks = () => {
             responce.data.user.first_name + " " + responce.data.user.last_name
           );
           setSelectedFilter(responce.data.configuration);
+          console.log(selectedFilter);
           setExaminationName(responce.data.configuration.examination_name);
           setSelectedYear(responce.data.configuration.academic_year);
           setType(responce.data.configuration.examination_type);
@@ -256,6 +269,109 @@ const ViewMarks = () => {
     }
   }, [selectedFilter]);
 
+  const handleBranchChange = (e) => {
+    var selectedIndex = e.target.options.selectedIndex;
+    setBranchesName(e.target.options[selectedIndex].getAttribute("data-name"));
+  };
+
+  const handlePrint = useReactToPrint({
+    onBeforeGetContent: () => {
+      const contentElement = componentRef.current;
+      contentElement.style = {};
+    },
+    content: () => componentRef.current,
+    onAfterPrint: () => {
+      const contentElement = componentRef.current;
+      contentElement.style = {
+        height: "400px",
+        overflowY: "auto",
+      };
+    },
+  });
+
+  const handleSavePDF = () => {
+    const contentElement = document.getElementById("marks_entry_viewport");
+    contentElement.style = {};
+
+    html2pdf()
+      .set({
+        filename: "Marks.pdf",
+        margin: [10, 10, 10, 10],
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: "pt", format: "a4", orientation: "portrait" },
+      })
+      .from(contentElement)
+      .save();
+
+    divStyle = {
+      height: "400px",
+      overflowY: "auto",
+    };
+  };
+
+  const downloadExcel = () => {
+    const wrapper = document.getElementById("marks_entry_viewport"); // Replace 'table' with the ID of your div element containing the table
+    const table = wrapper.querySelector("table");
+    const additionalData = wrapper.querySelectorAll("#selected_filters p");
+    const worksheetData = [];
+
+    additionalData.forEach((p) => {
+      const rowData = [
+        {
+          v: p.textContent,
+          t: "s",
+          s: { alignment: { horizontal: "center" } },
+        },
+      ];
+      worksheetData.push(rowData);
+    });
+
+    worksheetData.push([]);
+
+    const tableRows = table.querySelectorAll("tr");
+    // Prepare the worksheet data
+    tableRows.forEach((row) => {
+      const rowData = [];
+      const cells = row.querySelectorAll("th, td");
+      cells.forEach((cell) => {
+        let cellData = cell.textContent;
+        // Check if cell content includes the checkmark icon
+        if (
+          cell.innerHTML.includes(
+            '<svg stroke="currentColor" fill="currentColor" stroke-width="0" version="1" viewBox="0 0 48 48" enable-background="new 0 0 48 48" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><polygon fill="#43A047" points="40.6,12.1 17,35.7 7.4,26.1 4.6,29 17,41.3 43.4,14.9"></polygon></svg>'
+          )
+        ) {
+          cellData = "1";
+        }
+        rowData.push({ v: cellData });
+      });
+      worksheetData.push(rowData);
+    });
+    // Create a new workbook
+    const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+    const workbook = XLSX.utils.book_new();
+    // Create a new worksheet
+    // Add the worksheet to the workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, "viewMarksData"); // Replace 'Sheet1' with your desired sheet name
+    // Generate an Excel file
+    const excelBuffer = XLSX.write(workbook, {
+      type: "buffer",
+      bookType: "xlsx",
+    });
+    // Create a Blob object from the Excel buffer
+    const blob = new Blob([excelBuffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    // Create a download link
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "ViewMarks.xlsx"; // Replace 'table.xlsx' with your desired file name
+    // Trigger the download
+    link.click();
+  };
+
   const handleLogout = () => {
     localStorage.clear();
     navigate("/");
@@ -408,7 +524,34 @@ const ViewMarks = () => {
       <div className="pt-4 sm:ml-64">
         <div className="p-4 rounded-lg mt-14">
           <div className="text-center text-4xl">
-            <p>View Marks</p>
+            <div className="flex justify-center">
+              <p className="text-center">View Marks</p>
+              <a
+                href="#"
+                id="download_button"
+                onClick={handlePrint}
+                className="py-1 px-2 mt-1 absolute right-32 bg-blue-200 rounded-2xl text-white "
+              >
+                <FcPrint />
+              </a>
+
+              <a
+                href="#"
+                id="save_as_pdf"
+                onClick={handleSavePDF}
+                className="py-1 px-2 mt-1 absolute right-16 bg-blue-200 rounded-2xl"
+              >
+                <FcDownload />
+              </a>
+              <a
+                href="#"
+                id="save_as_pdf"
+                onClick={downloadExcel}
+                className="py-1 px-2 mt-1 absolute right-1 bg-blue-200 rounded-2xl"
+              >
+                <SiMicrosoftexcel />
+              </a>
+            </div>
           </div>
 
           <div className="flex mt-5 ml-2">
@@ -476,6 +619,7 @@ const ViewMarks = () => {
             <select
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
               value={branchId}
+              onChange={handleBranchChange}
               // isSearchable={true}
               disabled={true}
             >
@@ -483,7 +627,9 @@ const ViewMarks = () => {
                 Branch
               </option>
               {branches.map((branch) => (
-                <option value={branch.id}>{branch.name}</option>
+                <option value={branch.id} data-name={branch.name}>
+                  {branch.name}
+                </option>
               ))}
             </select>
 
@@ -515,7 +661,7 @@ const ViewMarks = () => {
 
             <select
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
-              // onChange={handleSubjectChange}
+              // onChange={}
               value={subject_id}
               disabled={true}
             >
@@ -531,8 +677,20 @@ const ViewMarks = () => {
           <div
             id="marks_entry_viewport"
             className="hidden flex-col mt-5"
-            style={{ height: 390 }}
+            ref={componentRef}
+            style={divStyle}
+            // style={{ height: 390 }}
           >
+            <div className="">
+              <p className="text-center">{uniName}</p>
+              <p className="text-center">
+                {branchesName} {semesterName}
+              </p>
+              <p className="text-center">
+                {examinationName} {selectedYear} {type}
+              </p>
+              <p className="text-center">Marks</p>
+            </div>
             <div className="">
               <div className="p-1.5 w-full inline-block align-middle">
                 <div className="border rounded-lg">
