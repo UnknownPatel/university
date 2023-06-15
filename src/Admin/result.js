@@ -651,10 +651,18 @@ const Result = () => {
             </li>
             <li>
               <a
-                href="/unlock_Marks"
+                href="/result"
                 className="flex items-center p-2 text-gray-900 rounded-lg bg-slate-600 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 <span className="ml-3">Result</span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="/studentResult"
+                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="ml-3">Student Result</span>
               </a>
             </li>
             <li>

@@ -34,6 +34,7 @@ import LockMarks from './Admin/lockMarks';
 import UnlockMarks from './Admin/unlockMarks';
 import ViewMarks from './Admin/viewMarks';
 import Result from './Admin/result';
+import StudentResult from './Admin/studentResult';
 
 function App() {
   return (
@@ -68,6 +69,7 @@ function App() {
         <Route path="/unlock_Marks" element={<UnlockMarks/>}/>
         <Route path="/view_Marks/:subject_id" element={<ViewMarks/>}/>
         <Route path="/result" element={<Result/>}/>
+        <Route path="/studentResult" element={<StudentResult/>}/>
 
 
 
