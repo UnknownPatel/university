@@ -10,6 +10,7 @@ import { FcDownload } from "react-icons/fc";
 import { FcPrint } from "react-icons/fc";
 import { SiMicrosoftexcel } from "react-icons/si";
 import * as XLSX from "xlsx";
+import numberToWords from "number-to-words";
 
 var headers;
 var subdomain;
@@ -96,7 +97,6 @@ const ViewMarks = () => {
             responce.data.user.first_name + " " + responce.data.user.last_name
           );
           setSelectedFilter(responce.data.configuration);
-          console.log(selectedFilter);
           setExaminationName(responce.data.configuration.examination_name);
           setSelectedYear(responce.data.configuration.academic_year);
           setType(responce.data.configuration.examination_type);
@@ -172,6 +172,11 @@ const ViewMarks = () => {
     if (selectedFilter !== "") {
       console.log(JSON.parse(JSON.stringify(selectedFilter.subject_ids)));
       selectedFilter["subject_id"] = subject_id;
+      var course_select = document.getElementById("course-select");
+      var branch_select = document.getElementById("branch-select");
+      var semester_select = document.getElementById("semester-select");
+      var subject_select = document.getElementById("subject-select");
+      var division_select = document.getElementById("division-select");
       // Get Branches
       axios
         .get(
@@ -180,6 +185,11 @@ const ViewMarks = () => {
         )
         .then((response) => {
           setBranches(response.data.data.branches);
+          var selectedIndex = branch_select.options.selectedIndex;
+          setBranchesName(
+            branch_select.options[selectedIndex].getAttribute("data-name")
+          );
+          console.log(selectedIndex);
         })
         .catch((error) => console.log(error));
 
@@ -191,6 +201,12 @@ const ViewMarks = () => {
         )
         .then((response) => {
           setSemesters(response.data.data.semesters);
+          var selectedIndex = semester_select.options.selectedIndex;
+          setSemesterName(
+            numberToWords.toOrdinal(
+              semester_select.options[selectedIndex].getAttribute("data-name")
+            ) + " Semester"
+          );
         })
         .catch((error) => console.log(error));
 
@@ -230,6 +246,10 @@ const ViewMarks = () => {
         )
         .then((response) => {
           setSubjects(response.data.data.subjects);
+          var selectedIndex = subject_select.options.selectedIndex;
+          setSubjectName(
+            subject_select.options[selectedIndex].getAttribute("data-name")
+          );
         })
         .catch((error) => console.log(error));
 
@@ -313,7 +333,7 @@ const ViewMarks = () => {
   const downloadExcel = () => {
     const wrapper = document.getElementById("marks_entry_viewport"); // Replace 'table' with the ID of your div element containing the table
     const table = wrapper.querySelector("table");
-    const additionalData = wrapper.querySelectorAll("#selected_filters p");
+    const additionalData = wrapper.querySelectorAll("#selected-filters p");
     const worksheetData = [];
 
     additionalData.forEach((p) => {
@@ -336,14 +356,6 @@ const ViewMarks = () => {
       const cells = row.querySelectorAll("th, td");
       cells.forEach((cell) => {
         let cellData = cell.textContent;
-        // Check if cell content includes the checkmark icon
-        if (
-          cell.innerHTML.includes(
-            '<svg stroke="currentColor" fill="currentColor" stroke-width="0" version="1" viewBox="0 0 48 48" enable-background="new 0 0 48 48" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><polygon fill="#43A047" points="40.6,12.1 17,35.7 7.4,26.1 4.6,29 17,41.3 43.4,14.9"></polygon></svg>'
-          )
-        ) {
-          cellData = "1";
-        }
         rowData.push({ v: cellData });
       });
       worksheetData.push(rowData);
@@ -422,7 +434,7 @@ const ViewMarks = () => {
                     data-dropdown-toggle="dropdown-user"
                   >
                     <span className="self-center text-xl mr-2 font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
-                      Faculty Name
+                      {faculty}
                     </span>
                     <span className="sr-only">Open user menu</span>
 
@@ -526,41 +538,16 @@ const ViewMarks = () => {
           <div className="text-center text-4xl">
             <div className="flex justify-center">
               <p className="text-center">View Marks</p>
-              <a
-                href="#"
-                id="download_button"
-                onClick={handlePrint}
-                className="py-1 px-2 mt-1 absolute right-32 bg-blue-200 rounded-2xl text-white "
-              >
-                <FcPrint />
-              </a>
-
-              <a
-                href="#"
-                id="save_as_pdf"
-                onClick={handleSavePDF}
-                className="py-1 px-2 mt-1 absolute right-16 bg-blue-200 rounded-2xl"
-              >
-                <FcDownload />
-              </a>
-              <a
-                href="#"
-                id="save_as_pdf"
-                onClick={downloadExcel}
-                className="py-1 px-2 mt-1 absolute right-1 bg-blue-200 rounded-2xl"
-              >
-                <SiMicrosoftexcel />
-              </a>
             </div>
           </div>
 
-          <div className="flex mt-5 ml-2">
+          <div className="hidden mt-5 ml-2">
             <select
               className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
               value={examinationName}
               disabled={true}
             >
-              <option value="Select Examination" hidden selected>
+              <option value="Select Examination" hidden>
                 Examination
               </option>
               {examinationNames.map((examination_name) => {
@@ -577,7 +564,7 @@ const ViewMarks = () => {
               value={selectedYear}
               disabled={true}
             >
-              <option value="Select Year" hidden selected>
+              <option value="Select Year" hidden>
                 Year
               </option>
               {academic_years.map((year) => {
@@ -590,7 +577,7 @@ const ViewMarks = () => {
               value={type}
               disabled={true}
             >
-              <option value="Select Type" hidden selected>
+              <option value="Select Type" hidden>
                 Type
               </option>
               {examinationTypes.map((examination_type) => {
@@ -606,24 +593,27 @@ const ViewMarks = () => {
               aria-label="Select Course"
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
               value={courseId}
+              id="course-select"
               disabled={true}
             >
-              <option value="Select Course" hidden selected>
+              <option value="Select Course" hidden>
                 Course
               </option>
               {courses.map((course, index) => (
-                <option value={course.id}>{course.name}</option>
+                <option value={course.id} data-course-name={course.name}>
+                  {course.name}
+                </option>
               ))}
             </select>
 
             <select
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
               value={branchId}
-              onChange={handleBranchChange}
+              id="branch-select"
               // isSearchable={true}
               disabled={true}
             >
-              <option value="Select Branch" hidden selected>
+              <option value="Select Branch" hidden>
                 Branch
               </option>
               {branches.map((branch) => (
@@ -636,26 +626,32 @@ const ViewMarks = () => {
             <select
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-20"
               value={semesterId}
+              id="semester-select"
               disabled={true}
             >
-              <option value="Select Semester" hidden selected>
+              <option value="Select Semester" hidden>
                 Semester
               </option>
               {semesters.map((semester) => (
-                <option value={semester.id}>{semester.name}</option>
+                <option value={semester.id} data-name={semester.name}>
+                  {semester.name}
+                </option>
               ))}
             </select>
 
             <select
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-28"
               value={divisionId}
+              id="division-select"
               disabled={true}
             >
-              <option value="Select Division" hidden selected>
+              <option value="Select Division" hidden>
                 Division
               </option>
               {divisions.map((division) => (
-                <option value={division.id}>{division.name}</option>
+                <option value={division.id} data-name={division.name}>
+                  {division.name}
+                </option>
               ))}
             </select>
 
@@ -663,15 +659,46 @@ const ViewMarks = () => {
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
               // onChange={}
               value={subject_id}
+              id="subject-select"
               disabled={true}
             >
-              <option value="Select Subject" selected>
+              <option value="Select Subject" hidden>
                 Subject
               </option>
               {subjects.map((subject) => (
-                <option value={subject.id}>{subject.name}</option>
+                <option value={subject.id} data-name={subject.name}>
+                  {subject.name}
+                </option>
               ))}
             </select>
+          </div>
+
+          <div id="button-viewport" className="flex justify-evenly mt-5 mb-5">
+            <a
+              href="#"
+              id="download_button"
+              onClick={handlePrint}
+              className="py-2 px-10 bg-blue-200 rounded-2xl text-white "
+            >
+              <FcPrint />
+            </a>
+
+            <a
+              href="#"
+              id="save_as_pdf"
+              onClick={handleSavePDF}
+              className="py-2 px-10 bg-blue-200 rounded-2xl"
+            >
+              <FcDownload />
+            </a>
+            <a
+              href="#"
+              id="save_as_pdf"
+              onClick={downloadExcel}
+              className="py-2 px-10 bg-blue-200 rounded-2xl"
+            >
+              <SiMicrosoftexcel />
+            </a>
           </div>
 
           <div
@@ -682,20 +709,26 @@ const ViewMarks = () => {
             // style={{ height: 390 }}
           >
             <div className="">
-              <p className="text-center">{uniName}</p>
-              <p className="text-center">
-                {branchesName} {semesterName}
-              </p>
-              <p className="text-center">
-                {examinationName} {selectedYear} {type}
-              </p>
-              <p className="text-center">Marks</p>
-            </div>
-            <div className="">
               <div className="p-1.5 w-full inline-block align-middle">
                 <div className="border rounded-lg">
                   <table className="min-w-full divide-y table-auto divide-gray-200">
                     <thead className="sticky top-0 bg-gray-50">
+                    <tr id="selected-filters">
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-xs font-bold text-gray-500 text-center"
+                          colSpan={4}
+                        >
+                          <p className="text-center">{uniName}</p>
+                          <p className="text-center">
+                            {examinationName} {selectedYear} {type}
+                          </p>
+                          <p className="text-center">
+                            {branchesName}, {semesterName}
+                          </p>
+                          <p className="text-center">{subjectName}</p>
+                        </th>
+                      </tr>
                       <tr>
                         <th
                           scope="col"
@@ -719,7 +752,7 @@ const ViewMarks = () => {
                           scope="col"
                           className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
                         >
-                          Enter Marks
+                          Marks
                         </th>
                       </tr>
                     </thead>

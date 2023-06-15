@@ -222,8 +222,10 @@ const LockMarks = () => {
           console.log(res);
           if (res.data.message === "Details found") {
             if (res.data.data.subject_ids.length !== 0) {
-              console.log( "Details : " + selectedFilter.subject_ids);
-              const filterSubjectIds = res.data.data.subject_ids.filter(subjectId => selectedFilter.subject_ids.includes(subjectId));
+              console.log("Details : " + selectedFilter.subject_ids);
+              const filterSubjectIds = res.data.data.subject_ids.filter(
+                (subjectId) => selectedFilter.subject_ids.includes(subjectId)
+              );
               axios
                 .get(
                   `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/subjects`,
@@ -306,16 +308,12 @@ const LockMarks = () => {
             console.log(res);
             if (res.data.status === "ok") {
               if (res.data.data.student_marks.length !== 0) {
-                const updatedCombination = { ...status, [id]: true }
+                const updatedCombination = { ...status, [id]: true };
                 setStatus(updatedCombination);
-                e.target.disabled = true;
-                e.target.classList.add("cursor-not-allowed");
+
                 toast.success(res.data.message, {
                   position: toast.POSITION.BOTTOM_LEFT,
                 });
-              } else {
-                e.target.disabled = false;
-                e.target.classList.remove("cursor-not-allowed");
               }
             } else {
               toast.error(res.data.message, {
@@ -338,7 +336,7 @@ const LockMarks = () => {
     viewNav(`/view_Marks/${subject_id}`);
 
     console.log(selectedFilter);
-  }
+  };
 
   const handleLogout = () => {
     localStorage.clear();
@@ -632,34 +630,49 @@ const LockMarks = () => {
                     </thead>
                     <tbody className="text-center divide-y divide-gray-200">
                       {subjects.map((subject, index) => {
-                        return (
-                          <tr>
-                            <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                              {index + 1}
-                            </td>
-                            <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                              {subject.name}
-                            </td>
-                            <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                              <button
-                                className="py-2 px-3 bg-gray-800 rounded-2xl text-white font-bold"
-                                id={"lock-mark-button-" + subject.id}
-                                data-subject-id={subject.id}
-                                onClick={handleLockMarks}
-                              >
-                                Lock Marks
-                              </button>
-                              <button
-                                className="py-2 px-3 ml-2 bg-gray-800 rounded-2xl text-white font-bold"
-                                id={"view-mark-button-" + subject.id}
-                                data-subject-id={subject.id}
-                                onClick={handleViewMarks}
-                              >
-                                View Marks
-                              </button>
-                            </td>
-                          </tr>
-                        );
+                        if (status[subject.id]) {
+                          return (
+                            <tr>
+                              <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                {index + 1}
+                              </td>
+                              <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                {subject.name}
+                              </td>
+                              <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                <button
+                                  className="py-2 px-3 ml-2 bg-gray-800 rounded-2xl text-white font-bold"
+                                  id={"view-mark-button-" + subject.id}
+                                  data-subject-id={subject.id}
+                                  onClick={handleViewMarks}
+                                >
+                                  View Marks
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        } else {
+                          return (
+                            <tr>
+                              <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                {index + 1}
+                              </td>
+                              <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                {subject.name}
+                              </td>
+                              <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                <button
+                                  className="py-2 px-3 bg-gray-800 rounded-2xl text-white font-bold"
+                                  id={"lock-mark-button-" + subject.id}
+                                  data-subject-id={subject.id}
+                                  onClick={handleLockMarks}
+                                >
+                                  Lock Marks
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        }
                       })}
                     </tbody>
                   </table>

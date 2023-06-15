@@ -9,7 +9,7 @@ var headers;
 var subdomain;
 var access_token;
 
-const MarksEntry = () => {
+const Result = () => {
   const [uniName, setUniName] = useState("");
   const [courses, setCourses] = useState([]);
   const [branches, setBranches] = useState([]);
@@ -38,14 +38,13 @@ const MarksEntry = () => {
   const [students, setStudents] = useState([]);
   const [removeOverFlow, setRemoveOverflow] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("");
-  const [marksData, setMarksData] = useState([]);
+  const [marksData, setMarksData] = useState({});
   const [faculty, setFaculty] = useState("");
   const navigate = useNavigate();
 
   var year;
 
   useEffect(() => {
-    // var selectedFilter = [];
     access_token = localStorage.getItem("access_token");
     year = new Date().getFullYear();
     setAcademicYears(
@@ -62,42 +61,16 @@ const MarksEntry = () => {
     }
 
     if (subdomain !== null || subdomain !== "") {
-      // Authorization Details
       axios
         .get(
           `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
         )
         .then((response) => {
-          //   console.log(response.data.university.name);
           setUniName(response.data.university.name);
         })
         .catch((err) => {
           console.log(err);
         });
-
-      //  Get Current User Details
-      axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/find_user?subdomain=${subdomain}`,
-          {
-            headers,
-          }
-        )
-        .then((responce) => {
-          // selectedFilter = responce.data.configuration;
-          setFaculty(
-            responce.data.user.first_name + " " + responce.data.user.last_name
-          );
-          setSelectedFilter(responce.data.configuration);
-          setExaminationName(responce.data.configuration.examination_name);
-          setSelectedYear(responce.data.configuration.academic_year);
-          setType(responce.data.configuration.examination_type);
-          setCourseId(responce.data.configuration.course_id);
-          setBranchId(responce.data.configuration.branch_id);
-          setSemesterId(responce.data.configuration.semester_id);
-          setDivisionId(responce.data.configuration.division_id);
-        })
-        .catch((error) => console.log(error));
 
       // Get Course
       axios
@@ -160,153 +133,144 @@ const MarksEntry = () => {
     }
   }, []);
 
-  useEffect(() => {
-    if (selectedFilter === "") 
-    {
+  const handleExaminationChange = (examination) => {
+    setExaminationName(examination);
+  };
+
+  const handleYearChange = (date) => {
+    if (date !== "Select Year") {
+      setSelectedYear(date);
     } else {
-      
-      console.log(JSON.parse(JSON.stringify(selectedFilter.subject_ids)));
-      // Get Branches
-      axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/branches?subdomain=${subdomain}&course_id=${selectedFilter.course_id}`,
-          { headers }
-        )
-        .then((response) => {
-          setBranches(response.data.data.branches);
-        })
-        .catch((error) => console.log(error));
-
-      // Get Semesters
-      axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/semesters?subdomain=${subdomain}&branch_id=${selectedFilter.branch_id}`,
-          { headers }
-        )
-        .then((response) => {
-          setSemesters(response.data.data.semesters);
-        })
-        .catch((error) => console.log(error));
-
-      // Get Divisions
-      axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/divisions?subdomain=${subdomain}`,
-          {
-            headers,
-            params: {
-              division: {
-                semester_id: selectedFilter.semester_id,
-              },
-            },
-          }
-        )
-        .then((response) => {
-          setDivisions(response.data.data.divisions);
-        })
-        .catch((error) => console.log(error));
-
-      // Get Subjects
-      axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/subjects`,
-          {
-            headers,
-            params: {
-              subject: {
-                course_id: selectedFilter.course_id,
-                branch_id: selectedFilter.branch_id,
-                semester_id: selectedFilter.semester_id,
-                id: JSON.stringify(selectedFilter.subject_ids),
-              },
-              subdomain: subdomain,
-            },
-          }
-        )
-        .then((response) => {
-          setSubjects(response.data.data.subjects);
-        })
-        .catch((error) => console.log(error));
-    }
-  }, [selectedFilter]);
-
-  const handleSubjectChange = (e) => {
-    e.preventDefault();
-    const viewport = document.getElementById("marks_entry_viewport");
-    viewport.classList.add("hidden");
-    viewport.classList.remove("flex");
-    if (e.target.value === "Select Subject") {
-      setSubjectId("");
-    } else {
-      setSubjectId(e.target.value);
+      setSelectedYear("");
     }
   };
 
-  const handleInputChange = (e, studentId) => {
-    const { value } = e.target;
-    var student_mark_id = e.target.getAttribute("data-student-mark-entry-id");
-    console.log(student_mark_id);
-    const existingInputIndex = marksData.findIndex(
-      (input) => input.student_id === studentId
-    );
-
-    if (existingInputIndex !== -1) {
-      const updatedInputValues = [...marksData];
-      updatedInputValues[existingInputIndex].marks = value;
-      setMarksData(updatedInputValues);
+  const handleTypeChange = (e) => {
+    e.preventDefault();
+    setSubjects([]);
+    if (e.target.value === "Select Type") {
+      setType("");
     } else {
-      if (examinationName === "") {
-        toast.error("Please select examination name", {
-          position: toast.POSITION.BOTTOM_LEFT,
-        });
-      } else if (selectedYear === "") {
-        toast.error("Please select year", {
-          position: toast.POSITION.BOTTOM_LEFT,
-        });
-      } else if (courseId === "" || courseId === "Select Course") {
-        toast.error("Please select course", {
-          position: toast.POSITION.BOTTOM_LEFT,
-        });
-      } else if (branchId === "") {
-        toast.error("Please select branch", {
-          position: toast.POSITION.BOTTOM_LEFT,
-        });
-      } else if (semesterId === "") {
-        toast.error("Please select semester", {
-          position: toast.POSITION.BOTTOM_LEFT,
-        });
-      } else if (divisionId === "") {
-        toast.error("Please select division", {
-          position: toast.POSITION.BOTTOM_LEFT,
-        });
-      } else if (type === "") {
-        toast.error("Please select type", {
-          position: toast.POSITION.BOTTOM_LEFT,
-        });
-      } else if (subjectId === "") {
-        toast.error("Please select subject", {
-          position: toast.POSITION.BOTTOM_LEFT,
-        });
-      } else {
-        var newInputValue = {
-          examination_name: examinationName,
-          examination_type: type,
-          academic_year: selectedYear,
-          course_id: courseId,
-          branch_id: branchId,
-          semester_id: semesterId,
-          division_id: divisionId,
-          subject_id: subjectId,
-          student_id: studentId,
-          marks: value,
-        };
+      setType(e.target.value);
+    }
+  };
 
-        if (student_mark_id !== "" || student_mark_id !== null) {
-          newInputValue["id"] = student_mark_id;
-        }
-
-        setMarksData([...marksData, newInputValue]);
+  const handleCourseChange = (e) => {
+    e.preventDefault();
+    console.log(e.target.value);
+    if (e.target.value !== "Select course") {
+      setCourseId(e.target.value);
+      var course_id = e.target.value;
+      if (subdomain !== null || subdomain !== "") {
+        axios
+          .get(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/branches?subdomain=${subdomain}&course_id=${course_id}`,
+            { headers }
+          )
+          .then((response) => {
+            setBranches(response.data.data.branches);
+          })
+          .catch((error) => console.log(error));
       }
+    } else {
+      setCourseId("");
+      setBranches([]);
+    }
+  };
+
+  const handleBranchChange = (e) => {
+    e.preventDefault();
+    var selectedFilter = {};
+
+    if (examinationName !== "Select Examination") {
+      selectedFilter["name"] = examinationName;
+    } else {
+      delete selectedFilter["name"];
+    }
+
+    if (selectedYear !== "Select Year") {
+      selectedFilter["academic_year"] = selectedYear;
+    } else {
+      delete selectedFilter["academic_year"];
+    }
+
+    if (courseId !== "Select Course") {
+      selectedFilter["course_id"] = courseId;
+    } else {
+      delete selectedFilter["course_id"];
+    }
+
+    if (e.target.value !== "Select Branch") {
+      selectedFilter["branch_id"] = e.target.value;
+    } else {
+      delete selectedFilter["branch_id"];
+    }
+
+    if (semesterId !== "Select Semester") {
+      selectedFilter["semester_id"] = semesterId;
+    } else {
+      delete selectedFilter["semester_id"];
+    }
+
+    var selectedIndex = e.target.options.selectedIndex;
+    setBranchesName(e.target.options[selectedIndex].getAttribute("data-name"));
+    var branch_id = e.target.value;
+    if (branch_id === "Select Branch") {
+      setBranchId("");
+      setSemesterId("");
+    } else {
+      setBranchId(e.target.value);
+      if (subdomain !== null || subdomain !== "") {
+        axios
+          .get(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/semesters?subdomain=${subdomain}&branch_id=${branch_id}`,
+            { headers }
+          )
+          .then((response) => {
+            setSemesters(response.data.data.semesters);
+          })
+          .catch((error) => console.log(error));
+      }
+    }
+  };
+
+  const handleSemesterChange = (e) => {
+    e.preventDefault();
+    if (e.target.value === "Select Semester") {
+      setSemesterId("");
+    } else {
+      setSemesterId(e.target.value);
+      if (subdomain !== null || subdomain !== "") {
+        axios
+          .get(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/divisions`,
+            {
+              headers,
+              params: {
+                subdomain: subdomain,
+                division: {
+                  semester_id: e.target.value,
+                },
+              },
+            }
+          )
+          .then((response) => {
+            setDivisions(response.data.data.divisions);
+          })
+          .catch((error) => console.log(error));
+      } else {
+        setDivisions([]);
+      }
+    }
+  };
+
+  const handleDivisionChange = (e) => {
+    e.preventDefault();
+    console.log("Button clicked");
+    if (e.target.value !== "Select Division") {
+      setDivisionId(e.target.value);
+    } else {
+      setDivisionId("");
     }
   };
 
@@ -340,10 +304,6 @@ const MarksEntry = () => {
       toast.error("Please select type", {
         position: toast.POSITION.BOTTOM_LEFT,
       });
-    } else if (subjectId === "") {
-      toast.error("Please select subject", {
-        position: toast.POSITION.BOTTOM_LEFT,
-      });
     } else {
       selectedFilter = {
         examination_name: examinationName,
@@ -352,10 +312,33 @@ const MarksEntry = () => {
         branch_id: branchId,
         semester_id: semesterId,
         division_id: divisionId,
-        subject_id: subjectId,
       };
 
-      if (subdomain !== null || subdomain !== "") {
+      // if (type !== "All" || type !== "") {
+      //   selectedFilter["examination_type"] = type;
+      // } else {
+      //   delete selectedFilter["examination_type"];
+      // }
+
+      console.log(selectedFilter);
+
+      if (subdomain !== "" || subdomain !== null) {
+        axios
+          .get(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/subjects`,
+            {
+              headers,
+              params: {
+                subject: selectedFilter,
+                subdomain: subdomain,
+              },
+            }
+          )
+          .then((response) => {
+            setSubjects(response.data.data.subjects);
+          })
+          .catch((error) => console.log(error));
+
         axios
           .get(
             `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/students`,
@@ -373,14 +356,13 @@ const MarksEntry = () => {
                 const viewport = document.getElementById(
                   "marks_entry_viewport"
                 );
-                viewport.classList.add("flex");
-                viewport.classList.remove("hidden");
                 setStudents(response.data.data.students);
-                response.data.data.students.map((student) => {
+                const updatedMarks = {};
+                const promises = response.data.data.students.map((student) => {
                   selectedFilter["student_id"] = student.id;
                   axios
                     .get(
-                      `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/${student.id}/fetch_details`,
+                      `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/${student.id}/fetch_marks`,
                       {
                         headers,
                         params: {
@@ -390,189 +372,28 @@ const MarksEntry = () => {
                       }
                     )
                     .then((res) => {
-                      console.log(res);
-                      const student_marks_input = document.getElementById(
-                        "input-marks-entry-" + student.id
-                      );
-                      const submit_button =
-                        document.getElementById("submit-button");
-                      if (res.data.message === "Details found") {
-                        student_marks_input.setAttribute(
-                          "data-student-mark-entry-id",
-                          res.data.data.student_mark.id
-                        );
-                        submit_button.innerHTML = "Update Marks";
-                        student_marks_input.value =
-                          res.data.data.student_mark.marks;
-                        submit_button.disabled =
-                          res.data.data.student_mark.lock_marks;
-                        student_marks_input.disabled =
-                          res.data.data.student_mark.lock_marks;
-                      } else {
-                        student_marks_input.value = "";
-                        student_marks_input.disabled = false;
-                        submit_button.innerHTML = "Submit Marks";
-                        submit_button.disable = false
-                      }
+                      const studentMarks = res.data.data.student_marks;
+                      var updatedCombination = {
+                        ...marksData,
+                        [studentMarks.student_id]: {
+                          student_name: studentMarks.student_name,
+                          student_enrollment_number:
+                            studentMarks.student_enrollment_number,
+                          marks: studentMarks.marks,
+                        },
+                      };
+                      setMarksData(updatedCombination);
                     })
                     .catch((err) => {
                       console.error(err);
                     });
                 });
+                viewport.classList.add("flex");
+                viewport.classList.remove("hidden");
               }
             }
           })
           .catch((error) => console.log(error));
-      }
-    }
-  };
-
-  const handleSubmitMarks = (e) => {
-    let selectedFilter = {};
-    if (examinationName === "") {
-      toast.error("Please select examination name", {
-        position: toast.POSITION.BOTTOM_LEFT,
-      });
-    } else if (selectedYear === "") {
-      toast.error("Please select year", {
-        position: toast.POSITION.BOTTOM_LEFT,
-      });
-    } else if (courseId === "" || courseId === "Select Course") {
-      toast.error("Please select course", {
-        position: toast.POSITION.BOTTOM_LEFT,
-      });
-    } else if (branchId === "") {
-      toast.error("Please select branch", {
-        position: toast.POSITION.BOTTOM_LEFT,
-      });
-    } else if (semesterId === "") {
-      toast.error("Please select semester", {
-        position: toast.POSITION.BOTTOM_LEFT,
-      });
-    } else if (divisionId === "") {
-      toast.error("Please select division", {
-        position: toast.POSITION.BOTTOM_LEFT,
-      });
-    } else if (type === "") {
-      toast.error("Please select type", {
-        position: toast.POSITION.BOTTOM_LEFT,
-      });
-    } else {
-      selectedFilter = {
-        examination_name: examinationName,
-        examination_type: type,
-        academic_year: selectedYear,
-        course_id: courseId,
-        branch_id: branchId,
-        semester_id: semesterId,
-        division_id: divisionId,
-      };
-
-      if (subjectId !== "") {
-        selectedFilter["subject_id"] = subjectId;
-      } else {
-        delete selectedFilter["subject_id"];
-      }
-
-      console.log(selectedFilter);
-    }
-
-    if (subdomain !== null || subdomain !== "") {
-      if (e.target.innerHTML === "Update Marks") {
-        console.log("PUT REQUEST");
-        axios
-          .put(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/${divisionId}`,
-            {
-              subdomain: subdomain,
-              student_marks: marksData,
-            },
-            { headers }
-          )
-          .then((res) => {
-            if (res.data.status === "ok") {
-              toast.success("The entered marks has been updated!", {
-                position: toast.POSITION.BOTTOM_LEFT,
-              });
-            } else {
-              toast.error(res.data.message, {
-                position: toast.POSITION.BOTTOM_LEFT,
-              });
-            }
-          })
-          .catch((err) => {
-            console.error(err);
-          });
-        // axios
-        //   .put(
-        //     `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/${branchId}`,
-        //     {
-        //       student_marks: marksData,
-        //       subdomain: subdomain,
-        //     },
-        //     {
-        //       headers: {
-        //         Authorization: `Bearer ${access_token}`,
-        //       },
-        //     }
-        //   )
-        //   .then((res) => {
-        //     console.log(res);
-        //     if (res.data.status === "ok") {
-        //       toast.success("The entered marks has been updated!", {
-        //         position: toast.POSITION.BOTTOM_LEFT,
-        //       });
-        //     } else {
-        //       toast.error(res.data.message, {
-        //         position: toast.POSITION.BOTTOM_LEFT,
-        //       });
-        //     }
-        //   })
-        //   .catch((err) => {
-        //     console.error(err.response.data);
-        //   });
-      } else {
-        axios
-          .post(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks`,
-            {
-              student_marks: marksData,
-              subdomain: subdomain,
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${access_token}`,
-                "Content-Type": "application/json",
-              },
-            }
-          )
-          .then((responce) => {
-            console.log(responce.data);
-            if (responce.data.status === "created") {
-              setMarksData([]);
-              responce.data.data.student_marks.map((student_mark) => {
-                const marks_entry_input = document.getElementById(
-                  "input-marks-entry-" + student_mark.student_id
-                );
-                marks_entry_input.setAttribute(
-                  "data-student-mark-entry-id",
-                  student_mark.id
-                );
-                marks_entry_input.value = student_mark.marks;
-                marks_entry_input.disabled = student_mark.lock_marks;
-              });
-              const submit_button = document.getElementById("submit-button");
-              submit_button.innerHTML = "Update Marks";
-              submit_button.disabled =
-                responce.data.data.student_marks[0].lock_marks;
-            }
-            toast.success("All Entered marks are been saved!", {
-              position: toast.POSITION.BOTTOM_LEFT,
-            });
-          })
-          .catch(function (err) {
-            console.log(err.response.data);
-          });
       }
     }
   };
@@ -698,22 +519,75 @@ const MarksEntry = () => {
           <ul className="space-y-2 font-medium">
             <li>
               <a
-                href="/marks_entry"
-                className="flex items-center p-2 text-gray-900 bg-slate-600 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                href="/examinationDetails"
+                className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
               >
-                <span className="ml-3">Marks Entry</span>
+                <span className="ml-3">Examination Details</span>
               </a>
             </li>
             <li>
               <a
-                href="/lock_Marks"
+                href="/examTimetable"
                 className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
               >
-                <span className="ml-3">Lock Marks</span>
+                <span className="ml-3">Time Table</span>
+              </a>
+            </li>
+
+            <li>
+              <a
+                href="/examBlockDetails"
+                className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="ml-3">Enter Block Details</span>
               </a>
             </li>
             <li>
-              <div className="p-4 absolute inset-x-0 bottom-0">
+              <a
+                href="/examAssignSupervision"
+                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="flex-1 ml-3 whitespace-nowrap">
+                  Assign Supervision
+                </span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="/assignMarksEntry"
+                className="flex items-center p-2 text-gray-900  rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="flex-1 ml-3 whitespace-nowrap">
+                  Assign Marks Entry
+                </span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="/unlock_Marks"
+                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="ml-3">Unlock Marks</span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="/examViewTimeTable"
+                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="flex-1 ml-3 whitespace-nowrap">Report</span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="/unlock_Marks"
+                className="flex items-center p-2 text-gray-900 rounded-lg bg-slate-600 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="ml-3">Result</span>
+              </a>
+            </li>
+            <li>
+              <div className="p-4">
                 <button
                   type="button"
                   className="inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition"
@@ -730,14 +604,17 @@ const MarksEntry = () => {
       <div className="pt-4 sm:ml-64">
         <div className="p-4 rounded-lg mt-14">
           <div className="text-center text-4xl">
-            <p>Marks Entry </p>
+            <p>Result </p>
           </div>
 
           <div className="flex mt-5 ml-2">
             <select
+              id="examination_name"
               className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
-              value={examinationName}
-              disabled={true}
+              onChange={(e) => {
+                handleExaminationChange(e.target.value);
+              }}
+              aria-label="Examination Name"
             >
               <option value="Select Examination" hidden selected>
                 Examination
@@ -753,8 +630,7 @@ const MarksEntry = () => {
 
             <select
               className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
-              value={selectedYear}
-              disabled={true}
+              onChange={(e) => handleYearChange(e.target.value)}
             >
               <option value="Select Year" hidden selected>
                 Year
@@ -766,8 +642,7 @@ const MarksEntry = () => {
 
             <select
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
-              value={type}
-              disabled={true}
+              onChange={handleTypeChange}
             >
               <option value="Select Type" hidden selected>
                 Type
@@ -782,12 +657,10 @@ const MarksEntry = () => {
             </select>
 
             <select
-              aria-label="Select Course"
-              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
-              value={courseId}
-              disabled={true}
+              className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+              onChange={handleCourseChange}
             >
-              <option value="Select Course" hidden selected>
+              <option value="Select course" hidden selected>
                 Course
               </option>
               {courses.map((course, index) => (
@@ -796,54 +669,46 @@ const MarksEntry = () => {
             </select>
 
             <select
-              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
-              value={branchId}
-              // isSearchable={true}
-              disabled={true}
+              className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+              onChange={(e) => {
+                handleBranchChange(e);
+              }}
             >
               <option value="Select Branch" hidden selected>
                 Branch
               </option>
               {branches.map((branch) => (
-                <option value={branch.id}>{branch.name}</option>
+                <option value={branch.id} data-name={branch.name}>
+                  {branch.name}
+                </option>
               ))}
             </select>
 
             <select
-              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-20"
-              value={semesterId}
-              disabled={true}
+              className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+              onChange={handleSemesterChange}
             >
               <option value="Select Semester" hidden selected>
                 Semester
               </option>
               {semesters.map((semester) => (
-                <option value={semester.id}>{semester.name}</option>
+                <option value={semester.id} data-semester-name={semester.name}>
+                  {semester.name}
+                </option>
               ))}
             </select>
 
             <select
-              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-28"
-              value={divisionId}
-              disabled={true}
+              className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+              onChange={handleDivisionChange}
             >
               <option value="Select Division" hidden selected>
                 Division
               </option>
               {divisions.map((division) => (
-                <option value={division.id}>{division.name}</option>
-              ))}
-            </select>
-
-            <select
-              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
-              onChange={handleSubjectChange}
-            >
-              <option value="Select Subject" selected>
-                Subject
-              </option>
-              {subjects.map((subject) => (
-                <option value={subject.id}>{subject.name}</option>
+                <option value={division.id} data-division-name={division.name}>
+                  {division.name}
+                </option>
               ))}
             </select>
           </div>
@@ -863,7 +728,7 @@ const MarksEntry = () => {
             className="hidden flex-col mt-5"
             style={{ height: 390 }}
           >
-            <div className="">
+            <div className="overflow-x-scroll">
               <div className="p-1.5 w-full inline-block align-middle">
                 <div className="border rounded-lg">
                   <table className="min-w-full divide-y table-auto divide-gray-200">
@@ -871,78 +736,94 @@ const MarksEntry = () => {
                       <tr>
                         <th
                           scope="col"
+                          rowSpan={2}
                           className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
                         >
                           Sr No.
                         </th>
                         <th
                           scope="col"
+                          rowSpan={2}
                           className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
                         >
                           Student Name
                         </th>
                         <th
                           scope="col"
+                          rowSpan={2}
                           className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
                         >
                           Enrollment No.
                         </th>
-                        <th
-                          scope="col"
-                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                        >
-                          Enter Marks
-                        </th>
+                        {subjects.map((subject) => {
+                          return (
+                            <th
+                              key={subject.id}
+                              scope="col"
+                              className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
+                              colSpan={examinationTypes.length}
+                            >
+                              {subject.name}
+                            </th>
+                          );
+                        })}
+                      </tr>
+                      <tr>
+                        {subjects.map((subject) =>
+                          examinationTypes.map((type) => (
+                            <th
+                              key={`${subject.id}-${type.id}`}
+                              scope="col"
+                              className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                            >
+                              {type.name}
+                            </th>
+                          ))
+                        )}
                       </tr>
                     </thead>
                     <tbody className="text-center divide-y divide-gray-200">
-                      {students.map((student, index) => {
-                        return (
-                          <tr>
-                            <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                              {index + 1}
-                            </td>
-                            <td
-                              className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap"
-                              data-id={student.id}
-                            >
-                              {student.name}
-                            </td>
-                            <td
-                              className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap"
-                              data-id={student.id}
-                            >
-                              {student.enrollment_number}
-                            </td>
-                            <td className="text-start px-6 py-4 text-sm  whitespace-nowrap">
-                              <input
-                                className="shadow appearance-none border rounded w-44 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                id={"input-marks-entry-" + student.id}
-                                data-subject-id={student.id}
-                                type="text"
-                                placeholder="Enter Marks"
-                                onChange={(e) => {
-                                  handleInputChange(e, student.id);
-                                }}
-                                required
-                              />
-                            </td>
-                          </tr>
-                        );
-                      })}
+                      {Object.entries(marksData).map(
+                        ([studentId, studentData]) => {
+                          const {
+                            student_name,
+                            student_enrollment_number,
+                            marks,
+                          } = studentData;
+
+                          return (
+                            <tr key={studentId}>
+                              <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                {studentId}
+                              </td>
+                              <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                {student_name}
+                              </td>
+                              <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                {student_enrollment_number}
+                              </td>
+                              {subjects.flatMap((subject) => {
+                                return examinationTypes.flatMap((type) => {
+                                  const cellKey = `${studentId}-${subject.name}-${type.name}`;
+                                  const studentMarks =
+                                    marks?.[subject.name]?.[type.name] || "-";
+
+                                  return (
+                                    <td
+                                      key={cellKey}
+                                      className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap"
+                                    >
+                                      {studentMarks}
+                                    </td>
+                                  );
+                                });
+                              })}
+                            </tr>
+                          );
+                        }
+                      )}
                     </tbody>
                   </table>
-                  <div className="flex justify-center mt-5">
-                    <button
-                      className="py-2 px-3 mr-7 ml-2 bg-gray-800 rounded-2xl text-white font-bold"
-                      onClick={handleSubmitMarks}
-                      id="submit-button"
-                    >
-                      <p className="inline-flex">
-                        Submit Marks
-                      </p>
-                    </button>
-                  </div>
                 </div>
               </div>
             </div>
@@ -954,4 +835,4 @@ const MarksEntry = () => {
   );
 };
 
-export default MarksEntry;
+export default Result;

@@ -133,6 +133,7 @@ const AssignMarksEntry = () => {
   }, []);
 
   const handleExaminationChange = (examination) => {
+    setSelectedOptions({});
     const marks_entry_viewport = document.getElementById(
       "marks_entry_viewport"
     );
@@ -142,6 +143,7 @@ const AssignMarksEntry = () => {
   };
 
   const handleYearChange = (date) => {
+    setSelectedOptions({});
     const marks_entry_viewport = document.getElementById(
       "marks_entry_viewport"
     );
@@ -157,6 +159,7 @@ const AssignMarksEntry = () => {
   const handleTypeChange = (e) => {
     e.preventDefault();
     setSubjects([]);
+    setSelectedOptions({});
     const marks_entry_viewport = document.getElementById(
       "marks_entry_viewport"
     );
@@ -171,6 +174,7 @@ const AssignMarksEntry = () => {
 
   const handleCourseChange = (e) => {
     e.preventDefault();
+    setSelectedOptions({});
     const marks_entry_viewport = document.getElementById(
       "marks_entry_viewport"
     );
@@ -199,6 +203,7 @@ const AssignMarksEntry = () => {
 
   const handleBranchChange = (e) => {
     e.preventDefault();
+    setSelectedOptions({});
     const marks_entry_viewport = document.getElementById(
       "marks_entry_viewport"
     );
@@ -253,6 +258,7 @@ const AssignMarksEntry = () => {
 
   const handleSemesterChange = (e) => {
     e.preventDefault();
+    setSelectedOptions({});
     const marks_entry_viewport = document.getElementById(
       "marks_entry_viewport"
     );
@@ -397,6 +403,9 @@ const AssignMarksEntry = () => {
                       res.data.data.marks_entry.id
                     );
                     button.innerHTML = "Update";
+                  } else {
+                    button.removeAttribute('data-marks-entry-id');
+                    button.innerHTML = "Create";
                   }
                 })
                 .catch((err) => {
@@ -419,14 +428,19 @@ const AssignMarksEntry = () => {
           }
         )
         .then((response) => {
-          if (response.data.data.subjects.length !== 0) {
-            setSubjects(response.data.data.subjects);
-            options_2 = response.data.data.subjects.map((subject) => {
-              return { key: `${subject.id}`, value: subject.name };
-            });
+          if(response.data.message === "Details found"){
+            if (response.data.data.subjects.length !== 0) {
+              setSubjects(response.data.data.subjects);
+              options_2 = response.data.data.subjects.map((subject) => {
+                return { key: `${subject.id}`, value: subject.name };
+              });
+            } else {
+              setSubjects([]);
+            }
           } else {
             setSubjects([]);
           }
+          
         })
         .catch((error) => console.log(error));
     }
