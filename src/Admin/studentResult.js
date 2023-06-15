@@ -136,6 +136,16 @@ const StudentResult = () => {
     }
   };
 
+  const handleTypeChange = (e) => {
+    e.preventDefault();
+    setSubjects([]);
+    if (e.target.value === "Select Type") {
+      setType("");
+    } else {
+      setType(e.target.value);
+    }
+  };
+
   const exportToExcel = (tableData) => {
     const worksheet = XLSX.utils.table_to_sheet(tableData);
     const workbook = XLSX.utils.book_new();
@@ -397,7 +407,7 @@ const StudentResult = () => {
               })}
             </select>
 
-            {/* <select
+            <select
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
               onChange={handleTypeChange}
             >
@@ -411,7 +421,8 @@ const StudentResult = () => {
                   </option>
                 );
               })}
-            </select> */}
+            </select>
+            <input type="text" id="enroll-search" class="bg-gray-50 border-0 border-b-2  text-gray-900 text-sm rounded-lg block w-auto pl-10 p-2.5 border-gray-600 " placeholder="Enter Enrollment No." required />
             <button
               className="py-2 px-3 mr-7 ml-2 bg-gray-800 rounded-2xl text-white font-bold"
               // onClick={handleFilterSubmit}
