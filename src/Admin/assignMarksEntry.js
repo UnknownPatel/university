@@ -428,12 +428,13 @@ const AssignMarksEntry = () => {
           }
         )
         .then((response) => {
-          if(response.data.message === "Details found"){
+          if(response.data.status === "ok"){
             if (response.data.data.subjects.length !== 0) {
               setSubjects(response.data.data.subjects);
               options_2 = response.data.data.subjects.map((subject) => {
                 return { key: `${subject.id}`, value: subject.name };
               });
+              console.log(options_2);
             } else {
               setSubjects([]);
             }

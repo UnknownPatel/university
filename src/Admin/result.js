@@ -4,6 +4,8 @@ import { GiArchiveResearch } from "react-icons/gi";
 import { MdAddCircle } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
+import { SiMicrosoftexcel } from "react-icons/si";
+import * as XLSX from "xlsx";
 
 var headers;
 var subdomain;
@@ -356,9 +358,11 @@ const Result = () => {
                 const viewport = document.getElementById(
                   "marks_entry_viewport"
                 );
+                const excel_sheet_button =
+                  document.getElementById("save_excel_sheet");
                 setStudents(response.data.data.students);
-                const updatedMarks = {};
-                const promises = response.data.data.students.map((student) => {
+                var updatedMarks = {};
+                response.data.data.students.map((student, index) => {
                   selectedFilter["student_id"] = student.id;
                   axios
                     .get(
@@ -373,8 +377,8 @@ const Result = () => {
                     )
                     .then((res) => {
                       const studentMarks = res.data.data.student_marks;
-                      var updatedCombination = {
-                        ...marksData,
+                      updatedMarks = {
+                        ...updatedMarks,
                         [studentMarks.student_id]: {
                           student_name: studentMarks.student_name,
                           student_enrollment_number:
@@ -382,7 +386,7 @@ const Result = () => {
                           marks: studentMarks.marks,
                         },
                       };
-                      setMarksData(updatedCombination);
+                      setMarksData(updatedMarks);
                     })
                     .catch((err) => {
                       console.error(err);
@@ -390,12 +394,79 @@ const Result = () => {
                 });
                 viewport.classList.add("flex");
                 viewport.classList.remove("hidden");
+                excel_sheet_button.classList.remove('hidden')
               }
             }
           })
           .catch((error) => console.log(error));
       }
     }
+  };
+
+  const exportToExcel = (tableData) => {
+    const worksheet = XLSX.utils.table_to_sheet(tableData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+    XLSX.writeFile(workbook, "table_data.xlsx");
+  };
+
+  const downloadExcel = () => {
+    const tableElement = document.getElementById("my-table"); // Replace 'my-table' with the ID of your table
+    exportToExcel(tableElement);
+  };
+
+  const downloadExcel1 = () => {
+    const wrapper = document.getElementById("marks_entry_viewport"); // Replace 'table' with the ID of your div element containing the table
+    const table = wrapper.querySelector("table");
+    const additionalData = wrapper.querySelectorAll("#selected-filters p");
+    const worksheetData = [];
+
+    additionalData.forEach((p) => {
+      const rowData = [
+        {
+          v: p.textContent,
+          t: "s",
+          s: { alignment: { horizontal: "center" } },
+        },
+      ];
+      worksheetData.push(rowData);
+    });
+
+    worksheetData.push([]);
+
+    const tableRows = table.querySelectorAll("tr");
+    // Prepare the worksheet data
+    tableRows.forEach((row) => {
+      const rowData = [];
+      const cells = row.querySelectorAll("th, td");
+      cells.forEach((cell) => {
+        let cellData = cell.textContent;
+        rowData.push({ v: cellData });
+      });
+      worksheetData.push(rowData);
+    });
+    // Create a new workbook
+    const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+    const workbook = XLSX.utils.book_new();
+    // Create a new worksheet
+    // Add the worksheet to the workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, "viewMarksData"); // Replace 'Sheet1' with your desired sheet name
+    // Generate an Excel file
+    const excelBuffer = XLSX.write(workbook, {
+      type: "buffer",
+      bookType: "xlsx",
+    });
+    // Create a Blob object from the Excel buffer
+    const blob = new Blob([excelBuffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    // Create a download link
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "ViewMarks.xlsx"; // Replace 'table.xlsx' with your desired file name
+    // Trigger the download
+    link.click();
   };
 
   const handleLogout = () => {
@@ -721,6 +792,14 @@ const Result = () => {
                 Search <GiArchiveResearch className="mt-1 ml-2" />
               </p>
             </button>
+            <a
+              href="#"
+              id="save_excel_sheet"
+              onClick={downloadExcel}
+              className="py-2 px-10 bg-blue-200 rounded-2xl hidden"
+            >
+              <SiMicrosoftexcel />
+            </a>
           </div>
           {/* Table of Faculty List */}
           <div
@@ -731,7 +810,10 @@ const Result = () => {
             <div className="overflow-x-scroll">
               <div className="p-1.5 w-full inline-block align-middle">
                 <div className="border rounded-lg">
-                  <table className="min-w-full divide-y table-auto divide-gray-200">
+                  <table
+                    id="my-table"
+                    className="min-w-full divide-y table-auto divide-gray-200"
+                  >
                     <thead className="sticky top-0 bg-gray-50">
                       <tr>
                         <th
@@ -784,7 +866,7 @@ const Result = () => {
                     </thead>
                     <tbody className="text-center divide-y divide-gray-200">
                       {Object.entries(marksData).map(
-                        ([studentId, studentData]) => {
+                        ([studentId, studentData], index) => {
                           const {
                             student_name,
                             student_enrollment_number,
@@ -794,7 +876,7 @@ const Result = () => {
                           return (
                             <tr key={studentId}>
                               <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                {studentId}
+                                {index + 1}
                               </td>
                               <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                                 {student_name}
