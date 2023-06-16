@@ -330,7 +330,19 @@ const ViewMarks = () => {
     };
   };
 
+  const exportToExcel = (tableData) => {
+    const worksheet = XLSX.utils.table_to_sheet(tableData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+    XLSX.writeFile(workbook, "table_data.xlsx");
+  };
+
   const downloadExcel = () => {
+    const tableElement = document.getElementById("my-table"); // Replace 'my-table' with the ID of your table
+    exportToExcel(tableElement);
+  };
+
+  const downloadExcel1 = () => {
     const wrapper = document.getElementById("marks_entry_viewport"); // Replace 'table' with the ID of your div element containing the table
     const table = wrapper.querySelector("table");
     const additionalData = wrapper.querySelectorAll("#selected-filters p");
@@ -711,9 +723,9 @@ const ViewMarks = () => {
             <div className="">
               <div className="p-1.5 w-full inline-block align-middle">
                 <div className="border rounded-lg">
-                  <table className="min-w-full divide-y table-auto divide-gray-200">
+                  <table id="my-table" className="min-w-full divide-y table-auto divide-gray-200">
                     <thead className="sticky top-0 bg-gray-50">
-                    <tr id="selected-filters">
+                      <tr id="selected-filters">
                         <th
                           scope="col"
                           className="px-6 py-3 text-xs font-bold text-gray-500 text-center"

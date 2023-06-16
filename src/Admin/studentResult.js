@@ -13,35 +13,17 @@ var access_token;
 
 const StudentResult = () => {
   const [uniName, setUniName] = useState("");
-  const [courses, setCourses] = useState([]);
-  const [branches, setBranches] = useState([]);
-  const [semesters, setSemesters] = useState([]);
-  const [divisions, setDivisions] = useState([]);
-  const [subjects, setSubjects] = useState([]);
-  const [subjectId, setSubjectId] = useState("");
   const [examinationNames, setExaminationNames] = useState([]);
   const [examinationTypes, setExaminationTypes] = useState([]);
   const [academic_years, setAcademicYears] = useState([]);
-  const [division, setDivision] = useState([]);
-  const [subjectName, setSubjectName] = useState([]);
+  const [enrollmentNumber, setEnrollmentNumber] = useState("");
   const [type, setType] = useState("");
-  const [courseId, setCourseId] = useState("");
-  const [branchId, setBranchId] = useState("");
-  const [divisionId, setDivisionId] = useState("");
-  const [branchesName, setBranchesName] = useState("");
-  const [semesterId, setSemesterId] = useState("");
-  const [semesterName, setSemesterName] = useState("");
   const [selectedYear, setSelectedYear] = useState();
   const [examinationName, setExaminationName] = useState("");
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
-  const [displayTimeTable, setDisplayTimeTable] = useState([]);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [students, setStudents] = useState([]);
-  const [removeOverFlow, setRemoveOverflow] = useState(false);
-  const [selectedFilter, setSelectedFilter] = useState("");
-  const [marksData, setMarksData] = useState({});
   const [faculty, setFaculty] = useState("");
+  const [subjects, setSubjects] = useState([]);
+  const [marksData, setMarksData] = useState({});
+  const [studentId, setStudentId] = useState("");
   const navigate = useNavigate();
 
   var year;
@@ -138,7 +120,6 @@ const StudentResult = () => {
 
   const handleTypeChange = (e) => {
     e.preventDefault();
-    setSubjects([]);
     if (e.target.value === "Select Type") {
       setType("");
     } else {
@@ -156,6 +137,89 @@ const StudentResult = () => {
   const downloadExcel = () => {
     const tableElement = document.getElementById("my-table"); // Replace 'my-table' with the ID of your table
     exportToExcel(tableElement);
+  };
+
+  const handleEnrollmentChange = (e) => {
+    e.preventDefault();
+    setEnrollmentNumber(e.target.value);
+  };
+
+  const handleFilterSubmit = (e) => {
+    e.preventDefault();
+    let selectedFilter = {};
+    if (examinationName === "") {
+      toast.error("Please select examination name", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (selectedYear === "") {
+      toast.error("Please select year", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (type === "") {
+      toast.error("Please select type", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (enrollmentNumber === "") {
+      toast.error("Please enter enrollment number", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else {
+      selectedFilter = {
+        examination_name: examinationName,
+        examination_type: type,
+        academic_year: selectedYear,
+      };
+
+      if (subdomain !== "" || subdomain !== null) {
+        axios
+          .get(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/students/${enrollmentNumber}/fetch_subjects`,
+            {
+              headers,
+              params: {
+                subdomain: subdomain,
+              },
+            }
+          )
+          .then((res) => {
+            console.log(res);
+            if (res.data.message === "Details found") {
+              if (res.data.data.subjects.length !== 0) {
+                setSubjects(res.data.data.subjects);
+                setStudentId(res.data.data.student_id);
+              } else {
+                setSubjects([]);
+              }
+            }
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+
+        axios
+          .get(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/fetch_marks_through_enrollment_number`,
+            {
+              headers,
+              params: {
+                student_mark: selectedFilter,
+                enrollment_number: enrollmentNumber,
+                subdomain: subdomain,
+              },
+            }
+          )
+          .then((res) => {
+            console.log(res.data.data.student_marks);
+            setMarksData(res.data.data.student_marks);
+            const viewport = document.getElementById("student_marks_viewport");
+            viewport.classList.add("flex");
+            viewport.classList.remove("hidden");
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+      }
+    }
   };
 
   const handleLogout = () => {
@@ -422,10 +486,17 @@ const StudentResult = () => {
                 );
               })}
             </select>
-            <input type="text" id="enroll-search" class="bg-gray-50 border-0 border-b-2  text-gray-900 text-sm rounded-lg block w-auto pl-10 p-2.5 border-gray-600 " placeholder="Enter Enrollment No." required />
+            <input
+              type="text"
+              onChange={(e) => handleEnrollmentChange(e)}
+              id="enroll-search"
+              class="bg-gray-50 border-0 border-b-2  text-gray-900 text-sm rounded-lg block w-auto pl-10 p-2.5 border-gray-600 "
+              placeholder="Enter Enrollment No."
+              required
+            />
             <button
               className="py-2 px-3 mr-7 ml-2 bg-gray-800 rounded-2xl text-white font-bold"
-              // onClick={handleFilterSubmit}
+              onClick={handleFilterSubmit}
             >
               <p className="inline-flex">
                 Search <GiArchiveResearch className="mt-1 ml-2" />
@@ -440,12 +511,71 @@ const StudentResult = () => {
               <SiMicrosoftexcel />
             </a>
           </div>
-            
+          <div
+            id="student_marks_viewport"
+            className="hidden flex-col mt-5"
+            style={{ height: 390 }}
+          >
+            <div className="overflow-x-scroll">
+              <div className="p-1.5 w-full inline-block align-middle">
+                <div className="border rounded-lg">
+                  <table
+                    id="my-table"
+                    className="min-w-full divide-y table-auto text-center divide-gray-200"
+                  >
+                    <thead className="sticky top-0 bg-gray-50">
+                      <tr>
+                        <th
+                          scope="col"
+                          rowSpan={2}
+                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                        >
+                          Sr No.
+                        </th>
+                        <th
+                          scope="col"
+                          rowSpan={2}
+                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                        >
+                          Subject Name
+                        </th>
+                        <th
+                          scope="col"
+                          rowSpan={2}
+                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                        >
+                          Marks
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="text-center divide-y divide-gray-200">
+                      {subjects.map((subject, index) => {
+                        return (
+                          <tr key={subject.id}>
+                            <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                              {index + 1}
+                            </td>
+                            <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                              {subject.name}
+                            </td>
+                            <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                              {marksData?.["marks"]?.[subject.name]?.[type] ||
+                                "-"}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <ToastContainer />
     </div>
-  )
-}
+  );
+};
 
-export default StudentResult
+export default StudentResult;

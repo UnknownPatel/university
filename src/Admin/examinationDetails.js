@@ -11,6 +11,7 @@ const ExaminationDetails = () => {
   const [examinationName, setExaminationName] = useState("");
   const [examinationNames, setExaminationNames] = useState([]);
   const [examinationType, setExaminationType] = useState("");
+  const [maximumMarks, setMaximumMarks] = useState("");
   const [examinationTypes, setExaminationTypes] = useState([]);
   const [uniName, setUniName] = useState("");
   const navigate = useNavigate();
@@ -168,6 +169,7 @@ const ExaminationDetails = () => {
         {
           examination_type: {
             name: examinationType,
+            maximum_marks: maximumMarks
           },
           subdomain: subdomain,
         },
@@ -530,6 +532,13 @@ const ExaminationDetails = () => {
                     onChange={(e) => setExaminationType(e.target.value)}
                     className="form-input border border-gray-400 rounded p-2"
                   />
+                  <label className="mr-2 ml-5">Maximum Marks: </label>
+                  <input
+                    type="text"
+                    value={maximumMarks}
+                    onChange={(e) => setMaximumMarks(e.target.value)}
+                    className="form-input border border-gray-400 rounded p-2"
+                  />
                 </div>
                 <button
                   type="submit"
@@ -563,6 +572,12 @@ const ExaminationDetails = () => {
                             >
                               Examination Type
                             </th>
+                            <th
+                              scope="col"
+                              className="text-center px-6 py-3 text-xs font-bold text-gray-500 uppercase "
+                            >
+                              Maximum marks
+                            </th>
                           </tr>
                         </thead>
                         <tbody className="text-center divide-y divide-gray-200">
@@ -574,6 +589,9 @@ const ExaminationDetails = () => {
                                 </td>
                                 <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                                   {examination_type.name}
+                                </td>
+                                <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                  {examination_type.maximum_marks}
                                 </td>
                               </tr>
                             );

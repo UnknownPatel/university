@@ -149,10 +149,21 @@ const Result = () => {
 
   const handleTypeChange = (e) => {
     e.preventDefault();
+    const viewport = document.getElementById("marks_entry_viewport");
+    const excel_sheet_button = document.getElementById("save_excel_sheet");
+    viewport.classList.add("hidden");
+    excel_sheet_button.classList.add("hidden");
+    viewport.classList.remove("flex");
     setSubjects([]);
     if (e.target.value === "Select Type") {
       setType("");
     } else {
+      const typeTr = document.getElementById("type-tr");
+      if (e.target.value !== "All") {
+        typeTr.classList.add("hidden");
+      } else {
+        typeTr.classList.remove("hidden");
+      }
       setType(e.target.value);
     }
   };
@@ -316,11 +327,11 @@ const Result = () => {
         division_id: divisionId,
       };
 
-      // if (type !== "All" || type !== "") {
-      //   selectedFilter["examination_type"] = type;
-      // } else {
-      //   delete selectedFilter["examination_type"];
-      // }
+      if (type !== "All" && type !== "") {
+        selectedFilter["examination_type"] = type;
+      } else {
+        delete selectedFilter["examination_type"];
+      }
 
       console.log(selectedFilter);
 
@@ -386,6 +397,8 @@ const Result = () => {
                           marks: studentMarks.marks,
                         },
                       };
+                      console.log(updatedMarks.size);
+                      console.log(students.length);
                       setMarksData(updatedMarks);
                     })
                     .catch((err) => {
@@ -394,7 +407,7 @@ const Result = () => {
                 });
                 viewport.classList.add("flex");
                 viewport.classList.remove("hidden");
-                excel_sheet_button.classList.remove('hidden')
+                excel_sheet_button.classList.remove("hidden");
               }
             }
           })
@@ -403,11 +416,29 @@ const Result = () => {
     }
   };
 
+  // const exportToExcel = (tableData) => {
+  //   const worksheet = XLSX.utils.table_to_sheet(tableData);
+  //   const workbook = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+  //   XLSX.writeFile(workbook, "table_data.xlsx");
+  // };
+
   const exportToExcel = (tableData) => {
     const worksheet = XLSX.utils.table_to_sheet(tableData);
+  
+    // Loop through each cell and add custom styling
+    for (let cell in worksheet) {
+      if (cell.startsWith('A') && worksheet.hasOwnProperty(cell)) {
+        const cellStyle = worksheet[cell].s || {};
+        cellStyle.alignment = cellStyle.alignment || {};
+        cellStyle.alignment.horizontal = 'center';
+        worksheet[cell].s = cellStyle;
+      }
+    }
+  
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-    XLSX.writeFile(workbook, "table_data.xlsx");
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+    XLSX.writeFile(workbook, 'MasterSheet.xlsx');
   };
 
   const downloadExcel = () => {
@@ -726,6 +757,7 @@ const Result = () => {
               <option value="Select Type" hidden selected>
                 Type
               </option>
+              <option value="All">All</option>
               {examinationTypes.map((examination_type) => {
                 return (
                   <option value={examination_type.name}>
@@ -820,7 +852,7 @@ const Result = () => {
                 <div className="border rounded-lg">
                   <table
                     id="my-table"
-                    className="min-w-full divide-y table-auto divide-gray-200"
+                    className="min-w-full divide-y table-auto text-center divide-gray-200"
                   >
                     <thead className="sticky top-0 bg-gray-50">
                       <tr>
@@ -851,14 +883,14 @@ const Result = () => {
                               key={subject.id}
                               scope="col"
                               className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
-                              colSpan={examinationTypes.length}
+                              colSpan={ type === "All" ?  examinationTypes.length : 1}
                             >
                               {subject.name}
                             </th>
                           );
                         })}
                       </tr>
-                      <tr>
+                      <tr id="type-tr" className="hidden">
                         {subjects.map((subject) =>
                           examinationTypes.map((type) => (
                             <th
@@ -880,36 +912,66 @@ const Result = () => {
                             student_enrollment_number,
                             marks,
                           } = studentData;
+                          if (type === "All") {
+                            return (
+                              <tr key={studentId}>
+                                <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                  {index + 1}
+                                </td>
+                                <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                  {student_name}
+                                </td>
+                                <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                  {student_enrollment_number}
+                                </td>
+                                {subjects.flatMap((subject) => {
+                                  return examinationTypes.flatMap((type) => {
+                                    const cellKey = `${studentId}-${subject.name}-${type.name}`;
+                                    const studentMarks =
+                                      marks?.[subject.name]?.[type.name] || "-";
 
-                          return (
-                            <tr key={studentId}>
-                              <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                {index + 1}
-                              </td>
-                              <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                {student_name}
-                              </td>
-                              <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                {student_enrollment_number}
-                              </td>
-                              {subjects.flatMap((subject) => {
-                                return examinationTypes.flatMap((type) => {
-                                  const cellKey = `${studentId}-${subject.name}-${type.name}`;
-                                  const studentMarks =
-                                    marks?.[subject.name]?.[type.name] || "-";
+                                    return (
+                                      <td
+                                        key={cellKey}
+                                        className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap"
+                                      >
+                                        {studentMarks}
+                                      </td>
+                                    );
+                                  });
+                                })}
+                              </tr>
+                            );
+                          } else {
+                            return (
+                              <tr key={studentId}>
+                                <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                  {index + 1}
+                                </td>
+                                <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                  {student_name}
+                                </td>
+                                <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                  {student_enrollment_number}
+                                </td>
+                                {subjects.flatMap((subject) => {
+                                  
+                                    const cellKey = `${studentId}-${subject.name}-${type}`;
+                                    const studentMarks =
+                                      marks?.[subject.name]?.[type] || "-";
 
-                                  return (
-                                    <td
-                                      key={cellKey}
-                                      className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap"
-                                    >
-                                      {studentMarks}
-                                    </td>
-                                  );
-                                });
-                              })}
-                            </tr>
-                          );
+                                    return (
+                                      <td
+                                        key={cellKey}
+                                        className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap"
+                                      >
+                                        {studentMarks}
+                                      </td>
+                                    );
+                                })}
+                              </tr>
+                            );
+                          }
                         }
                       )}
                     </tbody>
