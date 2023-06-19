@@ -18,6 +18,7 @@ var headers;
 var subdomain;
 
 const ExamAssignSupervision = () => {
+  const [faculty, setFaculty] = useState("");
   const [uniName, setUniName] = useState("");
   const [examinationNames, setExaminationNames] = useState([]);
   const [jrType, setJrType] = useState("");
@@ -92,6 +93,21 @@ const ExamAssignSupervision = () => {
         .catch((err) => {
           console.log(err);
         });
+
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/find_user?subdomain=${subdomain}`,
+          {
+            headers,
+          }
+        )
+        .then((responce) => {
+          // selectedFilter = responce.data.configuration;
+          setFaculty(
+            responce.data.user.first_name + " " + responce.data.user.last_name
+          );
+        })
+        .catch((error) => console.log(error));
 
       axios
         .get(
@@ -426,14 +442,22 @@ const ExamAssignSupervision = () => {
     const access_token = localStorage.getItem("access_token");
     console.log(acces_token);
     var metadata = {};
-    storedTimeTables.map((time_table) => {
-      const checkbox = document.getElementById(
-        "junior-checkbox-" + time_table + supervision_id
-      );
-      if (checkbox.checked) {
-        metadata[time_table] = true;
-      }
-    });
+    if (supervision_id !== null){
+      storedTimeTables.map((time_table) => {
+        console.log(time_table);
+        const checkbox = document.getElementById(
+          "junior-checkbox-" + time_table + supervision_id
+        );
+        console.log(checkbox);
+        if (checkbox.checked) {
+          metadata[time_table] = true;
+        }
+      });
+    } else {
+      toast.error("Something went wrong, try again!", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    }
 
     var requestBody = {
       supervision: {
@@ -635,6 +659,8 @@ const ExamAssignSupervision = () => {
             if (response.data.message === "Examination dates are as below") {
               if (response.data.data.dates.length !== 0) {
                 setStoredTimeTable(response.data.data.dates);
+              }else {
+                setStoredTimeTable([]);
               }
             }
           })
@@ -1049,7 +1075,8 @@ const ExamAssignSupervision = () => {
                         sr_no_of_supervisions_input.value =
                           res.data.data.supervision.no_of_supervisions;
                       } else {
-                        sr_supervision_submit_button.innerHTML = ReactDOMServer.renderToString(<MdAddCircle />);
+                        sr_supervision_submit_button.innerHTML =
+                          ReactDOMServer.renderToString(<MdAddCircle />);
 
                         sr_no_of_supervisions_input.value = "";
                       }
@@ -1522,12 +1549,10 @@ const ExamAssignSupervision = () => {
                       aria-expanded="false"
                       data-dropdown-toggle="dropdown-user"
                     >
+                      <span className="self-center text-xl mr-2 font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
+                        {faculty}
+                      </span>
                       <span className="sr-only">Open user menu</span>
-                      <img
-                        className="w-8 h-8 rounded-full"
-                        src=""
-                        alt="user photo"
-                      />
                     </button>
                   </div>
                   <div
@@ -1582,103 +1607,103 @@ const ExamAssignSupervision = () => {
         </nav>
 
         <aside
-        id="logo-sidebar"
-        className="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
-        aria-label="Sidebar"
-      >
-        <div className="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
-          <ul className="space-y-2 font-medium">
-            <li>
-              <a
-                href="/examinationDetails"
-                className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <span className="ml-3">Examination Details</span>
-              </a>
-            </li>
-            <li>
-              <a
-                href="/examTimetable"
-                className="flex items-center p-2  text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <span className="ml-3">Time Table</span>
-              </a>
-            </li>
-
-            <li>
-              <a
-                href="/examBlockDetails"
-                className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <span className="ml-3">Enter Block Details</span>
-              </a>
-            </li>
-            <li>
-              <a
-                href="/examAssignSupervision"
-                className="flex items-center p-2 bg-slate-600 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <span className="flex-1 ml-3 whitespace-nowrap">
-                  Assign Supervision
-                </span>
-              </a>
-            </li>
-            <li>
-              <a
-                href="/assignMarksEntry"
-                className="flex items-center p-2 text-gray-900  rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <span className="flex-1 ml-3 whitespace-nowrap">
-                  Assign Marks Entry
-                </span>
-              </a>
-            </li>
-            <li>
-              <a
-                href="/unlock_Marks"
-                className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <span className="ml-3">Unlock Marks</span>
-              </a>
-            </li>
-            <li>
-              <a
-                href="/examViewTimeTable"
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <span className="flex-1 ml-3 whitespace-nowrap">Report</span>
-              </a>
-            </li>
-            <li>
-              <a
-                href="/result"
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <span className="ml-3">Result</span>
-              </a>
-            </li>
-            <li>
-              <a
-                href="/studentResult"
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <span className="ml-3">Student Result</span>
-              </a>
-            </li>
-            <li>
-              <div className="p-4">
-                <button
-                  type="button"
-                  className="inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition"
-                  onClick={handleLogout}
+          id="logo-sidebar"
+          className="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
+          aria-label="Sidebar"
+        >
+          <div className="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
+            <ul className="space-y-2 font-medium">
+              <li>
+                <a
+                  href="/examinationDetails"
+                  className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
-                  <span className="">Logout</span>
-                </button>
-              </div>
-            </li>
-          </ul>
-        </div>
-      </aside>
+                  <span className="ml-3">Examination Details</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/examTimetable"
+                  className="flex items-center p-2  text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <span className="ml-3">Time Table</span>
+                </a>
+              </li>
+
+              <li>
+                <a
+                  href="/examBlockDetails"
+                  className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <span className="ml-3">Enter Block Details</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/examAssignSupervision"
+                  className="flex items-center p-2 bg-slate-600 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <span className="flex-1 ml-3 whitespace-nowrap">
+                    Assign Supervision
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/assignMarksEntry"
+                  className="flex items-center p-2 text-gray-900  rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <span className="flex-1 ml-3 whitespace-nowrap">
+                    Assign Marks Entry
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/unlock_Marks"
+                  className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <span className="ml-3">Unlock Marks</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/examViewTimeTable"
+                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <span className="flex-1 ml-3 whitespace-nowrap">Report</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/result"
+                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <span className="ml-3">Result</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/studentResult"
+                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <span className="ml-3">Student Result</span>
+                </a>
+              </li>
+              <li>
+                <div className="p-4">
+                  <button
+                    type="button"
+                    className="inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition"
+                    onClick={handleLogout}
+                  >
+                    <span className="">Logout</span>
+                  </button>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </aside>
 
         <div className="p-4 sm:ml-64">
           <div className="flex flex-col items-center mt-14">
@@ -2004,7 +2029,7 @@ const ExamAssignSupervision = () => {
                                             time_table +
                                             item.id
                                           }
-                                          // onChange={handlechangeDateCheckBox}
+                                          onChange={(e) => handlechangeDateCheckBox(e)}
                                         />
                                       </td>
                                     );

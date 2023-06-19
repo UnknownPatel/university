@@ -70,7 +70,7 @@ const SignInSuperAdmin = () => {
                       position: toast.POSITION.BOTTOM_LEFT,
                     });
                     setTimeout(() => {
-                      navigate("/home");
+                      navigate("/uploadExcel");
                     }, 2000);
                   } else if (
                     responce.data.roles.includes("Examination Controller")

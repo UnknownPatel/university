@@ -14,8 +14,8 @@ const ExaminationDetails = () => {
   const [maximumMarks, setMaximumMarks] = useState("");
   const [examinationTypes, setExaminationTypes] = useState([]);
   const [uniName, setUniName] = useState("");
+  const [faculty, setFaculty] = useState("");
   const navigate = useNavigate();
-
 
   useEffect(() => {
     acces_token = localStorage.getItem("access_token");
@@ -38,6 +38,21 @@ const ExaminationDetails = () => {
         .catch((err) => {
           console.log(err);
         });
+
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/find_user?subdomain=${subdomain}`,
+          {
+            headers,
+          }
+        )
+        .then((responce) => {
+          // selectedFilter = responce.data.configuration;
+          setFaculty(
+            responce.data.user.first_name + " " + responce.data.user.last_name
+          );
+        })
+        .catch((error) => console.log(error));
 
       axios
         .get(
@@ -169,7 +184,7 @@ const ExaminationDetails = () => {
         {
           examination_type: {
             name: examinationType,
-            maximum_marks: maximumMarks
+            maximum_marks: maximumMarks,
           },
           subdomain: subdomain,
         },
@@ -267,12 +282,10 @@ const ExaminationDetails = () => {
                     aria-expanded="false"
                     data-dropdown-toggle="dropdown-user"
                   >
+                    <span className="self-center text-xl mr-2 font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
+                      {faculty}
+                    </span>
                     <span className="sr-only">Open user menu</span>
-                    <img
-                      className="w-8 h-8 rounded-full"
-                      src=""
-                      alt="user photo"
-                    />
                   </button>
                 </div>
                 <div

@@ -9,6 +9,7 @@ var id;
 const AssignRole = () => {
   const navigate = useNavigate();
   const [uniName, setUniName] = useState("");
+  const [faculty, setFaculty] = useState("");
   const [clientId, setClentId] = useState("");
   const [clientSecret, setClentSecret] = useState("");
   const [isHidden, setIsHidden] = useState(true);
@@ -28,7 +29,6 @@ const AssignRole = () => {
   useEffect(() => {
     setFaculties([]);
     acces_token = localStorage.getItem("access_token");
-    console.log(acces_token);
     const headers = { Authorization: `Bearer ${acces_token}` };
     const host = window.location.host;
     const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
@@ -37,6 +37,8 @@ const AssignRole = () => {
     }
 
     if (subdomain !== null || subdomain !== "") {
+      setFaculty("Super Admin");
+
       axios
         .get(
           `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
@@ -286,7 +288,11 @@ const AssignRole = () => {
                   viewBox="0 0 20 20"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <path d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"></path>
+                  <path
+                    clip-rule="evenodd"
+                    fill-rule="evenodd"
+                    d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"
+                  ></path>
                 </svg>
               </button>
               <a href="" className="flex ml-2 md:mr-24">
@@ -305,12 +311,10 @@ const AssignRole = () => {
                     aria-expanded="false"
                     data-dropdown-toggle="dropdown-user"
                   >
+                    <span className="self-center text-xl mr-2 font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
+                      {faculty}
+                    </span>
                     <span className="sr-only">Open user menu</span>
-                    <img
-                      className="w-8 h-8 rounded-full"
-                      src=""
-                      alt="user photo"
-                    />
                   </button>
                 </div>
                 <div
@@ -389,7 +393,7 @@ const AssignRole = () => {
                 <span className="ml-3">Assign Roles</span>
               </a>
             </li>
-            <li>
+            {/* <li>
               <a
                 href="/approve_reject"
                 className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -409,7 +413,7 @@ const AssignRole = () => {
                   Profile Settings
                 </span>
               </a>
-            </li>
+            </li> */}
             <div className="p-4">
               <button
                 type="button"

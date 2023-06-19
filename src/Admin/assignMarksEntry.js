@@ -32,6 +32,7 @@ const AssignMarksEntry = () => {
   const [divisionId, setDivisionId] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
   const [examinationName, setExaminationName] = useState("");
+  const [faculty, setFaculty] = useState("");
   const [faculties, setFaculties] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [type, setType] = useState("");
@@ -43,10 +44,6 @@ const AssignMarksEntry = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    options_2 = subjects.map((subject) => {
-      return { key: `${subject.id}`, value: subject.name };
-    });
-    console.log(options_2);
     access_token = localStorage.getItem("access_token");
     year = new Date().getFullYear();
     setAcademicYears(
@@ -74,6 +71,20 @@ const AssignMarksEntry = () => {
         .catch((err) => {
           console.log(err);
         });
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/find_user?subdomain=${subdomain}`,
+          {
+            headers,
+          }
+        )
+        .then((responce) => {
+          // selectedFilter = responce.data.configuration;
+          setFaculty(
+            responce.data.user.first_name + " " + responce.data.user.last_name
+          );
+        })
+        .catch((error) => console.log(error));
       axios
         .get(
           `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/courses?subdomain=${subdomain}`,
@@ -203,6 +214,8 @@ const AssignMarksEntry = () => {
 
   const handleBranchChange = (e) => {
     e.preventDefault();
+    setSemesters([]);
+    setDivisions([]);
     setSelectedOptions({});
     const marks_entry_viewport = document.getElementById(
       "marks_entry_viewport"
@@ -258,6 +271,7 @@ const AssignMarksEntry = () => {
 
   const handleSemesterChange = (e) => {
     e.preventDefault();
+    setDivisions([]);
     setSelectedOptions({});
     const marks_entry_viewport = document.getElementById(
       "marks_entry_viewport"
@@ -309,6 +323,8 @@ const AssignMarksEntry = () => {
   };
 
   const handleFilterSubmit = (e) => {
+    options_2 = undefined;
+    setSelectedOptions({});
     let selectedFilter = {};
     if (examinationName === "") {
       toast.error("Please select examination name", {
@@ -387,6 +403,8 @@ const AssignMarksEntry = () => {
                   );
 
                   if (res.data.message === "Details found") {
+                    console.log("Hello");
+                    console.log(res.data.data.marks_entry);
                     setSelectedOptions((prevSelectedValues) => ({
                       ...prevSelectedValues,
                       [faculty.id]: res.data.data.marks_entry.subjects.map(
@@ -404,7 +422,7 @@ const AssignMarksEntry = () => {
                     );
                     button.innerHTML = "Update";
                   } else {
-                    button.removeAttribute('data-marks-entry-id');
+                    button.removeAttribute("data-marks-entry-id");
                     button.innerHTML = "Create";
                   }
                 })
@@ -428,7 +446,7 @@ const AssignMarksEntry = () => {
           }
         )
         .then((response) => {
-          if(response.data.status === "ok"){
+          if (response.data.status === "ok") {
             if (response.data.data.subjects.length !== 0) {
               setSubjects(response.data.data.subjects);
               options_2 = response.data.data.subjects.map((subject) => {
@@ -440,8 +458,8 @@ const AssignMarksEntry = () => {
             }
           } else {
             setSubjects([]);
+            options_2 = undefined;
           }
-          
         })
         .catch((error) => console.log(error));
     }
@@ -644,12 +662,10 @@ const AssignMarksEntry = () => {
                       aria-expanded="false"
                       data-dropdown-toggle="dropdown-user"
                     >
+                      <span className="self-center text-xl mr-2 font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
+                        {faculty}
+                      </span>
                       <span className="sr-only">Open user menu</span>
-                      <img
-                        className="w-8 h-8 rounded-full"
-                        src=""
-                        alt="user photo"
-                      />
                     </button>
                   </div>
                   <div
@@ -772,21 +788,21 @@ const AssignMarksEntry = () => {
                 </a>
               </li>
               <li>
-              <a
-                href="/result"
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <span className="ml-3">Result</span>
-              </a>
-            </li>
-            <li>
-              <a
-                href="/studentResult"
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <span className="ml-3">Student Result</span>
-              </a>
-            </li>
+                <a
+                  href="/result"
+                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <span className="ml-3">Result</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/studentResult"
+                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <span className="ml-3">Student Result</span>
+                </a>
+              </li>
               <li>
                 <div className="p-4">
                   <button

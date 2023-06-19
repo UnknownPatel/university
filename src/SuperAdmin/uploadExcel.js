@@ -5,10 +5,12 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 var acces_token;
+var headers;
 var subdomain;
 const UploadExcel = () => {
   const navigate = useNavigate();
   const [uniName, setUniName] = useState("");
+  const [faculty, setFaculty] = useState("");
   // const [subdomain, setSubdomain] = useState(null);
   const [selectedValue, setSelectedValue] = useState("");
   const [selectedFile, setSelectedFile] = useState("");
@@ -16,8 +18,8 @@ const UploadExcel = () => {
   const [clientSecret, setClentSecret] = useState("");
 
   useEffect(() => {
-    acces_token = localStorage.getItem("acces_token");
-
+    acces_token = localStorage.getItem("access_token");
+    headers = { Authorization: `Bearer ${acces_token}` };
     const host = window.location.host;
     const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
     if (arr.length > 0) {
@@ -38,6 +40,8 @@ const UploadExcel = () => {
         .catch((err) => {
           console.log(err);
         });
+
+      setFaculty("Super Admin")
     }
   }, []);
 
@@ -75,7 +79,8 @@ const UploadExcel = () => {
           submit_button.innerHTML = "Upload";
           submit_button.classList.remove("cursor-not-allowed");
           if (responce.data.status == "created") {
-            file_select.options[file_select.options.selectedIndex].text = "Select Sheet name";
+            file_select.options[file_select.options.selectedIndex].text =
+              "Select Sheet name";
             file_input.value = null;
             setSelectedFile("");
             setSelectedValue("");
@@ -163,9 +168,19 @@ const UploadExcel = () => {
                 className="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
               >
                 <span className="sr-only">Open sidebar</span>
-                {/* <svg className="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-               <path d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"></path>
-            </svg> */}
+                <svg
+                  className="w-6 h-6"
+                  aria-hidden="true"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    clip-rule="evenodd"
+                    fill-rule="evenodd"
+                    d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"
+                  ></path>
+                </svg>
               </button>
               <a href="" className="flex ml-2 md:mr-24">
                 <img src="" className="h-8 mr-3" alt="Logo" />
@@ -183,12 +198,10 @@ const UploadExcel = () => {
                     aria-expanded="false"
                     data-dropdown-toggle="dropdown-user"
                   >
+                    <span className="self-center text-xl mr-2 font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
+                      {faculty}
+                    </span>
                     <span className="sr-only">Open user menu</span>
-                    <img
-                      className="w-8 h-8 rounded-full"
-                      src=""
-                      alt="user photo"
-                    />
                   </button>
                 </div>
                 <div
@@ -267,7 +280,7 @@ const UploadExcel = () => {
                 <span className="ml-3">Assign Roles</span>
               </a>
             </li>
-            <li>
+            {/* <li>
               <a
                 href="/approve_reject"
                 className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -276,9 +289,9 @@ const UploadExcel = () => {
                   Approve/Reject Registrations
                 </span>
               </a>
-            </li>
+            </li> */}
 
-            <li>
+            {/* <li>
               <a
                 href="#"
                 className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -287,7 +300,7 @@ const UploadExcel = () => {
                   Profile Settings
                 </span>
               </a>
-            </li>
+            </li> */}
 
             <div className="p-4">
               <button
@@ -341,14 +354,14 @@ const UploadExcel = () => {
                     Choose {selectedValue} Sheet
                   </label>
                   <div className="flex justify-center w-full">
-                  <span class="sr-only">Choose {selectedValue} Sheet</span>
-                  <input
-                    type="file"
-                    id="file_input"
-                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-blue-100"
-                    onChange={(e) => setSelectedFile(e.target.files[0])}
-                    accept=".xls,.xlsx"
-                  />
+                    <span class="sr-only">Choose {selectedValue} Sheet</span>
+                    <input
+                      type="file"
+                      id="file_input"
+                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-blue-100"
+                      onChange={(e) => setSelectedFile(e.target.files[0])}
+                      accept=".xls,.xlsx"
+                    />
                   </div>
                 </div>
 
@@ -368,14 +381,9 @@ const UploadExcel = () => {
                         </div>
                         <p className="pointer-none text-gray-500 ">
                           <span className="text-sm">Drag and drop</span> files
-                          here <br /> or{" "}
-                          <a
-                            href=""
-                            id=""
-                            className="text-blue-600 hover:underline"
-                          >
+                          here <br /> or
                             select a file
-                          </a>{" "}
+                        
                           from your computer
                         </p>
                       </div>

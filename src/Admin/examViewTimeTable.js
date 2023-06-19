@@ -9,6 +9,7 @@ import { FcCheckmark } from "react-icons/fc";
 import { FcDownload } from "react-icons/fc";
 import { FcPrint } from "react-icons/fc";
 import { GiArchiveResearch } from "react-icons/gi";
+import numberToWords from "number-to-words";
 
 import { useReactToPrint } from "react-to-print";
 import { saveAs } from "file-saver";
@@ -31,6 +32,7 @@ var headers;
 const ExamViewTimeTable = () => {
   const componentRef = useRef();
   const tableRef = useRef(null);
+  const [faculty, setFaculty] = useState("");
   const [uniName, setUniName] = useState("");
   const [courses, setCourses] = useState([]);
   const [courseId, setCourseId] = useState("");
@@ -89,6 +91,21 @@ const ExamViewTimeTable = () => {
           console.log(err);
         });
       console.log(headers);
+
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/find_user?subdomain=${subdomain}`,
+          {
+            headers,
+          }
+        )
+        .then((responce) => {
+          // selectedFilter = responce.data.configuration;
+          setFaculty(
+            responce.data.user.first_name + " " + responce.data.user.last_name
+          );
+        })
+        .catch((error) => console.log(error));
       axios
         .get(
           `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/courses?subdomain=${subdomain}`,
@@ -334,8 +351,9 @@ const ExamViewTimeTable = () => {
     }
     var selectedIndex = e.target.options.selectedIndex;
     setSemesterName(
-      "Semester : " +
+      numberToWords.toOrdinal(
         e.target.options[selectedIndex].getAttribute("data-semester-name")
+      ) + " Semester"
     );
     access_token = localStorage.getItem("access_token");
     const headers = { Authorization: `Bearer ${access_token}` };
@@ -450,7 +468,7 @@ const ExamViewTimeTable = () => {
   const handlePrint = useReactToPrint({
     onBeforeGetContent: () => {
       const contentElement = componentRef.current;
-      contentElement.style = {}; 
+      contentElement.style = {};
     },
     content: () => componentRef.current,
     onAfterPrint: () => {
@@ -459,7 +477,7 @@ const ExamViewTimeTable = () => {
         height: "400px",
         overflowY: "auto",
       };
-    }
+    },
   });
 
   const handleSavePDF = () => {
@@ -533,12 +551,10 @@ const ExamViewTimeTable = () => {
                       aria-expanded="false"
                       data-dropdown-toggle="dropdown-user"
                     >
+                      <span className="self-center text-xl mr-2 font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
+                        {faculty}
+                      </span>
                       <span className="sr-only">Open user menu</span>
-                      <img
-                        className="w-8 h-8 rounded-full"
-                        src=""
-                        alt="user photo"
-                      />
                     </button>
                   </div>
                   <div
@@ -661,21 +677,21 @@ const ExamViewTimeTable = () => {
                 </a>
               </li>
               <li>
-              <a
-                href="/result"
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <span className="ml-3">Result</span>
-              </a>
-            </li>
-            <li>
-              <a
-                href="/studentResult"
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <span className="ml-3">Student Result</span>
-              </a>
-            </li>
+                <a
+                  href="/result"
+                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <span className="ml-3">Result</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/studentResult"
+                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <span className="ml-3">Student Result</span>
+                </a>
+              </li>
               <li>
                 <div className="p-4">
                   <button
@@ -797,7 +813,9 @@ const ExamViewTimeTable = () => {
                 Branch
               </option>
               {branches.map((branch) => (
-                <option value={branch.id}>{branch.name}</option>
+                <option value={branch.id} data-name={branch.name}>
+                  {branch.name}
+                </option>
               ))}
             </select>
 
@@ -809,7 +827,9 @@ const ExamViewTimeTable = () => {
                 Semester
               </option>
               {semesters.map((semester) => (
-                <option value={semester.id}>{semester.name}</option>
+                <option value={semester.id} data-semester-name={semester.name}>
+                  {semester.name}
+                </option>
               ))}
             </select>
 
@@ -919,7 +939,7 @@ const ExamViewTimeTable = () => {
                           <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                             {time_table.subject_code}
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                          <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap uppercase">
                             {time_table.date + " " + time_table.day}
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">

@@ -10,6 +10,7 @@ import { FcDownload } from "react-icons/fc";
 import { FcPrint } from "react-icons/fc";
 import { GiArchiveResearch } from "react-icons/gi";
 import html2pdf from "html2pdf.js";
+import numberToWords from "number-to-words";
 
 import { useReactToPrint } from "react-to-print";
 import { useNavigate } from "react-router-dom";
@@ -21,6 +22,7 @@ var subdomain;
 const ExamViewBlockDetails = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [uniName, setUniName] = useState("");
+  const [faculty, setFaculty] = useState("");
   const [selectedYear2, setSelectedYear2] = useState();
   const [examinationName2, setExaminationName2] = useState("");
   const [courses2, setCourses2] = useState([]);
@@ -86,6 +88,21 @@ const ExamViewBlockDetails = () => {
         .catch((err) => {
           console.log(err);
         });
+
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/find_user?subdomain=${subdomain}`,
+          {
+            headers,
+          }
+        )
+        .then((responce) => {
+          // selectedFilter = responce.data.configuration;
+          setFaculty(
+            responce.data.user.first_name + " " + responce.data.user.last_name
+          );
+        })
+        .catch((error) => console.log(error));
 
       axios
         .get(
@@ -323,6 +340,13 @@ const ExamViewBlockDetails = () => {
     e.preventDefault();
     var selectedIndex = e.target.options.selectedIndex;
     setBranchesName(e.target.options[selectedIndex].getAttribute("data-name"));
+    var branch_id = e.target.value;
+    if (branch_id === "Select Branch") {
+      setBranchId("");
+      setSemesterId("");
+    } else {
+      setBranchId(e.target.value);
+    }
     var selectedFilter = {};
     setStoreDates([]);
 
@@ -440,8 +464,9 @@ const ExamViewBlockDetails = () => {
 
     var selectedIndex = e.target.options.selectedIndex;
     setSemesterName(
-      "Semester : " +
+      numberToWords.toOrdinal(
         e.target.options[selectedIndex].getAttribute("data-semester-name")
+      ) + " Semester"
     );
     acces_token = localStorage.getItem("access_token");
     const headers = { Authorization: `Bearer ${acces_token}` };
@@ -691,12 +716,10 @@ const ExamViewBlockDetails = () => {
                       aria-expanded="false"
                       data-dropdown-toggle="dropdown-user"
                     >
+                      <span className="self-center text-xl mr-2 font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
+                        {faculty}
+                      </span>
                       <span className="sr-only">Open user menu</span>
-                      <img
-                        className="w-8 h-8 rounded-full"
-                        src=""
-                        alt="user photo"
-                      />
                     </button>
                   </div>
                   <div
@@ -819,21 +842,21 @@ const ExamViewBlockDetails = () => {
                 </a>
               </li>
               <li>
-              <a
-                href="/result"
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <span className="ml-3">Result</span>
-              </a>
-            </li>
-            <li>
-              <a
-                href="/studentResult"
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <span className="ml-3">Student Result</span>
-              </a>
-            </li>
+                <a
+                  href="/result"
+                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <span className="ml-3">Result</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/studentResult"
+                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <span className="ml-3">Student Result</span>
+                </a>
+              </li>
               <li>
                 <div className="p-4">
                   <button
@@ -950,7 +973,9 @@ const ExamViewBlockDetails = () => {
                 Branch
               </option>
               {branches2.map((branch) => (
-                <option value={branch.id}>{branch.name}</option>
+                <option value={branch.id} data-name={branch.name}>
+                  {branch.name}
+                </option>
               ))}
             </select>
             <select
@@ -961,7 +986,9 @@ const ExamViewBlockDetails = () => {
                 Semester
               </option>
               {semesters2.map((semester) => (
-                <option value={semester.id}>{semester.name}</option>
+                <option value={semester.id} data-semester-name={semester.name}>
+                  {semester.name}
+                </option>
               ))}
             </select>
 

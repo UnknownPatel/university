@@ -74,6 +74,21 @@ const Result = () => {
           console.log(err);
         });
 
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/find_user?subdomain=${subdomain}`,
+          {
+            headers,
+          }
+        )
+        .then((responce) => {
+          // selectedFilter = responce.data.configuration;
+          setFaculty(
+            responce.data.user.first_name + " " + responce.data.user.last_name
+          );
+        })
+        .catch((error) => console.log(error));
+
       // Get Course
       axios
         .get(
@@ -425,20 +440,20 @@ const Result = () => {
 
   const exportToExcel = (tableData) => {
     const worksheet = XLSX.utils.table_to_sheet(tableData);
-  
+
     // Loop through each cell and add custom styling
     for (let cell in worksheet) {
-      if (cell.startsWith('A') && worksheet.hasOwnProperty(cell)) {
+      if (cell.startsWith("A") && worksheet.hasOwnProperty(cell)) {
         const cellStyle = worksheet[cell].s || {};
         cellStyle.alignment = cellStyle.alignment || {};
-        cellStyle.alignment.horizontal = 'center';
+        cellStyle.alignment.horizontal = "center";
         worksheet[cell].s = cellStyle;
       }
     }
-  
+
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-    XLSX.writeFile(workbook, 'MasterSheet.xlsx');
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+    XLSX.writeFile(workbook, "MasterSheet.xlsx");
   };
 
   const downloadExcel = () => {
@@ -553,12 +568,6 @@ const Result = () => {
                       {faculty}
                     </span>
                     <span className="sr-only">Open user menu</span>
-
-                    <img
-                      className="w-8 h-8 rounded-full"
-                      src=""
-                      alt="user photo"
-                    />
                   </button>
                 </div>
                 <div
@@ -883,7 +892,9 @@ const Result = () => {
                               key={subject.id}
                               scope="col"
                               className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
-                              colSpan={ type === "All" ?  examinationTypes.length : 1}
+                              colSpan={
+                                type === "All" ? examinationTypes.length : 1
+                              }
                             >
                               {subject.name}
                             </th>
@@ -955,19 +966,18 @@ const Result = () => {
                                   {student_enrollment_number}
                                 </td>
                                 {subjects.flatMap((subject) => {
-                                  
-                                    const cellKey = `${studentId}-${subject.name}-${type}`;
-                                    const studentMarks =
-                                      marks?.[subject.name]?.[type] || "-";
+                                  const cellKey = `${studentId}-${subject.name}-${type}`;
+                                  const studentMarks =
+                                    marks?.[subject.name]?.[type] || "-";
 
-                                    return (
-                                      <td
-                                        key={cellKey}
-                                        className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap"
-                                      >
-                                        {studentMarks}
-                                      </td>
-                                    );
+                                  return (
+                                    <td
+                                      key={cellKey}
+                                      className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap"
+                                    >
+                                      {studentMarks}
+                                    </td>
+                                  );
                                 })}
                               </tr>
                             );

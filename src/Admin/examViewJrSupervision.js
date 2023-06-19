@@ -16,6 +16,7 @@ var headers;
 
 const ExamViewJrSupervision = () => {
   const [uniName, setUniName] = useState("");
+  const [faculty, setFaculty] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [academic_years, setAcademicYears] = useState([]);
   const [selectedYear3, setSelectedYear3] = useState();
@@ -25,7 +26,7 @@ const ExamViewJrSupervision = () => {
   const [branchId, setBranchId] = useState("");
   const [courseId, setCourseId] = useState("");
   const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
+  const [time, setTime] = useState("0");
   const [branchesName, setBranchesName] = useState("");
   const [storeDates, setStoreDates] = useState([]);
   const [subjectDates, setSubjectDates] = useState([]);
@@ -67,6 +68,21 @@ const ExamViewJrSupervision = () => {
         .catch((err) => {
           console.log(err);
         });
+
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/find_user?subdomain=${subdomain}`,
+          {
+            headers,
+          }
+        )
+        .then((responce) => {
+          // selectedFilter = responce.data.configuration;
+          setFaculty(
+            responce.data.user.first_name + " " + responce.data.user.last_name
+          );
+        })
+        .catch((error) => console.log(error));
 
       axios
         .get(
@@ -592,12 +608,10 @@ const ExamViewJrSupervision = () => {
                     aria-expanded="false"
                     data-dropdown-toggle="dropdown-user"
                   >
+                    <span className="self-center text-xl mr-2 font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
+                      {faculty}
+                    </span>
                     <span className="sr-only">Open user menu</span>
-                    <img
-                      className="w-8 h-8 rounded-full"
-                      src=""
-                      alt="user photo"
-                    />
                   </button>
                 </div>
                 <div
@@ -886,7 +900,6 @@ const ExamViewJrSupervision = () => {
               }
             }}
           >
-            <option>Select Time</option>
             <option value="0">10:30 A.M to 01:00 P.M</option>
             <option value="1">03:00 P.M to 05:30 P.M</option>
           </select>

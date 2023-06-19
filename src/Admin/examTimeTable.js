@@ -17,6 +17,7 @@ var subdomain;
 const ExamTimeTable = () => {
   const componentRef = useRef();
   const [uniName, setUniName] = useState("");
+  const [faculty, setFaculty] = useState("");
   const [courses, setCourses] = useState([]);
   const [courseId, setCourseId] = useState("");
   const [branches, setBranches] = useState([]);
@@ -70,6 +71,21 @@ const ExamTimeTable = () => {
         .catch((err) => {
           console.log(err);
         });
+
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/find_user?subdomain=${subdomain}`,
+          {
+            headers,
+          }
+        )
+        .then((responce) => {
+          // selectedFilter = responce.data.configuration;
+          setFaculty(
+            responce.data.user.first_name + " " + responce.data.user.last_name
+          );
+        })
+        .catch((error) => console.log(error));
 
       axios
         .get(
@@ -549,12 +565,10 @@ const ExamTimeTable = () => {
                       aria-expanded="false"
                       data-dropdown-toggle="dropdown-user"
                     >
+                      <span className="self-center text-xl mr-2 font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
+                        {faculty}
+                      </span>
                       <span className="sr-only">Open user menu</span>
-                      <img
-                        className="w-8 h-8 rounded-full"
-                        src=""
-                        alt="user photo"
-                      />
                     </button>
                   </div>
                   <div
@@ -677,21 +691,21 @@ const ExamTimeTable = () => {
                 </a>
               </li>
               <li>
-              <a
-                href="/result"
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <span className="ml-3">Result</span>
-              </a>
-            </li>
-            <li>
-              <a
-                href="/studentResult"
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <span className="ml-3">Student Result</span>
-              </a>
-            </li>
+                <a
+                  href="/result"
+                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <span className="ml-3">Result</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/studentResult"
+                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <span className="ml-3">Student Result</span>
+                </a>
+              </li>
               <li>
                 <div className="p-4">
                   <button
