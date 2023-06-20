@@ -1014,7 +1014,7 @@ const ExamBlockDetails = () => {
                 handleExaminationChange2(e, e.target.value);
               }}
             >
-              <option value="Select Examination" hidden selected>
+              <option value="Select Examination" >
                 Examination
               </option>
               {examinationNames.map((examination_name) => {
@@ -1031,7 +1031,7 @@ const ExamBlockDetails = () => {
               className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
               onChange={(e) => handleYearChange2(e.target.value)}
             >
-              <option value="Select Year" hidden selected>
+              <option value="Select Year" >
                 Year
               </option>
               {academic_years.map((year) => {
@@ -1043,7 +1043,7 @@ const ExamBlockDetails = () => {
               className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
               onChange={handleTypeChange}
             >
-              <option value="Select Type" hidden selected>
+              <option value="Select Type" >
                 Type
               </option>
               {examinationTypes.map((examination_type) => {
@@ -1059,7 +1059,7 @@ const ExamBlockDetails = () => {
               className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
               onChange={handleCourseChange2}
             >
-              <option value="Select course" hidden selected>
+              <option value="Select course" >
                 Course
               </option>
               {courses2.map((course) => (
@@ -1071,7 +1071,7 @@ const ExamBlockDetails = () => {
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded justify-center shadow-md px-3 py-2 w-auto"
               onChange={handleBranchChange2}
             >
-              <option value="Select Branch" hidden selected>
+              <option value="Select Branch" >
                 Branch
               </option>
               {branches2.map((branch) => (
@@ -1083,7 +1083,7 @@ const ExamBlockDetails = () => {
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded justify-center shadow-md px-3 py-2 w-auto"
               onChange={handleSemesterChange2}
             >
-              <option value="Select Semester" hidden selected>
+              <option value="Select Semester" >
                 Semester
               </option>
               {semesters2.map((semester) => (
@@ -1101,7 +1101,7 @@ const ExamBlockDetails = () => {
                 }
               }}
             >
-              <option value="Select Date" hidden selected>
+              <option value="Select Date" >
                 Date
               </option>
               {storeDates.map((date) => (
@@ -1115,7 +1115,7 @@ const ExamBlockDetails = () => {
                 handleTimeChange(e);
               }}
             >
-              <option value="Select time" hidden selected>
+              <option value="Select time" >
                 Time
               </option>
               <option value="morning">10:30 A.M to 01:00 P.M</option>

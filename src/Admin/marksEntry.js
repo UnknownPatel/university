@@ -739,7 +739,7 @@ const MarksEntry = () => {
               value={examinationName}
               disabled={true}
             >
-              <option value="Select Examination" hidden selected>
+              <option value="Select Examination" >
                 Examination
               </option>
               {examinationNames.map((examination_name) => {
@@ -756,7 +756,7 @@ const MarksEntry = () => {
               value={selectedYear}
               disabled={true}
             >
-              <option value="Select Year" hidden selected>
+              <option value="Select Year" >
                 Year
               </option>
               {academic_years.map((year) => {
@@ -769,7 +769,7 @@ const MarksEntry = () => {
               value={type}
               disabled={true}
             >
-              <option value="Select Type" hidden selected>
+              <option value="Select Type" >
                 Type
               </option>
               {examinationTypes.map((examination_type) => {
@@ -787,7 +787,7 @@ const MarksEntry = () => {
               value={courseId}
               disabled={true}
             >
-              <option value="Select Course" hidden selected>
+              <option value="Select Course" >
                 Course
               </option>
               {courses.map((course, index) => (
@@ -801,7 +801,7 @@ const MarksEntry = () => {
               // isSearchable={true}
               disabled={true}
             >
-              <option value="Select Branch" hidden selected>
+              <option value="Select Branch" >
                 Branch
               </option>
               {branches.map((branch) => (
@@ -814,7 +814,7 @@ const MarksEntry = () => {
               value={semesterId}
               disabled={true}
             >
-              <option value="Select Semester" hidden selected>
+              <option value="Select Semester" >
                 Semester
               </option>
               {semesters.map((semester) => (
@@ -827,7 +827,7 @@ const MarksEntry = () => {
               value={divisionId}
               disabled={true}
             >
-              <option value="Select Division" hidden selected>
+              <option value="Select Division" >
                 Division
               </option>
               {divisions.map((division) => (

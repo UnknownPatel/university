@@ -1747,7 +1747,7 @@ const ExamAssignSupervision = () => {
                       handleJrExaminationChange(e.target.value);
                     }}
                   >
-                    <option value="Select Examination" hidden selected>
+                    <option value="Select Examination" >
                       Examination
                     </option>
                     {examinationNames.map((examination_name) => {
@@ -1763,7 +1763,7 @@ const ExamAssignSupervision = () => {
                     className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
                     onChange={(e) => handleJrYearChange(e.target.value)}
                   >
-                    <option value="Select Year" hidden selected>
+                    <option value="Select Year" >
                       Year
                     </option>
                     {academic_years.map((year) => {
@@ -1775,7 +1775,7 @@ const ExamAssignSupervision = () => {
                     className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
                     onChange={handleJrTypeChange}
                   >
-                    <option value="Select Type" hidden selected>
+                    <option value="Select Type" >
                       Type
                     </option>
                     {examinationTypes.map((examination_type) => {
@@ -1791,7 +1791,7 @@ const ExamAssignSupervision = () => {
                     className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
                     onChange={handleJrCourseChange}
                   >
-                    <option value="Select Course" hidden selected>
+                    <option value="Select Course" >
                       Course
                     </option>
                     {courses.map((course) => (
@@ -1803,7 +1803,7 @@ const ExamAssignSupervision = () => {
                     className="w-auto form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded justify-center shadow-md px-3 py-2"
                     onChange={handleJrBranchChange}
                   >
-                    <option value="Select Branch" hidden selected>
+                    <option value="Select Branch" >
                       Branch
                     </option>
                     {branches.map((branch) => (
@@ -2066,7 +2066,7 @@ const ExamAssignSupervision = () => {
                       handleSrExaminationChange(e.target.value);
                     }}
                   >
-                    <option value="Select Examination" hidden selected>
+                    <option value="Select Examination" >
                       Examination
                     </option>
                     {examinationNames.map((examination_name) => {
@@ -2082,7 +2082,7 @@ const ExamAssignSupervision = () => {
                     className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
                     onChange={(e) => handleSrYearChange(e.target.value)}
                   >
-                    <option value="Select Year" hidden selected>
+                    <option value="Select Year" >
                       Year
                     </option>
                     {academic_years.map((year) => {
@@ -2094,7 +2094,7 @@ const ExamAssignSupervision = () => {
                     className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
                     onChange={handleSrTypeChange}
                   >
-                    <option value="Select Type" hidden selected>
+                    <option value="Select Type" >
                       Type
                     </option>
                     {examinationTypes.map((examination_type) => {
@@ -2110,7 +2110,7 @@ const ExamAssignSupervision = () => {
                     className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
                     onChange={handleSrCourseChange}
                   >
-                    <option value="Select Course" hidden selected>
+                    <option value="Select Course" >
                       Course
                     </option>
                     {srCourses.map((course) => (
@@ -2122,7 +2122,7 @@ const ExamAssignSupervision = () => {
                     className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded justify-center shadow-md px-3 py-2"
                     onChange={handleSrBranchChange}
                   >
-                    <option value="Select Branch" hidden selected>
+                    <option value="Select Branch" >
                       Branch
                     </option>
                     {srBranches.map((branch) => (

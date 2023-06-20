@@ -559,7 +559,7 @@ const ViewMarks = () => {
               value={examinationName}
               disabled={true}
             >
-              <option value="Select Examination" hidden>
+              <option value="Select Examination" >
                 Examination
               </option>
               {examinationNames.map((examination_name) => {
@@ -576,7 +576,7 @@ const ViewMarks = () => {
               value={selectedYear}
               disabled={true}
             >
-              <option value="Select Year" hidden>
+              <option value="Select Year" >
                 Year
               </option>
               {academic_years.map((year) => {
@@ -589,7 +589,7 @@ const ViewMarks = () => {
               value={type}
               disabled={true}
             >
-              <option value="Select Type" hidden>
+              <option value="Select Type" >
                 Type
               </option>
               {examinationTypes.map((examination_type) => {
@@ -608,7 +608,7 @@ const ViewMarks = () => {
               id="course-select"
               disabled={true}
             >
-              <option value="Select Course" hidden>
+              <option value="Select Course" >
                 Course
               </option>
               {courses.map((course, index) => (
@@ -625,7 +625,7 @@ const ViewMarks = () => {
               // isSearchable={true}
               disabled={true}
             >
-              <option value="Select Branch" hidden>
+              <option value="Select Branch" >
                 Branch
               </option>
               {branches.map((branch) => (
@@ -641,7 +641,7 @@ const ViewMarks = () => {
               id="semester-select"
               disabled={true}
             >
-              <option value="Select Semester" hidden>
+              <option value="Select Semester" >
                 Semester
               </option>
               {semesters.map((semester) => (
@@ -657,7 +657,7 @@ const ViewMarks = () => {
               id="division-select"
               disabled={true}
             >
-              <option value="Select Division" hidden>
+              <option value="Select Division" >
                 Division
               </option>
               {divisions.map((division) => (
@@ -674,7 +674,7 @@ const ViewMarks = () => {
               id="subject-select"
               disabled={true}
             >
-              <option value="Select Subject" hidden>
+              <option value="Select Subject" >
                 Subject
               </option>
               {subjects.map((subject) => (

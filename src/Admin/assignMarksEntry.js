@@ -834,7 +834,7 @@ const AssignMarksEntry = () => {
               }}
               aria-label="Examination Name"
             >
-              <option value="Select Examination" hidden selected>
+              <option value="Select Examination" >
                 Examination
               </option>
               {examinationNames.map((examination_name) => {
@@ -850,7 +850,7 @@ const AssignMarksEntry = () => {
               className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
               onChange={(e) => handleYearChange(e.target.value)}
             >
-              <option value="Select Year" hidden selected>
+              <option value="Select Year" >
                 Year
               </option>
               {academic_years.map((year) => {
@@ -862,7 +862,7 @@ const AssignMarksEntry = () => {
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
               onChange={handleTypeChange}
             >
-              <option value="Select Type" hidden selected>
+              <option value="Select Type" >
                 Type
               </option>
               {examinationTypes.map((examination_type) => {
@@ -878,7 +878,7 @@ const AssignMarksEntry = () => {
               className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
               onChange={handleCourseChange}
             >
-              <option value="Select course" hidden selected>
+              <option value="Select course" >
                 Course
               </option>
               {courses.map((course, index) => (
@@ -892,7 +892,7 @@ const AssignMarksEntry = () => {
                 handleBranchChange(e);
               }}
             >
-              <option value="Select Branch" hidden selected>
+              <option value="Select Branch" >
                 Branch
               </option>
               {branches.map((branch) => (
@@ -906,7 +906,7 @@ const AssignMarksEntry = () => {
               className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
               onChange={handleSemesterChange}
             >
-              <option value="Select Semester" hidden selected>
+              <option value="Select Semester" >
                 Semester
               </option>
               {semesters.map((semester) => (
@@ -920,7 +920,7 @@ const AssignMarksEntry = () => {
               className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
               onChange={handleDivisionChange}
             >
-              <option value="Select Division" hidden selected>
+              <option value="Select Division" >
                 Division
               </option>
               {divisions.map((division) => (
