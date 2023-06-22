@@ -4,6 +4,8 @@ import { GiArchiveResearch } from "react-icons/gi";
 import { MdAddCircle } from "react-icons/md";
 import { useNavigate, useParams } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
+import {BsLockFill} from 'react-icons/bs'
+import {CiViewList} from 'react-icons/ci'
 
 var headers;
 var subdomain;
@@ -243,6 +245,8 @@ const LockMarks = () => {
                   }
                 )
                 .then((response) => {
+                  setSubjects(response.data.data.subjects);
+                  var updatedCombination = {};
                   response.data.data.subjects.map((subject) => {
                     selectedFilter["subject_id"] = subject.id;
                     axios
@@ -259,9 +263,9 @@ const LockMarks = () => {
                       .then((res) => {
                         console.log(res);
                         if (res.data.message === "Details found") {
-                          const updatedCombination = {
-                            ...status,
-                            [subject.id]: res.data.data.locked,
+                          updatedCombination = {
+                            ...updatedCombination,
+                            [`${JSON.stringify(subject.id)}`]: res.data.data.locked,
                           };
                           setStatus(updatedCombination);
                         }
@@ -270,7 +274,6 @@ const LockMarks = () => {
                         console.error(err);
                       });
                   });
-                  setSubjects(response.data.data.subjects);
                 })
                 .catch((error) => console.log(error));
             }
@@ -289,8 +292,7 @@ const LockMarks = () => {
   const handleLockMarks = (e) => {
     // e.preventDefault();
 
-    const id = e.target.getAttribute("data-subject-id");
-    console.log(id);
+    const id = e.target.id;
     selectedFilter["subject_id"] = id;
 
     if (id !== "") {
@@ -331,7 +333,7 @@ const LockMarks = () => {
   const handleViewMarks = (e) => {
     e.preventDefault();
 
-    const subject_id = e.target.getAttribute("data-subject-id");
+    const subject_id = e.target.id;
     console.log(subject_id);
     viewNav(`/view_Marks/${subject_id}`);
 
@@ -388,7 +390,7 @@ const LockMarks = () => {
                     data-dropdown-toggle="dropdown-user"
                   >
                     <span className="self-center text-xl mr-2 font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
-                      Faculty Name
+                      {faculty}
                     </span>
                     <span className="sr-only">Open user menu</span>
 
@@ -641,10 +643,10 @@ const LockMarks = () => {
                               </td>
                               <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                                 <button
-                                  className="py-2 px-3 ml-2 bg-gray-800 rounded-2xl text-white font-bold"
-                                  id={"view-mark-button-" + subject.id}
+                                  className="py-2 px-3 bg-gray-800 rounded-2xl text-white font-bold"
+                                  id={subject.id}
                                   data-subject-id={subject.id}
-                                  onClick={handleViewMarks}
+                                  onClick={(e) => handleViewMarks(e)}
                                 >
                                   View Marks
                                 </button>
@@ -663,9 +665,9 @@ const LockMarks = () => {
                               <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                                 <button
                                   className="py-2 px-3 bg-gray-800 rounded-2xl text-white font-bold"
-                                  id={"lock-mark-button-" + subject.id}
+                                  id={subject.id}
                                   data-subject-id={subject.id}
-                                  onClick={handleLockMarks}
+                                  onClick={(e) => handleLockMarks(e)}
                                 >
                                   Lock Marks
                                 </button>

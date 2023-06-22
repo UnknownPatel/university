@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { GiArchiveResearch } from "react-icons/gi";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
+import { BsUnlockFill } from "react-icons/bs";
 
 var headers;
 var subdomain;
@@ -31,6 +32,8 @@ const UnlockMarks = () => {
   const [examinationNames, setExaminationNames] = useState([]);
   const [examinationTypes, setExaminationTypes] = useState([]);
   const [status, setStatus] = useState({});
+  const [actualSubjects, setActualSubjects] = useState([]);
+  const [disabled, setDisabled] = useState(false);
   const navigate = useNavigate();
 
   var year;
@@ -63,7 +66,7 @@ const UnlockMarks = () => {
           console.log(err);
         });
 
-        axios
+      axios
         .get(
           `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/find_user?subdomain=${subdomain}`,
           {
@@ -351,6 +354,29 @@ const UnlockMarks = () => {
       };
 
       console.log(selectedFilter);
+      var actual_subject_length = null;
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/subjects`,
+          {
+            headers,
+            params: {
+              subdomain: subdomain,
+              subject: {
+                course_id: selectedFilter.course_id,
+                branch_id: selectedFilter.branch_id,
+                semester_id: selectedFilter.semester_id,
+              },
+            },
+          }
+        )
+        .then((res) => {
+          setActualSubjects(res.data.data.subjects);
+          actual_subject_length = res.data.data.subjects.length;
+        })
+        .catch((err) => {
+          console.error(err);
+        });
 
       axios
         .get(
@@ -387,8 +413,13 @@ const UnlockMarks = () => {
                   const unlockMarks_viewport = document.getElementById(
                     "unlockMarks_viewport"
                   );
+                  const publish_marks_button =
+                    document.getElementById("publish-marks");
                   unlockMarks_viewport.classList.remove("hidden");
                   unlockMarks_viewport.classList.add("flex");
+                  console.log(actual_subject_length);
+
+                  var updatedCombination = {};
                   response.data.data.subjects.map((subject) => {
                     selectedFilter["subject_id"] = subject.id;
                     axios
@@ -405,8 +436,8 @@ const UnlockMarks = () => {
                       .then((res) => {
                         console.log(res);
                         if (res.data.message === "Details found") {
-                          const updatedCombination = {
-                            ...status,
+                          updatedCombination = {
+                            ...updatedCombination,
                             [subject.id]: res.data.data.locked,
                           };
                           setStatus(updatedCombination);
@@ -416,6 +447,81 @@ const UnlockMarks = () => {
                         console.error(err);
                       });
                   });
+
+                  delete selectedFilter["subject_id"];
+
+                  if (
+                    actual_subject_length === response.data.data.subjects.length
+                  ) {
+                    axios
+                      .get(
+                        `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/eligible_for_publish`,
+                        {
+                          headers,
+                          params: {
+                            subdomain: subdomain,
+                            student_mark: selectedFilter,
+                          },
+                        }
+                      )
+                      .then((res) => {
+                        console.log(res);
+                        if (res.data.status === "ok") {
+                          if (res.data.data.eligible === true) {
+                            publish_marks_button.disabled = false;
+                            publish_marks_button.classList.remove(
+                              "cursor-not-allowed"
+                            );
+                            axios
+                              .get(
+                                `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/fetch_publish_status`,
+                                {
+                                  headers,
+                                  params: {
+                                    subdomain: subdomain,
+                                    student_mark: selectedFilter,
+                                  },
+                                }
+                              )
+                              .then((res) => {
+                                if (res.data.status === "ok") {
+                                  if (res.data.data.published_marks === true) {
+                                    publish_marks_button.disabled = false;
+                                    publish_marks_button.innerHTML =
+                                      "Unpublish Marks";
+                                  } else {
+                                    publish_marks_button.disabled = false;
+                                    publish_marks_button.innerHTML =
+                                      "Publish Marks";
+                                  }
+                                } else {
+                                  toast.error(res.data.message, {
+                                    position: toast.POSITION.BOTTOM_LEFT,
+                                  });
+                                }
+                              })
+                              .catch((err) => {
+                                console.error(err);
+                              });
+                          } else {
+                            publish_marks_button.disabled = true;
+                            publish_marks_button.classList.add(
+                              "cursor-not-allowed"
+                            );
+                          }
+                        } else {
+                          toast.error(res.data.message, {
+                            position: toast.POSITION.BOTTOM_LEFT,
+                          });
+                        }
+                      })
+                      .catch((err) => {
+                        console.error(err);
+                      });
+                  } else {
+                    publish_marks_button.disabled = true;
+                    publish_marks_button.classList.add("cursor-not-allowed");
+                  }
                   setSubjects(response.data.data.subjects);
                 })
                 .catch((error) => console.log(error));
@@ -432,9 +538,12 @@ const UnlockMarks = () => {
     }
   };
 
-  const handleUnlockMarks = (e) => {
+  const handleUnlockMarks = (e, subjectId) => {
     // e.preventDefault();
-
+    const publish_marks_button = document.getElementById("publish-marks");
+    publish_marks_button.disabled = true;
+    publish_marks_button.classList.add("cursor-not-allowed");
+    console.log(e.target.getAttribute("data-subject-id"));
     let selectedFilter = {};
     if (examinationName === "") {
       toast.error("Please select examination name", {
@@ -476,7 +585,7 @@ const UnlockMarks = () => {
       };
     }
 
-    const id = e.target.getAttribute("data-subject-id");
+    const id = subjectId;
     console.log(id);
     selectedFilter["subject_id"] = id;
 
@@ -519,6 +628,104 @@ const UnlockMarks = () => {
     }
   };
 
+  const handlePublishMarks = (e) => {
+    e.preventDefault();
+    let selectedFilter = {};
+    if (examinationName === "") {
+      toast.error("Please select examination name", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (selectedYear === "") {
+      toast.error("Please select year", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (courseId === "" || courseId === "Select Course") {
+      toast.error("Please select course", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (branchId === "") {
+      toast.error("Please select branch", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (semesterId === "") {
+      toast.error("Please select semester", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (divisionId === "") {
+      toast.error("Please select division", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (type === "") {
+      toast.error("Please select type", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else {
+      selectedFilter = {
+        examination_name: examinationName,
+        academic_year: selectedYear,
+        course_id: courseId,
+        branch_id: branchId,
+        semester_id: semesterId,
+        division_id: divisionId,
+        entry_type: type,
+      };
+
+      if (e.target.innerHTML === "Unpublish Marks") {
+        axios
+          .put(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/unpublish_marks`,
+            {
+              subdomain: subdomain,
+              student_mark: selectedFilter,
+            },
+            {
+              headers,
+            }
+          )
+          .then((res) => {
+            if (res.data.status === "ok") {
+              setDisabled(!res.data.data.unpublish_marks);
+              if (res.data.data.unpublish_marks === true) {
+                e.target.innerHTML = "Publish Marks";
+                toast.success(res.data.message, {
+                  position: toast.POSITION.BOTTOM_LEFT,
+                });
+              }
+            }
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+      } else {
+        axios
+          .put(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/publish_marks`,
+            {
+              subdomain: subdomain,
+              student_mark: selectedFilter,
+            },
+            {
+              headers,
+            }
+          )
+          .then((res) => {
+            if (res.data.status === "ok") {
+              setDisabled(res.data.data.published);
+              if (res.data.data.published === true) {
+                e.target.innerHTML = "Unpublish Marks";
+                toast.success(res.data.message, {
+                  position: toast.POSITION.BOTTOM_LEFT,
+                });
+              }
+            }
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+      }
+    }
+  };
+
   const handleLogout = () => {
     localStorage.clear();
     navigate("/");
@@ -526,103 +733,103 @@ const UnlockMarks = () => {
   return (
     <div>
       <nav className="fixed top-0 z-50 w-full bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
-          <div className="px-3 py-3 lg:px-5 lg:pl-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center justify-start">
-                <button
-                  data-drawer-target="logo-sidebar"
-                  data-drawer-toggle="logo-sidebar"
-                  aria-controls="logo-sidebar"
-                  type="button"
-                  className="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
+        <div className="px-3 py-3 lg:px-5 lg:pl-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center justify-start">
+              <button
+                data-drawer-target="logo-sidebar"
+                data-drawer-toggle="logo-sidebar"
+                aria-controls="logo-sidebar"
+                type="button"
+                className="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
+              >
+                <span className="sr-only">Open sidebar</span>
+                <svg
+                  className="w-6 h-6"
+                  aria-hidden="true"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg"
                 >
-                  <span className="sr-only">Open sidebar</span>
-                  <svg
-                    className="w-6 h-6"
-                    aria-hidden="true"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
+                  <path
+                    clip-rule="evenodd"
+                    fill-rule="evenodd"
+                    d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"
+                  ></path>
+                </svg>
+              </button>
+              <a href="" className="flex ml-2 md:mr-24">
+                <img src="" className="h-8 mr-3" alt="Logo" />
+                <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
+                  {uniName}
+                </span>
+              </a>
+            </div>
+            <div className="flex items-center">
+              <div className="flex items-center ml-3">
+                <div>
+                  <button
+                    type="button"
+                    className="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
+                    aria-expanded="false"
+                    data-dropdown-toggle="dropdown-user"
                   >
-                    <path
-                      clip-rule="evenodd"
-                      fill-rule="evenodd"
-                      d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"
-                    ></path>
-                  </svg>
-                </button>
-                <a href="" className="flex ml-2 md:mr-24">
-                  <img src="" className="h-8 mr-3" alt="Logo" />
-                  <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
-                    {uniName}
-                  </span>
-                </a>
-              </div>
-              <div className="flex items-center">
-                <div className="flex items-center ml-3">
-                  <div>
-                    <button
-                      type="button"
-                      className="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
-                      aria-expanded="false"
-                      data-dropdown-toggle="dropdown-user"
-                    >
-                      <span className="self-center text-xl mr-2 font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
-                        {faculty}
-                      </span>
-                      <span className="sr-only">Open user menu</span>
-                    </button>
+                    <span className="self-center text-xl mr-2 font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
+                      {faculty}
+                    </span>
+                    <span className="sr-only">Open user menu</span>
+                  </button>
+                </div>
+                <div
+                  className="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded shadow dark:bg-gray-700 dark:divide-gray-600"
+                  id="dropdown-user"
+                >
+                  <div className="px-4 py-3" role="none">
+                    <p
+                      className="text-sm text-gray-900 dark:text-white"
+                      role="none"
+                    ></p>
+                    <p
+                      className="text-sm font-medium text-gray-900 truncate dark:text-gray-300"
+                      role="none"
+                    ></p>
                   </div>
-                  <div
-                    className="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded shadow dark:bg-gray-700 dark:divide-gray-600"
-                    id="dropdown-user"
-                  >
-                    <div className="px-4 py-3" role="none">
-                      <p
-                        className="text-sm text-gray-900 dark:text-white"
-                        role="none"
-                      ></p>
-                      <p
-                        className="text-sm font-medium text-gray-900 truncate dark:text-gray-300"
-                        role="none"
-                      ></p>
-                    </div>
-                    <ul className="py-1" role="none">
-                      <li>
-                        <a
-                          href="#"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
-                          role="menuitem"
-                        ></a>
-                      </li>
-                      <li>
-                        <a
-                          href="#"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
-                          role="menuitem"
-                        ></a>
-                      </li>
-                      <li>
-                        <a
-                          href="#"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
-                          role="menuitem"
-                        ></a>
-                      </li>
-                      <li>
-                        <a
-                          href="#"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
-                          role="menuitem"
-                        ></a>
-                      </li>
-                    </ul>
-                  </div>
+                  <ul className="py-1" role="none">
+                    <li>
+                      <a
+                        href="#"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
+                        role="menuitem"
+                      ></a>
+                    </li>
+                    <li>
+                      <a
+                        href="#"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
+                        role="menuitem"
+                      ></a>
+                    </li>
+                    <li>
+                      <a
+                        href="#"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
+                        role="menuitem"
+                      ></a>
+                    </li>
+                    <li>
+                      <a
+                        href="#"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
+                        role="menuitem"
+                      ></a>
+                    </li>
+                  </ul>
                 </div>
               </div>
             </div>
           </div>
-        </nav>
+        </div>
+      </nav>
 
       <aside
         id="logo-sidebar"
@@ -842,6 +1049,13 @@ const UnlockMarks = () => {
                 Search <GiArchiveResearch className="mt-1 ml-2" />
               </p>
             </button>
+            <button
+              id="publish-marks"
+              className="cursor-not-allowed w-auto py-2 px-3 ml-5 bg-gray-800 rounded-2xl text-white font-bold"
+              onClick={handlePublishMarks}
+            >
+              <p className="inline-flex">Publish Marks</p>
+            </button>
           </div>
           {/* Table of Faculty List */}
           <div
@@ -888,12 +1102,15 @@ const UnlockMarks = () => {
                               </td>
                               <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                                 <button
-                                  className="py-2 px-3 bg-gray-800 rounded-2xl text-white font-bold"
-                                  id={"lock-mark-button-" + subject.id}
+                                  className="py-2 px-3 bg-gray-800 rounded-2xl text-white font-bold unlock-buttons"
+                                  id={subject.id}
                                   data-subject-id={subject.id}
-                                  onClick={handleUnlockMarks}
+                                  onClick={(e) =>
+                                    handleUnlockMarks(e, subject.id)
+                                  }
+                                  disabled={disabled}
                                 >
-                                  Unlock Marks
+                                  <BsUnlockFill />
                                 </button>
                               </td>
                             </tr>

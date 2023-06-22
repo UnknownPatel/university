@@ -436,9 +436,9 @@ const ExamAssignSupervision = () => {
     event.target.disabled = false;
   };
 
-  const handleJuniorSupervisionSubmit = (e) => {
+  const handleJuniorSupervisionSubmit = (e, supervisionId) => {
     e.preventDefault();
-    const supervision_id = e.target.getAttribute("data-id");
+    const supervision_id = supervisionId;
     const access_token = localStorage.getItem("access_token");
     console.log(acces_token);
     var metadata = {};
@@ -2039,7 +2039,7 @@ const ExamAssignSupervision = () => {
                                   <button
                                     className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold"
                                     data-id={item.id}
-                                    onClick={handleJuniorSupervisionSubmit}
+                                    onClick={(e) => handleJuniorSupervisionSubmit(e, item.id)}
                                   >
                                     <FiEdit />
                                   </button>

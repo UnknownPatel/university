@@ -6,6 +6,8 @@ import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import { SiMicrosoftexcel } from "react-icons/si";
 import * as XLSX from "xlsx";
+import numberToWords from "number-to-words";
+
 
 var headers;
 var subdomain;
@@ -264,6 +266,12 @@ const Result = () => {
 
   const handleSemesterChange = (e) => {
     e.preventDefault();
+    var selectedIndex = e.target.options.selectedIndex;
+    setSemesterName(
+      numberToWords.toOrdinal(
+        e.target.options[selectedIndex].getAttribute("data-semester-name")
+      ) + " Semester"
+    );
     if (e.target.value === "Select Semester") {
       setSemesterId("");
     } else {
@@ -864,6 +872,22 @@ const Result = () => {
                     className="min-w-full divide-y table-auto text-center divide-gray-200"
                   >
                     <thead className="sticky top-0 bg-gray-50">
+                      <tr id="selected-filters">
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-xs font-bold text-gray-500 text-center"
+                          colSpan={type === "All" ? (3 + (subjects.length * examinationTypes.length)) : ( 3 + (subjects.length) )}
+                        >
+                          <p className="text-center">{uniName}</p>
+                          <p className="text-center">
+                            {examinationName} {selectedYear} {type}
+                          </p>
+                          <p className="text-center">
+                            {branchesName}, {semesterName}
+                          </p>
+                          <p className="text-center">{subjectName}</p>
+                        </th>
+                      </tr>
                       <tr>
                         <th
                           scope="col"

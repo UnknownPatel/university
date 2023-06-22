@@ -120,6 +120,11 @@ const StudentResult = () => {
 
   const handleTypeChange = (e) => {
     e.preventDefault();
+    const student_mark_viewport = document.getElementById(
+      "student_marks_viewport"
+    );
+    student_mark_viewport.classList.remove("flex");
+    student_mark_viewport.classList.add("hidden");
     if (e.target.value === "Select Type") {
       setType("");
     } else {
@@ -166,36 +171,16 @@ const StudentResult = () => {
     } else {
       selectedFilter = {
         examination_name: examinationName,
-        examination_type: type,
         academic_year: selectedYear,
       };
 
-      if (subdomain !== "" || subdomain !== null) {
-        axios
-          .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/students/${enrollmentNumber}/fetch_subjects`,
-            {
-              headers,
-              params: {
-                subdomain: subdomain,
-              },
-            }
-          )
-          .then((res) => {
-            console.log(res);
-            if (res.data.message === "Details found") {
-              if (res.data.data.subjects.length !== 0) {
-                setSubjects(res.data.data.subjects);
-                setStudentId(res.data.data.student_id);
-              } else {
-                setSubjects([]);
-              }
-            }
-          })
-          .catch((err) => {
-            console.error(err);
-          });
+      if (type !== "External") {
+        selectedFilter["examination_type"] = type;
+      } else {
+        delete selectedFilter["examination_type"];
+      }
 
+      if (subdomain !== "" || subdomain !== null) {
         axios
           .get(
             `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/fetch_marks_through_enrollment_number`,
@@ -209,11 +194,50 @@ const StudentResult = () => {
             }
           )
           .then((res) => {
-            console.log(res.data.data.student_marks);
-            setMarksData(res.data.data.student_marks);
+            console.log(res.data.status);
             const viewport = document.getElementById("student_marks_viewport");
-            viewport.classList.add("flex");
-            viewport.classList.remove("hidden");
+            if (res.data.status === "ok") {
+              axios
+                .get(
+                  `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/students/${enrollmentNumber}/fetch_subjects`,
+                  {
+                    headers,
+                    params: {
+                      subdomain: subdomain,
+                    },
+                  }
+                )
+                .then((resp) => {
+                  console.log(resp);
+                  if (resp.data.message === "Details found") {
+                    if (resp.data.data.subjects.length !== 0) {
+                      setSubjects(resp.data.data.subjects);
+                      setStudentId(resp.data.data.student_id);
+                    } else {
+                      setSubjects([]);
+                    }
+                  }
+                })
+                .catch((err) => {
+                  console.error(err);
+                });
+              setMarksData(res.data.data.student_marks);
+              viewport.classList.add("flex");
+              viewport.classList.remove("hidden");
+            } else {
+              console.log(res.data.message);
+              const error_message = document.getElementById("error-message");
+              if (res.data.message !== "Details not found") {
+                error_message.classList.remove("hidden");
+                error_message.classList.add("flex");
+              } else {
+                error_message.classList.remove("flex");
+                error_message.classList.add("hidden");
+                toast.error(res.data.message, {
+                  position: toast.POSITION.BOTTOM_LEFT,
+                });
+              }
+            }
           })
           .catch((err) => {
             console.error(err);
@@ -270,9 +294,7 @@ const StudentResult = () => {
                     aria-expanded="false"
                     data-dropdown-toggle="dropdown-user"
                   >
-                    <span className="self-center text-xl mr-2 font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
-                      {faculty}
-                    </span>
+                    <span className="self-center text-xl mr-2 font-semibold sm:text-2xl whitespace-nowrap dark:text-white"></span>
                     <span className="sr-only">Open user menu</span>
 
                     <img
@@ -333,223 +355,129 @@ const StudentResult = () => {
         </div>
       </nav>
 
-      <aside
-        id="logo-sidebar"
-        className="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
-        aria-label="Sidebar"
-      >
-        <div className="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
-          <ul className="space-y-2 font-medium">
-            <li>
-              <a
-                href="/examinationDetails"
-                className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <span className="ml-3">Examination Details</span>
-              </a>
-            </li>
-            <li>
-              <a
-                href="/examTimetable"
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <span className="ml-3">Time Table</span>
-              </a>
-            </li>
-
-            <li>
-              <a
-                href="/examBlockDetails"
-                className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <span className="ml-3">Enter Block Details</span>
-              </a>
-            </li>
-            <li>
-              <a
-                href="/examAssignSupervision"
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <span className="flex-1 ml-3 whitespace-nowrap">
-                  Assign Supervision
-                </span>
-              </a>
-            </li>
-            <li>
-              <a
-                href="/assignMarksEntry"
-                className="flex items-center p-2 text-gray-900  rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <span className="flex-1 ml-3 whitespace-nowrap">
-                  Assign Marks Entry
-                </span>
-              </a>
-            </li>
-            <li>
-              <a
-                href="/unlock_Marks"
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <span className="ml-3">Unlock Marks</span>
-              </a>
-            </li>
-            <li>
-              <a
-                href="/examViewTimeTable"
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <span className="flex-1 ml-3 whitespace-nowrap">Report</span>
-              </a>
-            </li>
-            <li>
-              <a
-                href="/result"
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <span className="ml-3">Result</span>
-              </a>
-            </li>
-            <li>
-              <a
-                href="/studentResult"
-                className="flex items-center p-2 text-gray-900 rounded-lg bg-slate-600 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <span className="ml-3">Student Result</span>
-              </a>
-            </li>
-            <li>
-              <div className="p-4">
-                <button
-                  type="button"
-                  className="inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition"
-                  onClick={handleLogout}
-                >
-                  <span className="">Logout</span>
-                </button>
-              </div>
-            </li>
-          </ul>
+      <div className="p-4 rounded-lg mt-14">
+        <div className="text-center text-4xl">
+          <p>Student Result </p>
         </div>
-      </aside>
 
-      <div className="pt-4 sm:ml-64">
-        <div className="p-4 rounded-lg mt-14">
-          <div className="text-center text-4xl">
-            <p>Student Result </p>
-          </div>
-
-          <div className="flex mt-5 ml-2">
-            <select
-              id="examination_name"
-              className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
-              onChange={(e) => {
-                handleExaminationChange(e.target.value);
-              }}
-              aria-label="Examination Name"
-            >
-              <option value="Select Examination" >
-                Examination
-              </option>
-              {examinationNames.map((examination_name) => {
-                return (
-                  <option value={examination_name.name}>
-                    {examination_name.name}
-                  </option>
-                );
-              })}
-            </select>
-
-            <select
-              className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
-              onChange={(e) => handleYearChange(e.target.value)}
-            >
-              <option value="Select Year" >
-                Year
-              </option>
-              {academic_years.map((year) => {
-                return <option value={year}>{year}</option>;
-              })}
-            </select>
-
-            <select
-              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
-              onChange={handleTypeChange}
-            >
-              <option value="Select Type" >
-                Type
-              </option>
-              {examinationTypes.map((examination_type) => {
-                return (
-                  <option value={examination_type.name}>
-                    {examination_type.name}
-                  </option>
-                );
-              })}
-            </select>
-            <input
-              type="text"
-              onChange={(e) => handleEnrollmentChange(e)}
-              id="enroll-search"
-              class="bg-gray-50 border-0 border-b-2  text-gray-900 text-sm rounded-lg block w-auto pl-10 p-2.5 border-gray-600 "
-              placeholder="Enter Enrollment No."
-              required
-            />
-            <button
-              className="py-2 px-3 mr-7 ml-2 bg-gray-800 rounded-2xl text-white font-bold"
-              onClick={handleFilterSubmit}
-            >
-              <p className="inline-flex">
-                Search <GiArchiveResearch className="mt-1 ml-2" />
-              </p>
-            </button>
-            <a
-              href="#"
-              id="save_excel_sheet"
-              onClick={downloadExcel}
-              className="py-2 px-10 bg-blue-200 rounded-2xl hidden"
-            >
-              <SiMicrosoftexcel />
-            </a>
-          </div>
-          <div
-            id="student_marks_viewport"
-            className="hidden flex-col mt-5"
-            style={{ height: 390 }}
+        <div className="flex mt-5 ml-2">
+          <select
+            id="examination_name"
+            className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
+            onChange={(e) => {
+              handleExaminationChange(e.target.value);
+            }}
+            aria-label="Examination Name"
           >
-            <div className="overflow-x-scroll">
-              <div className="p-1.5 w-full inline-block align-middle">
-                <div className="border rounded-lg">
-                  <table
-                    id="my-table"
-                    className="min-w-full divide-y table-auto text-center divide-gray-200"
-                  >
-                    <thead className="sticky top-0 bg-gray-50">
-                      <tr>
-                        <th
-                          scope="col"
-                          rowSpan={2}
-                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                        >
-                          Sr No.
-                        </th>
-                        <th
-                          scope="col"
-                          rowSpan={2}
-                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                        >
-                          Subject Name
-                        </th>
-                        <th
-                          scope="col"
-                          rowSpan={2}
-                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                        >
-                          Marks
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="text-center divide-y divide-gray-200">
-                      {subjects.map((subject, index) => {
+            <option value="Select Examination" hidden selected>
+              Examination
+            </option>
+            {examinationNames.map((examination_name) => {
+              return (
+                <option value={examination_name.name}>
+                  {examination_name.name}
+                </option>
+              );
+            })}
+          </select>
+
+          <select
+            className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
+            onChange={(e) => handleYearChange(e.target.value)}
+          >
+            <option value="Select Year" hidden selected>
+              Year
+            </option>
+            {academic_years.map((year) => {
+              return <option value={year}>{year}</option>;
+            })}
+          </select>
+
+          <select
+            className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
+            onChange={handleTypeChange}
+          >
+            <option value="Select Type" hidden selected>
+              Type
+            </option>
+            {examinationTypes.map((examination_type) => {
+              return (
+                <option value={examination_type.name}>
+                  {examination_type.name}
+                </option>
+              );
+            })}
+          </select>
+          <input
+            type="text"
+            onChange={(e) => handleEnrollmentChange(e)}
+            id="enroll-search"
+            class="bg-gray-50 border-0 border-b-2  text-gray-900 text-sm rounded-lg block w-auto pl-10 p-2.5 border-gray-600 "
+            placeholder="Enter Enrollment No."
+            required
+          />
+          <button
+            className="py-2 px-3 mr-7 ml-2 bg-gray-800 rounded-2xl text-white font-bold"
+            onClick={handleFilterSubmit}
+          >
+            <p className="inline-flex">
+              Search <GiArchiveResearch className="mt-1 ml-2" />
+            </p>
+          </button>
+          <a
+            href="#"
+            id="save_excel_sheet"
+            onClick={downloadExcel}
+            className="py-2 px-10 bg-blue-200 rounded-2xl hidden"
+          >
+            <SiMicrosoftexcel />
+          </a>
+        </div>
+        <div id="error-message" className="hidden flex-col mt-5">
+          {" "}
+          Please wait for your result to be declared by administrator!{" "}
+        </div>
+        <div
+          id="student_marks_viewport"
+          className="hidden flex-col mt-5"
+          style={{ height: 390 }}
+        >
+          <div className="overflow-x-scroll">
+            <div className="p-1.5 w-full inline-block align-middle">
+              <div className="border rounded-lg">
+                <table
+                  id="my-table"
+                  className="min-w-full divide-y table-auto text-center divide-gray-200"
+                >
+                  <thead className="sticky top-0 bg-gray-50">
+                    <tr>
+                      <th
+                        scope="col"
+                        rowSpan={2}
+                        className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                      >
+                        Sr No.
+                      </th>
+                      <th
+                        scope="col"
+                        rowSpan={2}
+                        className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                      >
+                        Subject Name
+                      </th>
+                      <th
+                        scope="col"
+                        rowSpan={2}
+                        className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                      >
+                        Marks
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-center divide-y divide-gray-200">
+                    {subjects.map((subject, index) => {
+                      console.log(marksData);
+                      if (type !== "External") {
                         return (
                           <tr key={subject.id}>
                             <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
@@ -564,10 +492,30 @@ const StudentResult = () => {
                             </td>
                           </tr>
                         );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+                      } else {
+                        return (
+                          <tr key={subject.id}>
+                            <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                              {index + 1}
+                            </td>
+                            <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                              {subject.name}
+                            </td>
+                            {examinationTypes.map((examination_type) => {
+                              return (
+                                <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                  {marksData?.["marks"]?.[subject.name]?.[
+                                    examination_type.name
+                                  ] || "-"}
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        );
+                      }
+                    })}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>

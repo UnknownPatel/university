@@ -161,10 +161,8 @@ const MarksEntry = () => {
   }, []);
 
   useEffect(() => {
-    if (selectedFilter === "") 
-    {
+    if (selectedFilter === "") {
     } else {
-      
       console.log(JSON.parse(JSON.stringify(selectedFilter.subject_ids)));
       // Get Branches
       axios
@@ -232,6 +230,7 @@ const MarksEntry = () => {
 
   const handleSubjectChange = (e) => {
     e.preventDefault();
+    setMarksData([]);
     const viewport = document.getElementById("marks_entry_viewport");
     viewport.classList.add("hidden");
     viewport.classList.remove("flex");
@@ -242,13 +241,74 @@ const MarksEntry = () => {
     }
   };
 
-  const handleInputChange = (e, studentId) => {
+  const handleInputChange = (e) => {
     const { value } = e.target;
+    const studentId = e.target.getAttribute("data-student-id");
+    console.log(studentId);
     var student_mark_id = e.target.getAttribute("data-student-mark-entry-id");
-    console.log(student_mark_id);
     const existingInputIndex = marksData.findIndex(
       (input) => input.student_id === studentId
     );
+    const regex = /^(Ab|ZR|\d*)$/;
+
+    if (subdomain !== null || subdomain !== "") {
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_types/${type}/fetch_maximum_marks`,
+          {
+            headers,
+            params: {
+              subdomain: subdomain,
+            },
+          }
+        )
+        .then((res) => {
+          if (res.data.message === "Type found") {
+            if (res.data.data.maximum_marks.length !== 0) {
+              console.log(res.data.data.maximum_marks);
+              const error_message = document.getElementById(
+                "error-message-" + studentId
+              );
+              if (regex.test(value)) {
+                if (value !== "Ab" && value !== "ZR") {
+                  if (value <= parseInt(res.data.data.maximum_marks)) {
+                    e.target.classList.remove("border-red-700");
+                    e.target.classList.add("border-green-700");
+                    e.target.classList.add("focus:outline-none");
+                    e.target.classList.remove("focus:outline-red-700");
+                    e.target.classList.add("focus:outline-green-700");
+                    error_message.textContent = "";
+                  } else {
+                    e.target.classList.add("border-red-700");
+                    e.target.classList.remove("border-green-700");
+                    e.target.classList.remove("focus:outline-none");
+                    e.target.classList.add("focus:outline-red-700");
+                    e.target.classList.remove("focus:outline-green-700");
+                    error_message.textContent = `Entered marks exceeded the maximum marks allowed`;
+                  }
+                } else {
+                  e.target.classList.remove("border-red-700");
+                  e.target.classList.add("border-green-700");
+                  e.target.classList.add("focus:outline-none");
+                  e.target.classList.remove("focus:outline-red-700");
+                  e.target.classList.add("focus:outline-green-700");
+                  error_message.textContent = "";
+                }
+              } else {
+                e.target.classList.add("border-red-700");
+                e.target.classList.remove("border-green-700");
+                e.target.classList.remove("focus:outline-none");
+                e.target.classList.add("focus:outline-red-700");
+                e.target.classList.remove("focus:outline-green-700");
+                error_message.textContent = `Entered Input is not acceptable, please change!`;
+              }
+            }
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    }
 
     if (existingInputIndex !== -1) {
       const updatedInputValues = [...marksData];
@@ -288,24 +348,29 @@ const MarksEntry = () => {
           position: toast.POSITION.BOTTOM_LEFT,
         });
       } else {
-        var newInputValue = {
-          examination_name: examinationName,
-          examination_type: type,
-          academic_year: selectedYear,
-          course_id: courseId,
-          branch_id: branchId,
-          semester_id: semesterId,
-          division_id: divisionId,
-          subject_id: subjectId,
-          student_id: studentId,
-          marks: value,
-        };
+        var newInputValue = {};
+        if (regex.test(value)) {
+          newInputValue = {
+            examination_name: examinationName,
+            examination_type: type,
+            academic_year: selectedYear,
+            course_id: courseId,
+            branch_id: branchId,
+            semester_id: semesterId,
+            division_id: divisionId,
+            subject_id: subjectId,
+            student_id: studentId,
+            marks: value,
+          };
 
-        if (student_mark_id !== "" || student_mark_id !== null) {
-          newInputValue["id"] = student_mark_id;
+          if (student_mark_id !== "" || student_mark_id !== null) {
+            newInputValue["id"] = student_mark_id;
+          } else {
+            delete newInputValue["id"];
+          }
+          setMarksData([...marksData, newInputValue]);
+        } else {
         }
-
-        setMarksData([...marksData, newInputValue]);
       }
     }
   };
@@ -390,7 +455,6 @@ const MarksEntry = () => {
                       }
                     )
                     .then((res) => {
-                      console.log(res);
                       const student_marks_input = document.getElementById(
                         "input-marks-entry-" + student.id
                       );
@@ -409,10 +473,13 @@ const MarksEntry = () => {
                         student_marks_input.disabled =
                           res.data.data.student_mark.lock_marks;
                       } else {
+                        student_marks_input.removeAttribute(
+                          "data-student-mark-entry-id"
+                        );
                         student_marks_input.value = "";
                         student_marks_input.disabled = false;
                         submit_button.innerHTML = "Submit Marks";
-                        submit_button.disable = false
+                        submit_button.disable = false;
                       }
                     })
                     .catch((err) => {
@@ -503,34 +570,6 @@ const MarksEntry = () => {
           .catch((err) => {
             console.error(err);
           });
-        // axios
-        //   .put(
-        //     `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/${branchId}`,
-        //     {
-        //       student_marks: marksData,
-        //       subdomain: subdomain,
-        //     },
-        //     {
-        //       headers: {
-        //         Authorization: `Bearer ${access_token}`,
-        //       },
-        //     }
-        //   )
-        //   .then((res) => {
-        //     console.log(res);
-        //     if (res.data.status === "ok") {
-        //       toast.success("The entered marks has been updated!", {
-        //         position: toast.POSITION.BOTTOM_LEFT,
-        //       });
-        //     } else {
-        //       toast.error(res.data.message, {
-        //         position: toast.POSITION.BOTTOM_LEFT,
-        //       });
-        //     }
-        //   })
-        //   .catch((err) => {
-        //     console.error(err.response.data);
-        //   });
       } else {
         axios
           .post(
@@ -565,10 +604,14 @@ const MarksEntry = () => {
               submit_button.innerHTML = "Update Marks";
               submit_button.disabled =
                 responce.data.data.student_marks[0].lock_marks;
+              toast.success("All Entered marks are been saved!", {
+                position: toast.POSITION.BOTTOM_LEFT,
+              });
+            } else {
+              toast.error(responce.data.message, {
+                position: toast.POSITION.BOTTOM_LEFT,
+              });
             }
-            toast.success("All Entered marks are been saved!", {
-              position: toast.POSITION.BOTTOM_LEFT,
-            });
           })
           .catch(function (err) {
             console.log(err.response.data);
@@ -915,17 +958,21 @@ const MarksEntry = () => {
                               {student.enrollment_number}
                             </td>
                             <td className="text-start px-6 py-4 text-sm  whitespace-nowrap">
-                              <input
-                                className="shadow appearance-none border rounded w-44 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                id={"input-marks-entry-" + student.id}
-                                data-subject-id={student.id}
-                                type="text"
-                                placeholder="Enter Marks"
-                                onChange={(e) => {
-                                  handleInputChange(e, student.id);
-                                }}
-                                required
-                              />
+                              <div>
+                                <input
+                                  className=" appearance-none border rounded w-44 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                  id={"input-marks-entry-" + student.id}
+                                  data-student-id={student.id}
+                                  type="text"
+                                  placeholder="Enter Ab, Zr or Numbers "
+                                  onChange={handleInputChange}
+                                  required
+                                />
+                              </div>
+                              <span
+                                id={"error-message-" + student.id}
+                                className="text-red-500 text-xs"
+                              ></span>
                             </td>
                           </tr>
                         );
@@ -938,9 +985,7 @@ const MarksEntry = () => {
                       onClick={handleSubmitMarks}
                       id="submit-button"
                     >
-                      <p className="inline-flex">
-                        Submit Marks
-                      </p>
+                      <p className="inline-flex">Submit Marks</p>
                     </button>
                   </div>
                 </div>
