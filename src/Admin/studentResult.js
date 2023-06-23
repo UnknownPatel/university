@@ -123,11 +123,20 @@ const StudentResult = () => {
     const student_mark_viewport = document.getElementById(
       "student_marks_viewport"
     );
+    const error_message = document.getElementById("type-tr");
+    error_message.classList.remove("flex");
+    error_message.classList.add("hidden");
     student_mark_viewport.classList.remove("flex");
     student_mark_viewport.classList.add("hidden");
     if (e.target.value === "Select Type") {
       setType("");
     } else {
+      const typeTr = document.getElementById("type-tr");
+      if (e.target.value !== "External") {
+        typeTr.classList.add("hidden");
+      } else {
+        typeTr.classList.remove("hidden");
+      }
       setType(e.target.value);
     }
   };
@@ -440,7 +449,7 @@ const StudentResult = () => {
         <div
           id="student_marks_viewport"
           className="hidden flex-col mt-5"
-          style={{ height: 390 }}
+          style={{ height: 520 }}
         >
           <div className="overflow-x-scroll">
             <div className="p-1.5 w-full inline-block align-middle">
@@ -467,11 +476,26 @@ const StudentResult = () => {
                       </th>
                       <th
                         scope="col"
-                        rowSpan={2}
-                        className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                        colSpan={
+                          type === "External" ? examinationTypes.length : 1
+                        }
+                        className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
                       >
-                        Marks
+                        {type !== "External" ? "Marks" : "Marks"}
                       </th>
+                    </tr>
+                    <tr id="type-tr" className="hidden">
+                      {examinationTypes.map((type) => {
+                        return (
+                          <th
+                            key={`${type.id}`}
+                            scope="col"
+                            className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                          >
+                            {type.name}
+                          </th>
+                        );
+                      })}
                     </tr>
                   </thead>
                   <tbody className="text-center divide-y divide-gray-200">
