@@ -35,6 +35,8 @@ import UnlockMarks from './Admin/unlockMarks';
 import ViewMarks from './Admin/viewMarks';
 import Result from './Admin/result';
 import StudentResult from './Admin/studentResult';
+import AcademicUploadSyllabus from './Admin/academicUploadSyllabus';
+import StudentViewSyllabus from './Admin/studentViewSyllabus';
 
 function App() {
   return (
@@ -70,6 +72,8 @@ function App() {
         <Route path="/view_Marks/:subject_id" element={<ViewMarks/>}/>
         <Route path="/result" element={<Result/>}/>
         <Route path="/studentResult" element={<StudentResult/>}/>
+        <Route path="/academic_UploadSyllabus" element={<AcademicUploadSyllabus/>}/>
+        <Route path="/student_view_syllabus" element={<StudentViewSyllabus/>}/>
 
 
 
