@@ -6,7 +6,6 @@ import { ToastContainer, toast } from "react-toastify";
 import numberToWords from "number-to-words";
 import { MdAddCircle } from "react-icons/md";
 
-
 var access_token;
 var subdomain;
 var year;
@@ -27,9 +26,6 @@ const AcademicUploadSyllabus = () => {
   const [semesters, setSemesters] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [semesterName, setSemesterName] = useState("");
-
-
-
 
   useEffect(() => {
     access_token = localStorage.getItem("access_token");
@@ -185,10 +181,9 @@ const AcademicUploadSyllabus = () => {
           .then((response) => {
             setSubjects(response.data.data.subjects);
             console.log(response.data.data.subjects);
-            console.log(subjects)
+            console.log(subjects);
           })
           .catch((error) => console.log(error));
-
       }
     }
   };
@@ -325,8 +320,16 @@ const AcademicUploadSyllabus = () => {
           <ul className="space-y-2 font-medium">
             <li>
               <a
-                href="/academic_UploadSyllabus"
+                href="/upload_SubjectDetails"
                 className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="ml-3">Upload Subject Details</span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="/academic_UploadSyllabus"
+                className="flex items-center p-2 text-gray-900 bg-slate-600 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 <span className="ml-3">Upload Syllabus</span>
               </a>
@@ -353,14 +356,11 @@ const AcademicUploadSyllabus = () => {
           </div>
 
           <div className="flex mt-5 ml-2">
-
             <select
               className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
               onChange={(e) => handleYearChange(e.target.value)}
             >
-              <option value="Select Year" >
-                Year
-              </option>
+              <option value="Select Year">Year</option>
               {academic_years.map((year) => {
                 return <option value={year}>{year}</option>;
               })}
@@ -370,9 +370,7 @@ const AcademicUploadSyllabus = () => {
               className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
               onChange={handleCourseChange}
             >
-              <option value="Select course" >
-                Course
-              </option>
+              <option value="Select course">Course</option>
               {courses.map((course, index) => (
                 <option value={course.id}>{course.name}</option>
               ))}
@@ -384,9 +382,7 @@ const AcademicUploadSyllabus = () => {
                 handleBranchChange(e);
               }}
             >
-              <option value="Select Branch" >
-                Branch
-              </option>
+              <option value="Select Branch">Branch</option>
               {branches.map((branch) => (
                 <option value={branch.id} data-name={branch.name}>
                   {branch.name}
@@ -398,9 +394,7 @@ const AcademicUploadSyllabus = () => {
               className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
               onChange={handleSemesterChange}
             >
-              <option value="Select Semester" >
-                Semester
-              </option>
+              <option value="Select Semester">Semester</option>
               {semesters.map((semester) => (
                 <option value={semester.id} data-semester-name={semester.name}>
                   {semester.name}
@@ -414,8 +408,8 @@ const AcademicUploadSyllabus = () => {
               <p className="inline-flex">
                 Search <GiArchiveResearch className="mt-1 ml-2" />
               </p>
-            </button>            
-          </div>          
+            </button>
+          </div>
           <div
             id="marks_entry_viewport"
             className="flex flex-col mt-5"
@@ -444,6 +438,12 @@ const AcademicUploadSyllabus = () => {
                         </th>
                         <th
                           scope="col"
+                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                        >
+                          Select File
+                        </th>
+                        <th
+                          scope="col"
                           className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
                         >
                           Upload
@@ -461,6 +461,17 @@ const AcademicUploadSyllabus = () => {
                           </td>
                           <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                             {subject.code}
+                          </td>
+                          <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                            <input
+                              type="file"
+                              id="file_input"
+                              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-blue-100"
+                              // onChange={(e) =>
+                              //   setSelectedFile(e.target.files[0])
+                              // }
+                              accept=".pdf"
+                            />
                           </td>
                           <td
                             className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap"

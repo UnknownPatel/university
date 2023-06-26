@@ -63,8 +63,10 @@ const SignInSuperAdmin = () => {
                   }
                 )
                 .then((responce) => {
-                  console.log(responce.data.roles)
-                  console.log(responce.data.roles.includes("examination_controller"));
+                  console.log(responce.data.roles);
+                  console.log(
+                    responce.data.roles.includes("examination_controller")
+                  );
                   if (responce.data.roles.includes("super_admin")) {
                     toast.success("Login Successfully !!", {
                       position: toast.POSITION.BOTTOM_LEFT,
@@ -81,14 +83,19 @@ const SignInSuperAdmin = () => {
                     setTimeout(() => {
                       navigate("/examTimeTable");
                     }, 2000);
-                  } else if (
-                    responce.data.roles.includes("Marks Entry")
-                  ) {
+                  } else if (responce.data.roles.includes("Marks Entry")) {
                     toast.success("Login Successfully !!", {
                       position: toast.POSITION.BOTTOM_LEFT,
                     });
                     setTimeout(() => {
                       navigate("/marks_entry");
+                    }, 2000);
+                  } else if (responce.data.roles.includes("Academic Head")) {
+                    toast.success("Login Successfully !!", {
+                      position: toast.POSITION.BOTTOM_LEFT,
+                    });
+                    setTimeout(() => {
+                      navigate("/academic_UploadSyllabus");
                     }, 2000);
                   }
                 })
