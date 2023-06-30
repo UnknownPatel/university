@@ -16,6 +16,7 @@ const UploadExcel = () => {
   const [selectedFile, setSelectedFile] = useState("");
   const [clientId, setClentId] = useState("");
   const [clientSecret, setClentSecret] = useState("");
+  const [excelSheets, setExcelSheets] = useState([]);
 
   useEffect(() => {
     acces_token = localStorage.getItem("access_token");
@@ -41,12 +42,32 @@ const UploadExcel = () => {
           console.log(err);
         });
 
-      setFaculty("Super Admin")
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/excel_sheets`,
+          {
+            headers,
+            params: {
+              subdomain: subdomain,
+            },
+          }
+        )
+        .then((res) => {
+          if (res.data.data.excel_sheets.length !== 0) {
+            setExcelSheets(res.data.data.excel_sheets);
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+
+      setFaculty("Super Admin");
     }
   }, []);
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    const axiosInstance = axios.create({timeout: 0})
     acces_token = localStorage.getItem("access_token");
     const submit_button = document.getElementById("button-submit-excel-sheet");
     const file_select = document.getElementById("file_select");
@@ -56,9 +77,9 @@ const UploadExcel = () => {
     submit_button.classList.add("cursor-not-allowed");
     if (selectedFile !== null || selectedFile !== "") {
       console.log("Uploading");
-      axios
+      axiosInstance
         .post(
-          " http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/excel_sheets",
+          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/excel_sheets",
           {
             excel_sheet: {
               name: selectedValue,
@@ -79,8 +100,25 @@ const UploadExcel = () => {
           submit_button.innerHTML = "Upload";
           submit_button.classList.remove("cursor-not-allowed");
           if (responce.data.status == "created") {
-            file_select.options[file_select.options.selectedIndex].text =
-              "Select Sheet name";
+            axios
+              .get(
+                `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/excel_sheets`,
+                {
+                  headers,
+                  params: {
+                    subdomain: subdomain,
+                  },
+                }
+              )
+              .then((res) => {
+                if (res.data.data.excel_sheets.length !== 0) {
+                  setExcelSheets(res.data.data.excel_sheets);
+                }
+              })
+              .catch((err) => {
+                console.error(err);
+              });
+            file_select.options.selectedIndex = 0;
             file_input.value = null;
             setSelectedFile("");
             setSelectedValue("");
@@ -409,6 +447,54 @@ const UploadExcel = () => {
                 </div>
               </div>
             </form>
+          </div>
+          <div
+            id="sheets_viewport"
+            className="flex flex-col mt-5"
+            style={{ height: 390 }}
+          >
+            <div className="">
+              <div className="p-1.5 w-full inline-block align-middle">
+                <div className="border rounded-lg">
+                  <table className="min-w-full divide-y table-auto divide-gray-200">
+                    <caption className="caption-top">
+                      {" "}
+                      Uploaded Sheets List{" "}
+                    </caption>
+                    <thead className="sticky top-0 bg-gray-50">
+                      <tr>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                        >
+                          Sr No.
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                        >
+                          Sheet Name
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="text-center divide-y divide-gray-200">
+                      {excelSheets.map((excelSheet, index) => {
+                        return (
+                          <tr>
+                            <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                              {index + 1}
+                            </td>
+                            <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                              {excelSheet.name}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

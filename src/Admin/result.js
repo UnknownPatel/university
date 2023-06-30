@@ -8,7 +8,6 @@ import { SiMicrosoftexcel } from "react-icons/si";
 import * as XLSX from "xlsx";
 import numberToWords from "number-to-words";
 
-
 var headers;
 var subdomain;
 var access_token;
@@ -410,27 +409,34 @@ const Result = () => {
                       }
                     )
                     .then((res) => {
-                      const studentMarks = res.data.data.student_marks;
-                      updatedMarks = {
-                        ...updatedMarks,
-                        [studentMarks.student_id]: {
-                          student_name: studentMarks.student_name,
-                          student_enrollment_number:
-                            studentMarks.student_enrollment_number,
-                          marks: studentMarks.marks,
-                        },
-                      };
-                      console.log(updatedMarks.size);
-                      console.log(students.length);
-                      setMarksData(updatedMarks);
+                      if (res.data.status === "ok") {
+                        const studentMarks = res.data.data.student_marks;
+                        updatedMarks = {
+                          ...updatedMarks,
+                          [studentMarks.student_id]: {
+                            student_name: studentMarks.student_name,
+                            student_enrollment_number:
+                              studentMarks.student_enrollment_number,
+                            marks: studentMarks.marks,
+                          },
+                        };
+                        setMarksData(updatedMarks);
+                      }
                     })
                     .catch((err) => {
                       console.error(err);
                     });
                 });
-                viewport.classList.add("flex");
-                viewport.classList.remove("hidden");
-                excel_sheet_button.classList.remove("hidden");
+
+                if (Object.keys(updatedMarks).length !== 0) {
+                  viewport.classList.add("flex");
+                  viewport.classList.remove("hidden");
+                  excel_sheet_button.classList.remove("hidden");
+                } else {
+                  toast.error("Result not found for the selected filters", {
+                    position: toast.POSITION.BOTTOM_LEFT,
+                  });
+                }
               }
             }
           })
@@ -743,9 +749,7 @@ const Result = () => {
               }}
               aria-label="Examination Name"
             >
-              <option value="Select Examination" >
-                Examination
-              </option>
+              <option value="Select Examination">Examination</option>
               {examinationNames.map((examination_name) => {
                 return (
                   <option value={examination_name.name}>
@@ -759,9 +763,7 @@ const Result = () => {
               className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
               onChange={(e) => handleYearChange(e.target.value)}
             >
-              <option value="Select Year" >
-                Year
-              </option>
+              <option value="Select Year">Year</option>
               {academic_years.map((year) => {
                 return <option value={year}>{year}</option>;
               })}
@@ -771,9 +773,7 @@ const Result = () => {
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
               onChange={handleTypeChange}
             >
-              <option value="Select Type" >
-                Type
-              </option>
+              <option value="Select Type">Type</option>
               <option value="All">All</option>
               {examinationTypes.map((examination_type) => {
                 return (
@@ -788,9 +788,7 @@ const Result = () => {
               className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
               onChange={handleCourseChange}
             >
-              <option value="Select course" >
-                Course
-              </option>
+              <option value="Select course">Course</option>
               {courses.map((course, index) => (
                 <option value={course.id}>{course.name}</option>
               ))}
@@ -802,9 +800,7 @@ const Result = () => {
                 handleBranchChange(e);
               }}
             >
-              <option value="Select Branch" >
-                Branch
-              </option>
+              <option value="Select Branch">Branch</option>
               {branches.map((branch) => (
                 <option value={branch.id} data-name={branch.name}>
                   {branch.name}
@@ -816,9 +812,7 @@ const Result = () => {
               className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
               onChange={handleSemesterChange}
             >
-              <option value="Select Semester" >
-                Semester
-              </option>
+              <option value="Select Semester">Semester</option>
               {semesters.map((semester) => (
                 <option value={semester.id} data-semester-name={semester.name}>
                   {semester.name}
@@ -830,9 +824,7 @@ const Result = () => {
               className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
               onChange={handleDivisionChange}
             >
-              <option value="Select Division" >
-                Division
-              </option>
+              <option value="Select Division">Division</option>
               {divisions.map((division) => (
                 <option value={division.id} data-division-name={division.name}>
                   {division.name}
@@ -876,7 +868,11 @@ const Result = () => {
                         <th
                           scope="col"
                           className="px-6 py-3 text-xs font-bold text-gray-500 text-center"
-                          colSpan={type === "All" ? (3 + (subjects.length * examinationTypes.length)) : ( 3 + (subjects.length) )}
+                          colSpan={
+                            type === "All"
+                              ? 3 + subjects.length * examinationTypes.length
+                              : 3 + subjects.length
+                          }
                         >
                           <p className="text-center">{uniName}</p>
                           <p className="text-center">

@@ -4,18 +4,39 @@ import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+var headers;
+var subdomain;
+var access_token;
+
 const SignInSuperAdmin = () => {
   const navigate = useNavigate();
   const [getEmail, setEmail] = useState("");
   const [getPassword, setPassword] = useState("");
-  const [subdomain, setSubdomain] = useState(null);
+  const [clientId, setClentId] = useState("");
+  const [clientSecret, setClientSecret] = useState("");
 
   useEffect(() => {
     const host = window.location.host;
     const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
-    if (arr.length > 0) setSubdomain(arr[0]);
+    if (arr.length > 0) {
+      subdomain = arr[0];
+    }
 
-    console.log(arr);
+    if (subdomain !== "" || subdomain !== null) {
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
+        )
+        .then((response) => {
+          if (response.data.status === "ok") {
+            setClentId(response.data.doorkeeper.client_id);
+            setClientSecret(response.data.doorkeeper.client_secret);
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
   }, []);
 
   const handleSubmit = (e) => {
@@ -24,97 +45,91 @@ const SignInSuperAdmin = () => {
     login_btn.disabled = true;
     login_btn.innerHTML = "Please wait ...";
     login_btn.classList.add("cursor-not-allowed");
-    axios
-      .get(
-        ` http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
-      )
-      .then(function (response) {
-        const clientId = response.data.doorkeeper.client_id;
-        const clientSecret = response.data.doorkeeper.client_secret;
 
-        axios
-          .post(
-            "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/oauth/token",
-            {
-              grant_type: "password",
-              subdomain: subdomain,
-              email: getEmail,
-              password: getPassword,
-              client_id: clientId,
-              client_secret: clientSecret,
-            }
-          )
-          .then((response) => {
-            console.log(response.data.access_token);
-            console.log(response.data);
-            login_btn.disabled = false;
-            login_btn.innerHTML = "Log In";
-            login_btn.classList.remove("cursor-not-allowed");
-            if (response.data.accessToken !== "") {
-              const accessToken = response.data.access_token;
-              localStorage.setItem("access_token", accessToken);
-              axios
-                .get(
-                  `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/find_user?subdomain=${subdomain}`,
-                  {
-                    headers: {
-                      Authorization: `Bearer ${accessToken}`,
-                    },
-                  }
-                )
-                .then((responce) => {
-                  console.log(responce.data.roles);
-                  console.log(
-                    responce.data.roles.includes("examination_controller")
-                  );
-                  if (responce.data.roles.includes("super_admin")) {
-                    toast.success("Login Successfully !!", {
-                      position: toast.POSITION.BOTTOM_LEFT,
-                    });
-                    setTimeout(() => {
-                      navigate("/uploadExcel");
-                    }, 2000);
-                  } else if (
-                    responce.data.roles.includes("Examination Controller")
-                  ) {
-                    toast.success("Login Successfully !!", {
-                      position: toast.POSITION.BOTTOM_LEFT,
-                    });
-                    setTimeout(() => {
-                      navigate("/examTimeTable");
-                    }, 2000);
-                  } else if (responce.data.roles.includes("Marks Entry")) {
-                    toast.success("Login Successfully !!", {
-                      position: toast.POSITION.BOTTOM_LEFT,
-                    });
-                    setTimeout(() => {
-                      navigate("/marks_entry");
-                    }, 2000);
-                  } else if (responce.data.roles.includes("Academic Head")) {
-                    toast.success("Login Successfully !!", {
-                      position: toast.POSITION.BOTTOM_LEFT,
-                    });
-                    setTimeout(() => {
-                      navigate("/academic_UploadSyllabus");
-                    }, 2000);
-                  }
-                })
-                .catch((error) => console.log(error));
-            }
-          })
-          .catch((err) => {
-            console.log(err);
-            console.log(err.response);
-            alert("Incorrect password or email id");
-            login_btn.disabled = false;
-            login_btn.innerHTML = "Log In";
-            login_btn.classList.remove("cursor-not-allowed");
+    if (clientId !== "" && clientSecret !== "") {
+      axios
+        .post(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/oauth/token`,
+          {
+            grant_type: "password",
+            subdomain: subdomain,
+            email: getEmail,
+            password: getPassword,
+            client_id: clientId,
+            client_secret: clientSecret,
+          }
+        )
+        .then((response) => {
+          console.log(response.data.access_token);
+          console.log(response.data);
+          login_btn.disabled = false;
+          login_btn.innerHTML = "Log In";
+          login_btn.classList.remove("cursor-not-allowed");
+          if (response.data.accessToken !== "") {
+            const accessToken = response.data.access_token;
+            localStorage.setItem("access_token", accessToken);
+            axios
+              .get(
+                `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/find_user?subdomain=${subdomain}`,
+                {
+                  headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                  },
+                }
+              )
+              .then((responce) => {
+                console.log(responce.data.roles);
+                console.log(
+                  responce.data.roles.includes("examination_controller")
+                );
+                if (responce.data.roles.includes("super_admin")) {
+                  toast.success("Login Successfully !!", {
+                    position: toast.POSITION.BOTTOM_LEFT,
+                  });
+                  setTimeout(() => {
+                    navigate("/uploadExcel");
+                  }, 2000);
+                } else if (
+                  responce.data.roles.includes("Examination Controller")
+                ) {
+                  toast.success("Login Successfully !!", {
+                    position: toast.POSITION.BOTTOM_LEFT,
+                  });
+                  setTimeout(() => {
+                    navigate("/examTimeTable");
+                  }, 2000);
+                } else if (responce.data.roles.includes("Marks Entry")) {
+                  toast.success("Login Successfully !!", {
+                    position: toast.POSITION.BOTTOM_LEFT,
+                  });
+                  setTimeout(() => {
+                    navigate("/marks_entry");
+                  }, 2000);
+                } else if (responce.data.roles.includes("Academic Head")) {
+                  toast.success("Login Successfully !!", {
+                    position: toast.POSITION.BOTTOM_LEFT,
+                  });
+                  setTimeout(() => {
+                    navigate("/academic_UploadSyllabus");
+                  }, 2000);
+                }
+              })
+              .catch((error) => console.log(error));
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+          console.log(err.response);
+          toast.error("Something went wrong, please try again!", {
+            position: toast.POSITION.BOTTOM_LEFT,
           });
-      })
-      .catch(function (error) {
-        console.log(error.message);
-      });
+          login_btn.disabled = false;
+          login_btn.innerHTML = "Log In";
+          login_btn.classList.remove("cursor-not-allowed");
+        });
+    }
   };
+
   return (
     <div>
       <section className="flex flex-col md:flex-row h-screen items-center">

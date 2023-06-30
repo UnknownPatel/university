@@ -154,6 +154,22 @@ const AssignRole = () => {
           // } else {
           //   alert("successfully updated");
         }
+        axios
+          .get(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/assigned_role_users?subdomain=${subdomain}`,
+            {
+              headers: {
+                Authorization: `Bearer ${acces_token}`,
+              },
+            }
+          )
+          .then((get_response) => {
+            if (get_response.data.message === "Details found") {
+              console.log(get_response.data.data.users);
+              setFaculties(get_response.data.data.users);
+            }
+          })
+          .catch((error) => console.log(error));
       })
       .catch(function (err) {
         console.log(err.message);

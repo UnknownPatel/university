@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import numberToWords from "number-to-words";
 import { MdAddCircle } from "react-icons/md";
+import { responsiveArray } from "antd/es/_util/responsiveObserver";
 
 var access_token;
 var subdomain;
@@ -26,6 +27,7 @@ const AcademicUploadSyllabus = () => {
   const [semesters, setSemesters] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [semesterName, setSemesterName] = useState("");
+  const [selectedFile, setSelectedFile] = useState("");
 
   useEffect(() => {
     access_token = localStorage.getItem("access_token");
@@ -56,7 +58,6 @@ const AcademicUploadSyllabus = () => {
         .catch((err) => {
           console.log(err);
         });
-      console.log(headers);
 
       axios
         .get(
@@ -94,7 +95,6 @@ const AcademicUploadSyllabus = () => {
 
   const handleCourseChange = (e) => {
     e.preventDefault();
-    console.log(e.target.value);
     if (e.target.value !== "Select course") {
       setCourseId(e.target.value);
       var course_id = e.target.value;
@@ -117,7 +117,6 @@ const AcademicUploadSyllabus = () => {
 
   const handleBranchChange = (e) => {
     e.preventDefault();
-    console.log(e.target.value);
     var selectedIndex = e.target.options.selectedIndex;
     setBranchesName(e.target.options[selectedIndex].getAttribute("data-name"));
     var branch_id = e.target.value;
@@ -136,6 +135,23 @@ const AcademicUploadSyllabus = () => {
             setSemesters(response.data.data.semesters);
           })
           .catch((error) => console.log(error));
+      }
+    }
+  };
+
+  const handleSemesterChange = (e) => {
+    e.preventDefault();
+    var selectedIndex = e.target.options.selectedIndex;
+    setSemesterName(
+      numberToWords.toOrdinal(
+        e.target.options[selectedIndex].getAttribute("data-semester-name")
+      ) + " Semester"
+    );
+    if (e.target.value === "Select Semester") {
+      setSemesterId("");
+    } else {
+      setSemesterId(e.target.value);
+      if (subdomain !== null || subdomain !== "") {
       }
     }
   };
@@ -166,6 +182,8 @@ const AcademicUploadSyllabus = () => {
         semester_id: semesterId,
       };
 
+      const viewport = document.getElementById("syllabus_viewport");
+
       if (subdomain !== "" || subdomain !== null) {
         axios
           .get(
@@ -179,28 +197,161 @@ const AcademicUploadSyllabus = () => {
             }
           )
           .then((response) => {
-            setSubjects(response.data.data.subjects);
-            console.log(response.data.data.subjects);
-            console.log(subjects);
+            if (response.data.status === "ok") {
+              if (response.data.data.subjects.length !== 0) {
+                viewport.classList.remove("hidden");
+                viewport.classList.add("flex");
+                setSubjects(response.data.data.subjects);
+                response.data.data.subjects.map((subject) => {
+                  selectedFilter["subject_id"] = subject.id;
+                  axios
+                    .get(
+                      `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/syllabuses/${subject.id}/fetch_details`,
+                      {
+                        headers,
+                        params: {
+                          subdomain: subdomain,
+                          syllabus: selectedFilter,
+                        },
+                      }
+                    )
+                    .then((res) => {
+                      const syllabusButton = document.getElementById(
+                        "button-subject-" + subject.id
+                      );
+                      if (res.data.status === "ok") {
+                        if (res.data.data.syllabus.length !== 0) {
+                          syllabusButton.innerHTML = "Update";
+                          syllabusButton.setAttribute(
+                            "data-syllabus-id",
+                            res.data.data.syllabus.id
+                          );
+                        }
+                      } else {
+                        syllabusButton.innerHTML = "Create";
+                      }
+                    })
+                    .catch((err) => {
+                      console.error(err);
+                    });
+                });
+              } else {
+                setSubjects([]);
+                viewport.classList.add("hidden");
+                viewport.classList.remove("flex");
+              }
+            }
           })
           .catch((error) => console.log(error));
       }
     }
   };
 
-  const handleSemesterChange = (e) => {
+  const createObject = (e, subject_id) => {
     e.preventDefault();
-    var selectedIndex = e.target.options.selectedIndex;
-    setSemesterName(
-      numberToWords.toOrdinal(
-        e.target.options[selectedIndex].getAttribute("data-semester-name")
-      ) + " Semester"
-    );
-    if (e.target.value === "Select Semester") {
-      setSemesterId("");
+    let selectedFilter = {};
+
+    if (subject_id === "") {
+      toast.error("Something went wrong, please try again!", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (selectedFile === "") {
+      toast.error("Please select a file", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (selectedYear === "") {
+      toast.error("Please select year", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (courseId === "" || courseId === "Select Course") {
+      toast.error("Please select course", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (branchId === "") {
+      toast.error("Please select branch", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (semesterId === "") {
+      toast.error("Please select semester", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
     } else {
-      setSemesterId(e.target.value);
-      if (subdomain !== null || subdomain !== "") {
+      selectedFilter = {
+        academic_year: selectedYear,
+        course_id: courseId,
+        branch_id: branchId,
+        semester_id: semesterId,
+        subject_id: subject_id,
+        syllabus_pdf: selectedFile,
+      };
+
+      if (subdomain !== "" || subdomain !== null) {
+        if (e.target.innerHTML === "Update") {
+          var syllabus_id = e.target.getAttribute("data-syllabus-id");
+          axios
+            .put(
+              `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/syllabuses/${syllabus_id}`,
+              {
+                subdomain: subdomain,
+                syllabus: selectedFilter,
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${access_token}`,
+                  "Content-Type": "multipart/form-data",
+                },
+              }
+            )
+            .then((res) => {
+              if (res.data.status === "ok") {
+                toast.success("Syllabus has been updated", {
+                  position: toast.POSITION.BOTTOM_LEFT,
+                });
+              } else {
+                toast.error(res.data.message, {
+                  position: toast.POSITION.BOTTOM_LEFT,
+                });
+              }
+            })
+            .catch((err) => {
+              console.error(err);
+            });
+        } else {
+          axios
+            .post(
+              "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/syllabuses",
+              {
+                subdomain: subdomain,
+                syllabus: selectedFilter,
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${access_token}`,
+                  "Content-Type": "multipart/form-data",
+                },
+              }
+            )
+            .then((res) => {
+              if (res.data.status === "ok") {
+                e.target.innerHTML = "Update";
+                e.target.setAttribute(
+                  "data-syllabus-id",
+                  res.data.data.syllabus.id
+                );
+                
+                toast.success("Syllabus has been created", {
+                  position: toast.POSITION.BOTTOM_LEFT,
+                });
+              } else {
+                toast.error(res.data.message, {
+                  position: toast.POSITION.BOTTOM_LEFT,
+                });
+              }
+            })
+            .catch((err) => {
+              console.error(err);
+            });
+        }
       }
     }
   };
@@ -411,9 +562,9 @@ const AcademicUploadSyllabus = () => {
             </button>
           </div>
           <div
-            id="marks_entry_viewport"
-            className="flex flex-col mt-5"
-            style={{ height: 390 }}
+            id="syllabus_viewport"
+            className="hidden flex-col mt-5"
+            style={{ height: 485 }}
           >
             <div className="overflow-x-scroll">
               <div className="p-1.5 w-full inline-block align-middle">
@@ -467,9 +618,9 @@ const AcademicUploadSyllabus = () => {
                               type="file"
                               id="file_input"
                               className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-blue-100"
-                              // onChange={(e) =>
-                              //   setSelectedFile(e.target.files[0])
-                              // }
+                              onChange={(e) =>
+                                setSelectedFile(e.target.files[0])
+                              }
                               accept=".pdf"
                             />
                           </td>
@@ -480,11 +631,9 @@ const AcademicUploadSyllabus = () => {
                             <button
                               className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold"
                               id={"button-subject-" + subject.id}
-                              // onClick={(e) =>
-                              //   createObject(e, subject.id, date, time)
-                              // }
+                              onClick={(e) => createObject(e, subject.id)}
                             >
-                              <MdAddCircle />
+                              Create
                             </button>
                           </td>
                         </tr>

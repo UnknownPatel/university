@@ -39,6 +39,7 @@ const UnlockMarks = () => {
   var year;
 
   useEffect(() => {
+    console.log(window.location.host);
     access_token = localStorage.getItem("access_token");
     year = new Date().getFullYear();
     setAcademicYears(
@@ -525,6 +526,10 @@ const UnlockMarks = () => {
                   setSubjects(response.data.data.subjects);
                 })
                 .catch((error) => console.log(error));
+            } else {
+              toast.error("No marks entered for the selected filter", {
+                position: toast.POSITION.BOTTOM_LEFT,
+              });
             }
           } else {
             toast.error(res.data.message, {
@@ -945,9 +950,7 @@ const UnlockMarks = () => {
               }}
               aria-label="Examination Name"
             >
-              <option value="Select Examination" >
-                Examination
-              </option>
+              <option value="Select Examination">Examination</option>
               {examinationNames.map((examination_name) => {
                 return (
                   <option value={examination_name.name}>
@@ -961,9 +964,7 @@ const UnlockMarks = () => {
               className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
               onChange={(e) => handleYearChange(e.target.value)}
             >
-              <option value="Select Year" >
-                Year
-              </option>
+              <option value="Select Year">Year</option>
               {academic_years.map((year) => {
                 return <option value={year}>{year}</option>;
               })}
@@ -973,9 +974,7 @@ const UnlockMarks = () => {
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
               onChange={handleTypeChange}
             >
-              <option value="Select Type" >
-                Type
-              </option>
+              <option value="Select Type">Type</option>
               {examinationTypes.map((examination_type) => {
                 return (
                   <option value={examination_type.name}>
@@ -989,9 +988,7 @@ const UnlockMarks = () => {
               className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
               onChange={handleCourseChange}
             >
-              <option value="Select course" >
-                Course
-              </option>
+              <option value="Select course">Course</option>
               {courses.map((course, index) => (
                 <option value={course.id}>{course.name}</option>
               ))}
@@ -1003,9 +1000,7 @@ const UnlockMarks = () => {
                 handleBranchChange(e);
               }}
             >
-              <option value="Select Branch" >
-                Branch
-              </option>
+              <option value="Select Branch">Branch</option>
               {branches.map((branch) => (
                 <option value={branch.id} data-name={branch.name}>
                   {branch.name}
@@ -1017,9 +1012,7 @@ const UnlockMarks = () => {
               className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
               onChange={handleSemesterChange}
             >
-              <option value="Select Semester" >
-                Semester
-              </option>
+              <option value="Select Semester">Semester</option>
               {semesters.map((semester) => (
                 <option value={semester.id} data-semester-name={semester.name}>
                   {semester.name}
@@ -1031,9 +1024,7 @@ const UnlockMarks = () => {
               className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
               onChange={handleDivisionChange}
             >
-              <option value="Select Division" >
-                Division
-              </option>
+              <option value="Select Division">Division</option>
               {divisions.map((division) => (
                 <option value={division.id} data-division-name={division.name}>
                   {division.name}
@@ -1058,6 +1049,7 @@ const UnlockMarks = () => {
             </button>
           </div>
           {/* Table of Faculty List */}
+          
           <div
             id="unlockMarks_viewport"
             className="hidden flex-col mt-5"

@@ -4,9 +4,6 @@ import React, { useEffect, useState, useRef } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-datepicker/dist/react-datepicker.css";
 import "tailwindcss/tailwind.css";
-import { IoCreate } from "react-icons/io5";
-import { MdAddCircle } from "react-icons/md";
-import { FiEdit } from "react-icons/fi";
 import { GiArchiveResearch } from "react-icons/gi";
 import { useNavigate } from "react-router-dom";
 
@@ -352,9 +349,7 @@ const ExamTimeTable = () => {
                       "select-time-subject-" + subject.id
                     );
                     if (get_response.data.message === "Details found") {
-                      button.innerHTML = ReactDOMServer.renderToString(
-                        <FiEdit />
-                      );
+                      button.innerHTML = "Update";
                       button.setAttribute(
                         "data-time-table-id",
                         get_response.data.data.time_table.id
@@ -367,9 +362,7 @@ const ExamTimeTable = () => {
                           : 2;
                       table_time.options.selectedIndex = selectedIndex;
                     } else {
-                      button.innerHTML = ReactDOMServer.renderToString(
-                        <MdAddCircle />
-                      );
+                      button.innerHTML = "Create";
                       table_date.value = "";
                       table_time.options[
                         table_time.options.selectedIndex
@@ -447,7 +440,7 @@ const ExamTimeTable = () => {
     } else {
       delete selectedFilter["time"];
     }
-    if (e.target.innerHTML === ReactDOMServer.renderToString(<FiEdit />)) {
+    if (e.target.innerHTML === "Update") {
       // Update TimeTable API
       axios
         .put(
@@ -492,7 +485,7 @@ const ExamTimeTable = () => {
           const date = document.getElementById("date-select-subject-" + id);
           const time = document.getElementById("select-time-subject-" + id);
           if (responce.data.status == "created") {
-            button.innerHTML = ReactDOMServer.renderToString(<FiEdit />);
+            button.innerHTML = "Update";
             button.setAttribute(
               "data-time-table-id",
               responce.data.data.time_table.id
@@ -736,9 +729,7 @@ const ExamTimeTable = () => {
               }}
               aria-label="Examination Name"
             >
-              <option value="Select Examination" >
-                Examination
-              </option>
+              <option value="Select Examination">Examination</option>
               {examinationNames.map((examination_name) => {
                 return (
                   <option value={examination_name.name}>
@@ -752,9 +743,7 @@ const ExamTimeTable = () => {
               className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
               onChange={(e) => handleYearChange(e.target.value)}
             >
-              <option value="Select Year" >
-                Year
-              </option>
+              <option value="Select Year">Year</option>
               {academic_years.map((year) => {
                 return <option value={year}>{year}</option>;
               })}
@@ -764,9 +753,7 @@ const ExamTimeTable = () => {
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
               onChange={handleTypeChange}
             >
-              <option value="Select Type" >
-                Type
-              </option>
+              <option value="Select Type">Type</option>
               {examinationTypes.map((examination_type) => {
                 return (
                   <option value={examination_type.name}>
@@ -781,9 +768,7 @@ const ExamTimeTable = () => {
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
               onChange={handleCourseChange}
             >
-              <option value="Select Course" >
-                Course
-              </option>
+              <option value="Select Course">Course</option>
               {courses.map((course, index) => (
                 <option value={course.id}>{course.name}</option>
               ))}
@@ -794,9 +779,7 @@ const ExamTimeTable = () => {
               onChange={handleBranchChange}
               isSearchable={true}
             >
-              <option value="Select Branch" >
-                Branch
-              </option>
+              <option value="Select Branch">Branch</option>
               {branches.map((branch) => (
                 <option value={branch.id}>{branch.name}</option>
               ))}
@@ -808,9 +791,7 @@ const ExamTimeTable = () => {
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
               onChange={handleSemesterChange}
             >
-              <option value="Select Semester" >
-                Semester
-              </option>
+              <option value="Select Semester">Semester</option>
               {semesters.map((semester) => (
                 <option value={semester.id}>{semester.name}</option>
               ))}
@@ -922,7 +903,7 @@ const ExamTimeTable = () => {
                                 createObject(e, subject.id, date, time)
                               }
                             >
-                              <MdAddCircle />
+                              Create
                             </button>
                           </td>
                         </tr>
