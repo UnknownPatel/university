@@ -373,7 +373,15 @@ const ExamTimeTable = () => {
                     console.log(err);
                   });
               });
+            } else {
+              toast.error("No subjects found for the selected criteria!", {
+                position: toast.POSITION.BOTTOM_LEFT,
+              });
             }
+          } else {
+            toast.error("No subjects found for the selected criteria!", {
+              position: toast.POSITION.BOTTOM_LEFT,
+            });
           }
         })
         .catch((err) => {

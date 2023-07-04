@@ -386,6 +386,7 @@ const ExamViewTimeTable = () => {
   };
 
   const handleFilterSubmit = (e) => {
+    
     let selectedFilter = {};
 
     if (examinationName === "") {

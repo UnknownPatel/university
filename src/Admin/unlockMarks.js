@@ -372,8 +372,12 @@ const UnlockMarks = () => {
           }
         )
         .then((res) => {
-          setActualSubjects(res.data.data.subjects);
-          actual_subject_length = res.data.data.subjects.length;
+          if (res.data.status === "ok") {
+            if (res.data.data.subjects.length !== 0) {
+              setActualSubjects(res.data.data.subjects);
+              actual_subject_length = res.data.data.subjects.length;
+            }
+          }
         })
         .catch((err) => {
           console.error(err);
@@ -1049,7 +1053,7 @@ const UnlockMarks = () => {
             </button>
           </div>
           {/* Table of Faculty List */}
-          
+
           <div
             id="unlockMarks_viewport"
             className="hidden flex-col mt-5"

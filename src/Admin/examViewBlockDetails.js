@@ -565,6 +565,7 @@ const ExamViewBlockDetails = () => {
   };
 
   const handleFilterSubmit = (e) => {
+    
     let selectedFilter = {};
 
     if (examinationName2 === "") {

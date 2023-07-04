@@ -150,10 +150,16 @@ const ExamBlockDetails = () => {
   }, []);
 
   const handleExaminationChange2 = (e, examination) => {
+    const time_table_viewport = document.getElementById("time_table_viewport");
+    time_table_viewport.classList.add("hidden");
+    time_table_viewport.classList.remove("flex");
     setExaminationName2(examination);
   };
 
   const handleYearChange2 = (date) => {
+    const time_table_viewport = document.getElementById("time_table_viewport");
+    time_table_viewport.classList.add("hidden");
+    time_table_viewport.classList.remove("flex");
     if (date !== "Select Year") {
       setSelectedYear2(date);
     } else {
@@ -237,6 +243,9 @@ const ExamBlockDetails = () => {
 
   const handleCourseChange2 = (e) => {
     e.preventDefault();
+    const time_table_viewport = document.getElementById("time_table_viewport");
+    time_table_viewport.classList.add("hidden");
+    time_table_viewport.classList.remove("flex");
     setCourseId("");
     setBranches2([]);
     setBranchId("");
@@ -418,6 +427,9 @@ const ExamBlockDetails = () => {
 
   const handleSemesterChange2 = (e) => {
     e.preventDefault();
+    const time_table_viewport = document.getElementById("time_table_viewport");
+    time_table_viewport.classList.add("hidden");
+    time_table_viewport.classList.remove("flex");
     var selectedFilter = {};
     setStoreDates([]);
     if (time2 !== "") {
@@ -475,6 +487,9 @@ const ExamBlockDetails = () => {
 
   const handleTimeChange = (e) => {
     e.preventDefault();
+    const time_table_viewport = document.getElementById("time_table_viewport");
+    time_table_viewport.classList.add("hidden");
+    time_table_viewport.classList.remove("flex");
     var selectedFilter = {};
     setStoreDates([]);
 

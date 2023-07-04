@@ -22,9 +22,11 @@ const StudentSyllabusView = () => {
   const [branchesName, setBranchesName] = useState("");
   const [branchId, setBranchId] = useState("");
   const [semesterId, setSemesterId] = useState("");
+  const [subjects, setSubjects] = useState([]);
   const [semesterName, setSemesterName] = useState("");
   const [subjectCode, setSubjectCode] = useState("");
   const [subjectName, setSubjectName] = useState("");
+  const [syllabusData, setSyllabusData] = useState({});
 
   useEffect(() => {
     access_token = localStorage.getItem("access_token");
@@ -79,6 +81,9 @@ const StudentSyllabusView = () => {
 
   const handleCourseChange = (e) => {
     e.preventDefault();
+    const syllabus_viewport = document.getElementById("syllabus_viewport");
+    syllabus_viewport.classList.remove("flex");
+    syllabus_viewport.classList.add("hidden");
     var selectedFilter = {};
     if (selectedYear !== "Select Year") {
       selectedFilter["academic_year"] = selectedYear;
@@ -113,6 +118,9 @@ const StudentSyllabusView = () => {
 
   const handleBranchChange = (e) => {
     e.preventDefault();
+    const syllabus_viewport = document.getElementById("syllabus_viewport");
+    syllabus_viewport.classList.remove("flex");
+    syllabus_viewport.classList.add("hidden");
     var selectedFilter = {};
 
     if (selectedYear !== "Select Year") {
@@ -159,6 +167,9 @@ const StudentSyllabusView = () => {
 
   const handleSemesterChange = (e) => {
     e.preventDefault();
+    const syllabus_viewport = document.getElementById("syllabus_viewport");
+    syllabus_viewport.classList.remove("flex");
+    syllabus_viewport.classList.add("hidden");
     var selectedFilter = {};
 
     if (selectedYear !== "Select Year") {
@@ -198,17 +209,25 @@ const StudentSyllabusView = () => {
 
   const handleSubjectCodeChange = (e) => {
     e.preventDefault();
+    const syllabus_viewport = document.getElementById("syllabus_viewport");
+    syllabus_viewport.classList.remove("flex");
+    syllabus_viewport.classList.add("hidden");
     setSubjectCode(e.target.value);
   };
 
   const handleSubjectNameChange = (e) => {
     e.preventDefault();
+    const syllabus_viewport = document.getElementById("syllabus_viewport");
+    syllabus_viewport.classList.remove("flex");
+    syllabus_viewport.classList.add("hidden");
     setSubjectName(e.target.value);
   };
 
   const handleFilterSubmit = (e) => {
     let selectedFilter = {};
-
+    const syllabus_viewport = document.getElementById("syllabus_viewport");
+    syllabus_viewport.classList.remove("flex");
+    syllabus_viewport.classList.add("hidden");
     if (selectedYear === "") {
       toast.error("Please select year", {
         position: toast.POSITION.BOTTOM_LEFT,
@@ -236,31 +255,77 @@ const StudentSyllabusView = () => {
       }
 
       if (subjectCode !== "") {
-        selectedFilter["subject_code"] = subjectCode;
+        selectedFilter["code"] = subjectCode;
       } else {
-        delete selectedFilter["subject_code"];
+        delete selectedFilter["code"];
       }
 
       if (subjectName !== "") {
-        selectedFilter["subject_name"] = subjectName;
+        selectedFilter["name"] = subjectName;
       } else {
-        delete selectedFilter["subject_name"];
+        delete selectedFilter["name"];
       }
 
       if (subdomain !== null || subdomain !== "") {
         axios
           .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/syllabuses`,
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/subjects/fetch_subjects`,
             {
               headers,
               params: {
+                subject: selectedFilter,
                 subdomain: subdomain,
-                syllabus: selectedFilter,
               },
             }
           )
           .then((res) => {
-            console.log(res);
+            if (res.data.status === "ok") {
+              if (res.data.data.subjects.length !== 0) {
+                syllabus_viewport.classList.add("flex");
+                syllabus_viewport.classList.remove("hidden");
+                setSubjects(res.data.data.subjects);
+                var updatedSyllabus = {};
+                res.data.data.subjects.map((subject) => {
+                  console.log(subject.id);
+                  selectedFilter["subject_id"] = subject.id;
+                  axios
+                    .get(
+                      `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/syllabuses/${subject.id}/fetch_details`,
+                      {
+                        headers,
+                        params: {
+                          syllabus: selectedFilter,
+                          subdomain: subdomain,
+                        },
+                      }
+                    )
+                    .then((res) => {
+                      if (res.data.status === "ok") {
+                        const syllabusData = res.data.data.syllabus;
+
+                        updatedSyllabus = {
+                          ...updatedSyllabus,
+                          [syllabusData.subject_id]: {
+                            syllabus_pdf_url: syllabusData.pdf_url,
+                          },
+                        };
+                        setSyllabusData(updatedSyllabus);
+                      }
+                    })
+                    .catch((err) => {
+                      console.error(err);
+                    });
+                });
+              } else {
+                toast.error("Please select other criteria to find subjects", {
+                  position: toast.POSITION.BOTTOM_LEFT
+                })
+              }
+            } else {
+              toast.error("Please select other criteria to find subjects", {
+                position: toast.POSITION.BOTTOM_LEFT
+              })
+            }
           })
           .catch((err) => {
             console.error(err);
@@ -382,81 +447,155 @@ const StudentSyllabusView = () => {
             </p>
           </button>
         </div>
-        <div id="syllabus_viewport" className="flex flex-col mt-5">
-          <div id="table-viewport" className="">
-            <div className="p-1.5 w-full inline-block align-middle">
-              <div className="border rounded-lg">
-                <table className="min-w-full table-fixed divide-y divide-gray-200">
-                  <thead className="sticky top-0 bg-gray-50">
-                    <tr>
-                      <th
-                        colSpan={5}
-                        className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                      ></th>
-                      <th
-                        colSpan={3}
-                        className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                      >
-                        Hours
-                      </th>
-                      <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
-                        Credit
-                      </th>
-                      <th
-                        colSpan={5}
-                        className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                      >
-                        Max Marks
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
-                        Subject Code
-                      </th>
-                      <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
-                        Branch Code
-                      </th>
-                      <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
-                        Subject Name
-                      </th>
-                      <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
-                        Category
-                      </th>
-                      <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
-                        Sem
-                      </th>
-                      <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
-                        L.
-                      </th>
-                      <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
-                        T.
-                      </th>
-                      <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
-                        P.
-                      </th>
-                      <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
-                        Total
-                      </th>
-                      <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
-                        E.
-                      </th>
-                      <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
-                        M.
-                      </th>
-                      <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
-                        I.
-                      </th>
-                      <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
-                        V.
-                      </th>
-                      <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
-                        Total
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200"></tbody>
-                </table>
-              </div>
+        <div
+          id="syllabus_viewport"
+          className="hidden flex-col mt-5"
+          style={{height: 490}}
+        >
+          <div className="p-1.5 w-full inline-block align-middle">
+            <div className="border rounded-lg overflow-y-scroll" style={{height: 490}}>
+              <table className="min-w-full table-fixed border border-collapse border-slate-950 divide-y divide-gray-200">
+                <thead className="sticky top-0 bg-blue-200 text-white">
+                  <tr>
+                    <th
+                      colSpan={6}
+                      className="px-6 py-3 text-xs font-bold text-center text-gray-900 uppercase border border-slate-500"
+                    >
+                      {" "}
+                      Details{" "}
+                    </th>
+                    <th
+                      colSpan={3}
+                      className="px-6 py-3 text-xs font-bold text-center text-gray-900 uppercase border border-slate-500"
+                    >
+                      Hours
+                    </th>
+                    <th className="px-6 py-3 text-xs font-bold text-center text-gray-900 uppercase border border-slate-500">
+                      Credit
+                    </th>
+                    <th
+                      colSpan={5}
+                      className="px-6 py-3 text-xs font-bold text-center text-gray-900 uppercase border border-slate-500 "
+                    >
+                      Maximum Marks
+                    </th>
+                  </tr>
+                  <tr>
+                    <th className="px-6 py-3 text-xs font-bold text-center text-gray-900 uppercase border border-slate-500 ">
+                      Sr no.
+                    </th>
+                    <th className="px-6 py-3 text-xs font-bold text-center text-gray-900 uppercase border border-slate-500 ">
+                      Subject Code
+                    </th>
+                    <th className="px-6 py-3 text-xs font-bold text-center text-gray-900 uppercase border border-slate-500 ">
+                      Branch Code
+                    </th>
+                    <th className="px-6 py-3 text-xs font-bold text-center text-gray-900 uppercase border border-slate-500 ">
+                      Subject Name
+                    </th>
+                    <th className="px-6 py-3 text-xs font-bold text-center text-gray-900 uppercase border border-slate-500 ">
+                      Category
+                    </th>
+                    <th className="px-6 py-3 text-xs font-bold text-center text-gray-900 uppercase border border-slate-500 ">
+                      Sem
+                    </th>
+                    <th className="px-6 py-3 text-xs font-bold text-center text-gray-900 uppercase border border-slate-500 ">
+                      L.
+                    </th>
+                    <th className="px-6 py-3 text-xs font-bold text-center text-gray-900 uppercase border border-slate-500 ">
+                      T.
+                    </th>
+                    <th className="px-6 py-3 text-xs font-bold text-center text-gray-900 uppercase border border-slate-500 ">
+                      P.
+                    </th>
+                    <th className="px-6 py-3 text-xs font-bold text-center text-gray-900 uppercase border border-slate-500 ">
+                      Total
+                    </th>
+                    <th className="px-6 py-3 text-xs font-bold text-center text-gray-900 uppercase border border-slate-500 ">
+                      E.
+                    </th>
+                    <th className="px-6 py-3 text-xs font-bold text-center text-gray-900 uppercase border border-slate-500 ">
+                      M.
+                    </th>
+                    <th className="px-6 py-3 text-xs font-bold text-center text-gray-900 uppercase border border-slate-500 ">
+                      I.
+                    </th>
+                    <th className="px-6 py-3 text-xs font-bold text-center text-gray-900 uppercase border border-slate-500 ">
+                      V.
+                    </th>
+                    <th className="px-6 py-3 text-xs font-bold text-center text-gray-900 uppercase border border-slate-500 ">
+                      Total
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 bg-blue-100">
+                  {subjects.map((subject, index) => {
+                    var syllabusPdfURL =
+                      syllabusData[subject.id]?.["syllabus_pdf_url"];
+                    return (
+                      <tr key={subject.id}>
+                        <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap border border-slate-500">
+                          {index + 1}
+                        </td>
+                        <td className="text-center px-6 py-4 text-sm whitespace-nowrap border border-slate-500">
+                          <a
+                            href={syllabusPdfURL}
+                            target="_blank"
+                            className="text-blue-600 underline"
+                          >
+                            {" "}
+                            {subject.code}{" "}
+                          </a>
+                        </td>
+                        <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap border border-slate-500">
+                          {subject.branch_code}
+                        </td>
+                        <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap border border-slate-500">
+                          {subject.name}
+                        </td>
+                        <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap border border-slate-500">
+                          {subject.category}
+                        </td>
+                        <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap border border-slate-500">
+                          {subject.semester_name}
+                        </td>
+                        <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap border border-slate-500">
+                          {subject.lecture}
+                        </td>
+                        <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap border border-slate-500">
+                          {subject.tutorial}
+                        </td>
+                        <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap border border-slate-500">
+                          {subject.practical}
+                        </td>
+                        <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap border border-slate-500">
+                          {parseInt(subject.lecture) +
+                            parseInt(subject.tutorial) +
+                            parseInt(subject.practical)}
+                        </td>
+                        <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap border border-slate-500">
+                          {subject.e || 0}
+                        </td>
+                        <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap border border-slate-500">
+                          {subject.m || 0}
+                        </td>
+                        <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap border border-slate-500">
+                          {subject.i || 0}
+                        </td>
+                        <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap border border-slate-500">
+                          {subject.v || 0}
+                        </td>
+                        <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap border border-slate-500">
+                          {parseInt(subject.e) +
+                            parseInt(subject.m) +
+                            parseInt(subject.i) +
+                            parseInt(subject.v) || 0}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>

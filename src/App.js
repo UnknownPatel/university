@@ -21,7 +21,6 @@ import AdminLogin from "./Admin/adminLogin";
 import ExamBlockDetails from "./Admin/examBlockDetails";
 import ExamAssignSupervision from "./Admin/examAssignSupervision";
 import ExamTimeTable from "./Admin/examTimeTable";
-import ExamReports from "./Admin/examReports";
 import ExamViewTimeTable from "./Admin/examViewTimeTable";
 import ExamViewBlockDetails from "./Admin/examViewBlockDetails";
 import ExamViewJrSupervision from "./Admin/examViewJrSupervision";
@@ -71,7 +70,6 @@ function App() {
             element={<ExamAssignSupervision />}
           />
           <Route path="/examTimeTable" element={<ExamTimeTable />} />
-          <Route path="/examReports" element={<ExamReports />} />
           <Route path="/examViewTimeTable" element={<ExamViewTimeTable />} />
           <Route
             path="/examViewBlockDetails"
