@@ -77,7 +77,7 @@ const UploadExcel = () => {
     submit_button.classList.add("cursor-not-allowed");
     if (selectedFile !== null || selectedFile !== "") {
       console.log("Uploading");
-      axiosInstance
+      axios
         .post(
           "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/excel_sheets",
           {

@@ -308,6 +308,7 @@ const ExamAssignSupervision = () => {
           .put(
             `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions/${supervision_id}?subdomain=${subdomain}`,
             {
+              time_table: timeTableSelectedFilter,
               supervision: {
                 no_of_supervisions: no_of_supervisions,
               },
@@ -391,7 +392,6 @@ const ExamAssignSupervision = () => {
 
   const handleFilterSubmit = (e) => {
     let selectedFilter = {};
-    let timeTableSelectedFilter = {};
     if (examinationName === "Select Examination" || examinationName === "") {
       toast.error("Please select examination name", {
         position: toast.POSITION.BOTTOM_LEFT,
@@ -419,16 +419,6 @@ const ExamAssignSupervision = () => {
         time: parseInt(jrTime),
       };
 
-      timeTableSelectedFilter = {
-        name: examinationName,
-        academic_year: selectedYear,
-        course_id: courseId,
-        user_type: 0,
-        list_type: "Junior",
-        time_table_type: jrType,
-        time: jrTime === "0" ? "morning" : "evening",
-      };
-
       if (branchId !== "") {
         selectedFilter = {
           examination_name: examinationName,
@@ -439,17 +429,6 @@ const ExamAssignSupervision = () => {
           list_type: "Junior",
           supervision_type: jrType,
           time: parseInt(jrTime),
-        };
-
-        timeTableSelectedFilter = {
-          examination_name: examinationName,
-          academic_year: selectedYear,
-          course_id: courseId,
-          branch_id: branchId,
-          user_type: 0,
-          list_type: "Junior",
-          time_table_type: jrType,
-          time: jrTime === "0" ? "morning" : "evening",
         };
       }
 

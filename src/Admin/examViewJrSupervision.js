@@ -807,9 +807,7 @@ const ExamViewJrSupervision = () => {
               handleExaminationChange3(e.target.value);
             }}
           >
-            <option value="Select Examination" >
-              Examination
-            </option>
+            <option value="Select Examination">Examination</option>
             {examinationNames.map((examination_name) => {
               return (
                 <option value={examination_name.name}>
@@ -823,9 +821,7 @@ const ExamViewJrSupervision = () => {
             className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
             onChange={(e) => handleYearChange3(e.target.value)}
           >
-            <option value="Select Year" >
-              Year
-            </option>
+            <option value="Select Year">Year</option>
             {academic_years.map((year) => {
               return <option value={year}>{year}</option>;
             })}
@@ -835,9 +831,7 @@ const ExamViewJrSupervision = () => {
             className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
             onChange={handleJrTypeChange}
           >
-            <option value="Select Type" >
-              Type
-            </option>
+            <option value="Select Type">Type</option>
             {examinationTypes.map((examination_type) => {
               return (
                 <option value={examination_type.name}>
@@ -851,9 +845,7 @@ const ExamViewJrSupervision = () => {
             className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
             onChange={handleCourseChange}
           >
-            <option value="Select Course" >
-              Course
-            </option>
+            <option value="Select Course">Course</option>
             {courses.map((course, index) => (
               <option value={course.id}>{course.name}</option>
             ))}
@@ -864,9 +856,7 @@ const ExamViewJrSupervision = () => {
               handleBranchChange(e);
             }}
           >
-            <option value="Select Branch" >
-              Branch
-            </option>
+            <option value="Select Branch">Branch</option>
             {branches.map((branch) => (
               <option value={branch.id} data-name={branch.name}>
                 {branch.name}
@@ -877,6 +867,11 @@ const ExamViewJrSupervision = () => {
           <select
             className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
             onChange={(e) => {
+              const jr_supervision_report_viewport = document.getElementById(
+                "jr_supervision_report_viewport"
+              );
+              jr_supervision_report_viewport.classList.add("hidden");
+              jr_supervision_report_viewport.classList.remove("flex");
               if (e.target.value !== "Select Date") {
                 setDate(e.target.value);
               } else {
@@ -999,6 +994,11 @@ const ExamViewJrSupervision = () => {
                                   <FcCheckmark />
                                 </td>
                               );
+                            } else {
+                              return (
+                              <td className="px-6 py-4 flex-row justify-center items-center text-sm text-gray-800 ">
+                                </td>
+                              )
                             }
                           }
                         })}
