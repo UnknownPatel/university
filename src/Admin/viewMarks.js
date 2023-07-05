@@ -559,9 +559,7 @@ const ViewMarks = () => {
               value={examinationName}
               disabled={true}
             >
-              <option value="Select Examination" >
-                Examination
-              </option>
+              <option value="Select Examination">Examination</option>
               {examinationNames.map((examination_name) => {
                 return (
                   <option value={examination_name.name}>
@@ -576,9 +574,7 @@ const ViewMarks = () => {
               value={selectedYear}
               disabled={true}
             >
-              <option value="Select Year" >
-                Year
-              </option>
+              <option value="Select Year">Year</option>
               {academic_years.map((year) => {
                 return <option value={year}>{year}</option>;
               })}
@@ -589,9 +585,7 @@ const ViewMarks = () => {
               value={type}
               disabled={true}
             >
-              <option value="Select Type" >
-                Type
-              </option>
+              <option value="Select Type">Type</option>
               {examinationTypes.map((examination_type) => {
                 return (
                   <option value={examination_type.name}>
@@ -608,9 +602,7 @@ const ViewMarks = () => {
               id="course-select"
               disabled={true}
             >
-              <option value="Select Course" >
-                Course
-              </option>
+              <option value="Select Course">Course</option>
               {courses.map((course, index) => (
                 <option value={course.id} data-course-name={course.name}>
                   {course.name}
@@ -625,9 +617,7 @@ const ViewMarks = () => {
               // isSearchable={true}
               disabled={true}
             >
-              <option value="Select Branch" >
-                Branch
-              </option>
+              <option value="Select Branch">Branch</option>
               {branches.map((branch) => (
                 <option value={branch.id} data-name={branch.name}>
                   {branch.name}
@@ -641,9 +631,7 @@ const ViewMarks = () => {
               id="semester-select"
               disabled={true}
             >
-              <option value="Select Semester" >
-                Semester
-              </option>
+              <option value="Select Semester">Semester</option>
               {semesters.map((semester) => (
                 <option value={semester.id} data-name={semester.name}>
                   {semester.name}
@@ -657,9 +645,7 @@ const ViewMarks = () => {
               id="division-select"
               disabled={true}
             >
-              <option value="Select Division" >
-                Division
-              </option>
+              <option value="Select Division">Division</option>
               {divisions.map((division) => (
                 <option value={division.id} data-name={division.name}>
                   {division.name}
@@ -674,9 +660,7 @@ const ViewMarks = () => {
               id="subject-select"
               disabled={true}
             >
-              <option value="Select Subject" >
-                Subject
-              </option>
+              <option value="Select Subject">Subject</option>
               {subjects.map((subject) => (
                 <option value={subject.id} data-name={subject.name}>
                   {subject.name}
@@ -685,31 +669,31 @@ const ViewMarks = () => {
             </select>
           </div>
 
-          <div id="button-viewport" className="flex justify-evenly mt-5 mb-5">
+          <div id="button-viewport" className="flex justify-end mt-5 mb-5">
             <a
               href="#"
               id="download_button"
               onClick={handlePrint}
-              className="py-2 px-10 bg-blue-200 rounded-2xl text-white "
+              className="py-2 px-4 bg-blue-200 rounded-2xl mr-2 text-white "
             >
-              <FcPrint />
+              <FcPrint size={30} />
             </a>
 
             <a
               href="#"
               id="save_as_pdf"
               onClick={handleSavePDF}
-              className="py-2 px-10 bg-blue-200 rounded-2xl"
+              className="py-2 px-4 bg-blue-200 mr-2 rounded-2xl"
             >
-              <FcDownload />
+              <FcDownload size={30} />
             </a>
             <a
               href="#"
               id="save_as_pdf"
               onClick={downloadExcel}
-              className="py-2 px-10 bg-blue-200 rounded-2xl"
+              className="py-2 px-4 bg-blue-200 rounded-2xl"
             >
-              <SiMicrosoftexcel />
+              <SiMicrosoftexcel size={30} />
             </a>
           </div>
 
@@ -723,7 +707,10 @@ const ViewMarks = () => {
             <div className="">
               <div className="p-1.5 w-full inline-block align-middle">
                 <div className="border rounded-lg">
-                  <table id="my-table" className="min-w-full divide-y table-auto divide-gray-200">
+                  <table
+                    id="my-table"
+                    className="min-w-full divide-y table-auto divide-gray-200"
+                  >
                     <thead className="sticky top-0 bg-gray-50">
                       <tr id="selected-filters">
                         <th

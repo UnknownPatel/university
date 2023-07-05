@@ -6,10 +6,6 @@ import MarksEntry from "./Admin/marksEntry";
 import ViewSupervisionList from "./Admin/viewSupervisionList";
 import ViewSyllabus from "./Admin/viewSyllabus";
 import "./App.css";
-import FacultyDashboard from "./Faculty/facultyDashboard";
-import FacultyExam from "./Faculty/facultyExam";
-import FacultyLogin from "./Faculty/facultyLogin";
-import FacultyProfile from "./Faculty/facultyProfile";
 import Home from "./SuperAdmin/Home";
 import AssignRole from "./SuperAdmin/assignRole";
 import SignInSuperAdmin from "./SuperAdmin/signInSuperAdmin";
@@ -34,9 +30,11 @@ import ViewMarks from "./Admin/viewMarks";
 import Result from "./Admin/result";
 import StudentResult from "./Admin/studentResult";
 import AcademicUploadSyllabus from "./Admin/academicUploadSyllabus";
-import StudentViewSyllabus from "./Admin/studentViewSyllabus";
 import UploadSubjectDetails from "./Admin/uploadSubjectDetails";
 import StudentSyllabusView from "./Admin/studentSyllabusView";
+import StudentHomePage from "./Student/studentHomePage";
+import StudentCertificatePage from "./Student/studentCertificatePage";
+import ForgotPassword from "./SuperAdmin/forgotPassword";
 
 function App() {
   return (
@@ -97,10 +95,6 @@ function App() {
             element={<AcademicUploadSyllabus />}
           />
           <Route
-            path="/student_view_syllabus"
-            element={<StudentViewSyllabus />}
-          />
-          <Route
             path="/upload_SubjectDetails"
             element={<UploadSubjectDetails />}
           />
@@ -108,6 +102,12 @@ function App() {
             path="/StudentSyllabusView"
             element={<StudentSyllabusView />}
           />
+          <Route path="/StudentHomePage" element={<StudentHomePage />} />
+          <Route
+            path="/StudentCertificatePage"
+            element={<StudentCertificatePage />}
+          />
+          <Route path="/ForgotPassword" element={<ForgotPassword />} />
         </Routes>
       </BrowserRouter>
 

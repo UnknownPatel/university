@@ -180,7 +180,7 @@ const SignInSuperAdmin = () => {
 
             <div className="text-right mt-2">
               <a
-                href="#"
+                href="/ForgotPassword"
                 className="text-sm font-semibold text-gray-700 hover:text-blue-700 focus:text-blue-700"
               >
                 Forgot Password?
