@@ -30,12 +30,12 @@ import ViewMarks from "./Admin/viewMarks";
 import Result from "./Admin/result";
 import StudentResult from "./Admin/studentResult";
 import AcademicUploadSyllabus from "./Admin/academicUploadSyllabus";
-import UploadSubjectDetails from "./Admin/uploadSubjectDetails";
 import StudentSyllabusView from "./Admin/studentSyllabusView";
 import StudentHomePage from "./Student/studentHomePage";
 import StudentCertificatePage from "./Student/studentCertificatePage";
 import ForgotPassword from "./SuperAdmin/forgotPassword";
 import ChangePassword from "./SuperAdmin/changePassword";
+import AcademicCreateCertificate from "./Admin/academicCreateCertificate";
 
 function App() {
   return (
@@ -96,8 +96,8 @@ function App() {
             element={<AcademicUploadSyllabus />}
           />
           <Route
-            path="/upload_SubjectDetails"
-            element={<UploadSubjectDetails />}
+            path="/academic_CreactCertificate"
+            element={<AcademicCreateCertificate />}
           />
           <Route
             path="/StudentSyllabusView"
