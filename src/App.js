@@ -35,6 +35,7 @@ import StudentSyllabusView from "./Admin/studentSyllabusView";
 import StudentHomePage from "./Student/studentHomePage";
 import StudentCertificatePage from "./Student/studentCertificatePage";
 import ForgotPassword from "./SuperAdmin/forgotPassword";
+import ChangePassword from "./SuperAdmin/changePassword";
 
 function App() {
   return (
@@ -108,6 +109,7 @@ function App() {
             element={<StudentCertificatePage />}
           />
           <Route path="/ForgotPassword" element={<ForgotPassword />} />
+          <Route path="/ChangePassword" element={<ChangePassword />} />
         </Routes>
       </BrowserRouter>
 

@@ -1,24 +1,51 @@
+import axios from "axios";
 import React from "react";
+import { useEffect } from "react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+
+var subdomain;
 
 const ForgotPassword = () => {
-  const [formData, setFormData] = useState({
-    email: "",
-  });
+  const [email, setEmail] = useState("");
+  const [resetToken, setresetToken] = useState("");
+  const navigate = useNavigate();
 
-  const handleChange = (event) => {
-    setFormData({
-      ...formData,
-      [event.target.name]: event.target.value,
-    });
+  useEffect(() => {
+    const host = window.location.host;
+    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
+    if (arr.length > 0) {
+      subdomain = arr[0];
+    }
+  }, []);
+  const handleEmailChange = (event) => {
+    setEmail(event.target.value);
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    if (subdomain == null || subdomain !== "") {
+      axios
+        .post(
+          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/forgot_password",
+          {
+            email: email,
+            subdomain: subdomain,
+          }
+        )
+        .then(function (response) {
+          console.log(response);
+          // navigate("/ChangePassword");
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    }
   };
 
   return (
-    <div className="bg-blue-950 h-scree signupimage">
+    <div className="bg-blue-950 signupimage">
       <div className="container max-w-screen-md mx-auto ">
         <div>
           <h2 className="p-5 "></h2>
@@ -38,10 +65,10 @@ const ForgotPassword = () => {
                     <label htmlFor="admin_email">Enter Email Address</label>
                     <input
                       type="email"
-                      name="admin_email"
+                      name="email"
                       id="admin_email"
-                      value={formData.email}
-                      onChange={handleChange}
+                      value={email}
+                      onChange={handleEmailChange}
                       className="h-10 border mt-1 rounded px-4 w-full bg-gray-50"
                       placeholder="email"
                     />
@@ -64,6 +91,7 @@ const ForgotPassword = () => {
           </div>
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 };
