@@ -1,6 +1,81 @@
+import axios from "axios";
 import React from "react";
+import { useEffect } from "react";
+import { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+var subdomain;
+var host;
+var reset_password_token;
 
 const ChangePassword = () => {
+  const location = useLocation();
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    reset_password_token = params.get('reset_password_token');
+    host = window.location.host;
+    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
+    if (arr.length > 0) {
+      subdomain = arr[0];
+    }
+  }, [location.search]);
+
+  const handlePasswordChange = (e) => {
+    e.preventDefault();
+    console.log("Password changed");
+    setPassword(e.target.value);
+  };
+
+  const handleConfirmPasswordChange = (e) => {
+    e.preventDefault();
+    const error_message = document.getElementById("error-message");
+    setConfirmPassword(e.target.value);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (password === "") {
+      toast.error("Please enter password", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (password !== confirmPassword) {
+      toast.error("Passwords doesn't match!", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else {
+      if (subdomain !== "" || subdomain !== null) {
+        axios
+          .put(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/reset_password`,
+            {
+              subdomain: subdomain,
+              reset_password_token: reset_password_token,
+              password: password,
+              confirm_password: confirmPassword,
+            }
+          )
+          .then((res) => {
+            console.log(res);
+            if (res.data.status === "ok"){
+              toast.success(res.data.message, {
+                position: toast.POSITION.BOTTOM_LEFT
+              })
+            } else {
+              toast.error(res.data.message, {
+                position: toast.POSITION.BOTTOM_LEFT
+              })
+            }
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+      }
+    }
+  };
+
   return (
     <div className="bg-blue-950 signupimage">
       <div className="container max-w-screen-md mx-auto ">
@@ -23,7 +98,8 @@ const ChangePassword = () => {
                     <input
                       type="text"
                       name=""
-                      id=""
+                      id="password"
+                      onChange={handlePasswordChange}
                       className="h-10 border mt-1 rounded px-4 w-full bg-gray-50"
                       placeholder="New Password"
                     />
@@ -33,17 +109,22 @@ const ChangePassword = () => {
                     <input
                       type="password"
                       name=""
-                      id=""
+                      id="confirm_password"
+                      onChange={handleConfirmPasswordChange}
                       className="h-10 border mt-1 rounded px-4 w-full bg-gray-50"
                       placeholder="Confirm New Password"
                     />
                   </div>
+                  <span
+                    id={"error-message"}
+                    className="text-red-500 text-xs"
+                  ></span>
 
                   <div className="md:col-span-5 mt-3 text-center">
                     <div className="inline-flex items-end">
                       <button
                         type="submit"
-                        // onClick={handleSubmit}
+                        onClick={handleSubmit}
                         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
                       >
                         Submit
@@ -56,6 +137,7 @@ const ChangePassword = () => {
           </div>
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 };

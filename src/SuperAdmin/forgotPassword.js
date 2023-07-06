@@ -6,14 +6,17 @@ import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 
 var subdomain;
+var host;
+var url;
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
-  const [resetToken, setresetToken] = useState("");
+  const [resetToken, setResetToken] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
-    const host = window.location.host;
+    url = window.location.origin;
+    host = window.location.host;
     const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
     if (arr.length > 0) {
       subdomain = arr[0];
@@ -32,11 +35,28 @@ const ForgotPassword = () => {
           {
             email: email,
             subdomain: subdomain,
+            url: url
           }
         )
         .then(function (response) {
           console.log(response);
-          // navigate("/ChangePassword");
+          if (response.data.status === "ok" ) {
+            if (response.data.data.token.length !== 0) {
+              setResetToken(response.data.data.token)
+              toast.success(response.data.message, {
+                position: toast.POSITION.BOTTOM_LEFT
+              });
+            } else {
+              setResetToken("");
+              toast.error("Something went wrong", {
+                position: toast.POSITION.BOTTOM_LEFT
+              });
+            }
+          } else {
+            toast.error("Something went wrong", {
+              position: toast.POSITION.BOTTOM_LEFT
+            });
+          }
         })
         .catch(function (error) {
           console.log(error);

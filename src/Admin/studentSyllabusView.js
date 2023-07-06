@@ -531,7 +531,7 @@ const StudentSyllabusView = () => {
                 <tbody className="divide-y divide-gray-200 bg-blue-100">
                   {subjects.map((subject, index) => {
                     var syllabusPdfURL =
-                      syllabusData[subject.id]?.["syllabus_pdf_url"];
+                      syllabusData[subject.id]?.  ["syllabus_pdf_url"];
                     return (
                       <tr key={subject.id}>
                         <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap border border-slate-500">
