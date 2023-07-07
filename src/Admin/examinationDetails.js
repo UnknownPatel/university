@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import TimePicker from "react-time-picker";
 import "react-time-picker/dist/TimePicker.css";
-import "react-clock/dist/Clock.css";
+// import "react-clock/dist/Clock.css";
 
 var acces_token;
 var subdomain;
@@ -675,6 +675,7 @@ const ExaminationDetails = () => {
                     <label htmlFor="">Start Time:</label>
                     <TimePicker
                       className="ml-2"
+                      disableClock="true"
                       onChange={handleStartTime}
                       value={startTime}
                     />
@@ -683,6 +684,7 @@ const ExaminationDetails = () => {
                     </label>
                     <TimePicker
                       className="ml-2 "
+                      disableClock="true"
                       onChange={handleEndTime}
                       value={endTime}
                     />
