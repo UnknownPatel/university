@@ -338,7 +338,7 @@ const AcademicUploadSyllabus = () => {
                   "data-syllabus-id",
                   res.data.data.syllabus.id
                 );
-                
+
                 toast.success("Syllabus has been created", {
                   position: toast.POSITION.BOTTOM_LEFT,
                 });
@@ -471,18 +471,26 @@ const AcademicUploadSyllabus = () => {
           <ul className="space-y-2 font-medium">
             <li>
               <a
-                href="/upload_SubjectDetails"
-                className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <span className="ml-3">Upload Subject Details</span>
-              </a>
-            </li>
-            <li>
-              <a
                 href="/academic_UploadSyllabus"
                 className="flex items-center p-2 text-gray-900 bg-slate-600 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 <span className="ml-3">Upload Syllabus</span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="/academic_CreactCertificate"
+                className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="ml-3">Certificate</span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="#"
+                className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="ml-3">Certificate Request</span>
               </a>
             </li>
             <li>
