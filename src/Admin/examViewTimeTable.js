@@ -386,7 +386,6 @@ const ExamViewTimeTable = () => {
   };
 
   const handleFilterSubmit = (e) => {
-    
     let selectedFilter = {};
 
     if (examinationName === "") {
@@ -752,9 +751,7 @@ const ExamViewTimeTable = () => {
               }}
               aria-label="Examination Name"
             >
-              <option value="Select Examination" >
-                Examination
-              </option>
+              <option value="Select Examination">Examination</option>
               {examinationNames.map((examination_name) => {
                 return (
                   <option value={examination_name.name}>
@@ -768,9 +765,7 @@ const ExamViewTimeTable = () => {
               className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
               onChange={(e) => handleYearChange(e.target.value)}
             >
-              <option value="Select Year" >
-                Year
-              </option>
+              <option value="Select Year">Year</option>
               {academic_years.map((year) => {
                 return <option value={year}>{year}</option>;
               })}
@@ -780,9 +775,7 @@ const ExamViewTimeTable = () => {
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
               onChange={handleTypeChange}
             >
-              <option value="Select Type" >
-                Type
-              </option>
+              <option value="Select Type">Type</option>
               {examinationTypes.map((examination_type) => {
                 return (
                   <option value={examination_type.name}>
@@ -797,9 +790,7 @@ const ExamViewTimeTable = () => {
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
               onChange={handleCourseChange}
             >
-              <option value="Select Course" >
-                Course
-              </option>
+              <option value="Select Course">Course</option>
               {courses.map((course, index) => (
                 <option value={course.id}>{course.name}</option>
               ))}
@@ -810,9 +801,7 @@ const ExamViewTimeTable = () => {
               onChange={handleBranchChange}
               isSearchable={true}
             >
-              <option value="Select Branch" >
-                Branch
-              </option>
+              <option value="Select Branch">Branch</option>
               {branches.map((branch) => (
                 <option value={branch.id} data-name={branch.name}>
                   {branch.name}
@@ -824,9 +813,7 @@ const ExamViewTimeTable = () => {
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
               onChange={handleSemesterChange}
             >
-              <option value="Select Semester" >
-                Semester
-              </option>
+              <option value="Select Semester">Semester</option>
               {semesters.map((semester) => (
                 <option value={semester.id} data-semester-name={semester.name}>
                   {semester.name}
@@ -959,6 +946,9 @@ const ExamViewTimeTable = () => {
                     </tbody>
                   </table>
                 </div>
+                <p className="text-lg mt-10">
+                  By. Exam Coordinator: ________________
+                </p>
               </div>
             </div>
           </div>

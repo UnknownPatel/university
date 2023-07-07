@@ -146,10 +146,12 @@ const ExamTimeTable = () => {
   }
 
   const handleExaminationChange = (examination) => {
+    handleViewPortChange();
     setExaminationName(examination);
   };
 
   const handleYearChange = (date) => {
+    handleViewPortChange();
     if (date !== "Select Year") {
       setSelectedYear(date);
       setMinDate(date.split(" - ")[0] + "-01-01");
@@ -175,9 +177,7 @@ const ExamTimeTable = () => {
     console.log(selectedFilter);
     setSubjects([]);
     setSemesters([]);
-    const time_table_viewport = document.getElementById("time_table_viewport");
-    time_table_viewport.classList.add("hidden");
-    time_table_viewport.classList.remove("flex");
+    handleViewPortChange();
     var course_id = e.target.value;
     setCourseId(course_id);
     acces_token = localStorage.getItem("access_token");
@@ -203,9 +203,7 @@ const ExamTimeTable = () => {
   const handleBranchChange = (e) => {
     e.preventDefault();
     setSubjects([]);
-    const time_table_viewport = document.getElementById("time_table_viewport");
-    time_table_viewport.classList.add("hidden");
-    time_table_viewport.classList.remove("flex");
+    handleViewPortChange();
     var branch_id = e.target.value;
     if (branch_id === "Select Branch") {
       setBranchId("");
@@ -239,9 +237,7 @@ const ExamTimeTable = () => {
     e.preventDefault();
     console.log(e.target.value);
     setSubjects([]);
-    const time_table_viewport = document.getElementById("time_table_viewport");
-    time_table_viewport.classList.add("hidden");
-    time_table_viewport.classList.remove("flex");
+    handleViewPortChange();
     if (e.target.value === "Select Semester") {
       setSemesterId("");
     } else {
@@ -252,9 +248,7 @@ const ExamTimeTable = () => {
   const handleTypeChange = (e) => {
     e.preventDefault();
     setSubjects([]);
-    const time_table_viewport = document.getElementById("time_table_viewport");
-    time_table_viewport.classList.add("hidden");
-    time_table_viewport.classList.remove("flex");
+    handleViewPortChange();
     if (e.target.value === "Select Type") {
       setType("");
     } else {
@@ -514,6 +508,12 @@ const ExamTimeTable = () => {
           console.log(err.message);
         });
     }
+  };
+
+  const handleViewPortChange = () => {
+    const time_table_viewport = document.getElementById("time_table_viewport");
+    time_table_viewport.classList.add("hidden");
+    time_table_viewport.classList.remove("flex");
   };
 
   const handleLogout = () => {
@@ -875,7 +875,7 @@ const ExamTimeTable = () => {
                               id={"date-select-subject-" + subject.id}
                               onChange={(e) => setDate(e.target.value)}
                               type="date"
-                              min={minDate}
+                              min={new Date().toISOString().split("T")[0]} // Set min attribute to today's date
                               max={maxDate}
                               onBeforeInput={(e) => e.preventDefault()}
                               // disabled={true}

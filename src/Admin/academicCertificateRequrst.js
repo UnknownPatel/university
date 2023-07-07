@@ -8,12 +8,10 @@ var access_token;
 var subdomain;
 var headers;
 
-const AcademicCreateCertificate = () => {
+const AcademicCertificateRequrst = () => {
   const [uniName, setUniName] = useState("");
   const [faculty, setFaculty] = useState("");
   const navigate = useNavigate();
-  const [certificateName, setCertificateName] = useState("");
-  const [certificateFee, setCertificateFee] = useState("");
 
   useEffect(() => {
     access_token = localStorage.getItem("access_token");
@@ -59,18 +57,6 @@ const AcademicCreateCertificate = () => {
     localStorage.clear();
     navigate("/");
   };
-
-  const handleCertificateNameChange = (e) => {
-    e.preventDefault();
-    setCertificateName(e.target.value);
-  };
-
-  const handleCertificateFeeChange = (e) => {
-    e.preventDefault();
-    setCertificateFee(e.target.value);
-  };
-
-  const handleCreateCertificate = (e) => {};
 
   return (
     <div>
@@ -191,7 +177,7 @@ const AcademicCreateCertificate = () => {
             <li>
               <a
                 href="/academic_CreactCertificate"
-                className="flex items-center p-2 text-gray-900 rounded-lg bg-slate-600 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 <span className="ml-3">Certificate</span>
               </a>
@@ -199,7 +185,7 @@ const AcademicCreateCertificate = () => {
             <li>
               <a
                 href="/academic_CertificateRequest"
-                className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                className="flex items-center p-2 text-gray-900 rounded-lg bg-slate-600 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 <span className="ml-3">Certificate Request</span>
               </a>
@@ -218,82 +204,8 @@ const AcademicCreateCertificate = () => {
           </ul>
         </div>
       </aside>
-
-      <div className="pt-4 sm:ml-64">
-        <div className="p-4 rounded-lg mt-14">
-          <div className="text-center text-4xl">
-            <p>Certificate</p>
-          </div>
-        </div>
-        <div className="mt-5 ml-2">
-          <label htmlFor="">Certificate Name:-</label>
-          <input
-            type="text"
-            name="reason"
-            id="reason"
-            onChange={(e) => handleCertificateNameChange(e)}
-            placeholder="Enter Certificate Name"
-            className="h-10 border-0 border-b-2 border-b-gray-700 mt-1 ml-3 mr-10 rounded px-4 bg-gray-50"
-          />
-          <label htmlFor="">Fee:-</label>
-          <input
-            type="text"
-            name="reason"
-            id="reason"
-            onChange={(e) => handleCertificateFeeChange(e)}
-            placeholder="Certificate fee"
-            className="h-10 border-0 border-b-2 border-b-gray-700 mt-1 ml-3 mr-10 rounded px-4 bg-gray-50"
-          />
-          <button
-            className="py-2 px-3 mr-7 ml-2 bg-gray-800 rounded-2xl text-white font-bold"
-            onClick={handleCreateCertificate}
-          >
-            <p className="inline-flex">Create</p>
-          </button>
-        </div>
-        <div
-          id="certificate_viewport"
-          className="flex flex-col mt-5"
-          style={{ height: 485 }}
-        >
-          <div className="overflow-x-scroll">
-            <div className="p-1.5 w-full inline-block align-middle">
-              <div className="border rounded-lg">
-                <table
-                  id="my-table"
-                  className="min-w-full divide-y table-auto text-center divide-gray-200"
-                >
-                  <thead className="sticky top-0 bg-gray-50">
-                    <tr>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                      >
-                        sr.
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                      >
-                        Certificate Name
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                      >
-                        Certificate Fee
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="text-center divide-y divide-gray-200"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };
 
-export default AcademicCreateCertificate;
+export default AcademicCertificateRequrst;

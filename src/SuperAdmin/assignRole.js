@@ -244,8 +244,6 @@ const AssignRole = () => {
     console.log(
       event.target.options[selectedIndex].getAttribute("data-designation")
     );
-    // const node = document.getElementById('select_name');
-    // console.log(e.target.getAttribute("data-designation"));
   };
 
   const handleLogout = () => {

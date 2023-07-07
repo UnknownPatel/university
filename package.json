@@ -27,6 +27,7 @@
     "react-router-dom": "^6.11.0",
     "react-scripts": "5.0.1",
     "react-tailwindcss-datepicker": "^1.6.0",
+    "react-time-picker": "^6.2.0",
     "react-to-print": "^2.14.12",
     "react-toastify": "^9.1.2",
     "tom-select": "^2.2.2",

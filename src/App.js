@@ -36,6 +36,7 @@ import StudentCertificatePage from "./Student/studentCertificatePage";
 import ForgotPassword from "./SuperAdmin/forgotPassword";
 import ChangePassword from "./SuperAdmin/changePassword";
 import AcademicCreateCertificate from "./Admin/academicCreateCertificate";
+import AcademicCertificateRequrst from "./Admin/academicCertificateRequrst";
 
 function App() {
   return (
@@ -98,6 +99,10 @@ function App() {
           <Route
             path="/academic_CreactCertificate"
             element={<AcademicCreateCertificate />}
+          />
+          <Route
+            path="/academic_CertificateRequest"
+            element={<AcademicCertificateRequrst />}
           />
           <Route
             path="/StudentSyllabusView"

@@ -1,6 +1,9 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import TimePicker from "react-time-picker";
+import "react-time-picker/dist/TimePicker.css";
+import "react-clock/dist/Clock.css";
 
 var acces_token;
 var subdomain;
@@ -16,10 +19,12 @@ const ExaminationDetails = () => {
   const [uniName, setUniName] = useState("");
   const [faculty, setFaculty] = useState("");
   const navigate = useNavigate();
+  const [value, onChange] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
 
   useEffect(() => {
     acces_token = localStorage.getItem("access_token");
-    console.log(acces_token);
     headers = { Authorization: `Bearer ${acces_token}` };
     const host = window.location.host;
     const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
@@ -138,6 +143,7 @@ const ExaminationDetails = () => {
       .then((responce) => {
         console.log(responce.data);
         if (responce.data.message === "Created") {
+          setExaminationName("");
           axios
             .get(
               "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_names",
@@ -197,6 +203,8 @@ const ExaminationDetails = () => {
       .then((responce) => {
         console.log(responce.data);
         if (responce.data.message === "Created") {
+          setExaminationType("");
+          setMaximumMarks("");
           axios
             .get(
               "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_types",
@@ -231,6 +239,23 @@ const ExaminationDetails = () => {
       .catch(function (err) {
         console.log(err.message);
       });
+  };
+
+  const handleStartTime = (e) => {
+    // e.preventDefault();
+    setStartTime(e);
+  };
+
+  const handleEndTime = (e) => {
+    setEndTime(e);
+  };
+
+  const handleCreateExaminationTime = (e) => {
+    e.preventDefault();
+    handleStartTime();
+    handleEndTime();
+    console.log(startTime);
+    console.log(endTime);
   };
 
   const handleLogout = () => {
@@ -457,9 +482,18 @@ const ExaminationDetails = () => {
             >
               Examination Type
             </button>
+            <button
+              className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg ${
+                activeButton === "button3" ? "bg-slate-800" : ""
+              }`}
+              onClick={() => toggleContent("button3")}
+            >
+              Examination Time
+            </button>
           </div>
           {/* Examination Name */}
           <div className="flex w-full">
+            {/* 1 */}
             <div
               id="content1"
               className={`min-w-full p-4 rounded-lg ${
@@ -474,6 +508,7 @@ const ExaminationDetails = () => {
                     value={examinationName}
                     onChange={(e) => setExaminationName(e.target.value)}
                     className="form-input border border-gray-400 rounded p-2"
+                    placeholder="Enter Examination Name"
                   />
                 </div>
                 <button
@@ -530,6 +565,7 @@ const ExaminationDetails = () => {
                 </div>
               </div>
             </div>
+            {/* 2 */}
             <div
               id="content2"
               className={`min-w-full p-4 rounded-lg ${
@@ -544,6 +580,7 @@ const ExaminationDetails = () => {
                     value={examinationType}
                     onChange={(e) => setExaminationType(e.target.value)}
                     className="form-input border border-gray-400 rounded p-2"
+                    placeholder="Enter Examination Type"
                   />
                   <label className="mr-2 ml-5">Maximum Marks: </label>
                   <input
@@ -551,6 +588,7 @@ const ExaminationDetails = () => {
                     value={maximumMarks}
                     onChange={(e) => setMaximumMarks(e.target.value)}
                     className="form-input border border-gray-400 rounded p-2"
+                    placeholder="Enter a maximum Marks"
                   />
                 </div>
                 <button
@@ -610,6 +648,81 @@ const ExaminationDetails = () => {
                             );
                           })}
                         </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {/* 3 */}
+            <div
+              id="content3"
+              className={`min-w-full p-4 rounded-lg ${
+                activeButton === "button3" ? "block" : "hidden"
+              }`}
+            >
+              <div className="flex ml-2">
+                <div className="flex items-center">
+                  {/* <label className="mr-2">Examination Time: </label> */}
+                  {/* <input
+                    type="text"
+                    value={examinationName}
+                    // onChange={(e) => setExaminationTime(e.target.value)}
+                    className="form-input border border-gray-400 rounded p-2"
+                    placeholder="Enter Time"
+                  /> */}
+                  <div className="ml-3">
+                    <label htmlFor="">Start Time:</label>
+                    <TimePicker
+                      className="ml-2"
+                      onChange={handleStartTime}
+                      value={startTime}
+                    />
+                    <label htmlFor="" className="ml-3">
+                      End Time:
+                    </label>
+                    <TimePicker
+                      className="ml-2 "
+                      onChange={handleEndTime}
+                      value={endTime}
+                    />
+                  </div>
+                </div>
+                <button
+                  type="submit"
+                  className="text-center ml-2 bg-green-600 text-gray-100 p-1 rounded tracking-wide
+                font-semibold  focus:outline-none focus:shadow-outline hover:bg-green-700 shadow-md cursor-pointer transition ease-in duration-300"
+                  onClick={handleCreateExaminationTime}
+                >
+                  Submit
+                </button>
+              </div>
+              <div
+                id="examination_time_viewport"
+                className="hidden flex-col overflow-y-scroll mt-5"
+                style={{ height: 390 }}
+              >
+                <div className="">
+                  <div className="p-1.5 w-full inline-block align-middle">
+                    <div className="border rounded-lg">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="sticky top-0 bg-gray-50">
+                          <tr>
+                            <th
+                              scope="col"
+                              className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                            >
+                              sr.
+                            </th>
+                            <th
+                              scope="col"
+                              className="text-center px-6 py-3 text-xs font-bold text-gray-500 uppercase "
+                            >
+                              Examination Time
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="text-center divide-y divide-gray-200"></tbody>
                       </table>
                     </div>
                   </div>

@@ -150,16 +150,12 @@ const ExamBlockDetails = () => {
   }, []);
 
   const handleExaminationChange2 = (e, examination) => {
-    const time_table_viewport = document.getElementById("time_table_viewport");
-    time_table_viewport.classList.add("hidden");
-    time_table_viewport.classList.remove("flex");
+    handleViewPortChange();
     setExaminationName2(examination);
   };
 
   const handleYearChange2 = (date) => {
-    const time_table_viewport = document.getElementById("time_table_viewport");
-    time_table_viewport.classList.add("hidden");
-    time_table_viewport.classList.remove("flex");
+    handleViewPortChange();
     if (date !== "Select Year") {
       setSelectedYear2(date);
     } else {
@@ -169,9 +165,7 @@ const ExamBlockDetails = () => {
 
   const handleTypeChange = (e) => {
     e.preventDefault();
-    const time_table_viewport = document.getElementById("time_table_viewport");
-    time_table_viewport.classList.add("hidden");
-    time_table_viewport.classList.remove("flex");
+    handleViewPortChange();
     var selectedFilter = {};
     setStoreDates([]);
     if (examinationName2 !== "Select Examination") {
@@ -243,9 +237,7 @@ const ExamBlockDetails = () => {
 
   const handleCourseChange2 = (e) => {
     e.preventDefault();
-    const time_table_viewport = document.getElementById("time_table_viewport");
-    time_table_viewport.classList.add("hidden");
-    time_table_viewport.classList.remove("flex");
+    handleViewPortChange();
     setCourseId("");
     setBranches2([]);
     setBranchId("");
@@ -339,9 +331,7 @@ const ExamBlockDetails = () => {
     e.preventDefault();
     var selectedFilter = {};
     setStoreDates([]);
-    const time_table_viewport = document.getElementById("time_table_viewport");
-    time_table_viewport.classList.add("hidden");
-    time_table_viewport.classList.remove("flex");
+    handleViewPortChange();
 
     if (examinationName2 !== "Select Examination") {
       selectedFilter["name"] = examinationName2;
@@ -427,9 +417,7 @@ const ExamBlockDetails = () => {
 
   const handleSemesterChange2 = (e) => {
     e.preventDefault();
-    const time_table_viewport = document.getElementById("time_table_viewport");
-    time_table_viewport.classList.add("hidden");
-    time_table_viewport.classList.remove("flex");
+    handleViewPortChange();
     var selectedFilter = {};
     setStoreDates([]);
     if (time2 !== "") {
@@ -487,9 +475,7 @@ const ExamBlockDetails = () => {
 
   const handleTimeChange = (e) => {
     e.preventDefault();
-    const time_table_viewport = document.getElementById("time_table_viewport");
-    time_table_viewport.classList.add("hidden");
-    time_table_viewport.classList.remove("flex");
+    handleViewPortChange();
     var selectedFilter = {};
     setStoreDates([]);
 
@@ -808,6 +794,12 @@ const ExamBlockDetails = () => {
     }
   };
 
+  const handleViewPortChange = () => {
+    const time_table_viewport = document.getElementById("time_table_viewport");
+    time_table_viewport.classList.add("hidden");
+    time_table_viewport.classList.remove("flex");
+  };
+
   const handleLogout = () => {
     localStorage.clear();
     navigate("/");
@@ -1029,9 +1021,7 @@ const ExamBlockDetails = () => {
                 handleExaminationChange2(e, e.target.value);
               }}
             >
-              <option value="Select Examination" >
-                Examination
-              </option>
+              <option value="Select Examination">Examination</option>
               {examinationNames.map((examination_name) => {
                 return (
                   <option value={examination_name.name}>
@@ -1046,9 +1036,7 @@ const ExamBlockDetails = () => {
               className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
               onChange={(e) => handleYearChange2(e.target.value)}
             >
-              <option value="Select Year" >
-                Year
-              </option>
+              <option value="Select Year">Year</option>
               {academic_years.map((year) => {
                 return <option value={year}>{year}</option>;
               })}
@@ -1058,9 +1046,7 @@ const ExamBlockDetails = () => {
               className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
               onChange={handleTypeChange}
             >
-              <option value="Select Type" >
-                Type
-              </option>
+              <option value="Select Type">Type</option>
               {examinationTypes.map((examination_type) => {
                 return (
                   <option value={examination_type.name}>
@@ -1074,9 +1060,7 @@ const ExamBlockDetails = () => {
               className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
               onChange={handleCourseChange2}
             >
-              <option value="Select course" >
-                Course
-              </option>
+              <option value="Select course">Course</option>
               {courses2.map((course) => (
                 <option value={course.id}>{course.name}</option>
               ))}
@@ -1086,9 +1070,7 @@ const ExamBlockDetails = () => {
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded justify-center shadow-md px-3 py-2 w-auto"
               onChange={handleBranchChange2}
             >
-              <option value="Select Branch" >
-                Branch
-              </option>
+              <option value="Select Branch">Branch</option>
               {branches2.map((branch) => (
                 <option value={branch.id}>{branch.name}</option>
               ))}
@@ -1098,9 +1080,7 @@ const ExamBlockDetails = () => {
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded justify-center shadow-md px-3 py-2 w-auto"
               onChange={handleSemesterChange2}
             >
-              <option value="Select Semester" >
-                Semester
-              </option>
+              <option value="Select Semester">Semester</option>
               {semesters2.map((semester) => (
                 <option value={semester.id}>{semester.name}</option>
               ))}
@@ -1116,9 +1096,7 @@ const ExamBlockDetails = () => {
                 }
               }}
             >
-              <option value="Select Date" >
-                Date
-              </option>
+              <option value="Select Date">Date</option>
               {storeDates.map((date) => (
                 <option value={date}>{date}</option>
               ))}
@@ -1130,9 +1108,7 @@ const ExamBlockDetails = () => {
                 handleTimeChange(e);
               }}
             >
-              <option value="Select time" >
-                Time
-              </option>
+              <option value="Select time">Time</option>
               <option value="morning">10:30 A.M to 01:00 P.M</option>
               <option value="evening">03:00 P.M to 05:30 P.M</option>
             </select>
