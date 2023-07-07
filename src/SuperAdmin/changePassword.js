@@ -9,6 +9,7 @@ var host;
 var reset_password_token;
 
 const ChangePassword = () => {
+  const navigate = useNavigate();
   const location = useLocation();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -63,6 +64,9 @@ const ChangePassword = () => {
               toast.success(res.data.message, {
                 position: toast.POSITION.BOTTOM_LEFT
               })
+              setTimeout(() => {
+                navigate("/");
+              }, 2000);
             } else {
               toast.error(res.data.message, {
                 position: toast.POSITION.BOTTOM_LEFT

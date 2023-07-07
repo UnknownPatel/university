@@ -1,3 +1,7 @@
 .signupimage{
-  background-image: url("./Images/bg-image.jpeg");
+  background-image: url("https://img.freepik.com/free-photo/abstract-blur-defocused-bookshelf-library_1203-9638.jpg?w=996&t=st=1688645731~exp=1688646331~hmac=7ce90c85caa158140d715930a44b44a10044da0a2ce68b4dcab5ff59436f3216");
+}
+
+.signinimage{
+  background-image: url("https://images.pexels.com/photos/256395/pexels-photo-256395.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1");
 }

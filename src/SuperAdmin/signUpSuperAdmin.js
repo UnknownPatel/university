@@ -51,8 +51,8 @@ const SignUpSuperAdmin = () => {
     });
   };
   return (
-    <div className="bg-blue-950 h-scree signupimage">
-      <div className="container max-w-screen-md mx-auto ">
+    <div className="h-screen flex items-center justify-center signupimage bg-cover" >
+      <div className="-mt-32">
         <div>
           <h2 className="font-semibold text-xl p-5 text-white"></h2>
 
@@ -69,7 +69,7 @@ const SignUpSuperAdmin = () => {
               <div className="lg:col-span-3">
                 <div className="grid gap-4 gap-y-2 text-sm grid-cols-2 md:grid-cols-9">
                   <div className="md:col-span-4">
-                    <label htmlFor="full_name">University Name</label>
+                    <label htmlFor="name">University Name</label>
                     <input
                       type="text"
                       name="name"
