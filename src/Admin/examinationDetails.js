@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import TimePicker from "react-time-picker";
 import "react-time-picker/dist/TimePicker.css";
 // import "react-clock/dist/Clock.css";
+import moment from "moment";
 
 var acces_token;
 var subdomain;
@@ -18,10 +19,10 @@ const ExaminationDetails = () => {
   const [examinationTypes, setExaminationTypes] = useState([]);
   const [uniName, setUniName] = useState("");
   const [faculty, setFaculty] = useState("");
-  const navigate = useNavigate();
-  const [value, onChange] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
+  const [examinationTimes, setExaminationTimes] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     acces_token = localStorage.getItem("access_token");
@@ -108,6 +109,34 @@ const ExaminationDetails = () => {
               viewport.classList.add("hidden");
               viewport.classList.remove("flex");
               setExaminationTypes([]);
+            }
+          }
+        })
+        .catch(function (err) {
+          console.log(err.message);
+        });
+
+      axios
+        .get(
+          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_times",
+          {
+            headers,
+            params: {
+              subdomain: subdomain,
+            },
+          }
+        )
+        .then((responce) => {
+          const viewport = document.getElementById("examination_time_viewport");
+          if (responce.data.message === "Times found") {
+            if (responce.data.data.examination_times.length !== 0) {
+              viewport.classList.remove("hidden");
+              viewport.classList.add("flex");
+              setExaminationTimes(responce.data.data.examination_names);
+            } else {
+              viewport.classList.add("hidden");
+              viewport.classList.remove("flex");
+              setExaminationTimes([]);
             }
           }
         })
@@ -243,19 +272,26 @@ const ExaminationDetails = () => {
 
   const handleStartTime = (e) => {
     // e.preventDefault();
-    setStartTime(e);
+    if (e !== null) {
+      var time = moment(e, "hh:mm A").format("hh:mm A");
+      setStartTime(time);
+    } else {
+      setStartTime("");
+    }
   };
 
   const handleEndTime = (e) => {
-    setEndTime(e);
-  };
+    if (e !== null) {
+      var time = moment(e, "hh:mm A").format("hh:mm A");
+      setEndTime(time)
+    } else {
+      setEndTime("")
+    }
+    };
 
   const handleCreateExaminationTime = (e) => {
     e.preventDefault();
-    handleStartTime();
-    handleEndTime();
-    console.log(startTime);
-    console.log(endTime);
+    console.log(startTime + " - " + endTime);
   };
 
   const handleLogout = () => {
@@ -663,19 +699,12 @@ const ExaminationDetails = () => {
             >
               <div className="flex ml-2">
                 <div className="flex items-center">
-                  {/* <label className="mr-2">Examination Time: </label> */}
-                  {/* <input
-                    type="text"
-                    value={examinationName}
-                    // onChange={(e) => setExaminationTime(e.target.value)}
-                    className="form-input border border-gray-400 rounded p-2"
-                    placeholder="Enter Time"
-                  /> */}
                   <div className="ml-3">
                     <label htmlFor="">Start Time:</label>
                     <TimePicker
                       className="ml-2"
                       disableClock="true"
+                      format="h:m a"
                       onChange={handleStartTime}
                       value={startTime}
                     />
@@ -724,7 +753,20 @@ const ExaminationDetails = () => {
                             </th>
                           </tr>
                         </thead>
-                        <tbody className="text-center divide-y divide-gray-200"></tbody>
+                        <tbody className="text-center divide-y divide-gray-200">
+                          {examinationTimes.map((examination_time, index) => {
+                            return (
+                              <tr>
+                                <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                  {index + 1}
+                                </td>
+                                <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                  {examination_time.name}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
                       </table>
                     </div>
                   </div>

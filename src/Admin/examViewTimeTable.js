@@ -169,10 +169,24 @@ const ExamViewTimeTable = () => {
   }
 
   const handleExaminationChange = (examination) => {
+    const time_table_viewport = document.getElementById("time_table_viewport");
+    const download_button = document.getElementById("download_button");
+    const save_as_pdf = document.getElementById("save_as_pdf");
+    download_button.classList.add("hidden");
+    save_as_pdf.classList.add("hidden");
+    time_table_viewport.classList.add("hidden");
+    time_table_viewport.classList.remove("flex");
     setExaminationName(examination);
   };
 
   const handleYearChange = (date) => {
+    const time_table_viewport = document.getElementById("time_table_viewport");
+    time_table_viewport.classList.add("hidden");
+    time_table_viewport.classList.remove("flex");
+    const download_button = document.getElementById("download_button");
+    const save_as_pdf = document.getElementById("save_as_pdf");
+    download_button.classList.add("hidden");
+    save_as_pdf.classList.add("hidden");
     if (date !== "Select Year") {
       setSelectedYear(date);
     } else {
@@ -185,6 +199,10 @@ const ExamViewTimeTable = () => {
     const time_table_viewport = document.getElementById("time_table_viewport");
     time_table_viewport.classList.add("hidden");
     time_table_viewport.classList.remove("flex");
+    const download_button = document.getElementById("download_button");
+    const save_as_pdf = document.getElementById("save_as_pdf");
+    download_button.classList.add("hidden");
+    save_as_pdf.classList.add("hidden");
     if (e.target.value === "Select Type") {
       setType("");
     } else {
@@ -194,6 +212,13 @@ const ExamViewTimeTable = () => {
 
   const handleCourseChange = (e) => {
     e.preventDefault();
+    const time_table_viewport = document.getElementById("time_table_viewport");
+    time_table_viewport.classList.add("hidden");
+    time_table_viewport.classList.remove("flex");
+    const download_button = document.getElementById("download_button");
+    const save_as_pdf = document.getElementById("save_as_pdf");
+    download_button.classList.add("hidden");
+    save_as_pdf.classList.add("hidden");
     var selectedFilter = {};
     setStoreDates([]);
     if (examinationName !== "Select Examination") {
@@ -253,6 +278,13 @@ const ExamViewTimeTable = () => {
 
   const handleBranchChange = (e) => {
     e.preventDefault();
+    const time_table_viewport = document.getElementById("time_table_viewport");
+    time_table_viewport.classList.add("hidden");
+    time_table_viewport.classList.remove("flex");
+    const download_button = document.getElementById("download_button");
+    const save_as_pdf = document.getElementById("save_as_pdf");
+    download_button.classList.add("hidden");
+    save_as_pdf.classList.add("hidden");
     var selectedFilter = {};
     setStoreDates([]);
 
@@ -324,6 +356,13 @@ const ExamViewTimeTable = () => {
 
   const handleSemesterChange = (e) => {
     e.preventDefault();
+    const time_table_viewport = document.getElementById("time_table_viewport");
+    time_table_viewport.classList.add("hidden");
+    time_table_viewport.classList.remove("flex");
+    const download_button = document.getElementById("download_button");
+    const save_as_pdf = document.getElementById("save_as_pdf");
+    download_button.classList.add("hidden");
+    save_as_pdf.classList.add("hidden");
     var selectedFilter = {};
     setStoreDates([]);
 

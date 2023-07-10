@@ -591,7 +591,8 @@ const ExamAssignSupervision = () => {
   };
 
   const createSrObject = (e, user_id, sr_no_of_supervisions) => {
-    let request_body = {};
+    let selectedFilter = {};
+    let timeTableSelectedFilter = {};
     if (srExaminationName === "") {
       toast.error("Please select examination name", {
         position: toast.POSITION.BOTTOM_LEFT,
@@ -610,7 +611,7 @@ const ExamAssignSupervision = () => {
       });
     } else {
       if (srBranchId !== "") {
-        request_body = {
+        selectedFilter = {
           examination_name: srExaminationName,
           academic_year: srSelectedYear,
           user_id: user_id,
@@ -620,8 +621,16 @@ const ExamAssignSupervision = () => {
           supervision_type: srType,
           no_of_supervisions: sr_no_of_supervisions,
         };
+
+        timeTableSelectedFilter = {
+          name: examinationName,
+          academic_year: selectedYear,
+          course_id: courseId,
+          branch_id: branchId,
+          time_table_type: srType,
+        };
       } else {
-        request_body = {
+        selectedFilter = {
           examination_name: srExaminationName,
           academic_year: srSelectedYear,
           user_id: user_id,
@@ -630,10 +639,21 @@ const ExamAssignSupervision = () => {
           supervision_type: srType,
           no_of_supervisions: sr_no_of_supervisions,
         };
+
+        timeTableSelectedFilter = {
+          name: examinationName,
+          academic_year: selectedYear,
+          course_id: courseId,
+          time_table_type: srType,
+        };
       }
 
       if (srTime !== "") {
-        request_body["time"] = parseInt(srTime);
+        selectedFilter["time"] = parseInt(srTime);
+        timeTableSelectedFilter["time"] = srTime === "0" ? "morning" : "evening"
+      } else {
+        delete selectedFilter["time"]
+        delete timeTableSelectedFilter["time"]
       }
 
       if (e.target.innerHTML === ReactDOMServer.renderToString(<FiEdit />)) {
@@ -647,6 +667,7 @@ const ExamAssignSupervision = () => {
               supervision: {
                 no_of_supervisions: sr_no_of_supervisions,
               },
+              time_table: timeTableSelectedFilter
             },
             {
               headers,
@@ -671,8 +692,9 @@ const ExamAssignSupervision = () => {
           .post(
             `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions`,
             {
-              supervision: request_body,
+              supervision: selectedFilter,
               subdomain: subdomain,
+              time_table: timeTableSelectedFilter
             },
             {
               headers: {

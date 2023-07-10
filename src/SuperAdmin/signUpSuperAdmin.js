@@ -57,7 +57,7 @@ const SignUpSuperAdmin = () => {
           <h2 className="font-semibold text-xl p-5 text-white"></h2>
 
           <div className="bg-white rounded shadow-lg p-4 px-4 md:p-8 mb-6 mt-20">
-            <div className="flex justify-center mb-3">
+            <div className="flex justify-start mb-3">
               <h2 className="font-semibold text-xl text-slate-900">
                 {" "}
                 Registration Form

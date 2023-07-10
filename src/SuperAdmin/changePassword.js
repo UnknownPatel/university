@@ -81,9 +81,9 @@ const ChangePassword = () => {
   };
 
   return (
-    <div className="bg-blue-950 signupimage">
+    <div className="h-screen signupimage flex items-center justify-center bg-cover">
       <div className="container max-w-screen-md mx-auto ">
-        <div>
+        <div className="-mt-48">
           <h2 className="p-5 "></h2>
 
           <div className="bg-white rounded shadow-lg p-4 px-4 md:p-8 mb-6 mt-36">
