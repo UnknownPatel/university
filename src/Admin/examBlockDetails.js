@@ -8,6 +8,7 @@ import { GiArchiveResearch } from "react-icons/gi";
 import { MdAddCircle } from "react-icons/md";
 import { FiEdit } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
+import BlockDetailsModal from "./modals/blockDetailsModal";
 
 var acces_token;
 var headers;
@@ -34,10 +35,12 @@ const ExamBlockDetails = () => {
   const [academic_years, setAcademicYears] = useState([]);
   const [storeDates, setStoreDates] = useState([]);
   const [examinationNames, setExaminationNames] = useState([]);
+  const [examinationTypes, setExaminationTypes] = useState([]);
+  const [examinationTimes, setExaminationTimes] = useState([]);
+  const [blockDetailsShowModal, setBlockDetailsShowModal] = useState(false);
+  const [blockDetailsId, setBlockDetailsId] = useState("");
   const [type, setType] = useState("");
   const navigate = useNavigate();
-
-  const [examinationTypes, setExaminationTypes] = useState([]);
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -140,6 +143,29 @@ const ExamBlockDetails = () => {
               setExaminationTypes(responce.data.data.examination_types);
             } else {
               setExaminationTypes([]);
+            }
+          }
+        })
+        .catch(function (err) {
+          console.log(err.message);
+        });
+
+      axios
+        .get(
+          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_times",
+          {
+            headers,
+            params: {
+              subdomain: subdomain,
+            },
+          }
+        )
+        .then((responce) => {
+          if (responce.data.status === "ok") {
+            if (responce.data.data.examination_times.length !== 0) {
+              setExaminationTimes(responce.data.data.examination_times);
+            } else {
+              setExaminationTimes([]);
             }
           }
         })
@@ -629,24 +655,31 @@ const ExamBlockDetails = () => {
                     const no_of_students = document.getElementById(
                       "input-time-table-" + time_table.id
                     );
+                    
+                    const deleteButton = document.getElementById(
+                      "delete-button-time-table-" + time_table.id
+                    );
+
                     const button_submit = document.getElementById(
                       "button-subject-" + time_table.id
                     );
                     if (res.data.message === "Details found") {
                       no_of_students.value =
                         res.data.data.report.no_of_students;
-                      button_submit.innerHTML = ReactDOMServer.renderToString(
-                        <FiEdit />
-                      );
+                      button_submit.innerHTML = "Update";
                       button_submit.setAttribute(
                         "data-report-id",
                         res.data.data.report.id
                       );
+                      deleteButton.setAttribute(
+                        "data-report-id",
+                        res.data.data.report.id
+                      );
+                      deleteButton.classList.remove('hidden');
                     } else {
                       no_of_students.value = "";
-                      button_submit.innerHTML = ReactDOMServer.renderToString(
-                        <MdAddCircle />
-                      );
+                      button_submit.innerHTML = "Create";
+                      deleteButton.classList.add('hidden');
                       button_submit.removeAttribute("data-report-id");
                     }
                   })
@@ -722,7 +755,7 @@ const ExamBlockDetails = () => {
     );
     selectedFilter["no_of_students"] = no_of_students_input.value;
     acces_token = localStorage.getItem("access_token");
-    if (e.target.innerHTML === ReactDOMServer.renderToString(<FiEdit />)) {
+    if (e.target.innerHTML === "Update") {
       var report_id = e.target.getAttribute("data-report-id");
       axios
         .put(
@@ -738,6 +771,7 @@ const ExamBlockDetails = () => {
           }
         )
         .then((res) => {
+          
           if (res.data.status == "ok") {
             const student_input = document.getElementById(
               "input-time-table-" + time_table_id
@@ -769,6 +803,9 @@ const ExamBlockDetails = () => {
           }
         )
         .then((responce) => {
+          const deleteButton = document.getElementById(
+            "delete-button-time-table-" + time_table_id
+          );
           if (responce.data.status == "created") {
             const button = document.getElementById(
               "button-subject-" + time_table_id
@@ -776,13 +813,19 @@ const ExamBlockDetails = () => {
             const student_input = document.getElementById(
               "input-time-table-" + time_table_id
             );
-            button.innerHTML = ReactDOMServer.renderToString(<FiEdit />);
+            deleteButton.setAttribute(
+              "data-report-id",
+              responce.data.data.report.id
+            );
+            deleteButton.classList.remove('hidden');
+            button.innerHTML = "Update";
             button.setAttribute("data-report-id", responce.data.data.report.id);
             student_input.value = responce.data.data.report.no_of_students;
             toast.success(responce.data.message, {
               position: toast.POSITION.BOTTOM_LEFT,
             });
           } else {
+            deleteButton.classList.add('hidden');
             toast.error(responce.data.message, {
               position: toast.POSITION.BOTTOM_LEFT,
             });
@@ -1109,15 +1152,20 @@ const ExamBlockDetails = () => {
               }}
             >
               <option value="Select time">Time</option>
-              <option value="morning">10:30 A.M to 01:00 P.M</option>
-              <option value="evening">03:00 P.M to 05:30 P.M</option>
+              {examinationTimes.map((examination_time) => {
+                return (
+                  <option value={examination_time.name}>
+                    {examination_time.name}
+                  </option>
+                );
+              })}
             </select>
           </div>
 
           <div className="flex justify-center mt-5">
             <button
               className="py-2 px-3 bg-gray-800 rounded-2xl text-white font-bold w-auto"
-              // id={"button-subject-" + subject.id}
+              id={"submit-button"}
               onClick={handleFilterSubmit}
             >
               <p className="inline-flex">
@@ -1145,31 +1193,31 @@ const ExamBlockDetails = () => {
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                          className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
                         >
                           Subject Code
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                          className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
                         >
                           Date
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                          className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
                         >
                           Time
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                          className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
                         >
                           No. of Students
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                          className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
                         >
                           Action
                         </th>
@@ -1184,16 +1232,16 @@ const ExamBlockDetails = () => {
                           <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                             {time_table.subject_name}
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                          <td className="px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap">
                             {time_table.subject_code}
                           </td>
-                          <td className="px-6 py-4 text-sm  whitespace-nowrap">
+                          <td className="px-6 py-4 text-sm text-center whitespace-nowrap">
                             {time_table.date}
                           </td>
-                          <td className="px-6 py-4 text-sm  whitespace-nowrap">
+                          <td className="px-6 py-4 text-sm text-center whitespace-nowrap">
                             {time_table.time}
                           </td>
-                          <td className="px-6 py-4 text-sm  whitespace-nowrap">
+                          <td className="px-6 py-4 text-sm flex justify-center whitespace-nowrap">
                             <input
                               className="shadow appearance-none border rounded w-44 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                               id={"input-time-table-" + time_table.id}
@@ -1205,9 +1253,10 @@ const ExamBlockDetails = () => {
                               required
                             />
                           </td>
-                          <td className="px-6 py-4 text-sm  whitespace-nowrap">
+                          <td className="px-6 py-4 text-sm text-center whitespace-nowrap">
                             <button
-                              className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold"
+                              className="text-center w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
+                              font-semibold focus:outline-none focus:shadow-outline hover:bg-green-600 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
                               data-id={time_table.id}
                               onClick={(e) =>
                                 handleSubmitBlockWiseReport(
@@ -1218,8 +1267,27 @@ const ExamBlockDetails = () => {
                               }
                               id={"button-subject-" + time_table.id}
                             >
-                              <MdAddCircle />
+                              Create
                             </button>
+                            <button
+                              id={"delete-button-time-table-" + time_table.id}
+                              className="hidden text-center ml-4 w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
+                                    font-semibold focus:outline-none focus:shadow-outline hover:bg-red-600 hover:text-slate-50 hover:border-none shadow-lg cursor-pointer transition ease-in duration-300"
+                              onClick={(e) => {
+                                setBlockDetailsShowModal(true);
+                                setBlockDetailsId(
+                                  e.target.getAttribute("data-report-id")
+                                );
+                              }}
+                            >
+                              Delete
+                            </button>
+                            {blockDetailsShowModal && (
+                              <BlockDetailsModal
+                                setOpenModal={setBlockDetailsShowModal}
+                                id={blockDetailsId}
+                              />
+                            )}
                           </td>
                         </tr>
                       ))}
