@@ -77,6 +77,8 @@ const SignInSuperAdmin = () => {
               )
               .then((responce) => {
                 console.log(responce.data.roles);
+                const roles = responce.data.roles;
+                localStorage.setItem("roles", roles);
                 if (responce.data.roles.includes("super_admin")) {
                   toast.success("Login Successfully !!", {
                     position: toast.POSITION.BOTTOM_LEFT,
@@ -110,7 +112,7 @@ const SignInSuperAdmin = () => {
                 }
               })
               .catch((error) => console.log(error));
-          } 
+          }
         })
         .catch((err) => {
           console.log(err);
@@ -118,7 +120,7 @@ const SignInSuperAdmin = () => {
           login_btn.disabled = false;
           login_btn.innerHTML = "Log In";
           login_btn.classList.remove("cursor-not-allowed");
-          if (err.response.data.error === "invalid_grant"){
+          if (err.response.data.error === "invalid_grant") {
             toast.error("Email or password is not valid", {
               position: toast.POSITION.BOTTOM_LEFT,
             });
@@ -127,7 +129,6 @@ const SignInSuperAdmin = () => {
               position: toast.POSITION.BOTTOM_LEFT,
             });
           }
-          
         });
     }
   };
