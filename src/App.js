@@ -44,7 +44,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route exact path="/" element={<SignInSuperAdmin />} />
-          <Route path="/signupSuperAdmin" element={<SignUpSuperAdmin />} />
+          <Route path="/universityRegistration" element={<SignUpSuperAdmin />} />
           <Route path="/home" element={<Home />} />
           <Route path="/assignRole" element={<AssignRole />} />
           <Route

@@ -18,6 +18,9 @@ const SignUpSuperAdmin = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    event.target.innerHTML = "Submitting ...";
+    event.target.disabled = true;
+    event.target.classList.add("cursor-not-allowed");
     axios
       .post(
         "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities",
@@ -26,14 +29,22 @@ const SignUpSuperAdmin = () => {
         }
       )
       .then(function (response) {
-        console.log(response);
-        toast.success(response.data.message, {
-          position: toast.POSITION.BOTTOM_LEFT,
-        });
-        setTimeout(() => {
+        if (response.data.status === "created") {
+          toast.success(response.data.message, {
+            position: toast.POSITION.BOTTOM_LEFT,
+          });
           var url = `${window.location.protocol}//${response.data.data.university.subdomain}.${window.location.host}/`;
-          window.location.replace(url);
-        }, 5000);
+          setTimeout(() => {
+            window.location.replace(url);
+          }, 5000);
+        } else {
+          event.target.innerHTML = "Submit";
+          event.target.disabled = false;
+          event.target.classList.remove("cursor-not-allowed");
+          toast.error(response.data.message, {
+            position: toast.POSITION.BOTTOM_LEFT,
+          });
+        }
       })
       .catch(function (error) {
         let message =
@@ -51,7 +62,7 @@ const SignUpSuperAdmin = () => {
     });
   };
   return (
-    <div className="h-screen flex items-center justify-center signupimage bg-cover" >
+    <div className="h-screen flex items-center justify-center signupimage bg-cover">
       <div className="-mt-32">
         <div>
           <h2 className="font-semibold text-xl p-5 text-white"></h2>
@@ -65,7 +76,6 @@ const SignUpSuperAdmin = () => {
             </div>
 
             <div className="grid gap-4 gap-y-2 text-sm grid-cols-1 lg:grid-cols-3">
-
               <div className="lg:col-span-3">
                 <div className="grid gap-4 gap-y-2 text-sm grid-cols-2 md:grid-cols-9">
                   <div className="md:col-span-4">
@@ -179,6 +189,7 @@ const SignUpSuperAdmin = () => {
           </div>
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 };

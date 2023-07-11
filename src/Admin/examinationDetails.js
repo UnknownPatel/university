@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import TimePicker from "react-time-picker";
 import "react-time-picker/dist/TimePicker.css";
+import SignInSuperAdmin from "../SuperAdmin/signInSuperAdmin";
 // import "react-clock/dist/Clock.css";
 import moment from "moment";
 
@@ -272,6 +273,7 @@ const ExaminationDetails = () => {
 
   const handleStartTime = (e) => {
     // e.preventDefault();
+    console.log(e);
     if (e !== null) {
       var time = moment(e, "hh:mm A").format("hh:mm A");
       setStartTime(time);
@@ -283,15 +285,72 @@ const ExaminationDetails = () => {
   const handleEndTime = (e) => {
     if (e !== null) {
       var time = moment(e, "hh:mm A").format("hh:mm A");
-      setEndTime(time)
+      setEndTime(time);
     } else {
-      setEndTime("")
+      setEndTime("");
     }
-    };
+  };
 
   const handleCreateExaminationTime = (e) => {
     e.preventDefault();
     console.log(startTime + " - " + endTime);
+    var name = startTime + " - " + endTime;
+
+    if (subdomain !== null || subdomain !== "") {
+      axios
+        .post(
+          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_times",
+          {
+            examination_time: {
+              name: name,
+            },
+            subdomain: subdomain,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${acces_token}`,
+            },
+          }
+        )
+        .then((res) => {
+          if(res.data.status === "created") {
+            setStartTime("");
+            setEndTime("");
+            axios
+            .get(
+              "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_times",
+              {
+                headers,
+                params: {
+                  subdomain: subdomain,
+                },
+              }
+            )
+            .then((responce) => {
+              const viewport = document.getElementById(
+                "examination_time_viewport"
+              );
+              if (responce.data.message === "Types found") {
+                if (responce.data.data.examination_types.length !== 0) {
+                  viewport.classList.remove("hidden");
+                  viewport.classList.add("flex");
+                  setExaminationTimes(responce.data.data.examination_types);
+                } else {
+                  viewport.classList.add("hidden");
+                  viewport.classList.remove("flex");
+                  setExaminationTimes([]);
+                }
+              }
+            })
+            .catch(function (err) {
+              console.log(err.message);
+            });
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    }
   };
 
   const handleLogout = () => {
@@ -714,6 +773,7 @@ const ExaminationDetails = () => {
                     <TimePicker
                       className="ml-2 "
                       disableClock="true"
+                      format="h:m a"
                       onChange={handleEndTime}
                       value={endTime}
                     />

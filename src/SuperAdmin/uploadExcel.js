@@ -1,8 +1,11 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import { MdDelete, MdDeleteOutline } from "react-icons/md";
+import { RiDeleteBin6Line } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Modal from "./modal";
 
 var acces_token;
 var headers;
@@ -17,6 +20,8 @@ const UploadExcel = () => {
   const [clientId, setClentId] = useState("");
   const [clientSecret, setClentSecret] = useState("");
   const [excelSheets, setExcelSheets] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [deleteExcel, setDeleteExcel] = useState(false);
 
   useEffect(() => {
     acces_token = localStorage.getItem("access_token");
@@ -26,7 +31,6 @@ const UploadExcel = () => {
     if (arr.length > 0) {
       subdomain = arr[0];
     }
-    console.log(subdomain);
 
     if (subdomain !== null || subdomain !== "") {
       axios
@@ -34,9 +38,7 @@ const UploadExcel = () => {
           `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
         )
         .then((response) => {
-          console.log(response.data.university.name);
           setUniName(response.data.university.name);
-          console.log(response);
         })
         .catch((err) => {
           console.log(err);
@@ -55,6 +57,7 @@ const UploadExcel = () => {
         .then((res) => {
           if (res.data.data.excel_sheets.length !== 0) {
             setExcelSheets(res.data.data.excel_sheets);
+          } else {
           }
         })
         .catch((err) => {
@@ -67,7 +70,6 @@ const UploadExcel = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const axiosInstance = axios.create({timeout: 0})
     acces_token = localStorage.getItem("access_token");
     const submit_button = document.getElementById("button-submit-excel-sheet");
     const file_select = document.getElementById("file_select");
@@ -76,7 +78,6 @@ const UploadExcel = () => {
     submit_button.innerHTML = "Uploading ...";
     submit_button.classList.add("cursor-not-allowed");
     if (selectedFile !== null || selectedFile !== "") {
-      console.log("Uploading");
       axios
         .post(
           "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/excel_sheets",
@@ -95,7 +96,6 @@ const UploadExcel = () => {
           }
         )
         .then((responce) => {
-          console.log(responce.data);
           submit_button.disabled = false;
           submit_button.innerHTML = "Upload";
           submit_button.classList.remove("cursor-not-allowed");
@@ -138,7 +138,6 @@ const UploadExcel = () => {
           console.log(err.message);
         });
     }
-    console.log(selectedFile);
   };
 
   const handleLogout = () => {
@@ -190,6 +189,11 @@ const UploadExcel = () => {
     } else {
       hidden_div.classList.add("hidden");
     }
+  };
+
+  const handleDeleteExcel = (e, id) => {
+    e.preventDefault();
+    console.log(id);
   };
 
   return (
@@ -370,7 +374,6 @@ const UploadExcel = () => {
                 <select
                   id="file_select"
                   className="form-select w-full rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                  // className="block p-2 mb-6 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   onChange={(e) => {
                     handleSheetNameChange(e);
                   }}
@@ -403,44 +406,12 @@ const UploadExcel = () => {
                   </div>
                 </div>
 
-                {/* <div className="grid grid-cols-1 space-y-2">
-                  <label className="text-start text-sm font-bold text-gray-500 tracking-wide">
-                    Attach {selectedValue} Sheet
-                  </label>
-                  <div className="flex items-center justify-center w-full">
-                    <label className="flex flex-col rounded-lg w-full border-4 border-dashed h-60 p-10 group text-center">
-                      <div className="h-full w-full text-center flex flex-col justify-center items-center  ">
-                        <div className="flex flex-auto max-h-48 w-2/5 mx-auto -mt-10">
-                          <img
-                            className="has-mask h-36 object-center"
-                            src="https://img.freepik.com/free-vector/image-upload-concept-landing-page_52683-27130.jpg?size=338&ext=jpg"
-                            alt="freepik image"
-                          />
-                        </div>
-                        <p className="pointer-none text-gray-500 ">
-                          <span className="text-sm">Drag and drop</span> files
-                          here <br /> or
-                            select a file
-                        
-                          from your computer
-                        </p>
-                      </div>
-                      <input
-                        type="file"
-                        className="hidden"
-                        onChange={(e) => setSelectedFile(e.target.files[0])}
-                        accept=".xls,.xlsx"
-                      />
-                    </label>
-                  </div>
-                </div> */}
                 <div className="flex justify-center mt-5">
                   <button
                     type="submit"
                     id="button-submit-excel-sheet"
-                    // className="py-3 px-8 bg-black rounded-2xl text-white font-bold"
                     className="text-center w-full bg-green-600 text-gray-100 p-4 rounded-full tracking-wide
-                font-semibold  focus:outline-none focus:shadow-outline hover:bg-green-700 shadow-lg cursor-pointer transition ease-in duration-300"
+                font-semibold  focus:outline-none focus:shadow-outline hover:bg-green-700 shadow-lg transition ease-in duration-300"
                   >
                     Upload
                   </button>
@@ -457,10 +428,6 @@ const UploadExcel = () => {
               <div className="p-1.5 w-full inline-block align-middle">
                 <div className="border rounded-lg">
                   <table className="min-w-full divide-y table-auto divide-gray-200">
-                    <caption className="caption-top">
-                      {" "}
-                      Uploaded Sheets List{" "}
-                    </caption>
                     <thead className="sticky top-0 bg-gray-50">
                       <tr>
                         <th
@@ -475,21 +442,59 @@ const UploadExcel = () => {
                         >
                           Sheet Name
                         </th>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase"
+                        >
+                          Action
+                        </th>
                       </tr>
                     </thead>
                     <tbody className="text-center divide-y divide-gray-200">
-                      {excelSheets.map((excelSheet, index) => {
-                        return (
-                          <tr>
-                            <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                              {index + 1}
-                            </td>
-                            <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                              {excelSheet.name}
-                            </td>
-                          </tr>
-                        );
-                      })}
+                      {excelSheets.length === 0 ? (
+                        <tr className="items-center">
+                          {" "}
+                          <td colSpan={3}>
+                            {" "}
+                            No excel sheets uploaded yet! Please upload first{" "}
+                          </td>{" "}
+                        </tr>
+                      ) : (
+                        excelSheets.map((excelSheet, index) => {
+                          return (
+                            <tr key={excelSheet.id}>
+                              <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                {index + 1}
+                              </td>
+                              <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                {excelSheet.name}
+                              </td>
+                              <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                <button
+                                  id={excelSheet.id}
+                                  className="text-center w-auto bg-transparent text-gray-100 p-1 rounded-full tracking-wide
+                                  font-semibold  focus:outline-none focus:shadow-outline hover:bg-red-200 shadow-lg cursor-pointer transition ease-in duration-300"
+                                  onClick={() => {
+                                    setShowModal(true);
+                                  }}
+                                >
+                                  <RiDeleteBin6Line
+                                    size={20}
+                                    className="text-red-600"
+                                  />
+                                </button>
+                                {showModal && (
+                                  <Modal
+                                    setOpenModal={setShowModal}
+                                    id={excelSheet.id}
+                                    setSheets={setExcelSheets}
+                                  />
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
                     </tbody>
                   </table>
                 </div>

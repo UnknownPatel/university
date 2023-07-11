@@ -91,7 +91,7 @@ const SignInSuperAdmin = () => {
                     position: toast.POSITION.BOTTOM_LEFT,
                   });
                   setTimeout(() => {
-                    navigate("/examTimeTable");
+                    navigate("/examinationDetails");
                   }, 2000);
                 } else if (responce.data.roles.includes("Marks Entry")) {
                   toast.success("Login Successfully !!", {
@@ -205,7 +205,7 @@ const SignInSuperAdmin = () => {
                     <p className="">
                       New here?{" "}
                       <a
-                        href="/signupSuperAdmin"
+                        href="/universityRegistration"
                         className="text-blue-500 hover:text-blue-700 font-semibold"
                       >
                         Create an University
