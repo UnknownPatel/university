@@ -72,15 +72,16 @@ const ExaminationDetails = () => {
           }
         )
         .then((responce) => {
-          const viewport = document.getElementById("examination_name_viewport");
+          const name_viewport = document.getElementById("examination_name_viewport");
+          console.log(name_viewport);
           if (responce.data.message === "Names found") {
             if (responce.data.data.examination_names.length !== 0) {
-              viewport.classList.remove("hidden");
-              viewport.classList.add("flex");
+              name_viewport.classList.remove("hidden");
+              name_viewport.classList.add("flex");
               setExaminationNames(responce.data.data.examination_names);
             } else {
-              viewport.classList.add("hidden");
-              viewport.classList.remove("flex");
+              name_viewport.classList.add("hidden");
+              name_viewport.classList.remove("flex");
               setExaminationNames([]);
             }
           }
@@ -133,7 +134,7 @@ const ExaminationDetails = () => {
             if (responce.data.data.examination_times.length !== 0) {
               viewport.classList.remove("hidden");
               viewport.classList.add("flex");
-              setExaminationTimes(responce.data.data.examination_names);
+              setExaminationTimes(responce.data.data.examination_times);
             } else {
               viewport.classList.add("hidden");
               viewport.classList.remove("flex");
@@ -185,9 +186,7 @@ const ExaminationDetails = () => {
               }
             )
             .then((responce) => {
-              const viewport = document.getElementById(
-                "examination_name_viewport"
-              );
+              const viewport = document.getElementById("examination_name_viewport")
               if (responce.data.message === "Names found") {
                 if (responce.data.data.examination_names.length !== 0) {
                   viewport.classList.remove("hidden");
