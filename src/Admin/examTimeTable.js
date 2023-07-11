@@ -6,6 +6,8 @@ import "react-datepicker/dist/react-datepicker.css";
 import "tailwindcss/tailwind.css";
 import { GiArchiveResearch } from "react-icons/gi";
 import { useNavigate } from "react-router-dom";
+import TimeTableModal from "./modals/timeTableModal";
+import { RiDeleteBin6Line } from "react-icons/ri";
 
 var acces_token;
 var headers;
@@ -26,6 +28,7 @@ const ExamTimeTable = () => {
   const [examinationName, setExaminationName] = useState("");
   const [examinationNames, setExaminationNames] = useState([]);
   const [examinationTypes, setExaminationTypes] = useState([]);
+  const [examinationTimes, setExaminationTimes] = useState([]);
   const [subjectId, setSubjectId] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
@@ -36,6 +39,8 @@ const ExamTimeTable = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [type, setType] = useState("");
   const [storedDates, setStoredDates] = useState([]);
+  const [timeTableShowModal, setTimeTableShowModal] = useState(false);
+  const [timeTableId, setTimeTableId] = useState("");
   const navigate = useNavigate();
 
   var year;
@@ -139,11 +144,31 @@ const ExamTimeTable = () => {
         .catch(function (err) {
           console.log(err.message);
         });
+
+      axios
+        .get(
+          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_times",
+          {
+            headers,
+            params: {
+              subdomain: subdomain,
+            },
+          }
+        )
+        .then((responce) => {
+          if (responce.data.status === "ok") {
+            if (responce.data.data.examination_times.length !== 0) {
+              setExaminationTimes(responce.data.data.examination_times);
+            } else {
+              setExaminationTimes([]);
+            }
+          }
+        })
+        .catch(function (err) {
+          console.log(err.message);
+        });
     }
   }, []);
-  function toggleDropdown() {
-    setIsDropdownOpen(!isDropdownOpen);
-  }
 
   const handleExaminationChange = (examination) => {
     handleViewPortChange();
@@ -177,6 +202,7 @@ const ExamTimeTable = () => {
     console.log(selectedFilter);
     setSubjects([]);
     setSemesters([]);
+    setBranches([]);
     handleViewPortChange();
     var course_id = e.target.value;
     setCourseId(course_id);
@@ -203,6 +229,7 @@ const ExamTimeTable = () => {
   const handleBranchChange = (e) => {
     e.preventDefault();
     setSubjects([]);
+    setSemesters([]);
     handleViewPortChange();
     var branch_id = e.target.value;
     if (branch_id === "Select Branch") {
@@ -245,6 +272,16 @@ const ExamTimeTable = () => {
     }
   };
 
+  const handleTimeChange = (e) => {
+    e.preventDefault();
+    handleViewPortChange();
+    if (e.target.value === "Select time") {
+      setTime("");
+    } else {
+      setTime(e.target.value);
+    }
+  };
+
   const handleTypeChange = (e) => {
     e.preventDefault();
     setSubjects([]);
@@ -275,12 +312,17 @@ const ExamTimeTable = () => {
       toast.error("Please select course", {
         position: toast.POSITION.BOTTOM_LEFT,
       });
+    } else if (time === "" || time === "Select time") {
+      toast.error("Please select examination time", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
     } else {
       selectedFilter = {
         name: examinationName,
         academic_year: selectedYear,
         course_id: courseId,
         time_table_type: type,
+        time: time,
       };
 
       if (branchId !== "") {
@@ -336,31 +378,30 @@ const ExamTimeTable = () => {
                     const button = document.getElementById(
                       "button-subject-" + subject.id
                     );
+
+                    const deleteButton = document.getElementById(
+                      "delete-button-subject-" + subject.id
+                    );
                     const table_date = document.getElementById(
                       "date-select-subject-" + subject.id
                     );
-                    const table_time = document.getElementById(
-                      "select-time-subject-" + subject.id
-                    );
+
                     if (get_response.data.message === "Details found") {
                       button.innerHTML = "Update";
+                      deleteButton.setAttribute(
+                        "data-time-table-id",
+                        get_response.data.data.time_table.id
+                      );
                       button.setAttribute(
                         "data-time-table-id",
                         get_response.data.data.time_table.id
                       );
+                      deleteButton.classList.remove('hidden');
                       table_date.value = get_response.data.data.time_table.date;
-                      var selectedIndex =
-                        get_response.data.data.time_table.time ===
-                        "10:30 A.M to 01:00 P.M"
-                          ? 1
-                          : 2;
-                      table_time.options.selectedIndex = selectedIndex;
                     } else {
                       button.innerHTML = "Create";
+                      deleteButton.classList.add('hidden');
                       table_date.value = "";
-                      table_time.options[
-                        table_time.options.selectedIndex
-                      ].text = "Select time";
                     }
                   })
                   .catch((err) => {
@@ -373,7 +414,7 @@ const ExamTimeTable = () => {
               });
             }
           } else {
-            toast.error("No subjects found for the selected criteria!", {
+            toast.error(res.data.message, {
               position: toast.POSITION.BOTTOM_LEFT,
             });
           }
@@ -384,7 +425,7 @@ const ExamTimeTable = () => {
     }
   };
 
-  const createObject = (e, id, date, time) => {
+  const createObject = (e, id) => {
     e.preventDefault();
     let selectedFilter = {};
 
@@ -404,6 +445,10 @@ const ExamTimeTable = () => {
       toast.error("Please select type", {
         position: toast.POSITION.BOTTOM_LEFT,
       });
+    } else if (time === "" || time === "Select time") {
+      toast.error("Please select time", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
     } else {
       selectedFilter = {
         name: examinationName,
@@ -411,6 +456,7 @@ const ExamTimeTable = () => {
         course_id: courseId,
         subject_id: id,
         time_table_type: type,
+        time: time,
       };
 
       if (branchId !== "") {
@@ -427,21 +473,15 @@ const ExamTimeTable = () => {
     }
     var time_table_id = e.target.getAttribute("data-time-table-id");
     const date_input = document.getElementById("date-select-subject-" + id);
-    const time_input = document.getElementById("select-time-subject-" + id);
 
     var dateValue = date_input.value;
-    var timeValue = time_input.options[time_input.options.selectedIndex].value;
+
     if (dateValue !== "") {
       selectedFilter["date"] = dateValue;
     } else {
       delete selectedFilter["date"];
     }
 
-    if (timeValue !== "") {
-      selectedFilter["time"] = timeValue;
-    } else {
-      delete selectedFilter["time"];
-    }
     if (e.target.innerHTML === "Update") {
       // Update TimeTable API
       axios
@@ -482,23 +522,28 @@ const ExamTimeTable = () => {
           }
         )
         .then((responce) => {
-          console.log(responce.data);
           const button = document.getElementById("button-subject-" + id);
           const date = document.getElementById("date-select-subject-" + id);
-          const time = document.getElementById("select-time-subject-" + id);
+          const deleteButton = document.getElementById(
+            "delete-button-subject-" + id
+          );
           if (responce.data.status == "created") {
             button.innerHTML = "Update";
+            deleteButton.setAttribute(
+              "data-time-table-id",
+              responce.data.data.time_table.id
+            );
             button.setAttribute(
               "data-time-table-id",
               responce.data.data.time_table.id
             );
+            deleteButton.classList.remove('hidden');
             date.value = responce.data.data.time_table.date;
-            time.options[time.options.selectedIndex].text =
-              responce.data.data.time_table.time;
             toast.success(responce.data.message, {
               position: toast.POSITION.BOTTOM_LEFT,
             });
           } else {
+            deleteButton.classList.add('hidden');
             toast.error(responce.data.message, {
               position: toast.POSITION.BOTTOM_LEFT,
             });
@@ -772,6 +817,24 @@ const ExamTimeTable = () => {
             </select>
 
             <select
+              id={"select-time-subject"}
+              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
+              onChange={(e) => {
+                handleTimeChange(e);
+              }}
+              // selected={}
+            >
+              <option value="Select time">Time</option>
+              {examinationTimes.map((examination_time) => {
+                return (
+                  <option value={examination_time.name}>
+                    {examination_time.name}
+                  </option>
+                );
+              })}
+            </select>
+
+            <select
               aria-label="Select Course"
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
               onChange={handleCourseChange}
@@ -806,7 +869,10 @@ const ExamTimeTable = () => {
             </select>
 
             <button
-              className="py-2 px-3 mr-7 bg-gray-800 rounded-2xl text-white font-bold"
+              id="submit-button"
+              // className="py-2 px-3 mr-7 bg-gray-800 rounded-2xl text-white font-bold"
+              className="text-center ml-4 w-auto bg-transparent text-slate-950 p-3 rounded-2xl tracking-wide border border-slate-950
+              font-semibold focus:outline-none focus:shadow-outline hover:bg-gray-700 hover:text-white hover:border-none shadow-lg cursor-pointer transition ease-in duration-300"
               onClick={handleFilterSubmit}
             >
               <p className="inline-flex">
@@ -833,7 +899,7 @@ const ExamTimeTable = () => {
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                          className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
                         >
                           Subject Code
                         </th>
@@ -842,12 +908,6 @@ const ExamTimeTable = () => {
                           className="text-center px-6 py-3 text-xs font-bold text-gray-500 uppercase "
                         >
                           Date
-                        </th>
-                        <th
-                          scope="col"
-                          className="text-center px-6 py-3 text-xs font-bold text-gray-500 uppercase "
-                        >
-                          Time
                         </th>
                         <th
                           scope="col"
@@ -866,10 +926,10 @@ const ExamTimeTable = () => {
                           >
                             {subject.name}
                           </td>
-                          <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                          <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                             {subject.code}
                           </td>
-                          <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
+                          <td className="px-6 py-4 text-sm font-medium text-center whitespace-nowrap">
                             <input
                               className="shadow appearance-none border rounded w-40 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                               id={"date-select-subject-" + subject.id}
@@ -882,37 +942,38 @@ const ExamTimeTable = () => {
                               required
                             />
                           </td>
-                          <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                            <select
-                              id={"select-time-subject-" + subject.id}
-                              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-2 py-1"
-                              onChange={(e) => {
-                                setTime(e.target.value);
-                              }}
-                              // selected={}
-                            >
-                              <option value="">Select time</option>
-                              <option value="morning">
-                                10:30 A.M to 01:00 P.M
-                              </option>
-                              <option value="evening">
-                                03:00 P.M to 05:30 P.M
-                              </option>
-                            </select>
-                          </td>
+
                           <td
                             className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap"
                             data-id={subject.id}
                           >
                             <button
-                              className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold"
+                              className="text-center w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
+                              font-semibold focus:outline-none focus:shadow-outline hover:bg-green-600 hover:text-white hover:border-none shadow-lg cursor-pointer transition ease-in duration-300"
                               id={"button-subject-" + subject.id}
-                              onClick={(e) =>
-                                createObject(e, subject.id, date, time)
-                              }
+                              onClick={(e) => createObject(e, subject.id)}
                             >
                               Create
                             </button>
+                            <button
+                              id={"delete-button-subject-" + subject.id}
+                              className="hidden text-center ml-4 w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
+                                    font-semibold focus:outline-none focus:shadow-outline hover:bg-red-600 hover:text-slate-50 hover:border-none shadow-lg cursor-pointer transition ease-in duration-300"
+                              onClick={(e) => {
+                                setTimeTableShowModal(true);
+                                setTimeTableId(
+                                  e.target.getAttribute("data-time-table-id")
+                                );
+                              }}
+                            >
+                              Delete
+                            </button>
+                            {timeTableShowModal && (
+                              <TimeTableModal
+                                setOpenModal={setTimeTableShowModal}
+                                id={timeTableId}
+                              />
+                            )}
                           </td>
                         </tr>
                       ))}
