@@ -8,7 +8,8 @@ var acces_token;
 var headers;
 var subdomain;
 
-const Modal = ({ setOpenModal, id, setSheets }) => {
+const NameModal = ({ setOpenModal, id, setNames }) => {
+
   useEffect(() => {
     acces_token = localStorage.getItem("access_token");
     headers = { Authorization: `Bearer ${acces_token}` };
@@ -19,11 +20,11 @@ const Modal = ({ setOpenModal, id, setSheets }) => {
     }
   }, []);
 
-  const handleDeleteExcel = (e) => {
+  const handleDeleteName = (e) => {
     if (subdomain !== null || subdomain !== "") {
       axios
         .delete(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/excel_sheets/${id}`,
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_names/${id}`,
           {
             headers,
             params: {
@@ -38,7 +39,7 @@ const Modal = ({ setOpenModal, id, setSheets }) => {
             });
             axios
               .get(
-                `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/excel_sheets`,
+                `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_names`,
                 {
                   headers,
                   params: {
@@ -47,11 +48,11 @@ const Modal = ({ setOpenModal, id, setSheets }) => {
                 }
               )
               .then((res) => {
-                if (res.data.data.excel_sheets.length !== 0) {
-                  setSheets(res.data.data.excel_sheets);
+                if (res.data.data.examination_names.length !== 0) {
+                  setNames(res.data.data.examination_names);
                   setOpenModal(false);
                 } else {
-                  setSheets([])
+                  setNames([])
                   setOpenModal(false)
                 }
               })
@@ -97,12 +98,12 @@ const Modal = ({ setOpenModal, id, setSheets }) => {
               </div>
               <div className="mt-2 text-center sm:ml-4 sm:text-left">
                 <p className="mt-2 text-[15px] leading-relaxed text-gray-500">
-                  Are you sure you want to delete this excel sheet?
+                  Are you sure you want to delete this examination time?
                 </p>
                 <div className="items-center gap-2 mt-3 sm:flex">
                   <button
                     className="w-full mt-2 p-2.5 flex-1 text-white bg-red-600 rounded-md outline-none ring-offset-2 ring-red-600 focus:ring-2"
-                    onClick={() => handleDeleteExcel()}
+                    onClick={() => handleDeleteName()}
                   >
                     Delete
                   </button>
@@ -119,7 +120,7 @@ const Modal = ({ setOpenModal, id, setSheets }) => {
         </div>
       </div>
     </>
-  );
-};
+  )
+}
 
-export default Modal;
+export default NameModal

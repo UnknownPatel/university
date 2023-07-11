@@ -6,6 +6,11 @@ import "react-time-picker/dist/TimePicker.css";
 import SignInSuperAdmin from "../SuperAdmin/signInSuperAdmin";
 // import "react-clock/dist/Clock.css";
 import moment from "moment";
+import { RiDeleteBin6Line } from "react-icons/ri";
+import TimeModal from "./modals/timeModal";
+import { ToastContainer, toast } from "react-toastify";
+import TypeModal from "./modals/typeModal";
+import NameModal from "./modals/nameModal";
 
 var acces_token;
 var subdomain;
@@ -23,6 +28,12 @@ const ExaminationDetails = () => {
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [examinationTimes, setExaminationTimes] = useState([]);
+  const [nameShowModal, setNameShowModal] = useState(false);
+  const [typeShowModal, setTypeShowModal] = useState(false);
+  const [timeShowModal, setTimeShowModal] = useState(false);
+  const [nameId, setNameId] = useState("");
+  const [timeId, setTimeId] = useState("");
+  const [typeId, setTypeId] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -72,7 +83,9 @@ const ExaminationDetails = () => {
           }
         )
         .then((responce) => {
-          const name_viewport = document.getElementById("examination_name_viewport");
+          const name_viewport = document.getElementById(
+            "examination_name_viewport"
+          );
           console.log(name_viewport);
           if (responce.data.message === "Names found") {
             if (responce.data.data.examination_names.length !== 0) {
@@ -172,9 +185,11 @@ const ExaminationDetails = () => {
         }
       )
       .then((responce) => {
-        console.log(responce.data);
-        if (responce.data.message === "Created") {
+        if (responce.data.status === "created") {
           setExaminationName("");
+          toast.success(responce.data.message, {
+            position: toast.POSITION.BOTTOM_LEFT,
+          });
           axios
             .get(
               "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_names",
@@ -186,7 +201,9 @@ const ExaminationDetails = () => {
               }
             )
             .then((responce) => {
-              const viewport = document.getElementById("examination_name_viewport")
+              const viewport = document.getElementById(
+                "examination_name_viewport"
+              );
               if (responce.data.message === "Names found") {
                 if (responce.data.data.examination_names.length !== 0) {
                   viewport.classList.remove("hidden");
@@ -231,9 +248,12 @@ const ExaminationDetails = () => {
       )
       .then((responce) => {
         console.log(responce.data);
-        if (responce.data.message === "Created") {
+        if (responce.data.status === "created") {
           setExaminationType("");
           setMaximumMarks("");
+          toast.success(responce.data.message, {
+            position: toast.POSITION.BOTTOM_LEFT,
+          });
           axios
             .get(
               "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_types",
@@ -312,38 +332,38 @@ const ExaminationDetails = () => {
           }
         )
         .then((res) => {
-          if(res.data.status === "created") {
+          if (res.data.status === "created") {
             setStartTime("");
             setEndTime("");
             axios
-            .get(
-              "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_times",
-              {
-                headers,
-                params: {
-                  subdomain: subdomain,
-                },
-              }
-            )
-            .then((responce) => {
-              const viewport = document.getElementById(
-                "examination_time_viewport"
-              );
-              if (responce.data.message === "Types found") {
-                if (responce.data.data.examination_types.length !== 0) {
-                  viewport.classList.remove("hidden");
-                  viewport.classList.add("flex");
-                  setExaminationTimes(responce.data.data.examination_types);
-                } else {
-                  viewport.classList.add("hidden");
-                  viewport.classList.remove("flex");
-                  setExaminationTimes([]);
+              .get(
+                "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_times",
+                {
+                  headers,
+                  params: {
+                    subdomain: subdomain,
+                  },
                 }
-              }
-            })
-            .catch(function (err) {
-              console.log(err.message);
-            });
+              )
+              .then((responce) => {
+                const viewport = document.getElementById(
+                  "examination_time_viewport"
+                );
+                if (responce.data.status === "ok") {
+                  if (responce.data.data.examination_times.length !== 0) {
+                    viewport.classList.remove("hidden");
+                    viewport.classList.add("flex");
+                    setExaminationTimes(responce.data.data.examination_times);
+                  } else {
+                    viewport.classList.add("hidden");
+                    viewport.classList.remove("flex");
+                    setExaminationTimes([]);
+                  }
+                }
+              })
+              .catch(function (err) {
+                console.log(err.message);
+              });
           }
         })
         .catch((err) => {
@@ -616,8 +636,7 @@ const ExaminationDetails = () => {
               </div>
               <div
                 id="examination_name_viewport"
-                className="hidden flex-col overflow-y-scroll mt-5"
-                style={{ height: 390 }}
+                className="hidden flex-col overflow-y-scroll min-h-max h-4/5 mt-5 "
               >
                 <div className="">
                   <div className="p-1.5 w-full inline-block align-middle">
@@ -637,6 +656,12 @@ const ExaminationDetails = () => {
                             >
                               Examination Name
                             </th>
+                            <th
+                              scope="col"
+                              className="text-center px-6 py-3 text-xs font-bold text-gray-500 uppercase "
+                            >
+                              Action
+                            </th>
                           </tr>
                         </thead>
                         <tbody className="text-center divide-y divide-gray-200">
@@ -648,6 +673,28 @@ const ExaminationDetails = () => {
                                 </td>
                                 <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                                   {examination_name.name}
+                                </td>
+                                <td>
+                                  <button
+                                    className="text-center w-auto bg-transparent text-gray-100 p-1 rounded-full tracking-wide
+                                    font-semibold  focus:outline-none focus:shadow-outline hover:bg-red-200 shadow-lg cursor-pointer transition ease-in duration-300"
+                                    onClick={() => {
+                                      setNameShowModal(true);
+                                      setNameId(examination_name.id);
+                                    }}
+                                  >
+                                    <RiDeleteBin6Line
+                                      size={20}
+                                      className="text-red-600"
+                                    />
+                                  </button>
+                                  {nameShowModal && (
+                                    <NameModal
+                                      setOpenModal={setNameShowModal}
+                                      id={nameId}
+                                      setNames={setExaminationNames}
+                                    />
+                                  )}
                                 </td>
                               </tr>
                             );
@@ -696,8 +743,7 @@ const ExaminationDetails = () => {
               </div>
               <div
                 id="examination_type_viewport"
-                className="hidden flex-col overflow-y-scroll mt-5"
-                style={{ height: 390 }}
+                className="hidden flex-col overflow-y-scroll min-h-max h-4/5 mt-5"
               >
                 <div className="">
                   <div className="p-1.5 w-full inline-block align-middle">
@@ -723,6 +769,12 @@ const ExaminationDetails = () => {
                             >
                               Maximum marks
                             </th>
+                            <th
+                              scope="col"
+                              className="text-center px-6 py-3 text-xs font-bold text-gray-500 uppercase "
+                            >
+                              Action
+                            </th>
                           </tr>
                         </thead>
                         <tbody className="text-center divide-y divide-gray-200">
@@ -737,6 +789,28 @@ const ExaminationDetails = () => {
                                 </td>
                                 <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                                   {examination_type.maximum_marks}
+                                </td>
+                                <td>
+                                  <button
+                                    className="text-center w-auto bg-transparent text-gray-100 p-1 rounded-full tracking-wide
+                                    font-semibold  focus:outline-none focus:shadow-outline hover:bg-red-200 shadow-lg cursor-pointer transition ease-in duration-300"
+                                    onClick={() => {
+                                      setTypeShowModal(true);
+                                      setTypeId(examination_type.id);
+                                    }}
+                                  >
+                                    <RiDeleteBin6Line
+                                      size={20}
+                                      className="text-red-600"
+                                    />
+                                  </button>
+                                  {typeShowModal && (
+                                    <TypeModal
+                                      setOpenModal={setTypeShowModal}
+                                      id={typeId}
+                                      setTypes={setExaminationTypes}
+                                    />
+                                  )}
                                 </td>
                               </tr>
                             );
@@ -789,8 +863,7 @@ const ExaminationDetails = () => {
               </div>
               <div
                 id="examination_time_viewport"
-                className="hidden flex-col overflow-y-scroll mt-5"
-                style={{ height: 390 }}
+                className="hidden flex-col overflow-y-scroll min-h-max h-4/5 mt-5"
               >
                 <div className="">
                   <div className="p-1.5 w-full inline-block align-middle">
@@ -810,6 +883,12 @@ const ExaminationDetails = () => {
                             >
                               Examination Time
                             </th>
+                            <th
+                              scope="col"
+                              className="text-center px-6 py-3 text-xs font-bold text-gray-500 uppercase "
+                            >
+                              Action
+                            </th>
                           </tr>
                         </thead>
                         <tbody className="text-center divide-y divide-gray-200">
@@ -821,6 +900,28 @@ const ExaminationDetails = () => {
                                 </td>
                                 <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                                   {examination_time.name}
+                                </td>
+                                <td>
+                                  <button
+                                    className="text-center w-auto bg-transparent text-gray-100 p-1 rounded-full tracking-wide
+                                    font-semibold  focus:outline-none focus:shadow-outline hover:bg-red-200 shadow-lg cursor-pointer transition ease-in duration-300"
+                                    onClick={() => {
+                                      setTimeShowModal(true);
+                                      setTimeId(examination_time.id);
+                                    }}
+                                  >
+                                    <RiDeleteBin6Line
+                                      size={20}
+                                      className="text-red-600"
+                                    />
+                                  </button>
+                                  {timeShowModal && (
+                                    <TimeModal
+                                      setOpenModal={setTimeShowModal}
+                                      id={timeId}
+                                      setTimes={setExaminationTimes}
+                                    />
+                                  )}
                                 </td>
                               </tr>
                             );
@@ -835,6 +936,7 @@ const ExaminationDetails = () => {
           </div>
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 };
