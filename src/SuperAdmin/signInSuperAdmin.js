@@ -76,6 +76,7 @@ const SignInSuperAdmin = () => {
                 }
               )
               .then((responce) => {
+                console.log(responce);
                 console.log(responce.data.roles);
                 const roles = responce.data.roles;
                 localStorage.setItem("roles", roles);
@@ -86,30 +87,38 @@ const SignInSuperAdmin = () => {
                   setTimeout(() => {
                     navigate("/uploadExcel");
                   }, 2000);
-                } else if (
-                  responce.data.roles.includes("Examination Controller")
-                ) {
+                } else if (responce.data.roles.includes("faculty")) {
                   toast.success("Login Successfully !!", {
                     position: toast.POSITION.BOTTOM_LEFT,
                   });
                   setTimeout(() => {
-                    navigate("/examinationDetails");
-                  }, 2000);
-                } else if (responce.data.roles.includes("Marks Entry")) {
-                  toast.success("Login Successfully !!", {
-                    position: toast.POSITION.BOTTOM_LEFT,
-                  });
-                  setTimeout(() => {
-                    navigate("/marks_entry");
-                  }, 2000);
-                } else if (responce.data.roles.includes("Academic Head")) {
-                  toast.success("Login Successfully !!", {
-                    position: toast.POSITION.BOTTOM_LEFT,
-                  });
-                  setTimeout(() => {
-                    navigate("/academic_UploadSyllabus");
+                    navigate("/facultyDashboard");
                   }, 2000);
                 }
+                // } else if (
+                //   responce.data.roles.includes("Examination Controller")
+                // ) {
+                //   toast.success("Login Successfully !!", {
+                //     position: toast.POSITION.BOTTOM_LEFT,
+                //   });
+                //   setTimeout(() => {
+                //     navigate("/examinationDetails");
+                //   }, 2000);
+                // } else if (responce.data.roles.includes("Marks Entry")) {
+                //   toast.success("Login Successfully !!", {
+                //     position: toast.POSITION.BOTTOM_LEFT,
+                //   });
+                //   setTimeout(() => {
+                //     navigate("/marks_entry");
+                //   }, 2000);
+                // } else if (responce.data.roles.includes("Academic Head")) {
+                //   toast.success("Login Successfully !!", {
+                //     position: toast.POSITION.BOTTOM_LEFT,
+                //   });
+                //   setTimeout(() => {
+                //     navigate("/academic_UploadSyllabus");
+                //   }, 2000);
+                // }
               })
               .catch((error) => console.log(error));
           }

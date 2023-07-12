@@ -28,6 +28,7 @@ var access_token;
 var subdomain;
 var year;
 var headers;
+var roles = localStorage.getItem("roles");
 
 const ExamViewTimeTable = () => {
   const componentRef = useRef();
@@ -547,454 +548,463 @@ const ExamViewTimeTable = () => {
 
   return (
     <div>
-      <div>
-        <nav className="fixed top-0 z-50 w-full bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
-          <div className="px-3 py-3 lg:px-5 lg:pl-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center justify-start">
-                <button
-                  data-drawer-target="logo-sidebar"
-                  data-drawer-toggle="logo-sidebar"
-                  aria-controls="logo-sidebar"
-                  type="button"
-                  className="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
-                >
-                  <span className="sr-only">Open sidebar</span>
-                  <svg
-                    className="w-6 h-6"
-                    aria-hidden="true"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
+      {access_token && roles.includes("Examination Controller") ? (
+        <div>
+          <nav className="fixed top-0 z-50 w-full bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+            <div className="px-3 py-3 lg:px-5 lg:pl-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center justify-start">
+                  <button
+                    data-drawer-target="logo-sidebar"
+                    data-drawer-toggle="logo-sidebar"
+                    aria-controls="logo-sidebar"
+                    type="button"
+                    className="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
                   >
-                    <path
-                      clip-rule="evenodd"
-                      fill-rule="evenodd"
-                      d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"
-                    ></path>
-                  </svg>
-                </button>
-                <a href="" className="flex ml-2 md:mr-24">
-                  <img src="" className="h-8 mr-3" alt="Logo" />
-                  <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
-                    {uniName}
-                  </span>
-                </a>
+                    <span className="sr-only">Open sidebar</span>
+                    <svg
+                      className="w-6 h-6"
+                      aria-hidden="true"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        clip-rule="evenodd"
+                        fill-rule="evenodd"
+                        d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"
+                      ></path>
+                    </svg>
+                  </button>
+                  <a href="" className="flex ml-2 md:mr-24">
+                    <img src="" className="h-8 mr-3" alt="Logo" />
+                    <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
+                      {uniName}
+                    </span>
+                  </a>
+                </div>
+                <div className="flex items-center">
+                  <div className="flex items-center ml-3">
+                    <div>
+                      <button
+                        type="button"
+                        className="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
+                        aria-expanded="false"
+                        data-dropdown-toggle="dropdown-user"
+                      >
+                        <span className="self-center text-xl mr-2 font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
+                          {faculty}
+                        </span>
+                        <span className="sr-only">Open user menu</span>
+                      </button>
+                    </div>
+                    <div
+                      className="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded shadow dark:bg-gray-700 dark:divide-gray-600"
+                      id="dropdown-user"
+                    >
+                      <div className="px-4 py-3" role="none">
+                        <p
+                          className="text-sm text-gray-900 dark:text-white"
+                          role="none"
+                        ></p>
+                        <p
+                          className="text-sm font-medium text-gray-900 truncate dark:text-gray-300"
+                          role="none"
+                        ></p>
+                      </div>
+                      <ul className="py-1" role="none">
+                        <li>
+                          <a
+                            href="#"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
+                            role="menuitem"
+                          ></a>
+                        </li>
+                        <li>
+                          <a
+                            href="#"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
+                            role="menuitem"
+                          ></a>
+                        </li>
+                        <li>
+                          <a
+                            href="#"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
+                            role="menuitem"
+                          ></a>
+                        </li>
+                        <li>
+                          <a
+                            href="#"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
+                            role="menuitem"
+                          ></a>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center">
-                <div className="flex items-center ml-3">
-                  <div>
+            </div>
+          </nav>
+
+          <aside
+            id="logo-sidebar"
+            className="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
+            aria-label="Sidebar"
+          >
+            <div className="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
+              <ul className="space-y-2 font-medium">
+                <li>
+                  <a
+                    href="/examinationDetails"
+                    className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <span className="ml-3">Examination Details</span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/examTimetable"
+                    className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <span className="ml-3">Time Table</span>
+                  </a>
+                </li>
+
+                <li>
+                  <a
+                    href="/examBlockDetails"
+                    className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <span className="ml-3">Enter Block Details</span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/examAssignSupervision"
+                    className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <span className="flex-1 ml-3 whitespace-nowrap">
+                      Assign Supervision
+                    </span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/assignMarksEntry"
+                    className="flex items-center p-2  text-gray-900  rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <span className="flex-1 ml-3 whitespace-nowrap">
+                      Assign Marks Entry
+                    </span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/unlock_Marks"
+                    className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <span className="ml-3">Unlock Marks</span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/examViewTimeTable"
+                    className="flex items-center p-2 bg-slate-600 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <span className="flex-1 ml-3 whitespace-nowrap">
+                      Report
+                    </span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/result"
+                    className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <span className="ml-3">Result</span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/studentResult"
+                    className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <span className="ml-3">Student Result</span>
+                  </a>
+                </li>
+                <li>
+                  <div className="p-4">
                     <button
                       type="button"
-                      className="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
-                      aria-expanded="false"
-                      data-dropdown-toggle="dropdown-user"
+                      className="inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition"
+                      onClick={handleLogout}
                     >
-                      <span className="self-center text-xl mr-2 font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
-                        {faculty}
-                      </span>
-                      <span className="sr-only">Open user menu</span>
+                      <span className="">Logout</span>
                     </button>
                   </div>
-                  <div
-                    className="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded shadow dark:bg-gray-700 dark:divide-gray-600"
-                    id="dropdown-user"
-                  >
-                    <div className="px-4 py-3" role="none">
-                      <p
-                        className="text-sm text-gray-900 dark:text-white"
-                        role="none"
-                      ></p>
-                      <p
-                        className="text-sm font-medium text-gray-900 truncate dark:text-gray-300"
-                        role="none"
-                      ></p>
-                    </div>
-                    <ul className="py-1" role="none">
-                      <li>
-                        <a
-                          href="#"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
-                          role="menuitem"
-                        ></a>
-                      </li>
-                      <li>
-                        <a
-                          href="#"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
-                          role="menuitem"
-                        ></a>
-                      </li>
-                      <li>
-                        <a
-                          href="#"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
-                          role="menuitem"
-                        ></a>
-                      </li>
-                      <li>
-                        <a
-                          href="#"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
-                          role="menuitem"
-                        ></a>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
+                </li>
+              </ul>
+            </div>
+          </aside>
+
+          <div className="pt-4 sm:ml-64">
+            <div className="flex flex-col items-center mt-14">
+              <div className="flex items-center space-x-4 mb-5">
+                <a
+                  className={`text-white font-bold py-2 px-4 rounded-lg bg-slate-800`}
+                  href="/examViewTimeTable"
+                >
+                  Time Table
+                </a>
+                <a
+                  className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg `}
+                  href="/examViewBlockDetails"
+                >
+                  Blockwise Report
+                </a>
+                <a
+                  className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg `}
+                  href="/examViewJrSupervision"
+                >
+                  Jr.Supervisor Tab
+                </a>
+                <a
+                  className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg `}
+                  href="/examViewSrSupervision"
+                >
+                  Sr.Supervisor Tab
+                </a>
+                <a
+                  className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg `}
+                  href="/examViewOtherDuty"
+                >
+                  Other Duties
+                </a>
               </div>
             </div>
-          </div>
-        </nav>
 
-        <aside
-          id="logo-sidebar"
-          className="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
-          aria-label="Sidebar"
-        >
-          <div className="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
-            <ul className="space-y-2 font-medium">
-              <li>
-                <a
-                  href="/examinationDetails"
-                  className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <span className="ml-3">Examination Details</span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/examTimetable"
-                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <span className="ml-3">Time Table</span>
-                </a>
-              </li>
+            <div className="flex mt-5 ml-2">
+              <select
+                className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
+                onChange={(e) => {
+                  handleExaminationChange(e.target.value);
+                }}
+                aria-label="Examination Name"
+              >
+                <option value="Select Examination">Examination</option>
+                {examinationNames.map((examination_name) => {
+                  return (
+                    <option value={examination_name.name}>
+                      {examination_name.name}
+                    </option>
+                  );
+                })}
+              </select>
 
-              <li>
-                <a
-                  href="/examBlockDetails"
-                  className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <span className="ml-3">Enter Block Details</span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/examAssignSupervision"
-                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <span className="flex-1 ml-3 whitespace-nowrap">
-                    Assign Supervision
-                  </span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/assignMarksEntry"
-                  className="flex items-center p-2  text-gray-900  rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <span className="flex-1 ml-3 whitespace-nowrap">
-                    Assign Marks Entry
-                  </span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/unlock_Marks"
-                  className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <span className="ml-3">Unlock Marks</span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/examViewTimeTable"
-                  className="flex items-center p-2 bg-slate-600 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <span className="flex-1 ml-3 whitespace-nowrap">Report</span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/result"
-                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <span className="ml-3">Result</span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/studentResult"
-                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <span className="ml-3">Student Result</span>
-                </a>
-              </li>
-              <li>
-                <div className="p-4">
-                  <button
-                    type="button"
-                    className="inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition"
-                    onClick={handleLogout}
+              <select
+                className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
+                onChange={(e) => handleYearChange(e.target.value)}
+              >
+                <option value="Select Year">Year</option>
+                {academic_years.map((year) => {
+                  return <option value={year}>{year}</option>;
+                })}
+              </select>
+
+              <select
+                className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
+                onChange={handleTypeChange}
+              >
+                <option value="Select Type">Type</option>
+                {examinationTypes.map((examination_type) => {
+                  return (
+                    <option value={examination_type.name}>
+                      {examination_type.name}
+                    </option>
+                  );
+                })}
+              </select>
+
+              <select
+                aria-label="Select Course"
+                className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
+                onChange={handleCourseChange}
+              >
+                <option value="Select Course">Course</option>
+                {courses.map((course, index) => (
+                  <option value={course.id}>{course.name}</option>
+                ))}
+              </select>
+
+              <select
+                className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
+                onChange={handleBranchChange}
+                isSearchable={true}
+              >
+                <option value="Select Branch">Branch</option>
+                {branches.map((branch) => (
+                  <option value={branch.id} data-name={branch.name}>
+                    {branch.name}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
+                onChange={handleSemesterChange}
+              >
+                <option value="Select Semester">Semester</option>
+                {semesters.map((semester) => (
+                  <option
+                    value={semester.id}
+                    data-semester-name={semester.name}
                   >
-                    <span className="">Logout</span>
-                  </button>
-                </div>
-              </li>
-            </ul>
-          </div>
-        </aside>
+                    {semester.name}
+                  </option>
+                ))}
+              </select>
 
-        <div className="pt-4 sm:ml-64">
-          <div className="flex flex-col items-center mt-14">
-            <div className="flex items-center space-x-4 mb-5">
-              <a
-                className={`text-white font-bold py-2 px-4 rounded-lg bg-slate-800`}
-                href="/examViewTimeTable"
+              <select
+                className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+                onChange={(e) => {
+                  if (e.target.value !== "Select Date") {
+                    setDate(e.target.value);
+                  } else {
+                    setDate("");
+                  }
+                }}
               >
-                Time Table
+                <option>Select Date</option>
+                {storeDates.map((date) => (
+                  <option value={date}>{date}</option>
+                ))}
+              </select>
+
+              <select
+                className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+                onChange={(e) => {
+                  if (e.target.value !== "Select time") {
+                    setTime(e.target.value);
+                  } else {
+                    setTime("");
+                  }
+                }}
+                // selected={}
+              >
+                <option value="">Select time</option>
+                <option value="morning">10:30 A.M to 01:00 P.M</option>
+                <option value="evening">03:00 P.M to 05:30 P.M</option>
+              </select>
+            </div>
+            <div className="flex justify-center mt-5">
+              <button
+                className="py-2 px-3 mr-7 bg-gray-800 rounded-2xl text-white font-bold"
+                onClick={handleFilterSubmit}
+              >
+                <p className="inline-flex">
+                  Search <GiArchiveResearch className="mt-1 ml-2" />
+                </p>
+              </button>
+              <a
+                href="#"
+                id="download_button"
+                onClick={handlePrint}
+                className="hidden py-2 px-3 mt-1 bg-blue-200 rounded-2xl text-white font-bold"
+              >
+                <FcPrint />
               </a>
+
               <a
-                className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg `}
-                href="/examViewBlockDetails"
+                href="#"
+                id="save_as_pdf"
+                onClick={handleSavePDF}
+                className="hidden py-2 px-3 ml-2 mt-1 bg-blue-200 rounded-2xl text-white font-bold"
               >
-                Blockwise Report
-              </a>
-              <a
-                className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg `}
-                href="/examViewJrSupervision"
-              >
-                Jr.Supervisor Tab
-              </a>
-              <a
-                className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg `}
-                href="/examViewSrSupervision"
-              >
-                Sr.Supervisor Tab
-              </a>
-              <a
-                className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg `}
-                href="/examViewOtherDuty"
-              >
-                Other Duties
+                <FcDownload />
               </a>
             </div>
-          </div>
-
-          <div className="flex mt-5 ml-2">
-            <select
-              className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
-              onChange={(e) => {
-                handleExaminationChange(e.target.value);
-              }}
-              aria-label="Examination Name"
+            <div
+              id="time_table_viewport"
+              className="hidden flex-col mt-5"
+              ref={componentRef}
+              style={divStyle}
             >
-              <option value="Select Examination">Examination</option>
-              {examinationNames.map((examination_name) => {
-                return (
-                  <option value={examination_name.name}>
-                    {examination_name.name}
-                  </option>
-                );
-              })}
-            </select>
-
-            <select
-              className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
-              onChange={(e) => handleYearChange(e.target.value)}
-            >
-              <option value="Select Year">Year</option>
-              {academic_years.map((year) => {
-                return <option value={year}>{year}</option>;
-              })}
-            </select>
-
-            <select
-              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
-              onChange={handleTypeChange}
-            >
-              <option value="Select Type">Type</option>
-              {examinationTypes.map((examination_type) => {
-                return (
-                  <option value={examination_type.name}>
-                    {examination_type.name}
-                  </option>
-                );
-              })}
-            </select>
-
-            <select
-              aria-label="Select Course"
-              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
-              onChange={handleCourseChange}
-            >
-              <option value="Select Course">Course</option>
-              {courses.map((course, index) => (
-                <option value={course.id}>{course.name}</option>
-              ))}
-            </select>
-
-            <select
-              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
-              onChange={handleBranchChange}
-              isSearchable={true}
-            >
-              <option value="Select Branch">Branch</option>
-              {branches.map((branch) => (
-                <option value={branch.id} data-name={branch.name}>
-                  {branch.name}
-                </option>
-              ))}
-            </select>
-
-            <select
-              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
-              onChange={handleSemesterChange}
-            >
-              <option value="Select Semester">Semester</option>
-              {semesters.map((semester) => (
-                <option value={semester.id} data-semester-name={semester.name}>
-                  {semester.name}
-                </option>
-              ))}
-            </select>
-
-            <select
-              className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-              onChange={(e) => {
-                if (e.target.value !== "Select Date") {
-                  setDate(e.target.value);
-                } else {
-                  setDate("");
-                }
-              }}
-            >
-              <option>Select Date</option>
-              {storeDates.map((date) => (
-                <option value={date}>{date}</option>
-              ))}
-            </select>
-
-            <select
-              className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-              onChange={(e) => {
-                if (e.target.value !== "Select time") {
-                  setTime(e.target.value);
-                } else {
-                  setTime("");
-                }
-              }}
-              // selected={}
-            >
-              <option value="">Select time</option>
-              <option value="morning">10:30 A.M to 01:00 P.M</option>
-              <option value="evening">03:00 P.M to 05:30 P.M</option>
-            </select>
-          </div>
-          <div className="flex justify-center mt-5">
-            <button
-              className="py-2 px-3 mr-7 bg-gray-800 rounded-2xl text-white font-bold"
-              onClick={handleFilterSubmit}
-            >
-              <p className="inline-flex">
-                Search <GiArchiveResearch className="mt-1 ml-2" />
-              </p>
-            </button>
-            <a
-              href="#"
-              id="download_button"
-              onClick={handlePrint}
-              className="hidden py-2 px-3 mt-1 bg-blue-200 rounded-2xl text-white font-bold"
-            >
-              <FcPrint />
-            </a>
-
-            <a
-              href="#"
-              id="save_as_pdf"
-              onClick={handleSavePDF}
-              className="hidden py-2 px-3 ml-2 mt-1 bg-blue-200 rounded-2xl text-white font-bold"
-            >
-              <FcDownload />
-            </a>
-          </div>
-          <div
-            id="time_table_viewport"
-            className="hidden flex-col mt-5"
-            ref={componentRef}
-            style={divStyle}
-          >
-            <div className="">
-              <p className="text-center">{uniName}</p>
-              <p className="text-center">
-                {branchesName} {semesterName}
-              </p>
-              <p className="text-center">
-                {examinationName} {selectedYear} Examination Time Table
-              </p>
-            </div>
-            <div ref={tableRef} id="table-viewport" className="">
-              <div className="p-1.5 w-full inline-block align-middle">
-                <div className="border rounded-lg">
-                  <table className="min-w-full table-fixed divide-y divide-gray-200">
-                    <thead className="sticky top-0 bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
-                          Subject Name
-                        </th>
-                        <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
-                          Subject Code
-                        </th>
-                        <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
-                          Day And Date
-                        </th>
-                        <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
-                          Time
-                        </th>
-                        {/* <th className="px-6 py-3 text-xs font-bold text-right text-gray-500 uppercase ">
+              <div className="">
+                <p className="text-center">{uniName}</p>
+                <p className="text-center">
+                  {branchesName} {semesterName}
+                </p>
+                <p className="text-center">
+                  {examinationName} {selectedYear} Examination Time Table
+                </p>
+              </div>
+              <div ref={tableRef} id="table-viewport" className="">
+                <div className="p-1.5 w-full inline-block align-middle">
+                  <div className="border rounded-lg">
+                    <table className="min-w-full table-fixed divide-y divide-gray-200">
+                      <thead className="sticky top-0 bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
+                            Subject Name
+                          </th>
+                          <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
+                            Subject Code
+                          </th>
+                          <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
+                            Day And Date
+                          </th>
+                          <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
+                            Time
+                          </th>
+                          {/* <th className="px-6 py-3 text-xs font-bold text-right text-gray-500 uppercase ">
                           Action
                         </th> */}
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                      {displayTimeTable.map((time_table) => (
-                        <tr>
-                          <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
-                            {time_table.subject_name}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                            {time_table.subject_code}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap uppercase">
-                            {time_table.date + " " + time_table.day}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                            {time_table.time}
-                          </td>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        {displayTimeTable.map((time_table) => (
+                          <tr>
+                            <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
+                              {time_table.subject_name}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                              {time_table.subject_code}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap uppercase">
+                              {time_table.date + " " + time_table.day}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                              {time_table.time}
+                            </td>
 
-                          {/* <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
+                            {/* <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
                           <button
                             className="text-red-500 hover:text-red-700"
                             href="#"
                             // onClick={handleRemoveRole}
                           >Remove</button>
                         </td> */}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <p className="text-lg mt-10">
+                    By. Exam Coordinator: ________________
+                  </p>
                 </div>
-                <p className="text-lg mt-10">
-                  By. Exam Coordinator: ________________
-                </p>
               </div>
             </div>
+            <div className="flex justify-evenly text-center mt-10"></div>
           </div>
-          <div className="flex justify-evenly text-center mt-10"></div>
+          <ToastContainer />
         </div>
-      </div>
-      <ToastContainer />
+      ) : (
+        navigate(-1)
+      )}
     </div>
   );
 };

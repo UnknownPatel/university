@@ -1,7 +1,7 @@
 import { BrowserRouter, Route, Router, Routes } from "react-router-dom";
-import FacultySupervisionList from "./Admin/FacultySupervisionList";
-import CreateSyllabus from "./Admin/createSyllabus";
-import ExamController from "./Admin/examController";
+// import FacultySupervisionList from "./Admin/FacultySupervisionList";
+// import CreateSyllabus from "./Admin/createSyllabus";
+// import ExamController from "./Admin/examController";
 import MarksEntry from "./Admin/marksEntry";
 import ViewSupervisionList from "./Admin/viewSupervisionList";
 import ViewSyllabus from "./Admin/viewSyllabus";
@@ -10,10 +10,9 @@ import Home from "./SuperAdmin/Home";
 import AssignRole from "./SuperAdmin/assignRole";
 import SignInSuperAdmin from "./SuperAdmin/signInSuperAdmin";
 import SignUpSuperAdmin from "./SuperAdmin/signUpSuperAdmin";
-import UpdateAssignRole from "./SuperAdmin/updateAssignRole";
+// import UpdateAssignRole from "./SuperAdmin/updateAssignRole";
 import Approve_reject_Registrations from "./SuperAdmin/approve_reject_Registrations";
 import UploadExcel from "./SuperAdmin/uploadExcel";
-import AdminLogin from "./Admin/adminLogin";
 import ExamBlockDetails from "./Admin/examBlockDetails";
 import ExamAssignSupervision from "./Admin/examAssignSupervision";
 import ExamTimeTable from "./Admin/examTimeTable";
@@ -37,6 +36,7 @@ import ForgotPassword from "./SuperAdmin/forgotPassword";
 import ChangePassword from "./SuperAdmin/changePassword";
 import AcademicCreateCertificate from "./Admin/academicCreateCertificate";
 import AcademicCertificateRequrst from "./Admin/academicCertificateRequrst";
+import FacultyDashboard from "./Faculty/facultyDashboard";
 
 function App() {
   return (
@@ -44,7 +44,10 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route exact path="/" element={<SignInSuperAdmin />} />
-          <Route path="/universityRegistration" element={<SignUpSuperAdmin />} />
+          <Route
+            path="/universityRegistration"
+            element={<SignUpSuperAdmin />}
+          />
           <Route path="/home" element={<Home />} />
           <Route path="/assignRole" element={<AssignRole />} />
           <Route
@@ -52,18 +55,18 @@ function App() {
             element={<Approve_reject_Registrations />}
           />
           <Route path="/uploadExcel" element={<UploadExcel />} />
-          <Route
+          {/* <Route
             path="/facultySupervisionList"
             element={<FacultySupervisionList />}
-          />
+          /> */}
           <Route
             path="/facultyViewSupervisionList"
             element={<ViewSupervisionList />}
           />
-          <Route path="/create_syllabus" element={<CreateSyllabus />} />
+          {/* <Route path="/create_syllabus" element={<CreateSyllabus />} /> */}
           <Route path="/view_syllabus" element={<ViewSyllabus />} />
-          <Route path="/AdminLogin" element={<AdminLogin />} />
-          <Route path="/examController" element={<ExamController />} />
+          {/* <Route path="/AdminLogin" element={<AdminLogin />} /> */}
+          {/* <Route path="/examController" element={<ExamController />} /> */}
           <Route path="/examBlockDetails" element={<ExamBlockDetails />} />
           <Route
             path="/examAssignSupervision"
@@ -115,29 +118,9 @@ function App() {
           />
           <Route path="/ForgotPassword" element={<ForgotPassword />} />
           <Route path="/ChangePassword" element={<ChangePassword />} />
+          <Route path="/facultyDashboard" element={<FacultyDashboard />} />
         </Routes>
       </BrowserRouter>
-
-      {/* <Route path='/updateAssignRole' element={<UpdateAssignRole/>} /> */}
-      {/* <FacultyLogin/> */}
-      {/* <FacultyDashboard/> */}
-      {/* <FacultyExam/> */}
-      {/* <FacultyProfile/> */}
-      {/* <Home/> */}
-      {/* <AssignRole/> */}
-      {/* <UpdateAssignRole/> */}
-      {/* <ExamController/> */}
-      {/* <FacultySupervisionList/> */}
-      {/* <ViewSupervisionList/> */}
-      {/* <CreateSyllabus/> */}
-      {/* <ViewSyllabus/> */}
-      {/* <MarksEntry/> */}
-      {/* <SignUpSuperAdmin/> */}
-      {/* <SignInSuperAdmin/> */}
-      {/* <AdminLogin/> */}
-      {/* <ExamBlockDetails/> */}
-      {/* <ExamAssignSupervision/> */}
-      {/* <ExamTimeTable/> */}
     </div>
   );
 }

@@ -12,6 +12,7 @@ import { RiDeleteBin6Line } from "react-icons/ri";
 var acces_token;
 var headers;
 var subdomain;
+var roles = localStorage.getItem("roles");
 
 const ExamTimeTable = () => {
   const componentRef = useRef();
@@ -42,6 +43,7 @@ const ExamTimeTable = () => {
   const [timeTableShowModal, setTimeTableShowModal] = useState(false);
   const [timeTableId, setTimeTableId] = useState("");
   const navigate = useNavigate();
+  const [isOpen, setIsOpen] = useState(false);
 
   var year;
 
@@ -169,6 +171,10 @@ const ExamTimeTable = () => {
         });
     }
   }, []);
+
+  const handleToggle = () => {
+    setIsOpen(!isOpen);
+  };
 
   const handleExaminationChange = (examination) => {
     handleViewPortChange();
@@ -396,11 +402,11 @@ const ExamTimeTable = () => {
                         "data-time-table-id",
                         get_response.data.data.time_table.id
                       );
-                      deleteButton.classList.remove('hidden');
+                      deleteButton.classList.remove("hidden");
                       table_date.value = get_response.data.data.time_table.date;
                     } else {
                       button.innerHTML = "Create";
-                      deleteButton.classList.add('hidden');
+                      deleteButton.classList.add("hidden");
                       table_date.value = "";
                     }
                   })
@@ -537,13 +543,13 @@ const ExamTimeTable = () => {
               "data-time-table-id",
               responce.data.data.time_table.id
             );
-            deleteButton.classList.remove('hidden');
+            deleteButton.classList.remove("hidden");
             date.value = responce.data.data.time_table.date;
             toast.success(responce.data.message, {
               position: toast.POSITION.BOTTOM_LEFT,
             });
           } else {
-            deleteButton.classList.add('hidden');
+            deleteButton.classList.add("hidden");
             toast.error(responce.data.message, {
               position: toast.POSITION.BOTTOM_LEFT,
             });
@@ -568,423 +574,429 @@ const ExamTimeTable = () => {
 
   return (
     <div>
-      <div>
-        <nav className="fixed top-0 z-50 w-full bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
-          <div className="px-3 py-3 lg:px-5 lg:pl-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center justify-start">
-                <button
-                  data-drawer-target="logo-sidebar"
-                  data-drawer-toggle="logo-sidebar"
-                  aria-controls="logo-sidebar"
-                  type="button"
-                  className="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
-                >
-                  <span className="sr-only">Open sidebar</span>
-                  <svg
-                    className="w-6 h-6"
-                    aria-hidden="true"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
+      {acces_token && roles.includes("Examination Controller") ? (
+        <div>
+          <nav className="fixed top-0 z-50 w-full bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+            <div className="px-3 py-3 lg:px-5 lg:pl-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center justify-start">
+                  <button
+                    data-drawer-target="logo-sidebar"
+                    data-drawer-toggle="logo-sidebar"
+                    aria-controls="logo-sidebar"
+                    type="button"
+                    className="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
                   >
-                    <path
-                      clip-rule="evenodd"
-                      fill-rule="evenodd"
-                      d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"
-                    ></path>
-                  </svg>
-                </button>
-                <a href="" className="flex ml-2 md:mr-24">
-                  <img src="" className="h-8 mr-3" alt="Logo" />
-                  <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
-                    {uniName}
-                  </span>
-                </a>
+                    <span className="sr-only">Open sidebar</span>
+                    <svg
+                      className="w-6 h-6"
+                      aria-hidden="true"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        clip-rule="evenodd"
+                        fill-rule="evenodd"
+                        d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"
+                      ></path>
+                    </svg>
+                  </button>
+                  <a href="" className="flex ml-2 md:mr-24">
+                    <img src="" className="h-8 mr-3" alt="Logo" />
+                    <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
+                      {uniName}
+                    </span>
+                  </a>
+                </div>
+                <div className="flex items-center">
+                  <div className="flex items-center ml-3">
+                    <div>
+                      <button
+                        type="button"
+                        className="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
+                        aria-expanded="false"
+                        data-dropdown-toggle="dropdown-user"
+                      >
+                        <span className="self-center text-xl mr-2 font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
+                          {faculty}
+                        </span>
+                        <span className="sr-only">Open user menu</span>
+                      </button>
+                    </div>
+                    <div
+                      className="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded shadow dark:bg-gray-700 dark:divide-gray-600"
+                      id="dropdown-user"
+                    >
+                      <div className="px-4 py-3" role="none">
+                        <p
+                          className="text-sm text-gray-900 dark:text-white"
+                          role="none"
+                        ></p>
+                        <p
+                          className="text-sm font-medium text-gray-900 truncate dark:text-gray-300"
+                          role="none"
+                        ></p>
+                      </div>
+                      <ul className="py-1" role="none">
+                        <li>
+                          <a
+                            href="#"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
+                            role="menuitem"
+                          ></a>
+                        </li>
+                        <li>
+                          <a
+                            href="#"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
+                            role="menuitem"
+                          ></a>
+                        </li>
+                        <li>
+                          <a
+                            href="#"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
+                            role="menuitem"
+                          ></a>
+                        </li>
+                        <li>
+                          <a
+                            href="#"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
+                            role="menuitem"
+                          ></a>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center">
-                <div className="flex items-center ml-3">
-                  <div>
+            </div>
+          </nav>
+
+          <aside
+            id="logo-sidebar"
+            className="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
+            aria-label="Sidebar"
+          >
+            <div className="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
+              <ul className="space-y-2 font-medium">
+                <li>
+                  <a
+                    href="/examinationDetails"
+                    className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <span className="ml-3">Examination Details</span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/examTimetable"
+                    className="flex items-center p-2 bg-slate-600 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <span className="ml-3">Time Table</span>
+                  </a>
+                </li>
+
+                <li>
+                  <a
+                    href="/examBlockDetails"
+                    className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <span className="ml-3">Enter Block Details</span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/examAssignSupervision"
+                    className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <span className="flex-1 ml-3 whitespace-nowrap">
+                      Assign Supervision
+                    </span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/assignMarksEntry"
+                    className="flex items-center p-2 text-gray-900  rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <span className="flex-1 ml-3 whitespace-nowrap">
+                      Assign Marks Entry
+                    </span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/unlock_Marks"
+                    className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <span className="ml-3">Unlock Marks</span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/examViewTimeTable"
+                    className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <span className="flex-1 ml-3 whitespace-nowrap">
+                      Report
+                    </span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/result"
+                    className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <span className="ml-3">Result</span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/studentResult"
+                    className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <span className="ml-3">Student Result</span>
+                  </a>
+                </li>
+                <li>
+                  <div className="p-4">
                     <button
                       type="button"
-                      className="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
-                      aria-expanded="false"
-                      data-dropdown-toggle="dropdown-user"
+                      className="inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition"
+                      onClick={handleLogout}
                     >
-                      <span className="self-center text-xl mr-2 font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
-                        {faculty}
-                      </span>
-                      <span className="sr-only">Open user menu</span>
+                      <span className="">Logout</span>
                     </button>
                   </div>
-                  <div
-                    className="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded shadow dark:bg-gray-700 dark:divide-gray-600"
-                    id="dropdown-user"
-                  >
-                    <div className="px-4 py-3" role="none">
-                      <p
-                        className="text-sm text-gray-900 dark:text-white"
-                        role="none"
-                      ></p>
-                      <p
-                        className="text-sm font-medium text-gray-900 truncate dark:text-gray-300"
-                        role="none"
-                      ></p>
-                    </div>
-                    <ul className="py-1" role="none">
-                      <li>
-                        <a
-                          href="#"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
-                          role="menuitem"
-                        ></a>
-                      </li>
-                      <li>
-                        <a
-                          href="#"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
-                          role="menuitem"
-                        ></a>
-                      </li>
-                      <li>
-                        <a
-                          href="#"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
-                          role="menuitem"
-                        ></a>
-                      </li>
-                      <li>
-                        <a
-                          href="#"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
-                          role="menuitem"
-                        ></a>
-                      </li>
-                    </ul>
+                </li>
+              </ul>
+            </div>
+          </aside>
+
+          <div className="p-4 sm:ml-64">
+            <div className="p-4 rounded-lg mt-10">
+              <div className="text-center text-4xl">
+                <p>Create Time Table</p>
+              </div>
+            </div>
+            {/* Button Content 1 */}
+            <div className="flex mt-5 ml-2">
+              <select
+                className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
+                onChange={(e) => {
+                  handleExaminationChange(e.target.value);
+                }}
+                aria-label="Examination Name"
+              >
+                <option value="Select Examination">Examination</option>
+                {examinationNames.map((examination_name) => {
+                  return (
+                    <option value={examination_name.name}>
+                      {examination_name.name}
+                    </option>
+                  );
+                })}
+              </select>
+
+              <select
+                className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
+                onChange={(e) => handleYearChange(e.target.value)}
+              >
+                <option value="Select Year">Year</option>
+                {academic_years.map((year) => {
+                  return <option value={year}>{year}</option>;
+                })}
+              </select>
+
+              <select
+                className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
+                onChange={handleTypeChange}
+              >
+                <option value="Select Type">Type</option>
+                {examinationTypes.map((examination_type) => {
+                  return (
+                    <option value={examination_type.name}>
+                      {examination_type.name}
+                    </option>
+                  );
+                })}
+              </select>
+
+              <select
+                id={"select-time-subject"}
+                className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
+                onChange={(e) => {
+                  handleTimeChange(e);
+                }}
+                // selected={}
+              >
+                <option value="Select time">Time</option>
+                {examinationTimes.map((examination_time) => {
+                  return (
+                    <option value={examination_time.name}>
+                      {examination_time.name}
+                    </option>
+                  );
+                })}
+              </select>
+
+              <select
+                aria-label="Select Course"
+                className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
+                onChange={handleCourseChange}
+              >
+                <option value="Select Course">Course</option>
+                {courses.map((course, index) => (
+                  <option value={course.id}>{course.name}</option>
+                ))}
+              </select>
+
+              <select
+                className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
+                onChange={handleBranchChange}
+                isSearchable={true}
+              >
+                <option value="Select Branch">Branch</option>
+                {branches.map((branch) => (
+                  <option value={branch.id}>{branch.name}</option>
+                ))}
+              </select>
+
+              <select
+                // data-te-select-init
+                // data-te-select-filter="true"
+                className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
+                onChange={handleSemesterChange}
+              >
+                <option value="Select Semester">Semester</option>
+                {semesters.map((semester) => (
+                  <option value={semester.id}>{semester.name}</option>
+                ))}
+              </select>
+
+              <button
+                id="submit-button"
+                // className="py-2 px-3 mr-7 bg-gray-800 rounded-2xl text-white font-bold"
+                className="text-center ml-4 w-auto bg-transparent text-slate-950 p-3 rounded-2xl tracking-wide border border-slate-950
+              font-semibold focus:outline-none focus:shadow-outline hover:bg-gray-700 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
+                onClick={handleFilterSubmit}
+              >
+                <p className="inline-flex">
+                  Search <GiArchiveResearch className="mt-1 ml-2" />
+                </p>
+              </button>
+            </div>
+            <div
+              id="time_table_viewport"
+              className="hidden flex-col overflow-y-scroll mt-5 h-[65vh] max-h-fit "
+            >
+              <div className="">
+                <div className="p-1.5 w-full inline-block align-middle">
+                  <div className="border rounded-lg">
+                    <table className="min-w-full divide-y table-auto divide-gray-200">
+                      <thead className="sticky top-0 bg-gray-50">
+                        <tr>
+                          <th
+                            scope="col"
+                            className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase"
+                          >
+                            Subject Name
+                          </th>
+                          <th
+                            scope="col"
+                            className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase"
+                          >
+                            Subject Code
+                          </th>
+                          <th
+                            scope="col"
+                            className="text-center px-6 py-3 text-xs font-bold text-gray-500 uppercase"
+                          >
+                            Date
+                          </th>
+                          <th
+                            scope="col"
+                            className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase"
+                          >
+                            Action
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="text-center divide-y divide-gray-200">
+                        {subjects.map((subject) => (
+                          <tr>
+                            <td
+                              className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap"
+                              data-id={subject.id}
+                            >
+                              {subject.name}
+                            </td>
+                            <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                              {subject.code}
+                            </td>
+                            <td className="px-6 py-4 text-sm font-medium text-center whitespace-nowrap">
+                              <input
+                                className="shadow appearance-none border rounded w-40 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                id={"date-select-subject-" + subject.id}
+                                onChange={(e) => setDate(e.target.value)}
+                                type="date"
+                                min={new Date().toISOString().split("T")[0]} // Set min attribute to today's date
+                                max={maxDate}
+                                onBeforeInput={(e) => e.preventDefault()}
+                                // disabled={true}
+                                required
+                              />
+                            </td>
+
+                            <td
+                              className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap"
+                              data-id={subject.id}
+                            >
+                              <button
+                                className="text-center w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
+                              font-semibold focus:outline-none focus:shadow-outline hover:bg-green-600 hover:text-white hover:border-none shadow-lg cursor-pointer transition ease-in duration-300"
+                                id={"button-subject-" + subject.id}
+                                onClick={(e) => createObject(e, subject.id)}
+                              >
+                                Create
+                              </button>
+                              <button
+                                id={"delete-button-subject-" + subject.id}
+                                className="hidden text-center ml-4 w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
+                                    font-semibold focus:outline-none focus:shadow-outline hover:bg-red-600 hover:text-slate-50 hover:border-none shadow-lg cursor-pointer transition ease-in duration-300"
+                                onClick={(e) => {
+                                  setTimeTableShowModal(true);
+                                  setTimeTableId(
+                                    e.target.getAttribute("data-time-table-id")
+                                  );
+                                }}
+                              >
+                                Delete
+                              </button>
+                              {timeTableShowModal && (
+                                <TimeTableModal
+                                  setOpenModal={setTimeTableShowModal}
+                                  id={timeTableId}
+                                />
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </nav>
-
-        <aside
-          id="logo-sidebar"
-          className="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
-          aria-label="Sidebar"
-        >
-          <div className="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
-            <ul className="space-y-2 font-medium">
-              <li>
-                <a
-                  href="/examinationDetails"
-                  className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <span className="ml-3">Examination Details</span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/examTimetable"
-                  className="flex items-center p-2 bg-slate-600 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <span className="ml-3">Time Table</span>
-                </a>
-              </li>
-
-              <li>
-                <a
-                  href="/examBlockDetails"
-                  className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <span className="ml-3">Enter Block Details</span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/examAssignSupervision"
-                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <span className="flex-1 ml-3 whitespace-nowrap">
-                    Assign Supervision
-                  </span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/assignMarksEntry"
-                  className="flex items-center p-2 text-gray-900  rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <span className="flex-1 ml-3 whitespace-nowrap">
-                    Assign Marks Entry
-                  </span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/unlock_Marks"
-                  className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <span className="ml-3">Unlock Marks</span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/examViewTimeTable"
-                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <span className="flex-1 ml-3 whitespace-nowrap">Report</span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/result"
-                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <span className="ml-3">Result</span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/studentResult"
-                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <span className="ml-3">Student Result</span>
-                </a>
-              </li>
-              <li>
-                <div className="p-4">
-                  <button
-                    type="button"
-                    className="inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition"
-                    onClick={handleLogout}
-                  >
-                    <span className="">Logout</span>
-                  </button>
-                </div>
-              </li>
-            </ul>
-          </div>
-        </aside>
-
-        <div className="p-4 sm:ml-64">
-          <div className="p-4 rounded-lg mt-10">
-            <div className="text-center text-4xl">
-              <p>Create Time Table</p>
-            </div>
-          </div>
-          {/* Button Content 1 */}
-          <div className="flex mt-5 ml-2">
-            <select
-              className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
-              onChange={(e) => {
-                handleExaminationChange(e.target.value);
-              }}
-              aria-label="Examination Name"
-            >
-              <option value="Select Examination">Examination</option>
-              {examinationNames.map((examination_name) => {
-                return (
-                  <option value={examination_name.name}>
-                    {examination_name.name}
-                  </option>
-                );
-              })}
-            </select>
-
-            <select
-              className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
-              onChange={(e) => handleYearChange(e.target.value)}
-            >
-              <option value="Select Year">Year</option>
-              {academic_years.map((year) => {
-                return <option value={year}>{year}</option>;
-              })}
-            </select>
-
-            <select
-              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
-              onChange={handleTypeChange}
-            >
-              <option value="Select Type">Type</option>
-              {examinationTypes.map((examination_type) => {
-                return (
-                  <option value={examination_type.name}>
-                    {examination_type.name}
-                  </option>
-                );
-              })}
-            </select>
-
-            <select
-              id={"select-time-subject"}
-              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
-              onChange={(e) => {
-                handleTimeChange(e);
-              }}
-              // selected={}
-            >
-              <option value="Select time">Time</option>
-              {examinationTimes.map((examination_time) => {
-                return (
-                  <option value={examination_time.name}>
-                    {examination_time.name}
-                  </option>
-                );
-              })}
-            </select>
-
-            <select
-              aria-label="Select Course"
-              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
-              onChange={handleCourseChange}
-            >
-              <option value="Select Course">Course</option>
-              {courses.map((course, index) => (
-                <option value={course.id}>{course.name}</option>
-              ))}
-            </select>
-
-            <select
-              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
-              onChange={handleBranchChange}
-              isSearchable={true}
-            >
-              <option value="Select Branch">Branch</option>
-              {branches.map((branch) => (
-                <option value={branch.id}>{branch.name}</option>
-              ))}
-            </select>
-
-            <select
-              // data-te-select-init
-              // data-te-select-filter="true"
-              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
-              onChange={handleSemesterChange}
-            >
-              <option value="Select Semester">Semester</option>
-              {semesters.map((semester) => (
-                <option value={semester.id}>{semester.name}</option>
-              ))}
-            </select>
-
-            <button
-              id="submit-button"
-              // className="py-2 px-3 mr-7 bg-gray-800 rounded-2xl text-white font-bold"
-              className="text-center ml-4 w-auto bg-transparent text-slate-950 p-3 rounded-2xl tracking-wide border border-slate-950
-              font-semibold focus:outline-none focus:shadow-outline hover:bg-gray-700 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
-              onClick={handleFilterSubmit}
-            >
-              <p className="inline-flex">
-                Search <GiArchiveResearch className="mt-1 ml-2" />
-              </p>
-            </button>
-          </div>
-          <div
-            id="time_table_viewport"
-            className="hidden flex-col overflow-y-scroll mt-5 h-[65vh] max-h-fit "
-          >
-            <div className="">
-              <div className="p-1.5 w-full inline-block align-middle">
-                <div className="border rounded-lg">
-                  <table className="min-w-full divide-y table-auto divide-gray-200">
-                    <thead className="sticky top-0 bg-gray-50">
-                      <tr>
-                        <th
-                          scope="col"
-                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase"
-                        >
-                          Subject Name
-                        </th>
-                        <th
-                          scope="col"
-                          className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase"
-                        >
-                          Subject Code
-                        </th>
-                        <th
-                          scope="col"
-                          className="text-center px-6 py-3 text-xs font-bold text-gray-500 uppercase"
-                        >
-                          Date
-                        </th>
-                        <th
-                          scope="col"
-                          className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase"
-                        >
-                          Action
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="text-center divide-y divide-gray-200">
-                      {subjects.map((subject) => (
-                        <tr>
-                          <td
-                            className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap"
-                            data-id={subject.id}
-                          >
-                            {subject.name}
-                          </td>
-                          <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                            {subject.code}
-                          </td>
-                          <td className="px-6 py-4 text-sm font-medium text-center whitespace-nowrap">
-                            <input
-                              className="shadow appearance-none border rounded w-40 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                              id={"date-select-subject-" + subject.id}
-                              onChange={(e) => setDate(e.target.value)}
-                              type="date"
-                              min={new Date().toISOString().split("T")[0]} // Set min attribute to today's date
-                              max={maxDate}
-                              onBeforeInput={(e) => e.preventDefault()}
-                              // disabled={true}
-                              required
-                            />
-                          </td>
-
-                          <td
-                            className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap"
-                            data-id={subject.id}
-                          >
-                            <button
-                              className="text-center w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
-                              font-semibold focus:outline-none focus:shadow-outline hover:bg-green-600 hover:text-white hover:border-none shadow-lg cursor-pointer transition ease-in duration-300"
-                              id={"button-subject-" + subject.id}
-                              onClick={(e) => createObject(e, subject.id)}
-                            >
-                              Create
-                            </button>
-                            <button
-                              id={"delete-button-subject-" + subject.id}
-                              className="hidden text-center ml-4 w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
-                                    font-semibold focus:outline-none focus:shadow-outline hover:bg-red-600 hover:text-slate-50 hover:border-none shadow-lg cursor-pointer transition ease-in duration-300"
-                              onClick={(e) => {
-                                setTimeTableShowModal(true);
-                                setTimeTableId(
-                                  e.target.getAttribute("data-time-table-id")
-                                );
-                              }}
-                            >
-                              Delete
-                            </button>
-                            {timeTableShowModal && (
-                              <TimeTableModal
-                                setOpenModal={setTimeTableShowModal}
-                                id={timeTableId}
-                              />
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
+          <ToastContainer />
         </div>
-      </div>
-      <ToastContainer />
+      ) : (
+        navigate(-1)
+      )}
     </div>
   );
 };
