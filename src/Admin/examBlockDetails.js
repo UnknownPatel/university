@@ -656,7 +656,7 @@ const ExamBlockDetails = () => {
                     const no_of_students = document.getElementById(
                       "input-time-table-" + time_table.id
                     );
-                    
+
                     const deleteButton = document.getElementById(
                       "delete-button-time-table-" + time_table.id
                     );
@@ -676,11 +676,11 @@ const ExamBlockDetails = () => {
                         "data-report-id",
                         res.data.data.report.id
                       );
-                      deleteButton.classList.remove('hidden');
+                      deleteButton.classList.remove("hidden");
                     } else {
                       no_of_students.value = "";
                       button_submit.innerHTML = "Create";
-                      deleteButton.classList.add('hidden');
+                      deleteButton.classList.add("hidden");
                       button_submit.removeAttribute("data-report-id");
                     }
                   })
@@ -772,7 +772,6 @@ const ExamBlockDetails = () => {
           }
         )
         .then((res) => {
-          
           if (res.data.status == "ok") {
             const student_input = document.getElementById(
               "input-time-table-" + time_table_id
@@ -818,7 +817,7 @@ const ExamBlockDetails = () => {
               "data-report-id",
               responce.data.data.report.id
             );
-            deleteButton.classList.remove('hidden');
+            deleteButton.classList.remove("hidden");
             button.innerHTML = "Update";
             button.setAttribute("data-report-id", responce.data.data.report.id);
             student_input.value = responce.data.data.report.no_of_students;
@@ -826,7 +825,7 @@ const ExamBlockDetails = () => {
               position: toast.POSITION.BOTTOM_LEFT,
             });
           } else {
-            deleteButton.classList.add('hidden');
+            deleteButton.classList.add("hidden");
             toast.error(responce.data.message, {
               position: toast.POSITION.BOTTOM_LEFT,
             });
@@ -1149,161 +1148,164 @@ const ExamBlockDetails = () => {
                 ))}
               </select>
 
-            <select
-              className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
-              onChange={(e) => {
-                handleTimeChange(e);
-              }}
-            >
-              <option value="Select time">Time</option>
-              {examinationTimes.map((examination_time) => {
-                return (
-                  <option value={examination_time.name}>
-                    {examination_time.name}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
+              <select
+                className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
+                onChange={(e) => {
+                  handleTimeChange(e);
+                }}
+              >
+                <option value="Select time">Time</option>
+                {examinationTimes.map((examination_time) => {
+                  return (
+                    <option value={examination_time.name}>
+                      {examination_time.name}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
 
-          <div className="flex justify-center mt-5">
-            <button
-              className="text-center w-auto bg-transparent text-slate-950 p-3 rounded-2xl tracking-wide border border-slate-950
-              font-semibold focus:outline-none focus:shadow-outline hover:bg-gray-700 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
-              id={"submit-button"}
-              onClick={handleFilterSubmit}
-            >
-              <p className="inline-flex">
-                Search <GiArchiveResearch className="mt-1 ml-2" />
-              </p>
-            </button>
-          </div>
+            <div className="flex justify-center mt-5">
+              <button
+                className="text-center w-auto bg-transparent text-slate-950 p-3 rounded-2xl tracking-wide border border-slate-950
+                font-semibold focus:outline-none focus:shadow-outline hover:bg-gray-700 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
+                id={"submit-button"}
+                onClick={handleFilterSubmit}
+              >
+                <p className="inline-flex">
+                  Search <GiArchiveResearch className="mt-1 ml-2" />
+                </p>
+              </button>
+            </div>
 
-          <div
-            id="time_table_viewport"
-            className="hidden flex-col h-96 max-h-fit overflow-y-scroll mt-5"
-          >
-            <div className="">
-              <div className="p-1.5 w-full inline-block align-middle">
-                <div className="border rounded-lg">
-                  <table className="min-w-full divide-y table-autos divide-gray-200">
-                    <thead className="sticky top-0 bg-gray-50">
-                      <tr>
-                        <th
-                          scope="col"
-                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase"
-                        >
-                          Subject Name
-                        </th>
-                        <th
-                          scope="col"
-                          className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase"
-                        >
-                          Subject Code
-                        </th>
-                        <th
-                          scope="col"
-                          className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase"
-                        >
-                          Date
-                        </th>
-                        <th
-                          scope="col"
-                          className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase"
-                        >
-                          Time
-                        </th>
-                        <th
-                          scope="col"
-                          className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase"
-                        >
-                          No. of Students
-                        </th>
-                        <th
-                          scope="col"
-                          className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase"
-                        >
-                          Action
-                        </th>
-                      </tr>
-                    </thead>
+            <div
+              id="time_table_viewport"
+              className="hidden flex-col h-96 max-h-fit overflow-y-scroll mt-5"
+            >
+              <div className="">
+                <div className="p-1.5 w-full inline-block align-middle">
+                  <div className="border rounded-lg">
+                    <table className="min-w-full divide-y table-autos divide-gray-200">
+                      <thead className="sticky top-0 bg-gray-50">
+                        <tr>
+                          <th
+                            scope="col"
+                            className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase"
+                          >
+                            Subject Name
+                          </th>
+                          <th
+                            scope="col"
+                            className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase"
+                          >
+                            Subject Code
+                          </th>
+                          <th
+                            scope="col"
+                            className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase"
+                          >
+                            Date
+                          </th>
+                          <th
+                            scope="col"
+                            className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase"
+                          >
+                            Time
+                          </th>
+                          <th
+                            scope="col"
+                            className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase"
+                          >
+                            No. of Students
+                          </th>
+                          <th
+                            scope="col"
+                            className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase"
+                          >
+                            Action
+                          </th>
+                        </tr>
+                      </thead>
 
                       {/* Body of the BlockWise Report */}
 
-                    <tbody className="divide-y divide-gray-200">
-                      {timeTables.map((time_table) => (
-                        <tr>
-                          <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                            {time_table.subject_name}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap">
-                            {time_table.subject_code}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-center whitespace-nowrap">
-                            {time_table.date}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-center whitespace-nowrap">
-                            {time_table.time}
-                          </td>
-                          <td className="px-6 py-4 text-sm flex justify-center whitespace-nowrap">
-                            <input
-                              className="shadow appearance-none border rounded w-44 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                              id={"input-time-table-" + time_table.id}
-                              onChange={(e) =>
-                                setNoOfStudent(parseInt(e.target.value))
-                              }
-                              type="text"
-                              placeholder="Enter Student Number"
-                              required
-                            />
-                          </td>
-                          <td className="px-6 py-4 text-sm text-center whitespace-nowrap">
-                            <button
-                              className="text-center w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
-                              font-semibold focus:outline-none focus:shadow-outline hover:bg-green-600 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
-                              data-id={time_table.id}
-                              onClick={(e) =>
-                                handleSubmitBlockWiseReport(
-                                  e,
-                                  time_table.id,
-                                  noOfStudent
-                                )
-                              }
-                              id={"button-subject-" + time_table.id}
-                            >
-                              Create
-                            </button>
-                            <button
-                              id={"delete-button-time-table-" + time_table.id}
-                              className="hidden text-center ml-4 w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
-                                    font-semibold focus:outline-none focus:shadow-outline hover:bg-red-600 hover:text-slate-50 hover:border-none shadow-lg cursor-pointer transition ease-in duration-300"
-                              onClick={(e) => {
-                                setBlockDetailsShowModal(true);
-                                setBlockDetailsId(
-                                  e.target.getAttribute("data-report-id")
-                                );
-                              }}
-                            >
-                              Delete
-                            </button>
-                            {blockDetailsShowModal && (
-                              <BlockDetailsModal
-                                setOpenModal={setBlockDetailsShowModal}
-                                id={blockDetailsId}
+                      <tbody className="divide-y divide-gray-200">
+                        {timeTables.map((time_table) => (
+                          <tr>
+                            <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                              {time_table.subject_name}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap">
+                              {time_table.subject_code}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-center whitespace-nowrap">
+                              {time_table.date}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-center whitespace-nowrap">
+                              {time_table.time}
+                            </td>
+                            <td className="px-6 py-4 text-sm flex justify-center whitespace-nowrap">
+                              <input
+                                className="shadow appearance-none border rounded w-44 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                id={"input-time-table-" + time_table.id}
+                                onChange={(e) =>
+                                  setNoOfStudent(parseInt(e.target.value))
+                                }
+                                type="text"
+                                placeholder="Enter Student Number"
+                                required
                               />
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                            </td>
+                            <td className="px-6 py-4 text-sm text-center whitespace-nowrap">
+                              <button
+                                className="text-center w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
+                                font-semibold focus:outline-none focus:shadow-outline hover:bg-green-600 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
+                                data-id={time_table.id}
+                                onClick={(e) =>
+                                  handleSubmitBlockWiseReport(
+                                    e,
+                                    time_table.id,
+                                    noOfStudent
+                                  )
+                                }
+                                id={"button-subject-" + time_table.id}
+                              >
+                                Create
+                              </button>
+                              <button
+                                id={"delete-button-time-table-" + time_table.id}
+                                className="hidden text-center ml-4 w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
+                                      font-semibold focus:outline-none focus:shadow-outline hover:bg-red-600 hover:text-slate-50 hover:border-none shadow-lg cursor-pointer transition ease-in duration-300"
+                                onClick={(e) => {
+                                  setBlockDetailsShowModal(true);
+                                  setBlockDetailsId(
+                                    e.target.getAttribute("data-report-id")
+                                  );
+                                }}
+                              >
+                                Delete
+                              </button>
+                              {blockDetailsShowModal && (
+                                <BlockDetailsModal
+                                  setOpenModal={setBlockDetailsShowModal}
+                                  id={blockDetailsId}
+                                />
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+          <ToastContainer />
         </div>
-      </div>
-      <ToastContainer />
+      ) : (
+        navigate(-1)
+      )}
     </div>
   );
 };
