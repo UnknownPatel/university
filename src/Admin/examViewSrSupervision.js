@@ -984,7 +984,6 @@ const ExamViewSrSupervision = () => {
               <div className="flex justify-evenly text-center mt-10"></div>
             </div>
           </div>
-          <ToastContainer />
         </div>
       ) : (
         navigate(-1)

@@ -111,7 +111,6 @@ const ForgotPassword = () => {
           </div>
         </div>
       </div>
-      <ToastContainer />
     </div>
   );
 };

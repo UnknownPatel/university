@@ -947,7 +947,6 @@ const ExaminationDetails = () => {
               </div>
             </div>
           </div>
-          <ToastContainer />
         </div>
       ) : (
         navigate(-1)

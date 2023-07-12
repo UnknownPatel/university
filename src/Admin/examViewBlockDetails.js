@@ -1146,7 +1146,6 @@ const ExamViewBlockDetails = () => {
             </div>
             <div className="flex justify-evenly text-center mt-10"></div>
           </div>
-          <ToastContainer />
         </div>
       ) : (
         navigate(-1)

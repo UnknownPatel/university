@@ -84,7 +84,6 @@ const ExamTimeTable = () => {
           }
         )
         .then((responce) => {
-          // selectedFilter = responce.data.configuration;
           setFaculty(
             responce.data.user.first_name + " " + responce.data.user.last_name
           );
@@ -992,7 +991,6 @@ const ExamTimeTable = () => {
               </div>
             </div>
           </div>
-          <ToastContainer />
         </div>
       ) : (
         navigate(-1)

@@ -189,7 +189,6 @@ const SignUpSuperAdmin = () => {
           </div>
         </div>
       </div>
-      <ToastContainer />
     </div>
   );
 };

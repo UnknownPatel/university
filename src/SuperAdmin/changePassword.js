@@ -141,7 +141,6 @@ const ChangePassword = () => {
           </div>
         </div>
       </div>
-      <ToastContainer />
     </div>
   );
 };

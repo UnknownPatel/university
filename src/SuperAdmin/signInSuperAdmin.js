@@ -58,8 +58,6 @@ const SignInSuperAdmin = () => {
           }
         )
         .then((response) => {
-          console.log(response.data.access_token);
-          console.log(response.data);
           login_btn.disabled = false;
           login_btn.innerHTML = "Log In";
           login_btn.classList.remove("cursor-not-allowed");
@@ -84,41 +82,27 @@ const SignInSuperAdmin = () => {
                   toast.success("Login Successfully !!", {
                     position: toast.POSITION.BOTTOM_LEFT,
                   });
-                  setTimeout(() => {
-                    navigate("/uploadExcel");
-                  }, 2000);
-                } else if (responce.data.roles.includes("faculty")) {
+                  navigate("/uploadExcel");
+                } else if (
+                  responce.data.roles.includes("Examination Controller")
+                ) {
                   toast.success("Login Successfully !!", {
                     position: toast.POSITION.BOTTOM_LEFT,
                   });
-                  setTimeout(() => {
-                    navigate("/facultyDashboard");
-                  }, 2000);
+                  navigate("/examinationDetails");
+                } else if (responce.data.roles.includes("Marks Entry")) {
+                  toast.success("Login Successfully !!", {
+                    position: toast.POSITION.BOTTOM_LEFT,
+                  });
+
+                  navigate("/marks_entry");
+                } else if (responce.data.roles.includes("Academic Head")) {
+                  toast.success("Login Successfully !!", {
+                    position: toast.POSITION.BOTTOM_LEFT,
+                  });
+
+                  navigate("/academic_UploadSyllabus");
                 }
-                // } else if (
-                //   responce.data.roles.includes("Examination Controller")
-                // ) {
-                //   toast.success("Login Successfully !!", {
-                //     position: toast.POSITION.BOTTOM_LEFT,
-                //   });
-                //   setTimeout(() => {
-                //     navigate("/examinationDetails");
-                //   }, 2000);
-                // } else if (responce.data.roles.includes("Marks Entry")) {
-                //   toast.success("Login Successfully !!", {
-                //     position: toast.POSITION.BOTTOM_LEFT,
-                //   });
-                //   setTimeout(() => {
-                //     navigate("/marks_entry");
-                //   }, 2000);
-                // } else if (responce.data.roles.includes("Academic Head")) {
-                //   toast.success("Login Successfully !!", {
-                //     position: toast.POSITION.BOTTOM_LEFT,
-                //   });
-                //   setTimeout(() => {
-                //     navigate("/academic_UploadSyllabus");
-                //   }, 2000);
-                // }
               })
               .catch((error) => console.log(error));
           }
@@ -300,7 +284,6 @@ const SignInSuperAdmin = () => {
           </div>
         </section>
       </div>
-      <ToastContainer />
     </div>
   );
 };

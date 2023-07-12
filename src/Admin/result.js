@@ -1012,7 +1012,6 @@ const Result = () => {
           </div>
         </div>
       </div>
-      <ToastContainer />
     </div>
   );
 };

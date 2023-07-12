@@ -545,7 +545,6 @@ const StudentResult = () => {
           </div>
         </div>
       </div>
-      <ToastContainer />
     </div>
   );
 };

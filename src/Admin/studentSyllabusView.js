@@ -600,7 +600,6 @@ const StudentSyllabusView = () => {
           </div>
         </div>
       </div>
-      <ToastContainer />
     </div>
   );
 };

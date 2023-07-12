@@ -541,7 +541,6 @@ const AssignRole = () => {
               </div>
             </div>
           </div>
-          <ToastContainer />
         </div>
       ) : (
         navigate(-1)
