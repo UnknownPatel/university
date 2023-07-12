@@ -1164,7 +1164,8 @@ const ExamBlockDetails = () => {
 
           <div className="flex justify-center mt-5">
             <button
-              className="py-2 px-3 bg-gray-800 rounded-2xl text-white font-bold w-auto"
+              className="text-center w-auto bg-transparent text-slate-950 p-3 rounded-2xl tracking-wide border border-slate-950
+              font-semibold focus:outline-none focus:shadow-outline hover:bg-gray-700 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
               id={"submit-button"}
               onClick={handleFilterSubmit}
             >
@@ -1176,48 +1177,47 @@ const ExamBlockDetails = () => {
 
           <div
             id="time_table_viewport"
-            className="hidden flex-col overflow-y-scroll mt-5"
-            style={{ height: 445 }}
+            className="hidden flex-col h-96 max-h-fit overflow-y-scroll mt-5"
           >
             <div className="">
               <div className="p-1.5 w-full inline-block align-middle">
                 <div className="border rounded-lg">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                  <table className="min-w-full divide-y table-autos divide-gray-200">
+                    <thead className="sticky top-0 bg-gray-50">
                       <tr>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase"
                         >
                           Subject Name
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
+                          className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase"
                         >
                           Subject Code
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
+                          className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase"
                         >
                           Date
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
+                          className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase"
                         >
                           Time
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
+                          className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase"
                         >
                           No. of Students
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
+                          className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase"
                         >
                           Action
                         </th>

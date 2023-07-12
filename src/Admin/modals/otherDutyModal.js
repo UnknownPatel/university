@@ -8,7 +8,7 @@ var acces_token;
 var headers;
 var subdomain;
 
-const TimeModal = ({ setOpenModal, id, setTimes }) => {
+const OtherDutyModal = ({ setOpenModal, id }) => {
   useEffect(() => {
     acces_token = localStorage.getItem("access_token");
     headers = { Authorization: `Bearer ${acces_token}` };
@@ -19,11 +19,11 @@ const TimeModal = ({ setOpenModal, id, setTimes }) => {
     }
   }, []);
 
-  const handleDeleteTime = (e) => {
+  const handleDeleteOtherDuty = (e) => {
     if (subdomain !== null || subdomain !== "") {
       axios
         .delete(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_times/${id}`,
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/other_duties/${id}`,
           {
             headers,
             params: {
@@ -33,36 +33,16 @@ const TimeModal = ({ setOpenModal, id, setTimes }) => {
         )
         .then((res) => {
           if (res.data.status === "ok") {
+            setOpenModal(false);
+            const submitButton = document.getElementById("od-submit-button");
+            submitButton.click();
             toast.success(res.data.message, {
               position: toast.POSITION.BOTTOM_LEFT,
             });
-            axios
-              .get(
-                `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_times`,
-                {
-                  headers,
-                  params: {
-                    subdomain: subdomain,
-                  },
-                }
-              )
-              .then((res) => {
-                if (res.data.data.examination_times.length !== 0) {
-                  setTimes(res.data.data.examination_times);
-                  setOpenModal(false);
-                } else {
-                  setTimes([]);
-                  setOpenModal(false);
-                }
-              })
-              .catch((err) => {
-                console.error(err);
-              });
           } else {
             toast.error(res.data.message, {
               position: toast.POSITION.BOTTOM_LEFT,
             });
-            setOpenModal(false);
           }
         })
         .catch((err) => {
@@ -75,7 +55,7 @@ const TimeModal = ({ setOpenModal, id, setTimes }) => {
     <>
       <div className="fixed inset-0 z-10 overflow-y-auto">
         <div
-          className="fixed inset-0 w-full h-full bg-black opacity-40"
+          className="fixed inset-0 w-full h-full bg-black opacity-20"
           onClick={() => setOpenModal(false)}
         ></div>
         <div className="flex items-center min-h-screen px-4 py-8">
@@ -96,13 +76,13 @@ const TimeModal = ({ setOpenModal, id, setTimes }) => {
                 </svg>
               </div>
               <p className="mt-2 text-[15px] leading-relaxed text-gray-500">
-                Are you sure you want to delete this examination time?
+                Are you sure you want to delete?
               </p>
-              <div className="mt-2 text-center sm:ml-4 sm:text-left">
+              <div className="mt-5 text-center sm:ml-4 sm:text-left">
                 <div className="items-center gap-2 mt-3 sm:flex">
                   <button
                     className="w-full mt-2 p-2.5 flex-1 text-white bg-red-600 rounded-md outline-none ring-offset-2 ring-red-600 focus:ring-2"
-                    onClick={() => handleDeleteTime()}
+                    onClick={() => handleDeleteOtherDuty()}
                   >
                     Delete
                   </button>
@@ -122,4 +102,4 @@ const TimeModal = ({ setOpenModal, id, setTimes }) => {
   );
 };
 
-export default TimeModal;
+export default OtherDutyModal;

@@ -12,6 +12,9 @@ import { FiEdit } from "react-icons/fi";
 
 import { useReactToPrint } from "react-to-print";
 import { useNavigate } from "react-router-dom";
+import JrSupervisionModal from "./modals/jrSupervisionModal";
+import SrSupervisionModal from "./modals/srSupervisionModal";
+import OtherDutyModal from "./modals/otherDutyModal";
 
 var acces_token;
 var headers;
@@ -20,10 +23,11 @@ var subdomain;
 const ExamAssignSupervision = () => {
   const [faculty, setFaculty] = useState("");
   const [uniName, setUniName] = useState("");
-  const [examinationNames, setExaminationNames] = useState([]);
   const [jrType, setJrType] = useState("");
   const [examinationTypes, setExaminationTypes] = useState([]);
   const [examinationName, setExaminationName] = useState("");
+  const [examinationNames, setExaminationNames] = useState([]);
+  const [examinationTimes, setExaminationTimes] = useState([]);
   const [selectedYear, setSelectedYear] = useState("");
   const [courses, setCourses] = useState([]);
   const [courseId, setCourseId] = useState("");
@@ -32,7 +36,9 @@ const ExamAssignSupervision = () => {
   const [noOfSupervisions, setNoOfSupervisions] = useState();
   const [branches, setBranches] = useState([]);
   const [academic_years, setAcademicYears] = useState([]);
-  const [jrTime, setJrTime] = useState("0");
+  const [jrTime, setJrTime] = useState("");
+  const [jrSupervisionShowModal, setJrSupervisionShowModal] = useState(false);
+  const [jrSupervisionId, setJrSupervisionId] = useState("");
 
   const [srExaminationName, setSrExaminationName] = useState("");
   const [srSelectedYear, setSrSelectedYear] = useState("");
@@ -44,9 +50,13 @@ const ExamAssignSupervision = () => {
   const [srFacultyName, setSrFacultyName] = useState([]);
   const [srNoOfSupervisions, setSrNoOfSupervisions] = useState();
   const [srTime, setSrTime] = useState("");
+  const [srSupervisionShowModal, setSrSupervisionShowModal] = useState(false);
+  const [srSupervisionId, setSrSupervisionId] = useState("");
 
   const [odExaminationName, setOdExaminationName] = useState("");
   const [odSelectedYear, setOdSelectedYear] = useState("");
+  const [odType, setOdType] = useState("");
+  const [odTime, setOdTime] = useState("");
   const [odCourses, setOdCourses] = useState([]);
   const [odCourseId, setOdCourseId] = useState("");
   const [odBranches, setOdBranches] = useState([]);
@@ -54,6 +64,8 @@ const ExamAssignSupervision = () => {
   const [odFacultyName, setOdFacultyName] = useState([]);
   const [otherDutyData, setOtherDutyData] = useState([]);
   const [odAssignedDuty, setOdAssignedDuty] = useState("");
+  const [otherDutyShowModal, setOtherDutyShowModal] = useState(false);
+  const [otherDutyId, setOtherDutyId] = useState("");
 
   const navigate = useNavigate();
 
@@ -161,6 +173,29 @@ const ExamAssignSupervision = () => {
         .catch(function (err) {
           console.log(err.message);
         });
+
+      axios
+        .get(
+          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_times",
+          {
+            headers,
+            params: {
+              subdomain: subdomain,
+            },
+          }
+        )
+        .then((responce) => {
+          if (responce.data.status === "ok") {
+            if (responce.data.data.examination_times.length !== 0) {
+              setExaminationTimes(responce.data.data.examination_times);
+            } else {
+              setExaminationTimes([]);
+            }
+          }
+        })
+        .catch(function (err) {
+          console.log(err.message);
+        });
     }
   }, []);
 
@@ -172,20 +207,17 @@ const ExamAssignSupervision = () => {
 
   const handleJrExaminationChange = (examination) => {
     setExaminationName(examination);
+    handleJrViewPortChange();
   };
 
   const handleJrYearChange = (date) => {
     setSelectedYear(date);
+    handleJrViewPortChange();
   };
 
   const handleJrTypeChange = (e) => {
     e.preventDefault();
-    const faculty_listing_viewport = document.getElementById(
-      "faculty_listing_viewport"
-    );
-    faculty_listing_viewport.classList.add("hidden");
-    faculty_listing_viewport.classList.remove("flex");
-
+    handleJrViewPortChange();
     if (e.target.value === "Select Type") {
       setJrTime("");
     } else {
@@ -198,11 +230,7 @@ const ExamAssignSupervision = () => {
     setBranches([]);
     setFacultyName([]);
     setCourseId(e.target.value);
-    const faculty_listing_viewport = document.getElementById(
-      "faculty_listing_viewport"
-    );
-    faculty_listing_viewport.classList.add("hidden");
-    faculty_listing_viewport.classList.remove("flex");
+    handleJrViewPortChange();
 
     var course_id = e.target.value;
     if (subdomain !== null || subdomain !== "") {
@@ -222,11 +250,7 @@ const ExamAssignSupervision = () => {
 
   const handleJrBranchChange = (e) => {
     e.preventDefault();
-    const faculty_listing_viewport = document.getElementById(
-      "faculty_listing_viewport"
-    );
-    faculty_listing_viewport.classList.add("hidden");
-    faculty_listing_viewport.classList.remove("flex");
+    handleJrViewPortChange();
 
     if (e.target.value === "Select Branch") {
       setBranchId("");
@@ -239,14 +263,13 @@ const ExamAssignSupervision = () => {
     e.preventDefault();
     setFacultyName([]);
     setJrTime(e.target.value);
-    const faculty_listing_viewport = document.getElementById(
-      "faculty_listing_viewport"
-    );
-    faculty_listing_viewport.classList.add("hidden");
-    faculty_listing_viewport.classList.remove("flex");
+    handleJrViewPortChange();
   };
 
   const createObject = (e, user_id, no_of_supervisions) => {
+    e.preventDefault();
+    e.target.disabled = true;
+    e.target.classList.add("cursor-not-allowed");
     var selectedFilter = {};
     var timeTableSelectedFilter = {};
     if (examinationName === "") {
@@ -261,6 +284,10 @@ const ExamAssignSupervision = () => {
       toast.error("Please select examination type", {
         position: toast.POSITION.BOTTOM_LEFT,
       });
+    } else if (jrTime === "" || jrTime === "Select time") {
+      toast.error("Please select time", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
     } else {
       selectedFilter = {
         examination_name: examinationName,
@@ -269,7 +296,7 @@ const ExamAssignSupervision = () => {
         user_type: 0,
         list_type: "Junior",
         supervision_type: jrType,
-        time: parseInt(jrTime),
+        time: jrTime,
       };
 
       timeTableSelectedFilter = {
@@ -277,7 +304,7 @@ const ExamAssignSupervision = () => {
         academic_year: selectedYear,
         course_id: courseId,
         time_table_type: jrType,
-        time: jrTime === "0" ? "morning" : "evening",
+        time: jrTime,
       };
 
       if (branchId !== "") {
@@ -289,7 +316,7 @@ const ExamAssignSupervision = () => {
           user_type: 0,
           list_type: "Junior",
           supervision_type: jrType,
-          time: parseInt(jrTime),
+          time: jrTime,
         };
 
         timeTableSelectedFilter = {
@@ -298,12 +325,18 @@ const ExamAssignSupervision = () => {
           course_id: courseId,
           branch_id: branchId,
           time_table_type: jrType,
-          time: jrTime === "0" ? "morning" : "evening",
+          time: jrTime,
         };
       }
 
-      if (e.target.innerHTML === ReactDOMServer.renderToString(<FiEdit />)) {
+      const no_of_supervisions = document.getElementById(
+        "jr-student-input-user-" + user_id
+      ).value;
+
+      if (e.target.innerHTML === "Update") {
+        e.target.innerHTML = "Assigning ...";
         var supervision_id = e.target.getAttribute("data-supervision-id");
+
         axios
           .put(
             `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions/${supervision_id}?subdomain=${subdomain}`,
@@ -318,7 +351,10 @@ const ExamAssignSupervision = () => {
             }
           )
           .then((res) => {
-            if (res.data.message == "Supervision Altered") {
+            e.target.innerHTML = "Update";
+            e.target.disabled = false;
+            e.target.classList.remove("cursor-not-allowed");
+            if (res.data.status === "ok") {
               toast.success(res.data.message, {
                 position: toast.POSITION.BOTTOM_LEFT,
               });
@@ -332,6 +368,7 @@ const ExamAssignSupervision = () => {
             console.error(err);
           });
       } else {
+        e.target.innerHTML = "Assigning ...";
         axios
           .post(
             `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions?subdomain=${subdomain}`,
@@ -345,7 +382,7 @@ const ExamAssignSupervision = () => {
                 list_type: "Junior",
                 no_of_supervisions: no_of_supervisions,
                 supervision_type: jrType,
-                time: parseInt(jrTime),
+                time: jrTime,
               },
             },
             {
@@ -355,29 +392,41 @@ const ExamAssignSupervision = () => {
             }
           )
           .then((res) => {
+            e.target.disabled = false;
+            e.target.classList.remove("cursor-not-allowed");
             const jr_no_of_supervisions_input = document.getElementById(
               "jr-student-input-user-" + user_id
             );
             const jr_supervision_submit_button = document.getElementById(
               "jr-supervision-button-" + user_id
             );
+            const delete_button = document.getElementById(
+              "jr-delete-button-user-" + user_id
+            );
             if (res.data.status === "created") {
-              e.target.setAttribute(
+              jr_supervision_submit_button.setAttribute(
                 "data-supervision-id",
                 res.data.data.supervision.id
               );
+              delete_button.setAttribute(
+                "data-supervision-id",
+                res.data.data.supervision.id
+              );
+              delete_button.classList.remove("hidden");
               jr_no_of_supervisions_input.value =
                 res.data.data.supervision.no_of_supervisions;
-              jr_supervision_submit_button.innerHTML =
-                ReactDOMServer.renderToString(<FiEdit />);
+              jr_supervision_submit_button.innerHTML = "Update";
 
               toast.success(
-                "Supervision is being assigned, you can view that in the Reports!",
+                "Supervision has assigned, you can view that in the Reports!",
                 {
                   position: toast.POSITION.BOTTOM_LEFT,
                 }
               );
             } else {
+              jr_no_of_supervisions_input.value = "";
+              delete_button.classList.add("hidden");
+              jr_supervision_submit_button.innerHTML = "Create";
               toast.error(res.data.message, {
                 position: toast.POSITION.BOTTOM_LEFT,
               });
@@ -408,6 +457,10 @@ const ExamAssignSupervision = () => {
       toast.error("Please select course", {
         position: toast.POSITION.BOTTOM_LEFT,
       });
+    } else if (jrTime === "" || jrTime === "Select time") {
+      toast.error("Please select time", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
     } else {
       selectedFilter = {
         examination_name: examinationName,
@@ -416,7 +469,7 @@ const ExamAssignSupervision = () => {
         user_type: 0,
         list_type: "Junior",
         supervision_type: jrType,
-        time: parseInt(jrTime),
+        time: jrTime,
       };
 
       if (branchId !== "") {
@@ -428,7 +481,7 @@ const ExamAssignSupervision = () => {
           user_type: 0,
           list_type: "Junior",
           supervision_type: jrType,
-          time: parseInt(jrTime),
+          time: jrTime,
         };
       }
 
@@ -447,7 +500,7 @@ const ExamAssignSupervision = () => {
           .then((res) => {
             console.log(res);
             const faculty_listing_viewport = document.getElementById(
-              "faculty_listing_viewport"
+              "jr_faculty_listing_viewport"
             );
             if (res.data.status === "ok") {
               if (res.data.data.users.length !== 0) {
@@ -476,28 +529,35 @@ const ExamAssignSupervision = () => {
                         document.getElementById(
                           "jr-supervision-button-" + faculty.id
                         );
+                      const delete_button = document.getElementById(
+                        "jr-delete-button-user-" + faculty.id
+                      );
                       if (res.data.message == "Details found") {
-                        const button = document.getElementById(
-                          "jr-supervision-button-" + faculty.id
+                        jr_supervision_submit_button.innerHTML = "Update";
+                        delete_button.classList.remove("hidden");
+                        delete_button.setAttribute(
+                          "data-supervision-id",
+                          res.data.data.supervision.id
                         );
-                        jr_supervision_submit_button.innerHTML =
-                          ReactDOMServer.renderToString(<FiEdit />);
-                        button.setAttribute(
+                        jr_supervision_submit_button.setAttribute(
                           "data-supervision-id",
                           res.data.data.supervision.id
                         );
                         jr_no_of_supervisions_input.value =
                           res.data.data.supervision.no_of_supervisions;
                       } else {
-                        jr_supervision_submit_button.innerHTML =
-                          ReactDOMServer.renderToString(<MdAddCircle />);
-
+                        jr_supervision_submit_button.innerHTML = "Create";
+                        delete_button.classList.add("hidden");
                         jr_no_of_supervisions_input.value = "";
                       }
                     })
                     .catch((err) => {
                       console.error(err);
                     });
+                });
+              } else {
+                toast.error("No faculties found for selected criteria", {
+                  position: toast.POSITION.BOTTOM_LEFT,
                 });
               }
             }
@@ -509,23 +569,27 @@ const ExamAssignSupervision = () => {
     }
   };
 
+  const handleJrViewPortChange = () => {
+    const viewport = document.getElementById("jr_faculty_listing_viewport");
+    viewport.classList.add("hidden");
+    viewport.classList.remove("flex");
+  };
+
   // Senior Supervision API
 
   const handleSrExaminationChange = (examination) => {
     setSrExaminationName(examination);
+    handleSrViewPortChange();
   };
 
   const handleSrYearChange = (date) => {
     setSrSelectedYear(date);
+    handleSrViewPortChange();
   };
 
   const handleSrTypeChange = (e) => {
     e.preventDefault();
-    const faculty_listing_viewport = document.getElementById(
-      "sr_faculty_listing_viewport"
-    );
-    faculty_listing_viewport.classList.add("hidden");
-    faculty_listing_viewport.classList.remove("flex");
+    handleSrViewPortChange();
 
     if (e.target.value === "Select Type") {
       setSrTime("");
@@ -540,11 +604,7 @@ const ExamAssignSupervision = () => {
     setSrFacultyName([]);
     setSrCourseId(e.target.value);
 
-    const faculty_listing_viewport = document.getElementById(
-      "sr_faculty_listing_viewport"
-    );
-    faculty_listing_viewport.classList.add("hidden");
-    faculty_listing_viewport.classList.remove("flex");
+    handleSrViewPortChange();
 
     if (subdomain !== null || subdomain !== "") {
       if (e.target.value !== "Select Course") {
@@ -565,11 +625,7 @@ const ExamAssignSupervision = () => {
     e.preventDefault();
     setFacultyName([]);
 
-    const faculty_listing_viewport = document.getElementById(
-      "sr_faculty_listing_viewport"
-    );
-    faculty_listing_viewport.classList.add("hidden");
-    faculty_listing_viewport.classList.remove("flex");
+    handleSrViewPortChange();
 
     if (e.target.value !== "Select Branch") {
       setSrBranchId(e.target.value);
@@ -582,15 +638,17 @@ const ExamAssignSupervision = () => {
     e.preventDefault();
     setSrFacultyName([]);
     setSrTime(e.target.value);
-    const sr_faculty_listing_viewport = document.getElementById(
-      "sr_faculty_listing_viewport"
-    );
-
-    sr_faculty_listing_viewport.classList.add("hidden");
-    sr_faculty_listing_viewport.classList.remove("flex");
+    handleSrViewPortChange();
   };
 
-  const createSrObject = (e, user_id, sr_no_of_supervisions) => {
+  const createSrObject = (e, user_id) => {
+    e.preventDefault();
+    e.target.disable = true;
+    e.target.classList.add("cursor-not-allowed");
+    const sr_no_of_supervisions = document.getElementById(
+      "sr-student-input-user-" + user_id
+    ).value;
+
     let selectedFilter = {};
     let timeTableSelectedFilter = {};
     if (srExaminationName === "") {
@@ -609,55 +667,42 @@ const ExamAssignSupervision = () => {
       toast.error("Please select course", {
         position: toast.POSITION.BOTTOM_LEFT,
       });
+    } else if (srTime === "" || srTime === "Select time") {
+      toast.error("Please select time", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
     } else {
+      selectedFilter = {
+        examination_name: srExaminationName,
+        academic_year: srSelectedYear,
+        user_id: user_id,
+        course_id: srCourseId,
+        list_type: "Senior",
+        supervision_type: srType,
+        time: srTime,
+        no_of_supervisions: sr_no_of_supervisions,
+        time: srTime,
+      };
+
+      timeTableSelectedFilter = {
+        name: srExaminationName,
+        academic_year: srSelectedYear,
+        course_id: srCourseId,
+        time_table_type: srType,
+        time: srTime,
+      };
+
       if (srBranchId !== "") {
-        selectedFilter = {
-          examination_name: srExaminationName,
-          academic_year: srSelectedYear,
-          user_id: user_id,
-          course_id: srCourseId,
-          branch_id: srBranchId,
-          list_type: "Senior",
-          supervision_type: srType,
-          no_of_supervisions: sr_no_of_supervisions,
-        };
-
-        timeTableSelectedFilter = {
-          name: examinationName,
-          academic_year: selectedYear,
-          course_id: courseId,
-          branch_id: branchId,
-          time_table_type: srType,
-        };
+        selectedFilter["branch_id"] = srBranchId;
+        timeTableSelectedFilter["branch_id"] = srBranchId;
       } else {
-        selectedFilter = {
-          examination_name: srExaminationName,
-          academic_year: srSelectedYear,
-          user_id: user_id,
-          course_id: srCourseId,
-          list_type: "Senior",
-          supervision_type: srType,
-          no_of_supervisions: sr_no_of_supervisions,
-        };
-
-        timeTableSelectedFilter = {
-          name: examinationName,
-          academic_year: selectedYear,
-          course_id: courseId,
-          time_table_type: srType,
-        };
+        delete selectedFilter["branch_id"];
+        delete timeTableSelectedFilter["branch_id"];
       }
 
-      if (srTime !== "") {
-        selectedFilter["time"] = parseInt(srTime);
-        timeTableSelectedFilter["time"] = srTime === "0" ? "morning" : "evening"
-      } else {
-        delete selectedFilter["time"]
-        delete timeTableSelectedFilter["time"]
-      }
-
-      if (e.target.innerHTML === ReactDOMServer.renderToString(<FiEdit />)) {
-        var supervision_id = e.target.getAttribute("data-supervision-id");
+      if (e.target.innerHTML === "Update") {
+        e.target.innerHTML = "Assigning ...";
+        let supervision_id = e.target.getAttribute("data-supervision-id");
 
         axios
           .put(
@@ -667,14 +712,17 @@ const ExamAssignSupervision = () => {
               supervision: {
                 no_of_supervisions: sr_no_of_supervisions,
               },
-              time_table: timeTableSelectedFilter
+              time_table: timeTableSelectedFilter,
             },
             {
               headers,
             }
           )
           .then((res) => {
-            if (res.data.message == "Supervision Altered") {
+            e.target.innerHTML = "Update";
+            e.target.disabled = false;
+            e.target.classList.remove("cursor-not-allowed");
+            if (res.data.status === "ok") {
               toast.success(res.data.message, {
                 position: toast.POSITION.BOTTOM_LEFT,
               });
@@ -688,13 +736,14 @@ const ExamAssignSupervision = () => {
             console.error(err);
           });
       } else {
+        e.target.innerHTML = "Assigning ...";
         axios
           .post(
             `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions`,
             {
               supervision: selectedFilter,
               subdomain: subdomain,
-              time_table: timeTableSelectedFilter
+              time_table: timeTableSelectedFilter,
             },
             {
               headers: {
@@ -703,21 +752,30 @@ const ExamAssignSupervision = () => {
             }
           )
           .then((res) => {
+            e.target.disabled = false;
+            e.target.classList.remove("cursor-not-allowed");
             const sr_no_of_supervisions_input = document.getElementById(
               "sr-student-input-user-" + user_id
             );
             const sr_supervision_submit_button = document.getElementById(
               "sr-supervision-button-" + user_id
             );
+            const delete_button = document.getElementById(
+              "sr-delete-button-user-" + user_id
+            );
             if (res.data.status === "created") {
-              e.target.setAttribute(
+              sr_supervision_submit_button.setAttribute(
                 "data-supervision-id",
                 res.data.data.supervision.id
               );
+              delete_button.setAttribute(
+                "data-supervision-id",
+                res.data.data.supervision.id
+              );
+              delete_button.classList.remove("hidden");
               sr_no_of_supervisions_input.value =
                 res.data.data.supervision.no_of_supervisions;
-              sr_supervision_submit_button.innerHTML =
-                ReactDOMServer.renderToString(<FiEdit />);
+              sr_supervision_submit_button.innerHTML = "Update";
               toast.success(
                 "Supervision has been assigned, you can view that in Reports!",
                 {
@@ -725,6 +783,8 @@ const ExamAssignSupervision = () => {
                 }
               );
             } else {
+              sr_no_of_supervisions_input.value = "";
+              sr_supervision_submit_button.innerHTML = "Create";
               toast.error(res.data.message, {
                 position: toast.POSITION.BOTTOM_LEFT,
               });
@@ -756,6 +816,10 @@ const ExamAssignSupervision = () => {
       toast.error("Please select course", {
         position: toast.POSITION.BOTTOM_LEFT,
       });
+    } else if (srTime === "" || srTime === "Select time") {
+      toast.error("Please select time", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
     } else {
       selectedFilter = {
         examination_name: srExaminationName,
@@ -764,6 +828,7 @@ const ExamAssignSupervision = () => {
         user_type: 1,
         supervision_type: srType,
         list_type: "Senior",
+        time: srTime,
       };
 
       timeTableSelectedFilter = {
@@ -773,34 +838,15 @@ const ExamAssignSupervision = () => {
         user_type: 1,
         time_table_type: srType,
         list_type: "Senior",
+        time: srTime,
       };
 
       if (srBranchId !== "") {
-        selectedFilter = {
-          examination_name: srExaminationName,
-          academic_year: srSelectedYear,
-          course_id: srCourseId,
-          branch_id: srBranchId,
-          user_type: 1,
-          supervision_type: srType,
-          list_type: "Senior",
-        };
-
-        timeTableSelectedFilter = {
-          examination_name: srExaminationName,
-          academic_year: srSelectedYear,
-          course_id: srCourseId,
-          branch_id: srBranchId,
-          user_type: 1,
-          time_table_type: srType,
-          list_type: "Senior",
-        };
-      }
-
-      if (srTime !== "") {
-        timeTableSelectedFilter["time"] =
-          parseInt(srTime) === 0 ? "morning" : "evening";
-        selectedFilter["time"] = parseInt(srTime);
+        selectedFilter["branch_id"] = srBranchId;
+        timeTableSelectedFilter["branch_id"] = srBranchId;
+      } else {
+        delete selectedFilter["branch_id"];
+        delete timeTableSelectedFilter["branch_id"];
       }
 
       if (subdomain !== null || subdomain !== "") {
@@ -846,29 +892,35 @@ const ExamAssignSupervision = () => {
                         document.getElementById(
                           "sr-supervision-button-" + faculty.id
                         );
-                      if (res.data.message == "Details found") {
-                        const button = document.getElementById(
-                          "sr-supervision-button-" + faculty.id
-                        );
-                        sr_supervision_submit_button.innerHTML =
-                          ReactDOMServer.renderToString(<FiEdit />);
-                        button.setAttribute(
+                      const delete_button = document.getElementById(
+                        "sr-delete-button-user-" + faculty.id
+                      );
+                      if (res.data.status == "ok") {
+                        sr_supervision_submit_button.innerHTML = "Update";
+                        sr_supervision_submit_button.setAttribute(
                           "data-supervision-id",
                           res.data.data.supervision.id
                         );
-
+                        delete_button.classList.remove("hidden");
+                        delete_button.setAttribute(
+                          "data-supervision-id",
+                          res.data.data.supervision.id
+                        );
                         sr_no_of_supervisions_input.value =
                           res.data.data.supervision.no_of_supervisions;
                       } else {
-                        sr_supervision_submit_button.innerHTML =
-                          ReactDOMServer.renderToString(<MdAddCircle />);
-
+                        sr_supervision_submit_button.innerHTML = "Create";
                         sr_no_of_supervisions_input.value = "";
+                        delete_button.classList.add("hidden");
                       }
                     })
                     .catch((err) => {
                       console.error(err);
                     });
+                });
+              } else {
+                toast.error("No Senior faculties found for selected criteria", {
+                  position: toast.POSITION.BOTTOM_LEFT,
                 });
               }
             }
@@ -880,13 +932,38 @@ const ExamAssignSupervision = () => {
     }
   };
 
+  const handleSrViewPortChange = () => {
+    const viewport = document.getElementById("sr_faculty_listing_viewport");
+    viewport.classList.add("hidden");
+    viewport.classList.remove("flex");
+  };
+
   // # Other Duties API
   const handleODExaminationChange = (e) => {
     setOdExaminationName(e);
+    handleOdViewPortChange();
   };
 
   const handleODYearChange = (e) => {
     setOdSelectedYear(e);
+    handleOdViewPortChange();
+  };
+
+  const handleODTypeChange = (e) => {
+    e.preventDefault();
+    handleOdViewPortChange();
+    if (e.target.value === "Select Type") {
+      setOdType("");
+    } else {
+      setOdType(e.target.value);
+    }
+  };
+
+  const handleODTimeChange = (e) => {
+    e.preventDefault();
+    setFacultyName([]);
+    setJrTime(e.target.value);
+    handleOdViewPortChange();
   };
 
   const handleODCourseChange = (e) => {
@@ -896,11 +973,7 @@ const ExamAssignSupervision = () => {
     setOtherDutyData([]);
     // setSrFacultyName([]);
     setOdCourseId(e.target.value);
-    const faculty_listing_viewport = document.getElementById(
-      "od_faculty_listing_viewport"
-    );
-    faculty_listing_viewport.classList.add("hidden");
-    faculty_listing_viewport.classList.remove("flex");
+    handleOdViewPortChange();
     if (subdomain !== null || subdomain !== "") {
       if (e.target.value !== "Select Course") {
         axios
@@ -919,11 +992,7 @@ const ExamAssignSupervision = () => {
   const handleODBranchChange = (e) => {
     e.preventDefault();
     setFacultyName([]);
-    const faculty_listing_viewport = document.getElementById(
-      "od_faculty_listing_viewport"
-    );
-    faculty_listing_viewport.classList.add("hidden");
-    faculty_listing_viewport.classList.remove("flex");
+    handleOdViewPortChange();
     if (e.target.value !== "Select Branch") {
       setOdBranchId(e.target.value);
     } else {
@@ -933,7 +1002,7 @@ const ExamAssignSupervision = () => {
 
   const handleODFilterSubmit = (e) => {
     let selectedFilter = {};
-    if (odExaminationName === "Select Examination") {
+    if (odExaminationName === "Select examination") {
       toast.error("Please select examination name", {
         position: toast.POSITION.BOTTOM_LEFT,
       });
@@ -941,8 +1010,16 @@ const ExamAssignSupervision = () => {
       toast.error("Please select year", {
         position: toast.POSITION.BOTTOM_LEFT,
       });
+    } else if (odType === "" || odType === "Select Type") {
+      toast.error("Please select type", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
     } else if (odCourseId === "Select Course") {
       toast.error("Please select course", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (odTime === "" || odTime === "Select Time") {
+      toast.error("Please select time", {
         position: toast.POSITION.BOTTOM_LEFT,
       });
     } else {
@@ -950,6 +1027,8 @@ const ExamAssignSupervision = () => {
         examination_name: odExaminationName,
         academic_year: odSelectedYear,
         course_id: odCourseId,
+        time: odTime,
+        other_duty_type: odType,
       };
 
       if (odBranchId !== "") {
@@ -958,6 +1037,8 @@ const ExamAssignSupervision = () => {
           academic_year: odSelectedYear,
           course_id: odCourseId,
           branch_id: odBranchId,
+          time: odTime,
+          other_duty_type: odType,
         };
       }
     }
@@ -988,8 +1069,14 @@ const ExamAssignSupervision = () => {
               res.data.data.users.map((faculty) => {
                 axios
                   .get(
-                    `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/other_duties/${faculty.id}/fetch_details?subdomain=${subdomain}`,
-                    { headers }
+                    `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/other_duties/${faculty.id}/fetch_details`,
+                    {
+                      headers,
+                      params: {
+                        subdomain: subdomain,
+                        other_duty: selectedFilter,
+                      },
+                    }
                   )
                   .then((res) => {
                     console.log(res);
@@ -999,50 +1086,36 @@ const ExamAssignSupervision = () => {
                     const other_duty_submit_button = document.getElementById(
                       "other-duty-button-" + faculty.id
                     );
+                    const delete_button = document.getElementById(
+                      "od-delete-button-user-" + faculty.id
+                    );
                     if (res.data.message == "Details found") {
                       other_duty_submit_button.setAttribute(
                         "data-other-duty-id",
                         res.data.data.other_duty.id
                       );
                       other_duty_submit_button.innerHTML = "Update";
-
+                      delete_button.classList.remove("hidden");
+                      delete_button.setAttribute(
+                        "data-other-duty-id",
+                        res.data.data.other_duty.id
+                      );
                       od_assigned_duty_input.value =
                         res.data.data.other_duty.assigned_duties;
                     } else {
-                      other_duty_submit_button.removeAttribute(
-                        "data-other-duty-id" + res.data.data.other_duty.id
-                      );
                       other_duty_submit_button.innerHTML = "Create";
-
                       od_assigned_duty_input.value = "";
+                      delete_button.classList.add("hidden");
                     }
                   })
                   .catch((err) => {
                     console.error(err);
                   });
               });
-            }
-          }
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-
-      axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/other_duties`,
-          {
-            headers,
-            params: {
-              subdomain: subdomain,
-              other_duty: selectedFilter,
-            },
-          }
-        )
-        .then((res) => {
-          if (res.data.message === "These are the other duties") {
-            if (res.data.data.other_duties.length !== 0) {
-              setOtherDutyData(res.data.data.other_duties);
+            } else {
+              toast.error("No faculties found for selected criteria", {
+                position: toast.POSITION.BOTTOM_LEFT,
+              });
             }
           }
         })
@@ -1052,18 +1125,32 @@ const ExamAssignSupervision = () => {
     }
   };
 
-  const createODObject = (e, user_id, od_assigned_duty) => {
-    let request_body = {};
-    if (odExaminationName === "") {
+  const createODObject = (e, user_id) => {
+    e.preventDefault();
+    e.target.disabled = true;
+    e.target.classList.add("cursor-not-allowed");
+    const od_assigned_duty = document.getElementById(
+      "od-assigned-duty-user-" + user_id
+    ).value;
+    var request_body = {};
+    if (odExaminationName === "Select Examination") {
       toast.error("Please select examination name", {
         position: toast.POSITION.BOTTOM_LEFT,
       });
-    } else if (odSelectedYear === "") {
-      toast.error("Please select academic year", {
+    } else if (odSelectedYear === "Select Year") {
+      toast.error("Please select year", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (odType === "" || odType === "Select Type") {
+      toast.error("Please select type", {
         position: toast.POSITION.BOTTOM_LEFT,
       });
     } else if (odCourseId === "Select Course") {
       toast.error("Please select course", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (odTime === "" || odTime === "Select time") {
+      toast.error("Please select time", {
         position: toast.POSITION.BOTTOM_LEFT,
       });
     } else {
@@ -1075,6 +1162,8 @@ const ExamAssignSupervision = () => {
           course_id: odCourseId,
           branch_id: odBranchId,
           assigned_duties: od_assigned_duty,
+          time: odTime,
+          other_duty_type: odType,
         };
       } else {
         request_body = {
@@ -1083,12 +1172,13 @@ const ExamAssignSupervision = () => {
           user_id: user_id,
           course_id: odCourseId,
           assigned_duties: od_assigned_duty,
+          time: odTime,
+          other_duty_type: odType,
         };
       }
 
-      console.log("Button Clicked");
-
       if (e.target.innerHTML === "Update") {
+        e.target.innerHTML = "Assigning ...";
         var other_duty_id = e.target.getAttribute("data-other-duty-id");
 
         axios
@@ -1101,11 +1191,16 @@ const ExamAssignSupervision = () => {
               },
             },
             {
-              headers,
+              headers: {
+                Authorization: `Bearer ${acces_token}`,
+              },
             }
           )
           .then((res) => {
-            if (res.data.message == "Updated!") {
+            e.target.innerHTML = "Update";
+            e.target.disabled = false;
+            e.target.classList.remove("cursor-not-allowed");
+            if (res.data.status == "ok") {
               toast.success(res.data.message, {
                 position: toast.POSITION.BOTTOM_LEFT,
               });
@@ -1119,6 +1214,7 @@ const ExamAssignSupervision = () => {
             console.error(err);
           });
       } else {
+        e.target.innerHTML = "Assigning ...";
         axios
           .post(
             `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/other_duties`,
@@ -1133,16 +1229,27 @@ const ExamAssignSupervision = () => {
             }
           )
           .then((res) => {
+            e.target.disabled = false;
+            e.target.classList.remove("cursor-not-allowed");
             const od_assigned_duty_input = document.getElementById(
               "od-assigned-duty-user-" + user_id
             );
             const od_submit_button = document.getElementById(
               "other-duty-button-" + user_id
             );
-            if (res.data.status === "Created") {
-              e.target.setAttribute(
-                "data-other-duty-id" + res.data.data.other_duty.id
+            const delete_button = document.getElementById(
+              "od-delete-button-user-" + user_id
+            );
+            if (res.data.status === "created") {
+              od_submit_button.setAttribute(
+                "data-other-duty-id",
+                res.data.data.other_duty.id
               );
+              delete_button.setAttribute(
+                "data-other-duty-id",
+                res.data.data.other_duty.id
+              );
+              delete_button.classList.remove("hidden");
               od_assigned_duty_input.value =
                 res.data.data.other_duty.assigned_duties;
               od_submit_button.innerHTML = "Update";
@@ -1150,6 +1257,8 @@ const ExamAssignSupervision = () => {
                 position: toast.POSITION.BOTTOM_LEFT,
               });
             } else {
+              od_assigned_duty_input.value = "";
+              od_submit_button.innerHTML = "Create";
               toast.error(res.data.message, {
                 position: toast.POSITION.BOTTOM_LEFT,
               });
@@ -1160,6 +1269,12 @@ const ExamAssignSupervision = () => {
           });
       }
     }
+  };
+
+  const handleOdViewPortChange = () => {
+    const viewport = document.getElementById("od_faculty_listing_viewport");
+    viewport.classList.add("hidden");
+    viewport.classList.remove("flex");
   };
 
   const handleLogout = () => {
@@ -1377,7 +1492,7 @@ const ExamAssignSupervision = () => {
                 }`}
                 onClick={() => toggleContent("button1")}
               >
-                Jr. Supervisors
+                Assign Jr. Supervisors
               </button>
               <button
                 className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg ${
@@ -1385,7 +1500,7 @@ const ExamAssignSupervision = () => {
                 }`}
                 onClick={() => toggleContent("button2")}
               >
-                Sr. Supervisor
+                Assign Sr. Supervisor
               </button>
               <button
                 className={`bg-slate-500  text-white font-bold py-2 px-4 rounded-lg ${
@@ -1477,13 +1592,20 @@ const ExamAssignSupervision = () => {
                       }
                     }}
                   >
-                    <option value="0">10:30 A.M to 01:00 P.M</option>
-                    <option value="1">03:00 P.M to 05:30 P.M</option>
+                    <option value="Select time"> Time </option>
+                    {examinationTimes.map((examination_time) => {
+                      return (
+                        <option value={examination_time.name}>
+                          {examination_time.name}
+                        </option>
+                      );
+                    })}
                   </select>
 
                   <button
-                    className="py-2 px-3 bg-gray-800 rounded-2xl text-white font-bold"
-                    // id={"button-subject-" + subject.id}
+                    className="text-center ml-4 w-auto bg-transparent text-slate-950 p-3 rounded-2xl tracking-wide border border-slate-950
+                    font-semibold focus:outline-none focus:shadow-outline hover:bg-gray-700 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
+                    id="jr-submit-button"
                     onClick={handleFilterSubmit}
                   >
                     <p className="inline-flex">
@@ -1492,14 +1614,14 @@ const ExamAssignSupervision = () => {
                   </button>
                 </div>
                 <div
-                  id="faculty_listing_viewport"
+                  id="jr_faculty_listing_viewport"
                   className="hidden overflow-y-scroll h-96 flex-col mt-5"
                 >
                   <div className="">
                     <div className="p-1.5 w-full inline-block align-middle">
                       <div className="border rounded-lg">
                         <table className="min-w-full divide-y divide-gray-200">
-                          <thead className="bg-gray-50">
+                          <thead className="sticky top-0 bg-gray-50">
                             <tr>
                               <th
                                 scope="col"
@@ -1509,25 +1631,25 @@ const ExamAssignSupervision = () => {
                               </th>
                               <th
                                 scope="col"
-                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                                className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
                               >
                                 Designation
                               </th>
                               <th
                                 scope="col"
-                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                                className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
                               >
                                 Department
                               </th>
                               <th
                                 scope="col"
-                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                                className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
                               >
                                 Enter No. Of Supervision
                               </th>
                               <th
                                 scope="col"
-                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                                className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
                               >
                                 Action
                               </th>
@@ -1541,13 +1663,13 @@ const ExamAssignSupervision = () => {
                                     <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                                       {item.first_name} {item.last_name}
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                    <td className="px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap">
                                       {item.designation}
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                    <td className="px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap">
                                       {item.department}
                                     </td>
-                                    <td className="px-6 py-4 text-sm font-medium text-left whitespace-nowrap">
+                                    <td className="px-6 py-4 text-sm font-medium flex justify-center whitespace-nowrap">
                                       <input
                                         className="shadow appearance-none border rounded w-52 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                         id={"jr-student-input-user-" + item.id}
@@ -1561,11 +1683,12 @@ const ExamAssignSupervision = () => {
                                       />
                                     </td>
                                     <td
-                                      className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap"
+                                      className="px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap"
                                       data-id={item.id}
                                     >
                                       <button
-                                        className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold"
+                                        className="text-center w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
+                                        font-semibold focus:outline-none focus:shadow-outline hover:bg-green-600 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
                                         id={"jr-supervision-button-" + item.id}
                                         onClick={(e) =>
                                           createObject(
@@ -1575,8 +1698,32 @@ const ExamAssignSupervision = () => {
                                           )
                                         }
                                       >
-                                        <MdAddCircle />
+                                        Create
                                       </button>
+
+                                      <button
+                                        id={"jr-delete-button-user-" + item.id}
+                                        className="hidden text-center ml-4 w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
+                                    font-semibold focus:outline-none focus:shadow-outline hover:bg-red-600 hover:text-slate-50 hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
+                                        onClick={(e) => {
+                                          setJrSupervisionShowModal(true);
+                                          setJrSupervisionId(
+                                            e.target.getAttribute(
+                                              "data-supervision-id"
+                                            )
+                                          );
+                                        }}
+                                      >
+                                        Delete
+                                      </button>
+                                      {jrSupervisionShowModal && (
+                                        <JrSupervisionModal
+                                          setOpenModal={
+                                            setJrSupervisionShowModal
+                                          }
+                                          id={jrSupervisionId}
+                                        />
+                                      )}
                                     </td>
                                   </tr>
                                 );
@@ -1667,12 +1814,19 @@ const ExamAssignSupervision = () => {
                       }
                     }}
                   >
-                    <option value="0">10:30 A.M to 01:00 P.M</option>
-                    <option value="1">03:00 P.M to 05:30 P.M</option>
+                    <option value="Select time"> Time </option>
+                    {examinationTimes.map((examination_time) => {
+                      return (
+                        <option value={examination_time.name}>
+                          {examination_time.name}
+                        </option>
+                      );
+                    })}
                   </select>
                   <button
-                    className="py-2 px-3 bg-gray-800 rounded-2xl text-white font-bold"
-                    // id={"button-subject-" + subject.id}
+                    className="text-center ml-4 w-auto bg-transparent text-slate-950 p-3 rounded-2xl tracking-wide border border-slate-950
+                    font-semibold focus:outline-none focus:shadow-outline hover:bg-gray-700 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
+                    id={"sr-submit-button"}
                     onClick={handleSrFilterSubmit}
                   >
                     <p className="inline-flex">
@@ -1682,13 +1836,13 @@ const ExamAssignSupervision = () => {
                 </div>
                 <div
                   id="sr_faculty_listing_viewport"
-                  className="hidden overflow-y-scroll h-52 flex-col mt-5"
+                  className="hidden overflow-y-scroll h-96 flex-col mt-5"
                 >
                   <div className="">
                     <div className="p-1.5 w-full inline-block align-middle">
                       <div className="border rounded-lg">
                         <table className="min-w-full divide-y divide-gray-200">
-                          <thead className="bg-gray-50">
+                          <thead className="sticky top-0 bg-gray-50">
                             <tr>
                               <th
                                 scope="col"
@@ -1698,25 +1852,25 @@ const ExamAssignSupervision = () => {
                               </th>
                               <th
                                 scope="col"
-                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                                className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
                               >
                                 Designation
                               </th>
                               <th
                                 scope="col"
-                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                                className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
                               >
                                 Department
                               </th>
                               <th
                                 scope="col"
-                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                                className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
                               >
                                 Enter No. Of Supervision
                               </th>
                               <th
                                 scope="col"
-                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                                className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
                               >
                                 Action
                               </th>
@@ -1730,13 +1884,13 @@ const ExamAssignSupervision = () => {
                                     <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                                       {item.first_name} {item.last_name}
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                    <td className="px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap">
                                       {item.designation}
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                    <td className="px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap">
                                       {item.department}
                                     </td>
-                                    <td className="px-6 py-4 text-sm font-medium text-left whitespace-nowrap">
+                                    <td className="px-6 py-4 text-sm font-medium flex justify-center whitespace-nowrap">
                                       <input
                                         className="shadow appearance-none border rounded w-52 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                         id={"sr-student-input-user-" + item.id}
@@ -1750,22 +1904,43 @@ const ExamAssignSupervision = () => {
                                       />
                                     </td>
                                     <td
-                                      className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap"
+                                      className="px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap"
                                       data-id={item.id}
                                     >
                                       <button
-                                        className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold"
+                                        className="text-center w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
+                                        font-semibold focus:outline-none focus:shadow-outline hover:bg-green-600 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
                                         id={"sr-supervision-button-" + item.id}
                                         onClick={(e) =>
-                                          createSrObject(
-                                            e,
-                                            item.id,
-                                            srNoOfSupervisions
-                                          )
+                                          createSrObject(e, item.id)
                                         }
                                       >
-                                        <MdAddCircle />
+                                        Create
                                       </button>
+
+                                      <button
+                                        id={"sr-delete-button-user-" + item.id}
+                                        className="hidden text-center ml-4 w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
+                                    font-semibold focus:outline-none focus:shadow-outline hover:bg-red-600 hover:text-slate-50 hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
+                                        onClick={(e) => {
+                                          setSrSupervisionShowModal(true);
+                                          setSrSupervisionId(
+                                            e.target.getAttribute(
+                                              "data-supervision-id"
+                                            )
+                                          );
+                                        }}
+                                      >
+                                        Delete
+                                      </button>
+                                      {srSupervisionShowModal && (
+                                        <SrSupervisionModal
+                                          setOpenModal={
+                                            setSrSupervisionShowModal
+                                          }
+                                          id={srSupervisionId}
+                                        />
+                                      )}
                                     </td>
                                   </tr>
                                 );
@@ -1786,23 +1961,42 @@ const ExamAssignSupervision = () => {
               >
                 <div className="flex ml-2">
                   <select
-                    className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+                    className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
                     onChange={(e) => {
                       handleODExaminationChange(e.target.value);
                     }}
                   >
-                    <option>Select Examination</option>
-                    <option value="Winter">Winter</option>
-                    <option value="Summer">Summer</option>
+                    <option value="Select examination">Examination</option>
+                    {examinationNames.map((examination_name) => {
+                      return (
+                        <option value={examination_name.name}>
+                          {examination_name.name}
+                        </option>
+                      );
+                    })}
                   </select>
 
                   <select
-                    className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+                    className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
                     onChange={(e) => handleODYearChange(e.target.value)}
                   >
-                    <option value="Select Year">Select Year</option>
+                    <option value="Select Year">Year</option>
                     {academic_years.map((year) => {
                       return <option value={year}>{year}</option>;
+                    })}
+                  </select>
+
+                  <select
+                    className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
+                    onChange={handleODTypeChange}
+                  >
+                    <option value="Select Type">Type</option>
+                    {examinationTypes.map((examination_type) => {
+                      return (
+                        <option value={examination_type.name}>
+                          {examination_type.name}
+                        </option>
+                      );
                     })}
                   </select>
 
@@ -1810,7 +2004,7 @@ const ExamAssignSupervision = () => {
                     className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
                     onChange={handleODCourseChange}
                   >
-                    <option>Select Course</option>
+                    <option value="Select Course">Course</option>
                     {odCourses.map((course) => (
                       <option value={course.id}>{course.name}</option>
                     ))}
@@ -1820,14 +2014,37 @@ const ExamAssignSupervision = () => {
                     className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded justify-center shadow-md px-3 py-2"
                     onChange={handleODBranchChange}
                   >
-                    <option>Select Branch</option>
+                    <option value="Select Branch">Branch</option>
                     {odBranches.map((branch) => (
                       <option value={branch.id}>{branch.name}</option>
                     ))}
                   </select>
+
+                  <select
+                    className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+                    onChange={(e) => {
+                      handleODTimeChange(e);
+                      if (e.target.value !== "Select Time") {
+                        setOdTime(e.target.value);
+                      } else {
+                        setOdTime("");
+                      }
+                    }}
+                  >
+                    <option value="Select time"> Time </option>
+                    {examinationTimes.map((examination_time) => {
+                      return (
+                        <option value={examination_time.name}>
+                          {examination_time.name}
+                        </option>
+                      );
+                    })}
+                  </select>
+
                   <button
-                    className="py-2 px-3 mr-7 bg-gray-800 rounded-2xl text-white font-bold"
-                    // id={"button-subject-" + subject.id}
+                    className="text-center ml-4 w-auto bg-transparent text-slate-950 p-3 rounded-2xl tracking-wide border border-slate-950
+                    font-semibold focus:outline-none focus:shadow-outline hover:bg-gray-700 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
+                    id={"od-submit-button"}
                     onClick={handleODFilterSubmit}
                   >
                     <p className="inline-flex">
@@ -1844,7 +2061,7 @@ const ExamAssignSupervision = () => {
                     <div className="p-1.5 w-full inline-block align-middle">
                       <div className="border rounded-lg">
                         <table className="min-w-full divide-y divide-gray-200">
-                          <thead className="bg-gray-50">
+                          <thead className="sticky top-0 bg-gray-50">
                             <tr>
                               <th
                                 scope="col"
@@ -1854,25 +2071,25 @@ const ExamAssignSupervision = () => {
                               </th>
                               <th
                                 scope="col"
-                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                                className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
                               >
                                 Designation
                               </th>
                               <th
                                 scope="col"
-                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                                className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
                               >
                                 Department
                               </th>
                               <th
                                 scope="col"
-                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                                className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
                               >
                                 Assign Other Duty
                               </th>
                               <th
                                 scope="col"
-                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                                className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
                               >
                                 Action
                               </th>
@@ -1886,13 +2103,13 @@ const ExamAssignSupervision = () => {
                                     <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                                       {item.first_name} {item.last_name}
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                    <td className="px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap">
                                       {item.designation}
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                    <td className="px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap">
                                       {item.course_name}
                                     </td>
-                                    <td className="px-6 py-4 text-sm font-medium text-left whitespace-nowrap">
+                                    <td className="px-6 py-4 text-sm font-medium flex justify-center whitespace-nowrap">
                                       <input
                                         className="shadow appearance-none border rounded w-52 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                         id={"od-assigned-duty-user-" + item.id}
@@ -1904,22 +2121,41 @@ const ExamAssignSupervision = () => {
                                       />
                                     </td>
                                     <td
-                                      className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap"
+                                      className="px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap"
                                       data-id={item.id}
                                     >
                                       <button
-                                        className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold"
+                                        className="text-center w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
+                                        font-semibold focus:outline-none focus:shadow-outline hover:bg-green-600 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
                                         id={"other-duty-button-" + item.id}
                                         onClick={(e) =>
-                                          createODObject(
-                                            e,
-                                            item.id,
-                                            odAssignedDuty
-                                          )
+                                          createODObject(e, item.id)
                                         }
                                       >
                                         Create
                                       </button>
+
+                                      <button
+                                        id={"od-delete-button-user-" + item.id}
+                                        className="hidden text-center ml-4 w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
+                                    font-semibold focus:outline-none focus:shadow-outline hover:bg-red-600 hover:text-slate-50 hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
+                                        onClick={(e) => {
+                                          setOtherDutyShowModal(true);
+                                          setOtherDutyId(
+                                            e.target.getAttribute(
+                                              "data-other-duty-id"
+                                            )
+                                          );
+                                        }}
+                                      >
+                                        Delete
+                                      </button>
+                                      {otherDutyShowModal && (
+                                        <OtherDutyModal
+                                          setOpenModal={setOtherDutyShowModal}
+                                          id={otherDutyId}
+                                        />
+                                      )}
                                     </td>
                                   </tr>
                                 );

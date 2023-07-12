@@ -872,7 +872,7 @@ const ExamTimeTable = () => {
               id="submit-button"
               // className="py-2 px-3 mr-7 bg-gray-800 rounded-2xl text-white font-bold"
               className="text-center ml-4 w-auto bg-transparent text-slate-950 p-3 rounded-2xl tracking-wide border border-slate-950
-              font-semibold focus:outline-none focus:shadow-outline hover:bg-gray-700 hover:text-white hover:border-none shadow-lg cursor-pointer transition ease-in duration-300"
+              font-semibold focus:outline-none focus:shadow-outline hover:bg-gray-700 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
               onClick={handleFilterSubmit}
             >
               <p className="inline-flex">
@@ -882,8 +882,7 @@ const ExamTimeTable = () => {
           </div>
           <div
             id="time_table_viewport"
-            className="hidden flex-col overflow-y-scroll mt-5"
-            style={{ height: 390 }}
+            className="hidden flex-col overflow-y-scroll mt-5 h-[65vh] max-h-fit "
           >
             <div className="">
               <div className="p-1.5 w-full inline-block align-middle">
@@ -893,25 +892,25 @@ const ExamTimeTable = () => {
                       <tr>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase"
                         >
                           Subject Name
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
+                          className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase"
                         >
                           Subject Code
                         </th>
                         <th
                           scope="col"
-                          className="text-center px-6 py-3 text-xs font-bold text-gray-500 uppercase "
+                          className="text-center px-6 py-3 text-xs font-bold text-gray-500 uppercase"
                         >
                           Date
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
+                          className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase"
                         >
                           Action
                         </th>

@@ -121,7 +121,7 @@ const SignInSuperAdmin = () => {
           login_btn.innerHTML = "Log In";
           login_btn.classList.remove("cursor-not-allowed");
           if (err.response.data.error === "invalid_grant") {
-            toast.error("Email or password is not valid", {
+            toast.error("Invalid Credentials", {
               position: toast.POSITION.BOTTOM_LEFT,
             });
           } else {
