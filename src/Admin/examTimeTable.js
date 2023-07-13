@@ -977,7 +977,7 @@ const ExamTimeTable = () => {
                             >
                               <button
                                 className="text-center w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
-                              font-semibold focus:outline-none focus:shadow-outline hover:bg-green-600 hover:text-white hover:border-none shadow-lg cursor-pointer transition ease-in duration-300"
+                              font-semibold focus:outline-none focus:shadow-outline hover:bg-green-600 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
                                 id={"button-subject-" + subject.id}
                                 onClick={(e) => createObject(e, subject.id)}
                               >
@@ -986,7 +986,7 @@ const ExamTimeTable = () => {
                               <button
                                 id={"delete-button-subject-" + subject.id}
                                 className="hidden text-center ml-4 w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
-                                    font-semibold focus:outline-none focus:shadow-outline hover:bg-red-600 hover:text-slate-50 hover:border-none shadow-lg cursor-pointer transition ease-in duration-300"
+                                    font-semibold focus:outline-none focus:shadow-outline hover:bg-red-600 hover:text-slate-50 hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
                                 onClick={(e) => {
                                   setTimeTableShowModal(true);
                                   setTimeTableId(

@@ -470,6 +470,11 @@ const MarksEntry = () => {
                           res.data.data.student_mark.marks;
                         submit_button.disabled =
                           res.data.data.student_mark.lock_marks;
+                        if (res.data.data.student_mark.lock_marks === true) {
+                          submit_button.classList.add("cursor-not-allowed");
+                        } else {
+                          submit_button.classList.remove("cursor-not-allowed");
+                        }
                         student_marks_input.disabled =
                           res.data.data.student_mark.lock_marks;
                       } else {
@@ -495,6 +500,8 @@ const MarksEntry = () => {
   };
 
   const handleSubmitMarks = (e) => {
+    e.target.disabled = true;
+    e.target.classList.add("cursor-not-allowed");
     let selectedFilter = {};
     if (examinationName === "") {
       toast.error("Please select examination name", {
@@ -540,82 +547,107 @@ const MarksEntry = () => {
       } else {
         delete selectedFilter["subject_id"];
       }
-
-      console.log(selectedFilter);
     }
 
     if (subdomain !== null || subdomain !== "") {
       if (e.target.innerHTML === "Update Marks") {
-        console.log("PUT REQUEST");
-        axios
-          .put(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/${divisionId}`,
-            {
-              subdomain: subdomain,
-              student_marks: marksData,
-            },
-            { headers }
-          )
-          .then((res) => {
-            if (res.data.status === "ok") {
-              toast.success("The entered marks has been updated!", {
-                position: toast.POSITION.BOTTOM_LEFT,
-              });
-            } else {
-              toast.error(res.data.message, {
-                position: toast.POSITION.BOTTOM_LEFT,
-              });
-            }
-          })
-          .catch((err) => {
-            console.error(err);
-          });
-      } else {
-        axios
-          .post(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks`,
-            {
-              student_marks: marksData,
-              subdomain: subdomain,
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${access_token}`,
-                "Content-Type": "application/json",
+        console.log(marksData);
+        e.target.innerHTML = "Updating Marks ...";
+        if (marksData.length === 0) {
+          e.target.innerHTML = "Update Marks";
+          e.target.disabled = false;
+          e.target.classList.remove("cursor-not-allowed");
+          toast.error("Please enter marks to update");
+        } else {
+          axios
+            .put(
+              `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/${divisionId}`,
+              {
+                subdomain: subdomain,
+                student_marks: marksData,
               },
-            }
-          )
-          .then((responce) => {
-            console.log(responce.data);
-            if (responce.data.status === "created") {
-              setMarksData([]);
-              responce.data.data.student_marks.map((student_mark) => {
-                const marks_entry_input = document.getElementById(
-                  "input-marks-entry-" + student_mark.student_id
-                );
-                marks_entry_input.setAttribute(
-                  "data-student-mark-entry-id",
-                  student_mark.id
-                );
-                marks_entry_input.value = student_mark.marks;
-                marks_entry_input.disabled = student_mark.lock_marks;
-              });
-              const submit_button = document.getElementById("submit-button");
-              submit_button.innerHTML = "Update Marks";
-              submit_button.disabled =
-                responce.data.data.student_marks[0].lock_marks;
-              toast.success("All Entered marks are been saved!", {
-                position: toast.POSITION.BOTTOM_LEFT,
-              });
-            } else {
-              toast.error(responce.data.message, {
-                position: toast.POSITION.BOTTOM_LEFT,
-              });
-            }
-          })
-          .catch(function (err) {
-            console.log(err.response.data);
-          });
+              { headers }
+            )
+            .then((res) => {
+              e.target.disabled = false;
+              e.target.classList.remove("cursor-not-allowed");
+              e.target.innerHTML = "Update Marks";
+              if (res.data.status === "ok") {
+                toast.success("The entered marks has been updated!");
+              } else {
+                toast.error(res.data.message);
+              }
+            })
+            .catch((err) => {
+              e.target.innerHTML = "Update Marks";
+              e.target.disabled = false;
+              e.target.classList.remove("cursor-not-allowed");
+              toast.error("Something went wrong, please try again!");
+              console.error(err);
+            });
+        }
+      } else {
+        e.target.innerHTML = "Submitting Marks ...";
+        if (marksData.length === 0) {
+          e.target.innerHTML = "Submit Marks";
+          e.target.disabled = false;
+          e.target.classList.remove("cursor-not-allowed");
+          toast.error("Please enter some marks to submit!");
+        } else {
+          axios
+            .post(
+              `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks`,
+              {
+                student_marks: marksData,
+                subdomain: subdomain,
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${access_token}`,
+                  "Content-Type": "application/json",
+                },
+              }
+            )
+            .then((responce) => {
+              console.log(responce.data);
+              if (responce.data.status === "created") {
+                setMarksData([]);
+                e.target.disabled = false;
+                e.target.classList.remove("cursor-not-allowed");
+                responce.data.data.student_marks.map((student_mark) => {
+                  const marks_entry_input = document.getElementById(
+                    "input-marks-entry-" + student_mark.student_id
+                  );
+                  marks_entry_input.setAttribute(
+                    "data-student-mark-entry-id",
+                    student_mark.id
+                  );
+                  marks_entry_input.value = student_mark.marks;
+                  marks_entry_input.disabled = student_mark.lock_marks;
+                });
+                const submit_button = document.getElementById("submit-button");
+                submit_button.innerHTML = "Update Marks";
+                submit_button.disabled =
+                  responce.data.data.student_marks[0].lock_marks;
+                if (responce.data.data.student_marks[0].lock_marks === true) {
+                  submit_button.classList.add("cursor-not-allowed");
+                } else {
+                  submit_button.classList.remove("cursor-not-allowed");
+                }
+                toast.success("All Entered marks are been saved!");
+              } else {
+                e.target.innerHTML = "Submit Marks";
+                toast.error(responce.data.message);
+              }
+            })
+            .catch(function (err) {
+              e.target.innerHTML = "Submit Marks";
+              e.target.disabled = false;
+              e.target.classList.remove('cursor-not-allowed');
+              toast.error("Something went wrong, please try again!");
+              console.log(err.response.data);
+            });
+        }
       }
     }
   };
@@ -782,9 +814,7 @@ const MarksEntry = () => {
               value={examinationName}
               disabled={true}
             >
-              <option value="Select Examination" >
-                Examination
-              </option>
+              <option value="Select Examination">Examination</option>
               {examinationNames.map((examination_name) => {
                 return (
                   <option value={examination_name.name}>
@@ -799,9 +829,7 @@ const MarksEntry = () => {
               value={selectedYear}
               disabled={true}
             >
-              <option value="Select Year" >
-                Year
-              </option>
+              <option value="Select Year">Year</option>
               {academic_years.map((year) => {
                 return <option value={year}>{year}</option>;
               })}
@@ -812,9 +840,7 @@ const MarksEntry = () => {
               value={type}
               disabled={true}
             >
-              <option value="Select Type" >
-                Type
-              </option>
+              <option value="Select Type">Type</option>
               {examinationTypes.map((examination_type) => {
                 return (
                   <option value={examination_type.name}>
@@ -830,9 +856,7 @@ const MarksEntry = () => {
               value={courseId}
               disabled={true}
             >
-              <option value="Select Course" >
-                Course
-              </option>
+              <option value="Select Course">Course</option>
               {courses.map((course, index) => (
                 <option value={course.id}>{course.name}</option>
               ))}
@@ -844,9 +868,7 @@ const MarksEntry = () => {
               // isSearchable={true}
               disabled={true}
             >
-              <option value="Select Branch" >
-                Branch
-              </option>
+              <option value="Select Branch">Branch</option>
               {branches.map((branch) => (
                 <option value={branch.id}>{branch.name}</option>
               ))}
@@ -857,9 +879,7 @@ const MarksEntry = () => {
               value={semesterId}
               disabled={true}
             >
-              <option value="Select Semester" >
-                Semester
-              </option>
+              <option value="Select Semester">Semester</option>
               {semesters.map((semester) => (
                 <option value={semester.id}>{semester.name}</option>
               ))}
@@ -870,9 +890,7 @@ const MarksEntry = () => {
               value={divisionId}
               disabled={true}
             >
-              <option value="Select Division" >
-                Division
-              </option>
+              <option value="Select Division">Division</option>
               {divisions.map((division) => (
                 <option value={division.id}>{division.name}</option>
               ))}
@@ -881,6 +899,7 @@ const MarksEntry = () => {
             <select
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
               onChange={handleSubjectChange}
+              isSearchable={true}
             >
               <option value="Select Subject" selected>
                 Subject
@@ -892,7 +911,8 @@ const MarksEntry = () => {
           </div>
           <div className="flex justify-center mt-5">
             <button
-              className="py-2 px-3 mr-7 ml-2 bg-gray-800 rounded-2xl text-white font-bold"
+              className="text-center ml-4 w-auto bg-transparent text-slate-950 p-3 rounded-2xl tracking-wide border border-slate-950
+              font-semibold focus:outline-none focus:shadow-outline hover:bg-gray-700 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
               onClick={handleFilterSubmit}
             >
               <p className="inline-flex">
@@ -979,15 +999,16 @@ const MarksEntry = () => {
                       })}
                     </tbody>
                   </table>
-                  <div className="flex justify-center mt-5">
-                    <button
-                      className="py-2 px-3 mr-7 ml-2 bg-gray-800 rounded-2xl text-white font-bold"
-                      onClick={handleSubmitMarks}
-                      id="submit-button"
-                    >
-                      <p className="inline-flex">Submit Marks</p>
-                    </button>
-                  </div>
+                </div>
+                <div className="flex justify-center mt-5">
+                  <button
+                    className="text-center w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
+                      font-semibold focus:outline-none focus:shadow-outline hover:bg-green-600 hover:text-white hover:border-white shadow-lg transition ease-in duration-300"
+                    onClick={handleSubmitMarks}
+                    id="submit-button"
+                  >
+                    <p className="inline-flex">Submit Marks</p>
+                  </button>
                 </div>
               </div>
             </div>
