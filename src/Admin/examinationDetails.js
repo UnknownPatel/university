@@ -47,6 +47,27 @@ const ExaminationDetails = () => {
     }
 
     if (subdomain !== null || subdomain !== "") {
+      if (acces_token) {
+        axios
+          .get(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/find_user?subdomain=${subdomain}`,
+            {
+              headers: {
+                Authorization: `Bearer ${acces_token}`,
+              },
+            }
+          )
+          .then((responce) => {
+            console.log(responce);
+            console.log(responce.data.roles);
+            if (responce.data.roles.length !== 0) {
+              roles = responce.data.roles;
+            } else {
+              roles = [];
+            }
+          })
+          .catch((error) => console.log(error));
+      }
       axios
         .get(
           `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
