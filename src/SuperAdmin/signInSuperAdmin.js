@@ -37,6 +37,35 @@ const SignInSuperAdmin = () => {
     }
   }, []);
 
+  // const handleSubmit = async () => {
+  //   try {
+  //     const data = {
+  //       grant_type: "password",
+  //       subdomain: subdomain,
+  //       email: getEmail,
+  //       password: getPassword,
+  //       client_id: clientId,
+  //       client_secret: clientSecret,
+  //     };
+  //     await toast.promise(postData(data), {
+  //       pending: "Sending data...",
+  //       success: "Data posted successfully!",
+  //       error: "Error posting data",
+  //     });
+  //   } catch (error) {
+  //     // Handle error
+  //   }
+  // };
+
+  // const postData = async (data) => {
+  //   try {
+  //     const response = await axios.post('http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/oauth/token', data);
+  //     return response.data;
+  //   } catch (error) {
+  //     throw new Error('Error posting data');
+  //   }
+  // };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const login_btn = document.getElementById("login-btn");
@@ -74,8 +103,6 @@ const SignInSuperAdmin = () => {
                 }
               )
               .then((responce) => {
-                console.log(responce);
-                console.log(responce.data.roles);
                 const roles = responce.data.roles;
                 localStorage.setItem("roles", roles);
                 if (responce.data.roles.includes("super_admin")) {
@@ -94,13 +121,11 @@ const SignInSuperAdmin = () => {
                   toast.success("Login Successfully !!", {
                     position: toast.POSITION.BOTTOM_LEFT,
                   });
-
                   navigate("/marks_entry");
                 } else if (responce.data.roles.includes("Academic Head")) {
                   toast.success("Login Successfully !!", {
                     position: toast.POSITION.BOTTOM_LEFT,
                   });
-
                   navigate("/academic_UploadSyllabus");
                 }
               })

@@ -165,17 +165,17 @@ const AcademicUploadSyllabus = () => {
   const handleSemesterChange = (e) => {
     e.preventDefault();
     var selectedIndex = e.target.options.selectedIndex;
-    setSemesterName(
-      numberToWords.toOrdinal(
-        e.target.options[selectedIndex].getAttribute("data-semester-name")
-      ) + " Semester"
-    );
+    
     if (e.target.value === "Select Semester") {
       setSemesterId("");
+      
     } else {
       setSemesterId(e.target.value);
-      if (subdomain !== null || subdomain !== "") {
-      }
+      setSemesterName(
+        numberToWords.toOrdinal(
+          e.target.options[selectedIndex].getAttribute("data-semester-name")
+        ) + " Semester"
+      );
     }
   };
 

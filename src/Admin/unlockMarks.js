@@ -1058,6 +1058,7 @@ const UnlockMarks = () => {
                 <button
                   id="publish-marks"
                   className="cursor-not-allowed w-auto py-2 px-3 ml-5 bg-gray-800 rounded-2xl text-white font-bold"
+                  disabled="true"
                   onClick={handlePublishMarks}
                 >
                   <p className="inline-flex">Publish Marks</p>
