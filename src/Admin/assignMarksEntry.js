@@ -515,6 +515,8 @@ const AssignMarksEntry = () => {
 
   const createObject = (e) => {
     e.preventDefault();
+    e.target.disabled = true;
+    e.target.classList.add("cursor-not-allowed");
     let selectedFilter = {};
     var faculty_id = e.target.getAttribute("data-id");
     if (examinationName === "") {
@@ -561,6 +563,7 @@ const AssignMarksEntry = () => {
 
     if (subdomain !== null || subdomain !== "") {
       if (e.target.innerHTML === "Update") {
+        e.target.innerHTML = "Assigning ...";
         var marks_entry_id = e.target.getAttribute("data-marks-entry-id");
         axios
           .put(
@@ -574,6 +577,9 @@ const AssignMarksEntry = () => {
             }
           )
           .then((res) => {
+            e.target.disabled = false;
+            e.target.classList.remove("cursor-not-allowed");
+            e.target.innerHTML = "Update";
             if (res.data.message === "Update successful") {
               toast.success(res.data.message, {
                 position: toast.POSITION.BOTTOM_LEFT,
@@ -585,9 +591,13 @@ const AssignMarksEntry = () => {
             }
           })
           .catch((err) => {
+            e.target.disabled = false;
+            e.target.classList.remove("cursor-not-allowed");
+            e.target.innerHTML = "Update";
             console.error(err);
           });
       } else {
+        e.target.innerHTML = "Assigning ...";
         axios
           .post(
             `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/marks_entries`,
@@ -600,6 +610,8 @@ const AssignMarksEntry = () => {
             }
           )
           .then((responce) => {
+            e.target.disabled = false;
+            e.target.classList.remove("cursor-not-allowed");
             const marksEntryCreateButton = document.getElementById(
               "button-faculty-" + faculty_id
             );
@@ -622,12 +634,16 @@ const AssignMarksEntry = () => {
                 position: toast.POSITION.BOTTOM_LEFT,
               });
             } else {
+              marksEntryCreateButton.innerHTML = "Create";
               toast.error(responce.data.message, {
                 position: toast.POSITION.BOTTOM_LEFT,
               });
             }
           })
           .catch(function (err) {
+            e.target.disabled = false;
+            e.target.classList.remove("cursor-not-allowed");
+            e.target.innerHTML = "Create";
             console.log(err.message);
           });
       }
@@ -857,7 +873,6 @@ const AssignMarksEntry = () => {
                 onChange={(e) => {
                   handleExaminationChange(e.target.value);
                 }}
-                aria-label="Examination Name"
               >
                 <option value="Select Examination">Examination</option>
                 {examinationNames.map((examination_name) => {
@@ -880,7 +895,7 @@ const AssignMarksEntry = () => {
               </select>
 
               <select
-                className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
+                className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
                 onChange={handleTypeChange}
               >
                 <option value="Select Type">Type</option>
@@ -948,7 +963,8 @@ const AssignMarksEntry = () => {
               </select>
 
               <button
-                className="w-auto py-2 px-3 bg-gray-800 rounded-2xl text-white font-bold"
+                className="text-center ml-4 w-auto bg-transparent text-slate-950 p-3 rounded-2xl tracking-wide border border-slate-950
+                font-semibold focus:outline-none focus:shadow-outline hover:bg-gray-700 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
                 onClick={handleFilterSubmit}
               >
                 <p className="inline-flex">
@@ -959,8 +975,7 @@ const AssignMarksEntry = () => {
 
             <div
               id="marks_entry_viewport"
-              className="hidden flex-col overflow-y-scroll mt-5"
-              style={{ height: 390 }}
+              className="hidden flex-col overflow-y-scroll mt-5 h-[65vh] max-h-fit"
               ref={componentRef}
             >
               <div ref={tableRef} id="table-viewport" className="">
@@ -974,20 +989,20 @@ const AssignMarksEntry = () => {
                           </th>
                           <th
                             scope="col"
-                            className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                            className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
                           >
                             Designation
                           </th>
                           <th
                             scope="col"
-                            className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                            className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
                           >
                             Department
                           </th>
-                          <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
+                          <th className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase ">
                             Subject
                           </th>
-                          <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
+                          <th className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase ">
                             Action
                           </th>
                         </tr>
@@ -998,13 +1013,13 @@ const AssignMarksEntry = () => {
                             <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
                               {faculty.first_name} {faculty.last_name}
                             </td>
-                            <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                            <td className="px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap">
                               {faculty.designation}
                             </td>
-                            <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                            <td className="px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap">
                               {faculty.department}
                             </td>
-                            <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                            <td className="px-6 py-4 text-sm flex justify-center text-gray-800 whitespace-nowrap">
                               <Multiselect
                                 options={options_2}
                                 showCheckbox={true}
@@ -1038,11 +1053,12 @@ const AssignMarksEntry = () => {
                               />
                             </td>
                             <td
-                              className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap"
+                              className="px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap"
                               data-id={faculty.id}
                             >
                               <button
-                                className="py-3 px-8 bg-gray-800 rounded-2xl text-white font-bold"
+                                className="text-center w-auto bg-transparent text-slate-950 p-4 rounded-2xl tracking-wide border border-slate-950
+                                font-semibold focus:outline-none focus:shadow-outline hover:bg-green-600 hover:text-white hover:border-white shadow-lg transition ease-in duration-300"
                                 id={"button-faculty-" + faculty.id}
                                 data-id={faculty.id}
                                 onClick={(e) => createObject(e)}
