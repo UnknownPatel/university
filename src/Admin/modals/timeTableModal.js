@@ -53,7 +53,7 @@ const TimeTableModal = ({ setOpenModal, id }) => {
 
   return (
     <>
-      <div className="fixed inset-0 z-10 overflow-y-auto">
+      <div className="ml-64 fixed inset-0 z-10 overflow-y-auto">
         <div
           className="fixed inset-0 w-full h-full bg-black opacity-20"
           onClick={() => setOpenModal(false)}

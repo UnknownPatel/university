@@ -268,12 +268,17 @@ const ViewMarks = () => {
           console.log(res.data);
           if (res.data.message === "Details found") {
             const viewport = document.getElementById("marks_entry_viewport");
+            const button_viewport = document.getElementById("button-viewport");
             if (res.data.data.student_marks.length !== 0) {
               viewport.classList.remove("hidden");
+              button_viewport.classList.remove("hidden");
               viewport.classList.add("flex");
+              button_viewport.classList.add("flex");
               setMarksData(res.data.data.student_marks);
             } else {
               viewport.classList.add("hidden");
+              button_viewport.classList.add("hidden");
+              button_viewport.classList.remove("hidden");
               viewport.classList.remove("flex");
               setMarksData([]);
             }
@@ -297,21 +302,19 @@ const ViewMarks = () => {
   const handlePrint = useReactToPrint({
     onBeforeGetContent: () => {
       const contentElement = componentRef.current;
+      contentElement.classList.remove("overflow-y-scroll");
       contentElement.style = {};
     },
     content: () => componentRef.current,
     onAfterPrint: () => {
       const contentElement = componentRef.current;
-      contentElement.style = {
-        height: "400px",
-        overflowY: "auto",
-      };
+      contentElement.classList.add("overflow-y-scroll");
     },
   });
 
   const handleSavePDF = () => {
     const contentElement = document.getElementById("marks_entry_viewport");
-    contentElement.style = {};
+    contentElement.classList.remove("overflow-y-scroll");
 
     html2pdf()
       .set({
@@ -322,12 +325,11 @@ const ViewMarks = () => {
         jsPDF: { unit: "pt", format: "a4", orientation: "portrait" },
       })
       .from(contentElement)
-      .save();
-
-    divStyle = {
-      height: "400px",
-      overflowY: "auto",
-    };
+      .save()
+      .then(() => {
+        // PDF saving completed, add the class back
+        contentElement.classList.add("overflow-y-scroll");
+      });
   };
 
   const exportToExcel = (tableData) => {
@@ -669,40 +671,10 @@ const ViewMarks = () => {
             </select>
           </div>
 
-          <div id="button-viewport" className="flex justify-end mt-5 mb-5">
-            <a
-              href="#"
-              id="download_button"
-              onClick={handlePrint}
-              className="py-2 px-4 bg-blue-200 rounded-2xl mr-2 text-white "
-            >
-              <FcPrint size={30} />
-            </a>
-
-            <a
-              href="#"
-              id="save_as_pdf"
-              onClick={handleSavePDF}
-              className="py-2 px-4 bg-blue-200 mr-2 rounded-2xl"
-            >
-              <FcDownload size={30} />
-            </a>
-            <a
-              href="#"
-              id="save_as_pdf"
-              onClick={downloadExcel}
-              className="py-2 px-4 bg-blue-200 rounded-2xl"
-            >
-              <SiMicrosoftexcel size={30} />
-            </a>
-          </div>
-
           <div
             id="marks_entry_viewport"
-            className="hidden flex-col mt-5"
+            className="hidden flex-col overflow-y-scroll mt-5 h-[65vh] max-h-fit"
             ref={componentRef}
-            style={divStyle}
-            // style={{ height: 390 }}
           >
             <div className="">
               <div className="p-1.5 w-full inline-block align-middle">
@@ -785,6 +757,37 @@ const ViewMarks = () => {
                 </div>
               </div>
             </div>
+          </div>
+
+          <div id="button-viewport" className="hidden justify-end mt-5 mb-5">
+            <a
+              href="#"
+              id="download_button"
+              onClick={handlePrint}
+              className="text-center w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
+              font-semibold focus:outline-none focus:shadow-outline hover:bg-slate-500 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
+            >
+              <FcPrint size={30} />
+            </a>
+
+            <a
+              href="#"
+              id="save_as_pdf"
+              onClick={handleSavePDF}
+              className="text-center w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950 ml-2
+              font-semibold focus:outline-none focus:shadow-outline hover:bg-slate-500 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
+            >
+              <FcDownload size={30} />
+            </a>
+            <a
+              href="#"
+              id="save_as_pdf"
+              onClick={downloadExcel}
+              className="text-center w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950 ml-2
+              font-semibold focus:outline-none focus:shadow-outline hover:bg-slate-500 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
+            >
+              <SiMicrosoftexcel size={30} />
+            </a>
           </div>
         </div>
       </div>

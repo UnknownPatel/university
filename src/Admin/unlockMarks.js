@@ -4,6 +4,7 @@ import { GiArchiveResearch } from "react-icons/gi";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import { BsUnlockFill } from "react-icons/bs";
+import UnlockMarkModal from "./modals/unlockMarkModal";
 
 var headers;
 var subdomain;
@@ -35,6 +36,11 @@ const UnlockMarks = () => {
   const [status, setStatus] = useState({});
   const [actualSubjects, setActualSubjects] = useState([]);
   const [disabled, setDisabled] = useState(false);
+  const [publishDisabled, setPublishDisabled] = useState(true);
+  const [unlockMarkShowModal, setUnlockMarkShowModal] = useState(false);
+  const [sendSelectedFilter, setSendSelectedFilter] = useState("");
+  const [subjectName, setSubjectName] = useState("");
+  const [subjectId, setSubjectId] = useState("");
   const navigate = useNavigate();
 
   var year;
@@ -327,7 +333,6 @@ const UnlockMarks = () => {
     );
     unlockMarks_viewport.classList.add("hidden");
     unlockMarks_viewport.classList.remove("flex");
-    console.log("Button clicked");
     if (e.target.value !== "Select Division") {
       setDivisionId(e.target.value);
     } else {
@@ -336,7 +341,9 @@ const UnlockMarks = () => {
   };
 
   const handleFilterSubmit = (e) => {
+    e.preventDefault();
     let selectedFilter = {};
+    const publish_marks_button = document.getElementById("publish-marks");
     if (examinationName === "") {
       toast.error("Please select examination name", {
         position: toast.POSITION.BOTTOM_LEFT,
@@ -440,10 +447,7 @@ const UnlockMarks = () => {
                   const unlockMarks_viewport = document.getElementById(
                     "unlockMarks_viewport"
                   );
-                  const publish_marks_button =
-                    document.getElementById("publish-marks");
-                  unlockMarks_viewport.classList.remove("hidden");
-                  unlockMarks_viewport.classList.add("flex");
+
                   console.log(actual_subject_length);
 
                   var updatedCombination = {};
@@ -495,10 +499,7 @@ const UnlockMarks = () => {
                         console.log(res);
                         if (res.data.status === "ok") {
                           if (res.data.data.eligible === true) {
-                            publish_marks_button.disabled = false;
-                            publish_marks_button.classList.remove(
-                              "cursor-not-allowed"
-                            );
+                            setPublishDisabled(false);
                             axios
                               .get(
                                 `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/fetch_publish_status`,
@@ -513,15 +514,16 @@ const UnlockMarks = () => {
                               .then((res) => {
                                 if (res.data.status === "ok") {
                                   if (res.data.data.published_marks === true) {
-                                    publish_marks_button.disabled = false;
+                                    setDisabled(true)
                                     publish_marks_button.innerHTML =
                                       "Unpublish Marks";
                                   } else {
-                                    publish_marks_button.disabled = false;
+                                    setDisabled(true)
                                     publish_marks_button.innerHTML =
                                       "Publish Marks";
                                   }
                                 } else {
+                                  setPublishDisabled(true)
                                   toast.error(res.data.message, {
                                     position: toast.POSITION.BOTTOM_LEFT,
                                   });
@@ -531,10 +533,8 @@ const UnlockMarks = () => {
                                 console.error(err);
                               });
                           } else {
-                            publish_marks_button.disabled = true;
-                            publish_marks_button.classList.add(
-                              "cursor-not-allowed"
-                            );
+                            setPublishDisabled(true);
+                            
                           }
                         } else {
                           toast.error(res.data.message, {
@@ -546,10 +546,11 @@ const UnlockMarks = () => {
                         console.error(err);
                       });
                   } else {
-                    publish_marks_button.disabled = true;
-                    publish_marks_button.classList.add("cursor-not-allowed");
+                    setPublishDisabled(true);
                   }
                   setSubjects(response.data.data.subjects);
+                  unlockMarks_viewport.classList.remove("hidden");
+                  unlockMarks_viewport.classList.add("flex");
                 })
                 .catch((error) => console.log(error));
             } else {
@@ -569,12 +570,12 @@ const UnlockMarks = () => {
     }
   };
 
-  const handleUnlockMarks = (e, subjectId) => {
-    // e.preventDefault();
-    const publish_marks_button = document.getElementById("publish-marks");
-    publish_marks_button.disabled = true;
-    publish_marks_button.classList.add("cursor-not-allowed");
-    console.log(e.target.getAttribute("data-subject-id"));
+  const handleUnlockMarks = (e, subjectId, subjectName) => {
+    e.preventDefault();
+    setUnlockMarkShowModal(true);
+    setSubjectName(subjectName);
+    setSubjectId(subjectId);
+    
     let selectedFilter = {};
     if (examinationName === "") {
       toast.error("Please select examination name", {
@@ -616,51 +617,14 @@ const UnlockMarks = () => {
       };
     }
 
-    const id = subjectId;
-    console.log(id);
-    selectedFilter["subject_id"] = id;
+    selectedFilter["subject_id"] = subjectId;
 
-    if (id !== "") {
-      if (subdomain !== null || subdomain !== "") {
-        axios
-          .put(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/unlock_marks`,
-            {
-              subdomain: subdomain,
-              student_mark: selectedFilter,
-            },
-            { headers }
-          )
-          .then((res) => {
-            console.log(res);
-            if (res.data.status === "ok") {
-              if (res.data.data.student_marks.length !== 0) {
-                const updatedCombination = { ...status, [id]: false };
-                setStatus(updatedCombination);
-                e.target.disabled = true;
-                e.target.classList.add("cursor-not-allowed");
-                toast.success(res.data.message, {
-                  position: toast.POSITION.BOTTOM_LEFT,
-                });
-              } else {
-                e.target.disabled = false;
-                e.target.classList.remove("cursor-not-allowed");
-              }
-            } else {
-              toast.error(res.data.message, {
-                position: toast.POSITION.BOTTOM_LEFT,
-              });
-            }
-          })
-          .catch((err) => {
-            console.error(err);
-          });
-      }
-    }
+    setSendSelectedFilter(selectedFilter);
   };
 
   const handlePublishMarks = (e) => {
     e.preventDefault();
+    console.log("Button Clicked");
     let selectedFilter = {};
     if (examinationName === "") {
       toast.error("Please select examination name", {
@@ -761,9 +725,10 @@ const UnlockMarks = () => {
     localStorage.clear();
     navigate("/");
   };
+
   return (
     <div>
-      {access_token && roles.includes("Examination Controller") ? (
+      {access_token ? (
         <div>
           <nav className="fixed top-0 z-50 w-full bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
             <div className="px-3 py-3 lg:px-5 lg:pl-3">
@@ -1069,7 +1034,9 @@ const UnlockMarks = () => {
                 </select>
 
                 <button
-                  className="w-auto py-2 px-3 bg-gray-800 rounded-2xl text-white font-bold"
+                  id="unlock-submit-button"
+                  className="text-center ml-4 w-auto bg-transparent text-slate-950 p-3 rounded-2xl tracking-wide border border-blue-600
+                  font-semibold focus:outline-none focus:shadow-outline hover:bg-blue-400 hover:text-white shadow-lg cursor-pointer transition ease-in duration-300"
                   onClick={handleFilterSubmit}
                 >
                   <p className="inline-flex">
@@ -1078,19 +1045,19 @@ const UnlockMarks = () => {
                 </button>
                 <button
                   id="publish-marks"
-                  className="cursor-not-allowed w-auto py-2 px-3 ml-5 bg-gray-800 rounded-2xl text-white font-bold"
-                  disabled="true"
+                  className={` ${publishDisabled ? "cursor-not-allowed" : "cursor-pointer"} text-center ml-4 w-auto bg-transparent text-slate-950 p-3 rounded-2xl tracking-wide border border-green-600 cursor-not-allowed
+                  font-semibold focus:outline-none focus:shadow-outline hover:bg-green-600 hover:text-white shadow-lg transition ease-in duration-300`}
                   onClick={handlePublishMarks}
+                  disabled={publishDisabled}
                 >
-                  <p className="inline-flex">Publish Marks</p>
+                  Publish Marks
                 </button>
               </div>
               {/* Table of Faculty List */}
 
               <div
                 id="unlockMarks_viewport"
-                className="hidden flex-col mt-5"
-                style={{ height: 390 }}
+                className="hidden flex-col overflow-y-scroll mt-5 h-[65vh] max-h-fit "
               >
                 <div className="">
                   <div className="p-1.5 w-full inline-block align-middle">
@@ -1100,7 +1067,7 @@ const UnlockMarks = () => {
                           <tr>
                             <th
                               scope="col"
-                              className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                              className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
                             >
                               Sr No.
                             </th>
@@ -1112,7 +1079,7 @@ const UnlockMarks = () => {
                             </th>
                             <th
                               scope="col"
-                              className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                              className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
                             >
                               Status
                             </th>
@@ -1123,38 +1090,59 @@ const UnlockMarks = () => {
                             if (status[subject.id]) {
                               return (
                                 <tr>
-                                  <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                  <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                                     {index + 1}
                                   </td>
                                   <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                                     {subject.name}
                                   </td>
-                                  <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                  <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                                     <button
-                                      className="py-2 px-3 bg-gray-800 rounded-2xl text-white font-bold unlock-buttons"
+                                      className={` ${disabled ? 'cursor-not-allowed' : ''} text-center w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-green-600
+                                      font-semibold focus:outline-none focus:shadow-outline hover:bg-green-600 hover:text-white hover:border-white shadow-lg transition ease-in duration-300 unlock-buttons`}
                                       id={subject.id}
                                       data-subject-id={subject.id}
                                       onClick={(e) =>
-                                        handleUnlockMarks(e, subject.id)
+                                        handleUnlockMarks(
+                                          e,
+                                          subject.id,
+                                          subject.name
+                                        )
                                       }
                                       disabled={disabled}
                                     >
-                                      <BsUnlockFill />
+                                      Unlock Marks
                                     </button>
+                                    {unlockMarkShowModal && (
+                                      <UnlockMarkModal
+                                        setOpenModal={setUnlockMarkShowModal}
+                                        id={subjectId}
+                                        selectedFilter={sendSelectedFilter}
+                                        setStatus={setStatus}
+                                        status={status}
+                                        name={subjectName}
+                                      />
+                                    )}
                                   </td>
                                 </tr>
                               );
                             } else {
                               return (
                                 <tr>
-                                  <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                  <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                                     {index + 1}
                                   </td>
                                   <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                                     {subject.name}
                                   </td>
-                                  <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                    Pending
+                                  <td className="flex justify-center text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                    <p
+                                      className="cursor-not-allowed text-center max-w-fit bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-red-600
+                                      font-semibold focus:outline-none focus:shadow-outline hover:bg-red-600 hover:text-white hover:border-white shadow-lg transition ease-in duration-300"
+                                    >
+                                      {" "}
+                                      Pending{" "}
+                                    </p>
                                   </td>
                                 </tr>
                               );
@@ -1169,9 +1157,7 @@ const UnlockMarks = () => {
             </div>
           </div>
         </div>
-      ) : (
-        navigate(-1)
-      )}
+      ) : null }
     </div>
   );
 };
