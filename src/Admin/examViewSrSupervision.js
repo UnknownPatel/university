@@ -973,13 +973,7 @@ const ExamViewSrSupervision = () => {
 
               <select
                 className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                onChange={(e) => {
-                  if (e.target.value !== "Select Date") {
-                    setDate(e.target.value);
-                  } else {
-                    setDate("");
-                  }
-                }}
+                onChange={handleDateChange}
               >
                 <option value="Select Date">Date</option>
                 {storeDates.map((date) => (
