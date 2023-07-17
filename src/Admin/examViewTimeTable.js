@@ -39,23 +39,28 @@ const ExamViewTimeTable = () => {
   const [courseId, setCourseId] = useState("");
   const [branches, setBranches] = useState([]);
   const [branchId, setBranchId] = useState("");
-  const [branchesName, setBranchesName] = useState("");
   const [semesters, setSemesters] = useState([]);
   const [semesterId, setSemesterId] = useState("");
-  const [semesterName, setSemesterName] = useState("");
-  const [selectedYear, setSelectedYear] = useState();
-  const [examinationName, setExaminationName] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [displayTimeTable, setDisplayTimeTable] = useState([]);
-  const [academic_years, setAcademicYears] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [storeDates, setStoreDates] = useState([]);
-  const [removeOverFlow, setRemoveOverflow] = useState(false);
   const navigate = useNavigate();
+  const [academic_years, setAcademicYears] = useState([]);
   const [examinationTypes, setExaminationTypes] = useState([]);
   const [examinationNames, setExaminationNames] = useState([]);
+  const [examinationTimes, setExaminationTimes] = useState([]);
   const [type, setType] = useState("");
+  const [hidden, setHidden] = useState(true);
+
+  // View Variables
+  const [branchesName, setBranchesName] = useState("");
+  const [semesterName, setSemesterName] = useState("");
+  const [selectedYear, setSelectedYear] = useState();
+  const [examinationName, setExaminationName] = useState("");
+  const [examinationType, setExaminationType] = useState("");
+  const [examinationTime, setExaminationTime] = useState("");
 
   var divStyle = {
     height: "400px",
@@ -184,6 +189,29 @@ const ExamViewTimeTable = () => {
       .catch(function (err) {
         console.log(err.message);
       });
+
+    axios
+      .get(
+        "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_times",
+        {
+          headers,
+          params: {
+            subdomain: subdomain,
+          },
+        }
+      )
+      .then((responce) => {
+        if (responce.data.status === "ok") {
+          if (responce.data.data.examination_times.length !== 0) {
+            setExaminationTimes(responce.data.data.examination_times);
+          } else {
+            setExaminationTimes([]);
+          }
+        }
+      })
+      .catch(function (err) {
+        console.log(err.message);
+      });
   }, []);
 
   function toggleDropdown() {
@@ -191,24 +219,12 @@ const ExamViewTimeTable = () => {
   }
 
   const handleExaminationChange = (examination) => {
-    const time_table_viewport = document.getElementById("time_table_viewport");
-    const download_button = document.getElementById("download_button");
-    const save_as_pdf = document.getElementById("save_as_pdf");
-    download_button.classList.add("hidden");
-    save_as_pdf.classList.add("hidden");
-    time_table_viewport.classList.add("hidden");
-    time_table_viewport.classList.remove("flex");
+    setHidden(true);
     setExaminationName(examination);
   };
 
   const handleYearChange = (date) => {
-    const time_table_viewport = document.getElementById("time_table_viewport");
-    time_table_viewport.classList.add("hidden");
-    time_table_viewport.classList.remove("flex");
-    const download_button = document.getElementById("download_button");
-    const save_as_pdf = document.getElementById("save_as_pdf");
-    download_button.classList.add("hidden");
-    save_as_pdf.classList.add("hidden");
+    setHidden(true)
     if (date !== "Select Year") {
       setSelectedYear(date);
     } else {
@@ -218,29 +234,18 @@ const ExamViewTimeTable = () => {
 
   const handleTypeChange = (e) => {
     e.preventDefault();
-    const time_table_viewport = document.getElementById("time_table_viewport");
-    time_table_viewport.classList.add("hidden");
-    time_table_viewport.classList.remove("flex");
-    const download_button = document.getElementById("download_button");
-    const save_as_pdf = document.getElementById("save_as_pdf");
-    download_button.classList.add("hidden");
-    save_as_pdf.classList.add("hidden");
+    setHidden(true);
     if (e.target.value === "Select Type") {
       setType("");
     } else {
+      setExaminationType(e.target.value);
       setType(e.target.value);
     }
   };
 
   const handleCourseChange = (e) => {
     e.preventDefault();
-    const time_table_viewport = document.getElementById("time_table_viewport");
-    time_table_viewport.classList.add("hidden");
-    time_table_viewport.classList.remove("flex");
-    const download_button = document.getElementById("download_button");
-    const save_as_pdf = document.getElementById("save_as_pdf");
-    download_button.classList.add("hidden");
-    save_as_pdf.classList.add("hidden");
+    setHidden(true)
     var selectedFilter = {};
     setStoreDates([]);
     if (examinationName !== "Select Examination") {
@@ -300,13 +305,7 @@ const ExamViewTimeTable = () => {
 
   const handleBranchChange = (e) => {
     e.preventDefault();
-    const time_table_viewport = document.getElementById("time_table_viewport");
-    time_table_viewport.classList.add("hidden");
-    time_table_viewport.classList.remove("flex");
-    const download_button = document.getElementById("download_button");
-    const save_as_pdf = document.getElementById("save_as_pdf");
-    download_button.classList.add("hidden");
-    save_as_pdf.classList.add("hidden");
+    setHidden(true);
     var selectedFilter = {};
     setStoreDates([]);
 
@@ -376,15 +375,20 @@ const ExamViewTimeTable = () => {
     }
   };
 
+  const handleTimeChange = (e) => {
+    e.preventDefault();
+    setHidden(true);
+    if (e.target.value === "Select time") {
+      setTime("");
+    } else {
+      setExaminationTime(e.target.value);
+      setTime(e.target.value);
+    }
+  };
+
   const handleSemesterChange = (e) => {
     e.preventDefault();
-    const time_table_viewport = document.getElementById("time_table_viewport");
-    time_table_viewport.classList.add("hidden");
-    time_table_viewport.classList.remove("flex");
-    const download_button = document.getElementById("download_button");
-    const save_as_pdf = document.getElementById("save_as_pdf");
-    download_button.classList.add("hidden");
-    save_as_pdf.classList.add("hidden");
+    setHidden(true);
     var selectedFilter = {};
     setStoreDates([]);
 
@@ -470,18 +474,32 @@ const ExamViewTimeTable = () => {
 
       if (branchId !== "") {
         selectedFilter["branch_id"] = branchId;
+      } else {
+        delete selectedFilter["branch_id"]
       }
 
       if (semesterId !== "") {
         selectedFilter["semester_id"] = semesterId;
+      } else {
+        delete selectedFilter["semester_id"]
+      }
+
+      if (type !== "" || type !== "Select Type") {
+        selectedFilter["time_table_type"] = type
+      } else {
+        delete selectedFilter["time_table_type"]
       }
 
       if (date !== "") {
         selectedFilter["date"] = date;
+      } else {
+        delete selectedFilter["date"]
       }
 
       if (time !== "") {
         selectedFilter["time"] = time;
+      } else {
+        delete selectedFilter["time"]
       }
     }
 
@@ -502,18 +520,11 @@ const ExamViewTimeTable = () => {
         .then((res) => {
           console.log(res);
           if (res.data.status == "ok") {
-            const time_table_viewport = document.getElementById(
-              "time_table_viewport"
-            );
-            const download_button = document.getElementById("download_button");
-            const save_as_pdf = document.getElementById("save_as_pdf");
             if (res.data.data.time_tables.length !== 0) {
-              download_button.classList.remove("hidden");
-              save_as_pdf.classList.remove("hidden");
-              time_table_viewport.classList.remove("hidden");
-              time_table_viewport.classList.add("flex");
+              setHidden(false);
               setDisplayTimeTable(res.data.data.time_tables);
             } else {
+              setHidden(true);
               toast.error("NO TimeTable found for the selected Filters", {
                 position: toast.POSITION.BOTTOM_LEFT,
               });
@@ -529,37 +540,37 @@ const ExamViewTimeTable = () => {
   const handlePrint = useReactToPrint({
     onBeforeGetContent: () => {
       const contentElement = componentRef.current;
-      contentElement.style = {};
+      contentElement.classList.remove('overflow-y-scroll')
+      contentElement.classList.remove('h-[60vh]')
     },
     content: () => componentRef.current,
     onAfterPrint: () => {
       const contentElement = componentRef.current;
-      contentElement.style = {
-        height: "400px",
-        overflowY: "auto",
-      };
+      contentElement.classList.add('overflow-y-scroll')
+      contentElement.classList.add('h-[60vh]')
     },
   });
 
   const handleSavePDF = () => {
     const contentElement = document.getElementById("time_table_viewport");
-    contentElement.style = {};
+    contentElement.classList.remove('overflow-y-scroll');
+    contentElement.classList.remove('h-[60vh]');
 
     html2pdf()
       .set({
         filename: "TimeTable.pdf",
         margin: [10, 10, 10, 10],
-        image: { type: "jpeg", quality: 0.98 },
+        image: { type: "jpeg", quality: 1.00 },
         html2canvas: { scale: 2 },
         jsPDF: { unit: "pt", format: "a4", orientation: "portrait" },
       })
       .from(contentElement)
-      .save();
-
-    divStyle = {
-      height: "400px",
-      overflowY: "auto",
-    };
+      .save()
+      .then(() => {
+        // PDF saving completed, add the class back
+        contentElement.classList.add("overflow-y-scroll");
+        contentElement.classList.add("h-[60vh]");
+      });
   };
 
   const handleLogout = () => {
@@ -771,7 +782,7 @@ const ExamViewTimeTable = () => {
             </div>
           </aside>
 
-          <div className="pt-4 sm:ml-64">
+          <div className="p-4 sm:ml-64">
             <div className="flex flex-col items-center mt-14">
               <div className="flex items-center space-x-4 mb-5">
                 <a
@@ -784,19 +795,19 @@ const ExamViewTimeTable = () => {
                   className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg `}
                   href="/examViewBlockDetails"
                 >
-                  Blockwise Report
+                  BlockWise Details
                 </a>
                 <a
                   className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg `}
                   href="/examViewJrSupervision"
                 >
-                  Jr.Supervisor Tab
+                  Jr.Supervision
                 </a>
                 <a
                   className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg `}
                   href="/examViewSrSupervision"
                 >
-                  Sr.Supervisor Tab
+                  Sr.Supervision
                 </a>
                 <a
                   className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg `}
@@ -844,6 +855,24 @@ const ExamViewTimeTable = () => {
                   return (
                     <option value={examination_type.name}>
                       {examination_type.name}
+                    </option>
+                  );
+                })}
+              </select>
+
+              <select
+                id={"select-time-subject"}
+                className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
+                onChange={(e) => {
+                  handleTimeChange(e);
+                }}
+                // selected={}
+              >
+                <option value="Select time">Time</option>
+                {examinationTimes.map((examination_time) => {
+                  return (
+                    <option value={examination_time.name}>
+                      {examination_time.name}
                     </option>
                   );
                 })}
@@ -904,62 +933,29 @@ const ExamViewTimeTable = () => {
                 ))}
               </select>
 
-              <select
-                className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                onChange={(e) => {
-                  if (e.target.value !== "Select time") {
-                    setTime(e.target.value);
-                  } else {
-                    setTime("");
-                  }
-                }}
-                // selected={}
-              >
-                <option value="">Select time</option>
-                <option value="morning">10:30 A.M to 01:00 P.M</option>
-                <option value="evening">03:00 P.M to 05:30 P.M</option>
-              </select>
-            </div>
-            <div className="flex justify-center mt-5">
               <button
-                className="py-2 px-3 mr-7 bg-gray-800 rounded-2xl text-white font-bold"
+                className="text-center ml-4 w-auto bg-transparent text-slate-950 p-3 rounded-2xl tracking-wide border border-slate-950
+                font-semibold focus:outline-none focus:shadow-outline hover:bg-gray-700 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
                 onClick={handleFilterSubmit}
               >
                 <p className="inline-flex">
                   Search <GiArchiveResearch className="mt-1 ml-2" />
                 </p>
               </button>
-              <a
-                href="#"
-                id="download_button"
-                onClick={handlePrint}
-                className="hidden py-2 px-3 mt-1 bg-blue-200 rounded-2xl text-white font-bold"
-              >
-                <FcPrint />
-              </a>
-
-              <a
-                href="#"
-                id="save_as_pdf"
-                onClick={handleSavePDF}
-                className="hidden py-2 px-3 ml-2 mt-1 bg-blue-200 rounded-2xl text-white font-bold"
-              >
-                <FcDownload />
-              </a>
             </div>
+            
             <div
               id="time_table_viewport"
-              className="hidden flex-col mt-5"
+              className={`${hidden ? "hidden" : "flex" } flex-col overflow-y-scroll mt-5 h-[60vh] max-h-fit`}
               ref={componentRef}
-              style={divStyle}
             >
-              <div className="">
+              <div className="text-[15px] mb-5">
                 <p className="text-center">{uniName}</p>
                 <p className="text-center">
-                  {branchesName} {semesterName}
+                  {examinationName} {selectedYear} {examinationType}
                 </p>
                 <p className="text-center">
-                  {examinationName} {selectedYear} Examination Time Table
+                  {branchesName} {semesterName}
                 </p>
               </div>
               <div ref={tableRef} id="table-viewport" className="">
@@ -1000,14 +996,6 @@ const ExamViewTimeTable = () => {
                             <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                               {time_table.time}
                             </td>
-
-                            {/* <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                          <button
-                            className="text-red-500 hover:text-red-700"
-                            href="#"
-                            // onClick={handleRemoveRole}
-                          >Remove</button>
-                        </td> */}
                           </tr>
                         ))}
                       </tbody>
@@ -1019,12 +1007,30 @@ const ExamViewTimeTable = () => {
                 </div>
               </div>
             </div>
-            <div className="flex justify-evenly text-center mt-10"></div>
+            <div className={`${hidden ? "hidden" : "flex" } justify-end mt-5`}>
+              <a
+                href="#"
+                id="download_button"
+                onClick={handlePrint}
+                className={` ${hidden ? "hidden" : "flex" } text-center w-auto bg-transparent mr-2 text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
+                font-semibold focus:outline-none focus:shadow-outline hover:bg-slate-500 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300`}
+              >
+                <FcPrint size={25} />
+              </a>
+
+              <a
+                href="#"
+                id="save_as_pdf"
+                onClick={handleSavePDF}
+                className={`${hidden ? "hidden" : "flex" } text-center w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
+                font-semibold focus:outline-none focus:shadow-outline hover:bg-slate-500 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300`}
+              >
+                <FcDownload size={25} />
+              </a>
+            </div>
           </div>
         </div>
-      ) : (
-        navigate(-1)
-      )}
+      ) : null }
     </div>
   );
 };

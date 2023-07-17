@@ -1643,7 +1643,7 @@ const ExamAssignSupervision = () => {
                     </div>
                     <div
                       id="jr_faculty_listing_viewport"
-                      className="hidden overflow-y-scroll h-96 flex-col mt-5"
+                      className="hidden overflow-y-scroll h-[65vh] max-h-fit flex-col mt-5"
                     >
                       <div className="">
                         <div className="p-1.5 w-full inline-block align-middle">
@@ -1870,7 +1870,7 @@ const ExamAssignSupervision = () => {
                     </div>
                     <div
                       id="sr_faculty_listing_viewport"
-                      className="hidden overflow-y-scroll h-96 flex-col mt-5"
+                      className="hidden flex-col overflow-y-scroll h-[65vh] max-h-fit mt-5"
                     >
                       <div className="">
                         <div className="p-1.5 w-full inline-block align-middle">
@@ -2094,7 +2094,7 @@ const ExamAssignSupervision = () => {
                     </div>
                     <div
                       id="od_faculty_listing_viewport"
-                      className="hidden overflow-y-scroll flex-col mt-5"
+                      className="hidden overflow-y-scroll flex-col mt-5 h-[65vh] max-h-fit"
                       style={{ height: 445 }}
                     >
                       <div className="">
@@ -2219,9 +2219,7 @@ const ExamAssignSupervision = () => {
             </div>
           </div>
         </div>
-      ) : (
-        navigate(-1)
-      )}
+      ) : null}
     </div>
   );
 };

@@ -303,7 +303,6 @@ const ViewMarks = () => {
     onBeforeGetContent: () => {
       const contentElement = componentRef.current;
       contentElement.classList.remove("overflow-y-scroll");
-      contentElement.style = {};
     },
     content: () => componentRef.current,
     onAfterPrint: () => {
