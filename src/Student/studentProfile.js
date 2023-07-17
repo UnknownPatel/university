@@ -1,9 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import StudentNavbar from "./StudentNavbar";
 import { useNavigate } from "react-router-dom";
 
 const StudentProfile = () => {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState(1);
+
+  const handleTabClick = (tabIndex) => {
+    setActiveTab(tabIndex);
+  };
 
   const handleLogout = () => {
     localStorage.clear();
@@ -81,6 +86,56 @@ const StudentProfile = () => {
           </ul>
         </div>
       </aside>
+
+      <div className="p-4 sm:ml-64">
+        <div className="p-4 rounded-lg mt-10">
+          <div className="text-center text-4xl">
+            <p>Student Profile</p>
+          </div>
+
+          <div className="mt-5 text-3xl bg-slate-500 text-white py-2">
+            <p className="ml-5">Hi, Student Name</p>
+          </div>
+
+          <div className="flex">
+            <button
+              className={`${
+                activeTab === 1
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200 text-gray-700"
+              } px-4 py-2 rounded-t`}
+              onClick={() => handleTabClick(1)}
+            >
+              Tab 1
+            </button>
+            <button
+              className={`${
+                activeTab === 2
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200 text-gray-700"
+              } px-4 py-2`}
+              onClick={() => handleTabClick(2)}
+            >
+              Tab 2
+            </button>
+            <button
+              className={`${
+                activeTab === 3
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200 text-gray-700"
+              } px-4 py-2 rounded-t`}
+              onClick={() => handleTabClick(3)}
+            >
+              Tab 3
+            </button>
+          </div>
+          <div className="bg-gray-200 p-4">
+            {activeTab === 1 && <div>Content for Tab 1</div>}
+            {activeTab === 2 && <div>Content for Tab 2</div>}
+            {activeTab === 3 && <div>Content for Tab 3</div>}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
