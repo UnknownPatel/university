@@ -37,6 +37,10 @@ import ChangePassword from "./SuperAdmin/changePassword";
 import AcademicCreateCertificate from "./Admin/academicCreateCertificate";
 import AcademicCertificateRequrst from "./Admin/academicCertificateRequrst";
 import FacultyDashboard from "./Faculty/facultyDashboard";
+import FeeReceipt from "./Student/feeReceipt";
+import CertificateTracking from "./Student/certificateTracking";
+// import StudentProfile from "./Student/studentProfile";
+import StudentProfile from "./Student/studentProfile";
 
 function App() {
   return (
@@ -116,6 +120,12 @@ function App() {
             path="/StudentCertificatePage"
             element={<StudentCertificatePage />}
           />
+          <Route path="/feeReceipt" element={<FeeReceipt />} />
+          <Route
+            path="/certificateTracking"
+            element={<CertificateTracking />}
+          />
+          <Route path="/studentProfile" element={<StudentProfile />} />
           <Route path="/ForgotPassword" element={<ForgotPassword />} />
           <Route path="/ChangePassword" element={<ChangePassword />} />
           <Route path="/facultyDashboard" element={<FacultyDashboard />} />

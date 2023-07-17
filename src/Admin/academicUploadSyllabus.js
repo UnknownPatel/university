@@ -171,10 +171,9 @@ const AcademicUploadSyllabus = () => {
   const handleSemesterChange = (e) => {
     e.preventDefault();
     var selectedIndex = e.target.options.selectedIndex;
-    
+
     if (e.target.value === "Select Semester") {
       setSemesterId("");
-      
     } else {
       setSemesterId(e.target.value);
       setSemesterName(
