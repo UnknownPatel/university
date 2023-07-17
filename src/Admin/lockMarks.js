@@ -4,8 +4,9 @@ import { GiArchiveResearch } from "react-icons/gi";
 import { MdAddCircle } from "react-icons/md";
 import { useNavigate, useParams } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
-import {BsLockFill} from 'react-icons/bs'
-import {CiViewList} from 'react-icons/ci'
+import { BsLockFill } from "react-icons/bs";
+import { CiViewList } from "react-icons/ci";
+import LockMarkModal from "./modals/lockMarkModal";
 
 var headers;
 var subdomain;
@@ -19,6 +20,7 @@ const LockMarks = () => {
   const [divisions, setDivisions] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [subjectId, setSubjectId] = useState("");
+  const [lockSubjectName, setLockSubjectName] = useState("");
   const [examinationNames, setExaminationNames] = useState([]);
   const [examinationTypes, setExaminationTypes] = useState([]);
   const [academic_years, setAcademicYears] = useState([]);
@@ -43,6 +45,7 @@ const LockMarks = () => {
   const [marksData, setMarksData] = useState([]);
   const [faculty, setFaculty] = useState("");
   const [status, setStatus] = useState({});
+  const [lockMarkShowModal, setLockMarkShowModal] = useState(false);
 
   const navigate = useNavigate();
   // const {subject_id} = useParams();
@@ -246,6 +249,8 @@ const LockMarks = () => {
                 )
                 .then((response) => {
                   setSubjects(response.data.data.subjects);
+                  const viewport =
+                    document.getElementById("lockMarks_viewport");
                   var updatedCombination = {};
                   response.data.data.subjects.map((subject) => {
                     selectedFilter["subject_id"] = subject.id;
@@ -265,7 +270,8 @@ const LockMarks = () => {
                         if (res.data.message === "Details found") {
                           updatedCombination = {
                             ...updatedCombination,
-                            [`${JSON.stringify(subject.id)}`]: res.data.data.locked,
+                            [`${JSON.stringify(subject.id)}`]:
+                              res.data.data.locked,
                           };
                           setStatus(updatedCombination);
                         }
@@ -274,6 +280,8 @@ const LockMarks = () => {
                         console.error(err);
                       });
                   });
+                  viewport.classList.remove("hidden");
+                  viewport.classList.add("flex");
                 })
                 .catch((error) => console.log(error));
             }
@@ -288,47 +296,6 @@ const LockMarks = () => {
         });
     }
   }, [selectedFilter]);
-
-  const handleLockMarks = (e) => {
-    // e.preventDefault();
-
-    const id = e.target.id;
-    selectedFilter["subject_id"] = id;
-
-    if (id !== "") {
-      if (subdomain !== null || subdomain !== "") {
-        axios
-          .put(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/lock_marks`,
-            {
-              subdomain: subdomain,
-              student_mark: selectedFilter,
-            },
-            { headers }
-          )
-          .then((res) => {
-            console.log(res);
-            if (res.data.status === "ok") {
-              if (res.data.data.student_marks.length !== 0) {
-                const updatedCombination = { ...status, [id]: true };
-                setStatus(updatedCombination);
-
-                toast.success(res.data.message, {
-                  position: toast.POSITION.BOTTOM_LEFT,
-                });
-              }
-            } else {
-              toast.error(res.data.message, {
-                position: toast.POSITION.BOTTOM_LEFT,
-              });
-            }
-          })
-          .catch((err) => {
-            console.error(err);
-          });
-      }
-    }
-  };
 
   const handleViewMarks = (e) => {
     e.preventDefault();
@@ -502,9 +469,7 @@ const LockMarks = () => {
               value={examinationName}
               disabled={true}
             >
-              <option value="Select Examination" >
-                Examination
-              </option>
+              <option value="Select Examination">Examination</option>
               {examinationNames.map((examination_name) => {
                 return (
                   <option value={examination_name.name}>
@@ -519,9 +484,7 @@ const LockMarks = () => {
               value={selectedYear}
               disabled={true}
             >
-              <option value="Select Year" >
-                Year
-              </option>
+              <option value="Select Year">Year</option>
               {academic_years.map((year) => {
                 return <option value={year}>{year}</option>;
               })}
@@ -532,9 +495,7 @@ const LockMarks = () => {
               value={type}
               disabled={true}
             >
-              <option value="Select Type" >
-                Type
-              </option>
+              <option value="Select Type">Type</option>
               {examinationTypes.map((examination_type) => {
                 return (
                   <option value={examination_type.name}>
@@ -550,9 +511,7 @@ const LockMarks = () => {
               value={courseId}
               disabled={true}
             >
-              <option value="Select Course" >
-                Course
-              </option>
+              <option value="Select Course">Course</option>
               {courses.map((course, index) => (
                 <option value={course.id}>{course.name}</option>
               ))}
@@ -561,12 +520,9 @@ const LockMarks = () => {
             <select
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
               value={branchId}
-              // isSearchable={true}
               disabled={true}
             >
-              <option value="Select Branch" >
-                Branch
-              </option>
+              <option value="Select Branch">Branch</option>
               {branches.map((branch) => (
                 <option value={branch.id}>{branch.name}</option>
               ))}
@@ -577,9 +533,7 @@ const LockMarks = () => {
               value={semesterId}
               disabled={true}
             >
-              <option value="Select Semester" >
-                Semester
-              </option>
+              <option value="Select Semester">Semester</option>
               {semesters.map((semester) => (
                 <option value={semester.id}>{semester.name}</option>
               ))}
@@ -590,9 +544,7 @@ const LockMarks = () => {
               value={divisionId}
               disabled={true}
             >
-              <option value="Select Division" >
-                Division
-              </option>
+              <option value="Select Division">Division</option>
               {divisions.map((division) => (
                 <option value={division.id}>{division.name}</option>
               ))}
@@ -601,8 +553,7 @@ const LockMarks = () => {
           {/* Table of Faculty List */}
           <div
             id="lockMarks_viewport"
-            className="flex flex-col mt-5"
-            style={{ height: 390 }}
+            className="hidden flex-col overflow-y-scroll mt-5 h-[65vh] max-h-fit "
           >
             <div className="">
               <div className="p-1.5 w-full inline-block align-middle">
@@ -612,7 +563,7 @@ const LockMarks = () => {
                       <tr>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                          className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
                         >
                           Sr No.
                         </th>
@@ -624,7 +575,7 @@ const LockMarks = () => {
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                          className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
                         >
                           Action
                         </th>
@@ -635,15 +586,16 @@ const LockMarks = () => {
                         if (status[subject.id]) {
                           return (
                             <tr>
-                              <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                              <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                                 {index + 1}
                               </td>
                               <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                                 {subject.name}
                               </td>
-                              <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                              <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                                 <button
-                                  className="py-2 px-3 bg-gray-800 rounded-2xl text-white font-bold"
+                                  className="text-center w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-blue-600
+                                  font-semibold focus:outline-none focus:shadow-outline hover:bg-blue-500 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
                                   id={subject.id}
                                   data-subject-id={subject.id}
                                   onClick={(e) => handleViewMarks(e)}
@@ -656,21 +608,36 @@ const LockMarks = () => {
                         } else {
                           return (
                             <tr>
-                              <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                              <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                                 {index + 1}
                               </td>
                               <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                                 {subject.name}
                               </td>
-                              <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                              <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                                 <button
-                                  className="py-2 px-3 bg-gray-800 rounded-2xl text-white font-bold"
+                                  className="text-center w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-red-600
+                                  font-semibold focus:outline-none focus:shadow-outline hover:bg-red-600 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
                                   id={subject.id}
                                   data-subject-id={subject.id}
-                                  onClick={(e) => handleLockMarks(e)}
+                                  onClick={(e) => {
+                                    setLockMarkShowModal(true);
+                                    setSubjectId(subject.id);
+                                    setLockSubjectName(subject.name)
+                                  }}
                                 >
                                   Lock Marks
                                 </button>
+                                {lockMarkShowModal && (
+                                  <LockMarkModal
+                                    setOpenModal={setLockMarkShowModal}
+                                    id={subjectId}
+                                    selectedFilter={selectedFilter}
+                                    setStatus={setStatus}
+                                    status={status}
+                                    name={lockSubjectName}
+                                  />
+                                )}
                               </td>
                             </tr>
                           );

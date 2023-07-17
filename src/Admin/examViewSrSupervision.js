@@ -29,7 +29,7 @@ const ExamViewSrSupervision = () => {
   const [branchId, setBranchId] = useState("");
   const [courseId, setCourseId] = useState("");
   const [date, setDate] = useState("");
-  const [time, setTime] = useState("0");
+  const [time, setTime] = useState("");
   const [branchesName, setBranchesName] = useState("");
   const [srSupervisionTable, setSrSupervisionTable] = useState([]);
   const [subjectDates, setSubjectDates] = useState([]);
@@ -37,6 +37,7 @@ const ExamViewSrSupervision = () => {
   const navigate = useNavigate();
   const [examinationNames, setExaminationNames] = useState([]);
   const [examinationTypes, setExaminationTypes] = useState([]);
+  const [examinationTimes, setExaminationTimes] = useState([]);
   const [type, setType] = useState("");
 
   const componentRef4 = useRef();
@@ -146,6 +147,29 @@ const ExamViewSrSupervision = () => {
         .catch(function (err) {
           console.log(err.message);
         });
+
+      axios
+        .get(
+          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_times",
+          {
+            headers,
+            params: {
+              subdomain: subdomain,
+            },
+          }
+        )
+        .then((responce) => {
+          if (responce.data.status === "ok") {
+            if (responce.data.data.examination_times.length !== 0) {
+              setExaminationTimes(responce.data.data.examination_times);
+            } else {
+              setExaminationTimes([]);
+            }
+          }
+        })
+        .catch(function (err) {
+          console.log(err.message);
+        });
     }
     if (roles === null) {
       toast.error("Something went wrong, please Try Again!", {
@@ -175,7 +199,7 @@ const ExamViewSrSupervision = () => {
     faculty_listing_viewport.classList.add("hidden");
     faculty_listing_viewport.classList.remove("flex");
     if (e.target.value === "Select Type") {
-      setTime("");
+      setType("");
     } else {
       setType(e.target.value);
     }
@@ -337,6 +361,65 @@ const ExamViewSrSupervision = () => {
       }
     } else {
       setBranchId("");
+    }
+  };
+
+  const handleTimeChange = (e) => {
+    e.preventDefault();
+    setDate("");
+    setStoreDates([]);
+    var selectedFilter = {};
+    examinationName4 !== "" || examinationName4 !== "Select Examination"
+      ? (selectedFilter["name"] = examinationName4)
+      : delete selectedFilter["name"];
+    selectedYear4 !== "" || selectedYear4 !== "Select Year"
+      ? (selectedFilter["academic_year"] = selectedYear4)
+      : delete selectedFilter["academic_year"];
+    courseId !== ""
+      ? (selectedFilter["course_id"] = courseId)
+      : delete selectedFilter["course_id"];
+    branchId !== ""
+      ? (selectedFilter["branchId"] = branchId)
+      : delete selectedFilter["branch_id"];
+    type !== ""
+      ? (selectedFilter["time_table_type"] = type)
+      : delete selectedFilter["time_table_type"];
+
+    if (e.target.value !== "Select time") {
+      setTime(e.target.value);
+      selectedFilter["time"] = e.target.value;
+      if (subdomain !== null || subdomain !== "") {
+        axios
+          .get(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
+            {
+              headers,
+              params: {
+                time_table: selectedFilter,
+                subdomain: subdomain,
+              },
+            }
+          )
+          .then((response) => {
+            if (response.data.message === "Examination dates are as below") {
+              if (response.data.data.dates.length !== 0) {
+                setStoreDates(response.data.data.dates);
+              }
+            }
+          })
+          .catch((error) => console.log(error));
+      }
+    } else {
+      setTime("");
+    }
+  };
+
+  const handleDateChange = (e) => {
+    e.preventDefault();
+    if (e.target.value !== "Select Date") {
+      setDate(e.target.value);
+    } else {
+      setDate("");
     }
   };
 
@@ -544,6 +627,7 @@ const ExamViewSrSupervision = () => {
   const handlePrint4 = useReactToPrint({
     content: () => componentRef4.current,
   });
+
   function toggleDropdown() {
     setIsDropdownOpen(!isDropdownOpen);
   }
@@ -552,6 +636,7 @@ const ExamViewSrSupervision = () => {
     localStorage.clear();
     navigate("/");
   };
+
   return (
     <div>
       {localStorage.getItem("roles") !== null ? (
@@ -1201,7 +1286,7 @@ const ExamViewSrSupervision = () => {
             </div>
           </aside>
 
-          <div className="pt-4 sm:ml-64">
+          <div className="p-4 sm:ml-64">
             <div className="flex flex-col items-center mt-14">
               <div className="flex items-center space-x-4 mb-5">
                 <a
@@ -1301,29 +1386,29 @@ const ExamViewSrSupervision = () => {
               </select>
 
               <select
-                className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
+                className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
                 onChange={(e) => {
-                  if (e.target.value !== "Select Date") {
-                    setDate(e.target.value);
-                  } else {
-                    setDate("");
-                  }
+                  handleTimeChange(e);
                 }}
               >
-                <option>Select Date</option>
-                {storeDates.map((date) => (
-                  <option value={date}>{date}</option>
-                ))}
+                <option value="Select time">Time</option>
+                {examinationTimes.map((examination_time) => {
+                  return (
+                    <option value={examination_time.name}>
+                      {examination_time.name}
+                    </option>
+                  );
+                })}
               </select>
 
               <select
                 className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                onChange={(e) => {
-                  setTime(e.target.value);
-                }}
+                onChange={handleDateChange}
               >
-                <option value="0">10:30 A.M to 01:00 P.M</option>
-                <option value="1">03:00 P.M to 05:30 P.M</option>
+                <option value="Select Date">Date</option>
+                {storeDates.map((date) => (
+                  <option value={date}>{date}</option>
+                ))}
               </select>
 
               <button

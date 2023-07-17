@@ -38,23 +38,28 @@ const ExamViewTimeTable = () => {
   const [courseId, setCourseId] = useState("");
   const [branches, setBranches] = useState([]);
   const [branchId, setBranchId] = useState("");
-  const [branchesName, setBranchesName] = useState("");
   const [semesters, setSemesters] = useState([]);
   const [semesterId, setSemesterId] = useState("");
-  const [semesterName, setSemesterName] = useState("");
-  const [selectedYear, setSelectedYear] = useState();
-  const [examinationName, setExaminationName] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [displayTimeTable, setDisplayTimeTable] = useState([]);
-  const [academic_years, setAcademicYears] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [storeDates, setStoreDates] = useState([]);
-  const [removeOverFlow, setRemoveOverflow] = useState(false);
   const navigate = useNavigate();
+  const [academic_years, setAcademicYears] = useState([]);
   const [examinationTypes, setExaminationTypes] = useState([]);
   const [examinationNames, setExaminationNames] = useState([]);
+  const [examinationTimes, setExaminationTimes] = useState([]);
   const [type, setType] = useState("");
+  const [hidden, setHidden] = useState(true);
+
+  // View Variables
+  const [branchesName, setBranchesName] = useState("");
+  const [semesterName, setSemesterName] = useState("");
+  const [selectedYear, setSelectedYear] = useState();
+  const [examinationName, setExaminationName] = useState("");
+  const [examinationType, setExaminationType] = useState("");
+  const [examinationTime, setExaminationTime] = useState("");
 
   var divStyle = {
     height: "400px",
@@ -164,6 +169,29 @@ const ExamViewTimeTable = () => {
       .catch(function (err) {
         console.log(err.message);
       });
+
+    axios
+      .get(
+        "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_times",
+        {
+          headers,
+          params: {
+            subdomain: subdomain,
+          },
+        }
+      )
+      .then((responce) => {
+        if (responce.data.status === "ok") {
+          if (responce.data.data.examination_times.length !== 0) {
+            setExaminationTimes(responce.data.data.examination_times);
+          } else {
+            setExaminationTimes([]);
+          }
+        }
+      })
+      .catch(function (err) {
+        console.log(err.message);
+      });
     if (roles === null) {
       toast.error("Something went wrong, please Try Again!", {
         position: toast.POSITION.BOTTOM_LEFT,
@@ -176,24 +204,12 @@ const ExamViewTimeTable = () => {
   }
 
   const handleExaminationChange = (examination) => {
-    const time_table_viewport = document.getElementById("time_table_viewport");
-    const download_button = document.getElementById("download_button");
-    const save_as_pdf = document.getElementById("save_as_pdf");
-    download_button.classList.add("hidden");
-    save_as_pdf.classList.add("hidden");
-    time_table_viewport.classList.add("hidden");
-    time_table_viewport.classList.remove("flex");
+    setHidden(true);
     setExaminationName(examination);
   };
 
   const handleYearChange = (date) => {
-    const time_table_viewport = document.getElementById("time_table_viewport");
-    time_table_viewport.classList.add("hidden");
-    time_table_viewport.classList.remove("flex");
-    const download_button = document.getElementById("download_button");
-    const save_as_pdf = document.getElementById("save_as_pdf");
-    download_button.classList.add("hidden");
-    save_as_pdf.classList.add("hidden");
+    setHidden(true);
     if (date !== "Select Year") {
       setSelectedYear(date);
     } else {
@@ -203,29 +219,18 @@ const ExamViewTimeTable = () => {
 
   const handleTypeChange = (e) => {
     e.preventDefault();
-    const time_table_viewport = document.getElementById("time_table_viewport");
-    time_table_viewport.classList.add("hidden");
-    time_table_viewport.classList.remove("flex");
-    const download_button = document.getElementById("download_button");
-    const save_as_pdf = document.getElementById("save_as_pdf");
-    download_button.classList.add("hidden");
-    save_as_pdf.classList.add("hidden");
+    setHidden(true);
     if (e.target.value === "Select Type") {
       setType("");
     } else {
+      setExaminationType(e.target.value);
       setType(e.target.value);
     }
   };
 
   const handleCourseChange = (e) => {
     e.preventDefault();
-    const time_table_viewport = document.getElementById("time_table_viewport");
-    time_table_viewport.classList.add("hidden");
-    time_table_viewport.classList.remove("flex");
-    const download_button = document.getElementById("download_button");
-    const save_as_pdf = document.getElementById("save_as_pdf");
-    download_button.classList.add("hidden");
-    save_as_pdf.classList.add("hidden");
+    setHidden(true);
     var selectedFilter = {};
     setStoreDates([]);
     if (examinationName !== "Select Examination") {
@@ -285,13 +290,7 @@ const ExamViewTimeTable = () => {
 
   const handleBranchChange = (e) => {
     e.preventDefault();
-    const time_table_viewport = document.getElementById("time_table_viewport");
-    time_table_viewport.classList.add("hidden");
-    time_table_viewport.classList.remove("flex");
-    const download_button = document.getElementById("download_button");
-    const save_as_pdf = document.getElementById("save_as_pdf");
-    download_button.classList.add("hidden");
-    save_as_pdf.classList.add("hidden");
+    setHidden(true);
     var selectedFilter = {};
     setStoreDates([]);
 
@@ -361,15 +360,20 @@ const ExamViewTimeTable = () => {
     }
   };
 
+  const handleTimeChange = (e) => {
+    e.preventDefault();
+    setHidden(true);
+    if (e.target.value === "Select time") {
+      setTime("");
+    } else {
+      setExaminationTime(e.target.value);
+      setTime(e.target.value);
+    }
+  };
+
   const handleSemesterChange = (e) => {
     e.preventDefault();
-    const time_table_viewport = document.getElementById("time_table_viewport");
-    time_table_viewport.classList.add("hidden");
-    time_table_viewport.classList.remove("flex");
-    const download_button = document.getElementById("download_button");
-    const save_as_pdf = document.getElementById("save_as_pdf");
-    download_button.classList.add("hidden");
-    save_as_pdf.classList.add("hidden");
+    setHidden(true);
     var selectedFilter = {};
     setStoreDates([]);
 
@@ -455,18 +459,32 @@ const ExamViewTimeTable = () => {
 
       if (branchId !== "") {
         selectedFilter["branch_id"] = branchId;
+      } else {
+        delete selectedFilter["branch_id"];
       }
 
       if (semesterId !== "") {
         selectedFilter["semester_id"] = semesterId;
+      } else {
+        delete selectedFilter["semester_id"];
+      }
+
+      if (type !== "" || type !== "Select Type") {
+        selectedFilter["time_table_type"] = type;
+      } else {
+        delete selectedFilter["time_table_type"];
       }
 
       if (date !== "") {
         selectedFilter["date"] = date;
+      } else {
+        delete selectedFilter["date"];
       }
 
       if (time !== "") {
         selectedFilter["time"] = time;
+      } else {
+        delete selectedFilter["time"];
       }
     }
 
@@ -487,18 +505,11 @@ const ExamViewTimeTable = () => {
         .then((res) => {
           console.log(res);
           if (res.data.status == "ok") {
-            const time_table_viewport = document.getElementById(
-              "time_table_viewport"
-            );
-            const download_button = document.getElementById("download_button");
-            const save_as_pdf = document.getElementById("save_as_pdf");
             if (res.data.data.time_tables.length !== 0) {
-              download_button.classList.remove("hidden");
-              save_as_pdf.classList.remove("hidden");
-              time_table_viewport.classList.remove("hidden");
-              time_table_viewport.classList.add("flex");
+              setHidden(false);
               setDisplayTimeTable(res.data.data.time_tables);
             } else {
+              setHidden(true);
               toast.error("NO TimeTable found for the selected Filters", {
                 position: toast.POSITION.BOTTOM_LEFT,
               });
@@ -514,37 +525,37 @@ const ExamViewTimeTable = () => {
   const handlePrint = useReactToPrint({
     onBeforeGetContent: () => {
       const contentElement = componentRef.current;
-      contentElement.style = {};
+      contentElement.classList.remove("overflow-y-scroll");
+      contentElement.classList.remove("h-[60vh]");
     },
     content: () => componentRef.current,
     onAfterPrint: () => {
       const contentElement = componentRef.current;
-      contentElement.style = {
-        height: "400px",
-        overflowY: "auto",
-      };
+      contentElement.classList.add("overflow-y-scroll");
+      contentElement.classList.add("h-[60vh]");
     },
   });
 
   const handleSavePDF = () => {
     const contentElement = document.getElementById("time_table_viewport");
-    contentElement.style = {};
+    contentElement.classList.remove("overflow-y-scroll");
+    contentElement.classList.remove("h-[60vh]");
 
     html2pdf()
       .set({
         filename: "TimeTable.pdf",
         margin: [10, 10, 10, 10],
-        image: { type: "jpeg", quality: 0.98 },
+        image: { type: "jpeg", quality: 1.0 },
         html2canvas: { scale: 2 },
         jsPDF: { unit: "pt", format: "a4", orientation: "portrait" },
       })
       .from(contentElement)
-      .save();
-
-    divStyle = {
-      height: "400px",
-      overflowY: "auto",
-    };
+      .save()
+      .then(() => {
+        // PDF saving completed, add the class back
+        contentElement.classList.add("overflow-y-scroll");
+        contentElement.classList.add("h-[60vh]");
+      });
   };
 
   const handleLogout = () => {
@@ -758,7 +769,7 @@ const ExamViewTimeTable = () => {
               </div>
             </aside>
 
-            <div className="pt-4 sm:ml-64">
+            <div className="p-4 sm:ml-64">
               <div className="flex flex-col items-center mt-14">
                 <div className="flex items-center space-x-4 mb-5">
                   <a
@@ -771,19 +782,19 @@ const ExamViewTimeTable = () => {
                     className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg `}
                     href="/examViewBlockDetails"
                   >
-                    Blockwise Report
+                    BlockWise Details
                   </a>
                   <a
                     className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg `}
                     href="/examViewJrSupervision"
                   >
-                    Jr.Supervisor Tab
+                    Jr.Supervision
                   </a>
                   <a
                     className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg `}
                     href="/examViewSrSupervision"
                   >
-                    Sr.Supervisor Tab
+                    Sr.Supervision
                   </a>
                   <a
                     className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg `}
@@ -831,6 +842,24 @@ const ExamViewTimeTable = () => {
                     return (
                       <option value={examination_type.name}>
                         {examination_type.name}
+                      </option>
+                    );
+                  })}
+                </select>
+
+                <select
+                  id={"select-time-subject"}
+                  className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
+                  onChange={(e) => {
+                    handleTimeChange(e);
+                  }}
+                  // selected={}
+                >
+                  <option value="Select time">Time</option>
+                  {examinationTimes.map((examination_time) => {
+                    return (
+                      <option value={examination_time.name}>
+                        {examination_time.name}
                       </option>
                     );
                   })}
@@ -891,62 +920,31 @@ const ExamViewTimeTable = () => {
                   ))}
                 </select>
 
-                <select
-                  className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                  onChange={(e) => {
-                    if (e.target.value !== "Select time") {
-                      setTime(e.target.value);
-                    } else {
-                      setTime("");
-                    }
-                  }}
-                  // selected={}
-                >
-                  <option value="">Select time</option>
-                  <option value="morning">10:30 A.M to 01:00 P.M</option>
-                  <option value="evening">03:00 P.M to 05:30 P.M</option>
-                </select>
-              </div>
-              <div className="flex justify-center mt-5">
                 <button
-                  className="py-2 px-3 mr-7 bg-gray-800 rounded-2xl text-white font-bold"
+                  className="text-center ml-4 w-auto bg-transparent text-slate-950 p-3 rounded-2xl tracking-wide border border-slate-950
+                font-semibold focus:outline-none focus:shadow-outline hover:bg-gray-700 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
                   onClick={handleFilterSubmit}
                 >
                   <p className="inline-flex">
                     Search <GiArchiveResearch className="mt-1 ml-2" />
                   </p>
                 </button>
-                <a
-                  href="#"
-                  id="download_button"
-                  onClick={handlePrint}
-                  className="hidden py-2 px-3 mt-1 bg-blue-200 rounded-2xl text-white font-bold"
-                >
-                  <FcPrint />
-                </a>
-
-                <a
-                  href="#"
-                  id="save_as_pdf"
-                  onClick={handleSavePDF}
-                  className="hidden py-2 px-3 ml-2 mt-1 bg-blue-200 rounded-2xl text-white font-bold"
-                >
-                  <FcDownload />
-                </a>
               </div>
+
               <div
                 id="time_table_viewport"
-                className="hidden flex-col mt-5"
+                className={`${
+                  hidden ? "hidden" : "flex"
+                } flex-col overflow-y-scroll mt-5 h-[60vh] max-h-fit`}
                 ref={componentRef}
-                style={divStyle}
               >
-                <div className="">
+                <div className="text-[15px] mb-5">
                   <p className="text-center">{uniName}</p>
                   <p className="text-center">
-                    {branchesName} {semesterName}
+                    {examinationName} {selectedYear} {examinationType}
                   </p>
                   <p className="text-center">
-                    {examinationName} {selectedYear} Examination Time Table
+                    {branchesName} {semesterName}
                   </p>
                 </div>
                 <div ref={tableRef} id="table-viewport" className="">
@@ -987,14 +985,6 @@ const ExamViewTimeTable = () => {
                               <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                                 {time_table.time}
                               </td>
-
-                              {/* <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                          <button
-                            className="text-red-500 hover:text-red-700"
-                            href="#"
-                            // onClick={handleRemoveRole}
-                          >Remove</button>
-                        </td> */}
                             </tr>
                           ))}
                         </tbody>
@@ -1006,7 +996,31 @@ const ExamViewTimeTable = () => {
                   </div>
                 </div>
               </div>
-              <div className="flex justify-evenly text-center mt-10"></div>
+              <div className={`${hidden ? "hidden" : "flex"} justify-end mt-5`}>
+                <a
+                  href="#"
+                  id="download_button"
+                  onClick={handlePrint}
+                  className={` ${
+                    hidden ? "hidden" : "flex"
+                  } text-center w-auto bg-transparent mr-2 text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
+                font-semibold focus:outline-none focus:shadow-outline hover:bg-slate-500 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300`}
+                >
+                  <FcPrint size={25} />
+                </a>
+
+                <a
+                  href="#"
+                  id="save_as_pdf"
+                  onClick={handleSavePDF}
+                  className={`${
+                    hidden ? "hidden" : "flex"
+                  } text-center w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
+                font-semibold focus:outline-none focus:shadow-outline hover:bg-slate-500 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300`}
+                >
+                  <FcDownload size={25} />
+                </a>
+              </div>
             </div>
           </div>
         ) : (
@@ -1015,454 +1029,6 @@ const ExamViewTimeTable = () => {
       ) : (
         navigate("/")
       )}
-      {/* {access_token && roles.includes("Examination Controller") ? (
-        <div>
-          <nav className="fixed top-0 z-50 w-full bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
-            <div className="px-3 py-3 lg:px-5 lg:pl-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center justify-start">
-                  <button
-                    data-drawer-target="logo-sidebar"
-                    data-drawer-toggle="logo-sidebar"
-                    aria-controls="logo-sidebar"
-                    type="button"
-                    className="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
-                  >
-                    <span className="sr-only">Open sidebar</span>
-                    <svg
-                      className="w-6 h-6"
-                      aria-hidden="true"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        clip-rule="evenodd"
-                        fill-rule="evenodd"
-                        d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"
-                      ></path>
-                    </svg>
-                  </button>
-                  <a href="" className="flex ml-2 md:mr-24">
-                    <img src="" className="h-8 mr-3" alt="Logo" />
-                    <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
-                      {uniName}
-                    </span>
-                  </a>
-                </div>
-                <div className="flex items-center">
-                  <div className="flex items-center ml-3">
-                    <div>
-                      <button
-                        type="button"
-                        className="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
-                        aria-expanded="false"
-                        data-dropdown-toggle="dropdown-user"
-                      >
-                        <span className="self-center text-xl mr-2 font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
-                          {faculty}
-                        </span>
-                        <span className="sr-only">Open user menu</span>
-                      </button>
-                    </div>
-                    <div
-                      className="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded shadow dark:bg-gray-700 dark:divide-gray-600"
-                      id="dropdown-user"
-                    >
-                      <div className="px-4 py-3" role="none">
-                        <p
-                          className="text-sm text-gray-900 dark:text-white"
-                          role="none"
-                        ></p>
-                        <p
-                          className="text-sm font-medium text-gray-900 truncate dark:text-gray-300"
-                          role="none"
-                        ></p>
-                      </div>
-                      <ul className="py-1" role="none">
-                        <li>
-                          <a
-                            href="#"
-                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
-                            role="menuitem"
-                          ></a>
-                        </li>
-                        <li>
-                          <a
-                            href="#"
-                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
-                            role="menuitem"
-                          ></a>
-                        </li>
-                        <li>
-                          <a
-                            href="#"
-                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
-                            role="menuitem"
-                          ></a>
-                        </li>
-                        <li>
-                          <a
-                            href="#"
-                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
-                            role="menuitem"
-                          ></a>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </nav>
-
-          <aside
-            id="logo-sidebar"
-            className="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
-            aria-label="Sidebar"
-          >
-            <div className="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
-              <ul className="space-y-2 font-medium">
-                <li>
-                  <a
-                    href="/examinationDetails"
-                    className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    <span className="ml-3">Examination Details</span>
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="/examTimetable"
-                    className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    <span className="ml-3">Time Table</span>
-                  </a>
-                </li>
-
-                <li>
-                  <a
-                    href="/examBlockDetails"
-                    className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    <span className="ml-3">Enter Block Details</span>
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="/examAssignSupervision"
-                    className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    <span className="flex-1 ml-3 whitespace-nowrap">
-                      Assign Supervision
-                    </span>
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="/assignMarksEntry"
-                    className="flex items-center p-2  text-gray-900  rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    <span className="flex-1 ml-3 whitespace-nowrap">
-                      Assign Marks Entry
-                    </span>
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="/unlock_Marks"
-                    className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    <span className="ml-3">Unlock Marks</span>
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="/examViewTimeTable"
-                    className="flex items-center p-2 bg-slate-600 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    <span className="flex-1 ml-3 whitespace-nowrap">
-                      Report
-                    </span>
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="/result"
-                    className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    <span className="ml-3">Result</span>
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="/studentResult"
-                    className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    <span className="ml-3">Student Result</span>
-                  </a>
-                </li>
-                <li>
-                  <div className="p-4">
-                    <button
-                      type="button"
-                      className="inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition"
-                      onClick={handleLogout}
-                    >
-                      <span className="">Logout</span>
-                    </button>
-                  </div>
-                </li>
-              </ul>
-            </div>
-          </aside>
-
-          <div className="pt-4 sm:ml-64">
-            <div className="flex flex-col items-center mt-14">
-              <div className="flex items-center space-x-4 mb-5">
-                <a
-                  className={`text-white font-bold py-2 px-4 rounded-lg bg-slate-800`}
-                  href="/examViewTimeTable"
-                >
-                  Time Table
-                </a>
-                <a
-                  className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg `}
-                  href="/examViewBlockDetails"
-                >
-                  Blockwise Report
-                </a>
-                <a
-                  className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg `}
-                  href="/examViewJrSupervision"
-                >
-                  Jr.Supervisor Tab
-                </a>
-                <a
-                  className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg `}
-                  href="/examViewSrSupervision"
-                >
-                  Sr.Supervisor Tab
-                </a>
-                <a
-                  className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg `}
-                  href="/examViewOtherDuty"
-                >
-                  Other Duties
-                </a>
-              </div>
-            </div>
-
-            <div className="flex mt-5 ml-2">
-              <select
-                className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
-                onChange={(e) => {
-                  handleExaminationChange(e.target.value);
-                }}
-                aria-label="Examination Name"
-              >
-                <option value="Select Examination">Examination</option>
-                {examinationNames.map((examination_name) => {
-                  return (
-                    <option value={examination_name.name}>
-                      {examination_name.name}
-                    </option>
-                  );
-                })}
-              </select>
-
-              <select
-                className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
-                onChange={(e) => handleYearChange(e.target.value)}
-              >
-                <option value="Select Year">Year</option>
-                {academic_years.map((year) => {
-                  return <option value={year}>{year}</option>;
-                })}
-              </select>
-
-              <select
-                className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
-                onChange={handleTypeChange}
-              >
-                <option value="Select Type">Type</option>
-                {examinationTypes.map((examination_type) => {
-                  return (
-                    <option value={examination_type.name}>
-                      {examination_type.name}
-                    </option>
-                  );
-                })}
-              </select>
-
-              <select
-                aria-label="Select Course"
-                className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
-                onChange={handleCourseChange}
-              >
-                <option value="Select Course">Course</option>
-                {courses.map((course, index) => (
-                  <option value={course.id}>{course.name}</option>
-                ))}
-              </select>
-
-              <select
-                className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
-                onChange={handleBranchChange}
-                isSearchable={true}
-              >
-                <option value="Select Branch">Branch</option>
-                {branches.map((branch) => (
-                  <option value={branch.id} data-name={branch.name}>
-                    {branch.name}
-                  </option>
-                ))}
-              </select>
-
-              <select
-                className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
-                onChange={handleSemesterChange}
-              >
-                <option value="Select Semester">Semester</option>
-                {semesters.map((semester) => (
-                  <option
-                    value={semester.id}
-                    data-semester-name={semester.name}
-                  >
-                    {semester.name}
-                  </option>
-                ))}
-              </select>
-
-              <select
-                className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                onChange={(e) => {
-                  if (e.target.value !== "Select Date") {
-                    setDate(e.target.value);
-                  } else {
-                    setDate("");
-                  }
-                }}
-              >
-                <option>Select Date</option>
-                {storeDates.map((date) => (
-                  <option value={date}>{date}</option>
-                ))}
-              </select>
-
-              <select
-                className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                onChange={(e) => {
-                  if (e.target.value !== "Select time") {
-                    setTime(e.target.value);
-                  } else {
-                    setTime("");
-                  }
-                }}
-                // selected={}
-              >
-                <option value="">Select time</option>
-                <option value="morning">10:30 A.M to 01:00 P.M</option>
-                <option value="evening">03:00 P.M to 05:30 P.M</option>
-              </select>
-            </div>
-            <div className="flex justify-center mt-5">
-              <button
-                className="py-2 px-3 mr-7 bg-gray-800 rounded-2xl text-white font-bold"
-                onClick={handleFilterSubmit}
-              >
-                <p className="inline-flex">
-                  Search <GiArchiveResearch className="mt-1 ml-2" />
-                </p>
-              </button>
-              <a
-                href="#"
-                id="download_button"
-                onClick={handlePrint}
-                className="hidden py-2 px-3 mt-1 bg-blue-200 rounded-2xl text-white font-bold"
-              >
-                <FcPrint />
-              </a>
-
-              <a
-                href="#"
-                id="save_as_pdf"
-                onClick={handleSavePDF}
-                className="hidden py-2 px-3 ml-2 mt-1 bg-blue-200 rounded-2xl text-white font-bold"
-              >
-                <FcDownload />
-              </a>
-            </div>
-            <div
-              id="time_table_viewport"
-              className="hidden flex-col mt-5"
-              ref={componentRef}
-              style={divStyle}
-            >
-              <div className="">
-                <p className="text-center">{uniName}</p>
-                <p className="text-center">
-                  {branchesName} {semesterName}
-                </p>
-                <p className="text-center">
-                  {examinationName} {selectedYear} Examination Time Table
-                </p>
-              </div>
-              <div ref={tableRef} id="table-viewport" className="">
-                <div className="p-1.5 w-full inline-block align-middle">
-                  <div className="border rounded-lg">
-                    <table className="min-w-full table-fixed divide-y divide-gray-200">
-                      <thead className="sticky top-0 bg-gray-50">
-                        <tr>
-                          <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
-                            Subject Name
-                          </th>
-                          <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
-                            Subject Code
-                          </th>
-                          <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
-                            Day And Date
-                          </th>
-                          <th className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">
-                            Time
-                          </th>
-                          
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-200">
-                        {displayTimeTable.map((time_table) => (
-                          <tr>
-                            <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
-                              {time_table.subject_name}
-                            </td>
-                            <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                              {time_table.subject_code}
-                            </td>
-                            <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap uppercase">
-                              {time_table.date + " " + time_table.day}
-                            </td>
-                            <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                              {time_table.time}
-                            </td>
-
-                            
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                  <p className="text-lg mt-10">
-                    By. Exam Coordinator: ________________
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="flex justify-evenly text-center mt-10"></div>
-          </div>
-        </div>
-      ) : (
-        navigate(-1)
-      )} */}
     </div>
   );
 };

@@ -1601,6 +1601,7 @@ const ExamBlockDetails = () => {
               <select
                 className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
                 onChange={(e) => {
+                  handleViewPortChange();
                   if (e.target.value !== "Select Date") {
                     setDate2(e.target.value);
                   } else {
@@ -1629,9 +1630,7 @@ const ExamBlockDetails = () => {
                   );
                 })}
               </select>
-            </div>
 
-            <div className="flex justify-center mt-5">
               <button
                 className="text-center w-auto bg-transparent text-slate-950 p-3 rounded-2xl tracking-wide border border-slate-950
                 font-semibold focus:outline-none focus:shadow-outline hover:bg-gray-700 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
@@ -1646,7 +1645,7 @@ const ExamBlockDetails = () => {
 
             <div
               id="time_table_viewport"
-              className="hidden flex-col h-96 max-h-fit overflow-y-scroll mt-5"
+              className="hidden flex-col max-h-fit overflow-y-scroll mt-5 h-[65vh]"
             >
               <div className="">
                 <div className="p-1.5 w-full inline-block align-middle">

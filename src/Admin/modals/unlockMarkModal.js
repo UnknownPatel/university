@@ -8,7 +8,14 @@ var acces_token;
 var headers;
 var subdomain;
 
-const NameModal = ({ setOpenModal, id, setNames }) => {
+const UnlockMarkModal = ({
+  setOpenModal,
+  id,
+  selectedFilter,
+  setStatus,
+  status,
+  name,
+}) => {
   useEffect(() => {
     acces_token = localStorage.getItem("access_token");
     headers = { Authorization: `Bearer ${acces_token}` };
@@ -19,55 +26,43 @@ const NameModal = ({ setOpenModal, id, setNames }) => {
     }
   }, []);
 
-  const handleDeleteName = (e) => {
-    if (subdomain !== null || subdomain !== "") {
-      axios
-        .delete(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_names/${id}`,
-          {
-            headers,
-            params: {
+  const handleUnlockMark = (e) => {
+    console.log("Unlock Now");
+    console.log(selectedFilter);
+
+    if (id !== "") {
+      if (subdomain !== null || subdomain !== "") {
+        axios
+          .put(
+            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/unlock_marks`,
+            {
               subdomain: subdomain,
+              student_mark: selectedFilter,
             },
-          }
-        )
-        .then((res) => {
-          if (res.data.status === "ok") {
-            toast.success(res.data.message, {
-              position: toast.POSITION.BOTTOM_LEFT,
-            });
-            axios
-              .get(
-                `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_names`,
-                {
-                  headers,
-                  params: {
-                    subdomain: subdomain,
-                  },
-                }
-              )
-              .then((res) => {
-                if (res.data.data.examination_names.length !== 0) {
-                  setNames(res.data.data.examination_names);
-                  setOpenModal(false);
-                } else {
-                  setNames([]);
-                  setOpenModal(false);
-                }
-              })
-              .catch((err) => {
-                console.error(err);
-              });
-          } else {
-            toast.error(res.data.message, {
-              position: toast.POSITION.BOTTOM_LEFT,
-            });
+            { headers }
+          )
+          .then((res) => {
+            console.log(res);
+            if (res.data.status === "ok") {
+              setOpenModal(false);
+              if (res.data.data.student_marks.length !== 0) {
+                const updatedCombination = { ...status, [id]: false };
+                setStatus(updatedCombination);
+                const button = document.getElementById('unlock-submit-button');
+                button.click();
+                toast.success(res.data.message, {
+                  position: toast.POSITION.BOTTOM_LEFT,
+                });
+              }
+            } else {
+              toast.error(res.data.message);
+            }
+          })
+          .catch((err) => {
             setOpenModal(false);
-          }
-        })
-        .catch((err) => {
-          console.error(err);
-        });
+            console.error(err);
+          });
+      }
     }
   };
 
@@ -75,11 +70,11 @@ const NameModal = ({ setOpenModal, id, setNames }) => {
     <>
       <div className="ml-64 fixed inset-0 z-10 overflow-y-auto">
         <div
-          className="fixed inset-0 w-full h-full bg-black opacity-40"
+          className="fixed inset-0 w-full h-full bg-black opacity-20"
           onClick={() => setOpenModal(false)}
         ></div>
         <div className="flex items-center min-h-screen px-4 py-8">
-          <div className="relative w-full max-w-lg p-4 mx-auto bg-white rounded-md shadow-lg">
+          <div className="relative w-full min-w-max max-w-fit p-4 mx-auto bg-white rounded-md shadow-lg">
             <div className="mt-3 flex flex-col sm:flex">
               <div className="flex items-center justify-center flex-none w-12 h-12 mx-auto bg-red-100 rounded-full">
                 <svg
@@ -96,15 +91,15 @@ const NameModal = ({ setOpenModal, id, setNames }) => {
                 </svg>
               </div>
               <p className="mt-2 text-[15px] leading-relaxed text-gray-500">
-                Are you sure you want to delete this examination name?
+                Are you sure you want to unlock marks for {name} ?
               </p>
               <div className="mt-2 text-center sm:ml-4 sm:text-left">
                 <div className="items-center gap-2 mt-3 sm:flex">
                   <button
                     className="w-full mt-2 p-2.5 flex-1 text-white bg-red-600 rounded-md outline-none ring-offset-2 ring-red-600 focus:ring-2"
-                    onClick={() => handleDeleteName()}
+                    onClick={() => handleUnlockMark()}
                   >
-                    Delete
+                    Unlock Marks
                   </button>
                   <button
                     className="w-full mt-2 p-2.5 flex-1 text-gray-800 rounded-md outline-none border ring-offset-2 ring-indigo-600 focus:ring-2"
@@ -122,4 +117,4 @@ const NameModal = ({ setOpenModal, id, setNames }) => {
   );
 };
 
-export default NameModal;
+export default UnlockMarkModal;

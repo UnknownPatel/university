@@ -10,6 +10,7 @@ root.render(
   <React.StrictMode>
     <App />
     <ToastContainer
+      position="bottom-left"
       transition = {Zoom}
     />
   </React.StrictMode>
