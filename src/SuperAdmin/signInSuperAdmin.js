@@ -127,6 +127,13 @@ const SignInSuperAdmin = () => {
                     position: toast.POSITION.BOTTOM_LEFT,
                   });
                   navigate("/academic_UploadSyllabus");
+                } else if (
+                  responce.data.roles.includes("student coordinator")
+                ) {
+                  toast.success("Login Successfully !!", {
+                    position: toast.POSITION.BOTTOM_LEFT,
+                  });
+                  navigate("/student_coordinator_homePage");
                 }
               })
               .catch((error) => console.log(error));

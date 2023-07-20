@@ -41,6 +41,9 @@ import FeeReceipt from "./Student/feeReceipt";
 import CertificateTracking from "./Student/certificateTracking";
 // import StudentProfile from "./Student/studentProfile";
 import StudentProfile from "./Student/studentProfile";
+import StudentCoordinatorHome from "./Admin/Student Coordinator/studentCoordinatorHome";
+import FeeDetails from "./Admin/Student Coordinator/feeDetails";
+import FeePayGetway from "./Student/feePayGetway";
 
 function App() {
   return (
@@ -129,6 +132,12 @@ function App() {
           <Route path="/ForgotPassword" element={<ForgotPassword />} />
           <Route path="/ChangePassword" element={<ChangePassword />} />
           <Route path="/facultyDashboard" element={<FacultyDashboard />} />
+          <Route
+            path="/student_coordinator_homePage"
+            element={<StudentCoordinatorHome />}
+          />
+          <Route path="/feeDetails" element={<FeeDetails />} />
+          {/* <Route path="/feePayGetway" element={<FeePayGetway />} /> */}
         </Routes>
       </BrowserRouter>
     </div>
