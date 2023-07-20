@@ -137,7 +137,7 @@ function App() {
             element={<StudentCoordinatorHome />}
           />
           <Route path="/feeDetails" element={<FeeDetails />} />
-          {/* <Route path="/feePayGetway" element={<FeePayGetway />} /> */}
+          <Route path="/feePayGetway" element={<FeePayGetway />} />
         </Routes>
       </BrowserRouter>
     </div>

@@ -1,18 +1,18 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
-import { ToastContainer, Zoom } from 'react-toastify';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import "./index.css";
+import App from "./App";
+import reportWebVitals from "./reportWebVitals";
+import { ToastContainer, Zoom } from "react-toastify";
+import axios from "axios";
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+axios.defaults.headers.common["ngrok-skip-browser-warning"] = true;
+const root = ReactDOM.createRoot(document.getElementById("root"));
+
 root.render(
   <React.StrictMode>
     <App />
-    <ToastContainer
-      position="bottom-left"
-      transition = {Zoom}
-    />
+    <ToastContainer position="bottom-left" transition={Zoom} />
   </React.StrictMode>
 );
 
