@@ -87,10 +87,10 @@ const BasicDetailsModal = ({
   return (
     <div>
       <div className="ml-64 fixed inset-0 z-10 overflow-y-auto">
-        <div
+        {/* <div
           className="fixed inset-0 w-full h-full bg-black opacity-20"
           onClick={() => setOpenModal(false)}
-        ></div>
+        ></div> */}
         <div className="flex items-center min-h-screen px-4 py-8">
           <div className="relative w-full max-w-lg p-4 mx-auto bg-white rounded-md shadow-lg">
             <div className="mt-3 flex flex-col sm:flex">
@@ -220,12 +220,12 @@ const BasicDetailsModal = ({
                   >
                     Submit
                   </button>
-                  <button
+                  {/* <button
                     className="w-full mt-2 p-2.5 flex-1 text-gray-800 rounded-md outline-none border ring-offset-2 hover:bg-red-600 hover:text-slate-50 ring-indigo-600 focus:ring-2"
                     onClick={() => setOpenModal(false)}
                   >
                     Cancel
-                  </button>
+                  </button> */}
                 </div>
               </div>
             </div>

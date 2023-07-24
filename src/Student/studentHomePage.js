@@ -74,6 +74,14 @@ const StudentHomePage = () => {
               </a>
             </li>
             <li>
+              <a
+                href="/UpdateProfile"
+                className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="ml-3">Update Profile</span>
+              </a>
+            </li>
+            <li>
               <div className="p-4">
                 <button
                   type="button"
@@ -111,7 +119,7 @@ const StudentHomePage = () => {
                     Lorem ipsum dolor sit amet, consectetur adipiscing elit.
                   </p>
                   <a
-                    href="#"
+                    href="/studentProfile"
                     className="text-blue-500 font-semibold mt-7 flex justify-end"
                   >
                     More Details

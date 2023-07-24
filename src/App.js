@@ -44,6 +44,10 @@ import StudentProfile from "./Student/studentProfile";
 import StudentCoordinatorHome from "./Admin/Student Coordinator/studentCoordinatorHome";
 import FeeDetails from "./Admin/Student Coordinator/feeDetails";
 import FeePayGetway from "./Student/feePayGetway";
+import PayFee from "./Student/payFee";
+import UpdateProfile from "./Student/updateProfile";
+import CreateCertificate from "./Admin/Student Coordinator/createCertificate";
+import CertificateRequest from "./Admin/Student Coordinator/certificateRequest";
 
 function App() {
   return (
@@ -129,6 +133,7 @@ function App() {
             element={<CertificateTracking />}
           />
           <Route path="/studentProfile" element={<StudentProfile />} />
+          <Route path="/updateProfile" element={<UpdateProfile />} />
           <Route path="/ForgotPassword" element={<ForgotPassword />} />
           <Route path="/ChangePassword" element={<ChangePassword />} />
           <Route path="/facultyDashboard" element={<FacultyDashboard />} />
@@ -136,8 +141,11 @@ function App() {
             path="/student_coordinator_homePage"
             element={<StudentCoordinatorHome />}
           />
+          <Route path="/createCertificate" element={<CreateCertificate />} />
+          <Route path="/certificateRequest" element={<CertificateRequest />} />
           <Route path="/feeDetails" element={<FeeDetails />} />
-          <Route path="/feePayGetway" element={<FeePayGetway />} />
+          {/* <Route path="/feePayGetway" element={<FeePayGetway />} /> */}
+          <Route path="/payFee" element={<PayFee />} />
         </Routes>
       </BrowserRouter>
     </div>

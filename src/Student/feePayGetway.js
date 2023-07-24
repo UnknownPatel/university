@@ -65,12 +65,21 @@ export default function FeePayGetway() {
 
   return (
     <div className="App">
-      <button
-        className="inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition"
-        onClick={handlePayment}
-      >
-        Click
-      </button>
+      <div className="flex items-center  text-center h-screen w-96 p-4">
+        <div className="bg-slate-100 rounded-lg shadow-md w-full h-96 flex flex-col">
+          <div className="">
+            <div className="text-center">student Name:</div>
+            <div className="text-center">Enrollment Number:</div>
+            <div className="text-center">Total Fee Amount:</div>
+            <button
+              className="inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition"
+              onClick={handlePayment}
+            >
+              Click
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

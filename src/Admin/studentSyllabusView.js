@@ -318,13 +318,13 @@ const StudentSyllabusView = () => {
                 });
               } else {
                 toast.error("Please select other criteria to find subjects", {
-                  position: toast.POSITION.BOTTOM_LEFT
-                })
+                  position: toast.POSITION.BOTTOM_LEFT,
+                });
               }
             } else {
               toast.error("Please select other criteria to find subjects", {
-                position: toast.POSITION.BOTTOM_LEFT
-              })
+                position: toast.POSITION.BOTTOM_LEFT,
+              });
             }
           })
           .catch((err) => {
@@ -358,8 +358,8 @@ const StudentSyllabusView = () => {
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    clip-rule="evenodd"
-                    fill-rule="evenodd"
+                    clipRule="evenodd"
+                    fillRule="evenodd"
                     d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"
                   ></path>
                 </svg>
@@ -450,10 +450,13 @@ const StudentSyllabusView = () => {
         <div
           id="syllabus_viewport"
           className="hidden flex-col mt-5"
-          style={{height: 490}}
+          style={{ height: 490 }}
         >
           <div className="p-1.5 w-full inline-block align-middle">
-            <div className="border rounded-lg overflow-y-scroll" style={{height: 490}}>
+            <div
+              className="border rounded-lg overflow-y-scroll"
+              style={{ height: 490 }}
+            >
               <table className="min-w-full table-fixed border border-collapse border-slate-950 divide-y divide-gray-200">
                 <thead className="sticky top-0 bg-blue-200 text-white">
                   <tr>
@@ -531,7 +534,7 @@ const StudentSyllabusView = () => {
                 <tbody className="divide-y divide-gray-200 bg-blue-100">
                   {subjects.map((subject, index) => {
                     var syllabusPdfURL =
-                      syllabusData[subject.id]?.  ["syllabus_pdf_url"];
+                      syllabusData[subject.id]?.["syllabus_pdf_url"];
                     return (
                       <tr key={subject.id}>
                         <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap border border-slate-500">

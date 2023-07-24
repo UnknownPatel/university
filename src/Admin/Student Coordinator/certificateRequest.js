@@ -1,25 +1,29 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React from "react";
+import { useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
+var acces_token;
+var headers;
 var subdomain;
 
-const Home = () => {
+const CertificateRequest = () => {
   const navigate = useNavigate();
-
-  const [clientId, setClentId] = useState("");
-  const [clientSecret, setClentSecret] = useState("");
-
   const [uniName, setUniName] = useState("");
-  // const [subdomain, setSubdomain] = useState(null);
+  const [faculty, setFaculty] = useState("");
 
   useEffect(() => {
+    acces_token = localStorage.getItem("access_token");
+    const roles = localStorage.getItem("roles");
+
+    headers = { Authorization: `Bearer ${acces_token}` };
     const host = window.location.host;
     const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
     if (arr.length > 0) {
       subdomain = arr[0];
     }
-    console.log(subdomain);
 
     if (subdomain !== null || subdomain !== "") {
       axios
@@ -27,53 +31,39 @@ const Home = () => {
           `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
         )
         .then((response) => {
-          console.log(response.data.university.name);
+          //   console.log(response.data.university.name);
           setUniName(response.data.university.name);
         })
         .catch((err) => {
           console.log(err);
         });
+
+      axios
+        .get(
+          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/find_user?subdomain=${subdomain}`,
+          {
+            headers,
+          }
+        )
+        .then((responce) => {
+          setFaculty(
+            responce.data.user.first_name + " " + responce.data.user.last_name
+          );
+        })
+        .catch((error) => console.log(error));
+    }
+
+    if (roles === null) {
+      toast.error("Something went wrong, please Try Again!", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
     }
   }, []);
 
   const handleLogout = () => {
-    const accessToken = localStorage.getItem("access_token");
-
-    axios
-      .get(
-        `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
-      )
-      .then(function (response) {
-        setClentId(response.data.doorkeeper.client_id);
-        setClentSecret(response.data.doorkeeper.client_secret);
-      })
-      .catch(function (error) {
-        console.log(error.message);
-      });
-    axios
-      .post(
-        " http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/oauth/revoke",
-        {
-          token: { accessToken },
-          subdomain: subdomain,
-          client_id: clientId,
-          client_secret: clientSecret,
-        }
-      )
-      .then((response) => {
-        // console.log(response.data);
-        // Remove the access token from local storage
-        navigate("/");
-        localStorage.removeItem("access_token");
-        // Do any other necessary clean up and redirect the user to the login page
-        // ...
-      })
-      .catch((error) => {
-        // Handle error
-        console.error(error);
-      });
+    localStorage.clear();
+    navigate("/");
   };
-
   return (
     <div>
       <nav className="fixed top-0 z-50 w-full bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
@@ -102,7 +92,7 @@ const Home = () => {
                   ></path>
                 </svg>
               </button>
-              <a href="/home" className="flex ml-2 md:mr-24">
+              <a href="" className="flex ml-2 md:mr-24">
                 <img src="" className="h-8 mr-3" alt="Logo" />
                 <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
                   {uniName}
@@ -118,12 +108,10 @@ const Home = () => {
                     aria-expanded="false"
                     data-dropdown-toggle="dropdown-user"
                   >
+                    <span className="self-center text-xl mr-2 font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
+                      {faculty}
+                    </span>
                     <span className="sr-only">Open user menu</span>
-                    <img
-                      className="w-8 h-8 rounded-full"
-                      src=""
-                      alt="user photo"
-                    />
                   </button>
                 </div>
                 <div
@@ -146,36 +134,28 @@ const Home = () => {
                         href="#"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
                         role="menuitem"
-                      >
-                        Dashboard
-                      </a>
+                      ></a>
                     </li>
                     <li>
                       <a
                         href="#"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
                         role="menuitem"
-                      >
-                        Settings
-                      </a>
+                      ></a>
                     </li>
                     <li>
                       <a
                         href="#"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
                         role="menuitem"
-                      >
-                        Earnings
-                      </a>
+                      ></a>
                     </li>
                     <li>
                       <a
                         href="#"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
                         role="menuitem"
-                      >
-                        Sign out
-                      </a>
+                      ></a>
                     </li>
                   </ul>
                 </div>
@@ -184,7 +164,6 @@ const Home = () => {
           </div>
         </div>
       </nav>
-
       <aside
         id="logo-sidebar"
         className="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
@@ -194,89 +173,114 @@ const Home = () => {
           <ul className="space-y-2 font-medium">
             <li>
               <a
-                href="/uploadExcel"
+                href="/student_coordinator_homePage"
                 className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
               >
-                <span className="flex-1 ml-3 whitespace-nowrap">
-                  Upload Excel File
-                </span>
+                <span className="ml-3">Students Detais</span>
               </a>
             </li>
             <li>
               <a
-                href="/assignRole"
+                href="/feeDetails"
                 className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
               >
-                <span className="ml-3">Assign Roles</span>
+                <span className="ml-3">Fee Detais</span>
               </a>
             </li>
             <li>
               <a
-                href="/approve_reject"
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                href="/createCertificate"
+                className="flex items-center p-2  text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
               >
-                <span className="flex-1 ml-3 whitespace-nowrap">
-                  Approve/Reject Registrations
-                </span>
+                <span className="ml-3">Create Certificate</span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="/certificateRequest"
+                className="flex items-center p-2 bg-slate-600 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="ml-3">Certificate Request</span>
               </a>
             </li>
 
             <li>
-              <a
-                href="#"
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <span className="flex-1 ml-3 whitespace-nowrap">
-                  Profile Settings
-                </span>
-              </a>
+              <div className="p-4">
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition"
+                  onClick={handleLogout}
+                >
+                  <span className="">Logout</span>
+                </button>
+              </div>
             </li>
-            <div className="p-4">
-              <button
-                type="button"
-                className="inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition"
-                onClick={handleLogout}
-              >
-                <span className="">Logout</span>
-              </button>
-            </div>
           </ul>
         </div>
       </aside>
 
       <div className="p-4 sm:ml-64">
         <div className="p-4 rounded-lg mt-14">
-          <div className="text-6xl text-center">
-            <p>Congratulations !</p>
+          <div className="text-center text-4xl">
+            <p>certificates requested </p>
           </div>
-          <div className="text-3xl text-center mt-3">
-            <h4>You have Succcessfully Logged in as</h4>
-          </div>
-          <div className="text-center mt-10 text-3xl">{uniName}</div>
-          <hr />
-          {/* <div className='text-center text-2xl mt-20'>
-        <h1>Get Started By Uploading Excel File</h1>
-      </div> */}
-          {/* <div className='flex justify-center'>
-        <input class="mt-5 text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none  dark:border-gray-600 dark:placeholder-gray-400" id="default_size" type="file" accept='.xls,.xlsx'/>
-      </div> */}
+        </div>
 
-          {/* <br /> */}
-          {/* <div className='text-center'>
-      <div className="inline-flex items-center">
-          <button
-            type="submit"
-            // onClick={handleSubmit}
-              className="bg-slate-800 0 text-white font-bold py-2 px-4 rounded"
-            >
-            Submit
-          </button>
-      </div>
-      </div> */}
+        <div
+          id="certificate_req_viewport"
+          className="flex flex-col mt-5"
+          // style={{ height: 485 }}
+        >
+          <div className="">
+            <div className="p-1.5 w-full inline-block align-middle">
+              <div className="border rounded-lg">
+                <table
+                  id="my-table"
+                  className="min-w-full divide-y table-auto text-center divide-gray-200"
+                >
+                  <thead className="sticky top-0 bg-gray-50">
+                    <tr>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                      >
+                        sr.
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                      >
+                        Certificate Name
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                      >
+                        Student Name
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                      >
+                        Enrollment No.
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                      >
+                        No. of Copies
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-center divide-y divide-gray-200"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default Home;
+export default CertificateRequest;
