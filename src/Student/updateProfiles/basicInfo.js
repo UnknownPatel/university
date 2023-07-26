@@ -136,7 +136,7 @@ const BasicInfo = () => {
             />
           </div>
         </div>
-        <div className="flex justify-center mt-2">
+        <div className="flex mt-5 ml-3">
           <label htmlFor="physicallyHandicap" className="text-lg mr-10">
             Physically Handicap:
           </label>
