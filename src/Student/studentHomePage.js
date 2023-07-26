@@ -89,7 +89,7 @@ const StudentHomePage = () => {
             </li>
             <li>
               <a
-                href="#"
+                href="/payFee"
                 className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 <span className="ml-3">Pay Fees</span>
@@ -125,6 +125,14 @@ const StudentHomePage = () => {
                 className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 <span className="ml-3">Certificate Tracking</span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="/UpdateProfile"
+                className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="ml-3">Update Profile</span>
               </a>
             </li>
             <li>
@@ -165,7 +173,7 @@ const StudentHomePage = () => {
                     Lorem ipsum dolor sit amet, consectetur adipiscing elit.
                   </p>
                   <a
-                    href="#"
+                    href="/studentProfile"
                     className="text-blue-500 font-semibold mt-7 flex justify-end"
                   >
                     More Details

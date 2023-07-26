@@ -60,6 +60,22 @@ const StudentCertificatePage = () => {
               </a>
             </li>
             <li>
+              <a
+                href="/certificateTracking"
+                className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="ml-3">Certificate Tracking</span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="/UpdateProfile"
+                className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="ml-3">Update Profile</span>
+              </a>
+            </li>
+            <li>
               <div className="p-4">
                 <button
                   type="button"
