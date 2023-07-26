@@ -7,13 +7,14 @@ import { ToastContainer, Zoom } from "react-toastify";
 import axios from "axios";
 
 axios.defaults.headers.common["ngrok-skip-browser-warning"] = true;
+axios.defaults.baseURL = "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1"
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
 root.render(
-  <React.StrictMode>
+  <>
     <App />
     <ToastContainer position="bottom-left" transition={Zoom} />
-  </React.StrictMode>
+  </>
 );
 
 // If you want to start measuring performance in your app, pass a function

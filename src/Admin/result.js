@@ -66,7 +66,7 @@ const Result = () => {
     if (subdomain !== null || subdomain !== "") {
       axios
         .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
+          `/universities/${subdomain}/get_authorization_details`
         )
         .then((response) => {
           setUniName(response.data.university.name);
@@ -77,7 +77,7 @@ const Result = () => {
 
       axios
         .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/find_user?subdomain=${subdomain}`,
+          `/users/users/find_user?subdomain=${subdomain}`,
           {
             headers,
           }
@@ -93,7 +93,7 @@ const Result = () => {
       // Get Course
       axios
         .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/courses?subdomain=${subdomain}`,
+          `/courses?subdomain=${subdomain}`,
           { headers }
         )
         .then((response) => {
@@ -104,7 +104,7 @@ const Result = () => {
       // Get Examination Names
       axios
         .get(
-          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_names",
+          "/examination_names",
           {
             headers,
             params: {
@@ -128,7 +128,7 @@ const Result = () => {
       // Get Examination Types
       axios
         .get(
-          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_types",
+          "/examination_types",
           {
             headers,
             params: {
@@ -193,7 +193,7 @@ const Result = () => {
       if (subdomain !== null || subdomain !== "") {
         axios
           .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/branches?subdomain=${subdomain}&course_id=${course_id}`,
+            `/branches?subdomain=${subdomain}&course_id=${course_id}`,
             { headers }
           )
           .then((response) => {
@@ -252,7 +252,7 @@ const Result = () => {
       if (subdomain !== null || subdomain !== "") {
         axios
           .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/semesters?subdomain=${subdomain}&branch_id=${branch_id}`,
+            `/semesters?subdomain=${subdomain}&branch_id=${branch_id}`,
             { headers }
           )
           .then((response) => {
@@ -278,7 +278,7 @@ const Result = () => {
       if (subdomain !== null || subdomain !== "") {
         axios
           .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/divisions`,
+            `/divisions`,
             {
               headers,
               params: {
@@ -360,7 +360,7 @@ const Result = () => {
       if (subdomain !== "" || subdomain !== null) {
         axios
           .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/subjects`,
+            `/subjects`,
             {
               headers,
               params: {
@@ -376,7 +376,7 @@ const Result = () => {
 
         axios
           .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/students`,
+            `/students`,
             {
               headers,
               params: {
@@ -399,7 +399,7 @@ const Result = () => {
                   selectedFilter["student_id"] = student.id;
                   axios
                     .get(
-                      `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/${student.id}/fetch_marks`,
+                      `/student_marks/${student.id}/fetch_marks`,
                       {
                         headers,
                         params: {

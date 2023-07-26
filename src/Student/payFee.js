@@ -65,7 +65,7 @@ const PayFee = () => {
                 <button
                   type="button"
                   className="inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition"
-                  onClick={handleLogout}
+                  // onClick={  leLogout}
                 >
                   <span className="">Logout</span>
                 </button>

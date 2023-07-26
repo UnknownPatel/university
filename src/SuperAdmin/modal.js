@@ -23,7 +23,7 @@ const Modal = ({ setOpenModal, id, setSheets }) => {
     if (subdomain !== null || subdomain !== "") {
       axios
         .delete(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/excel_sheets/${id}`,
+          `/excel_sheets/${id}`,
           {
             headers,
             params: {
@@ -38,7 +38,7 @@ const Modal = ({ setOpenModal, id, setSheets }) => {
             });
             axios
               .get(
-                `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/excel_sheets`,
+                `/excel_sheets`,
                 {
                   headers,
                   params: {

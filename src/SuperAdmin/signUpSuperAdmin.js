@@ -5,6 +5,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const SignUpSuperAdmin = () => {
+  var domain = window.location.host;
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
@@ -14,6 +15,7 @@ const SignUpSuperAdmin = () => {
     city: "",
     state: "",
     country: "",
+    url: domain,
   });
 
   const handleSubmit = (event) => {
@@ -22,21 +24,16 @@ const SignUpSuperAdmin = () => {
     event.target.disabled = true;
     event.target.classList.add("cursor-not-allowed");
     axios
-      .post(
-        "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities",
-        {
-          university: formData,
-        }
-      )
+      .post("/universities", {
+        university: formData,
+      })
       .then(function (response) {
         if (response.data.status === "created") {
           toast.success(response.data.message, {
             position: toast.POSITION.BOTTOM_LEFT,
           });
-          var url = `${window.location.protocol}//${response.data.data.university.subdomain}.${window.location.host}/`;
-          setTimeout(() => {
-            window.location.replace(url);
-          }, 5000);
+          var url = `${window.location.protocol}//${response.data.data.university.subdomain}.superadmin.${window.location.host}/`;
+          window.location.replace(url);
         } else {
           event.target.innerHTML = "Submit";
           event.target.disabled = false;

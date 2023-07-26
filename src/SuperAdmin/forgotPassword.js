@@ -31,7 +31,7 @@ const ForgotPassword = () => {
     if (subdomain == null || subdomain !== "") {
       axios
         .post(
-          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/forgot_password",
+          "/forgot_password",
           {
             email: email,
             subdomain: subdomain,

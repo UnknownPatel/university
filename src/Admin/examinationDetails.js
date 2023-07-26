@@ -11,6 +11,7 @@ import TimeModal from "./modals/timeModal";
 import { ToastContainer, toast } from "react-toastify";
 import TypeModal from "./modals/typeModal";
 import NameModal from "./modals/nameModal";
+import Aside from "./aside";
 
 var acces_token;
 var subdomain;
@@ -40,7 +41,6 @@ const ExaminationDetails = () => {
     acces_token = localStorage.getItem("access_token");
     headers = { Authorization: `Bearer ${acces_token}` };
     const roles = localStorage.getItem("roles");
-
     const host = window.location.host;
     const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
     if (arr.length > 0) {
@@ -50,7 +50,7 @@ const ExaminationDetails = () => {
     if (subdomain !== null || subdomain !== "") {
       axios
         .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
+          `/universities/${subdomain}/get_authorization_details`
         )
         .then((response) => {
           setUniName(response.data.university.name);
@@ -61,7 +61,7 @@ const ExaminationDetails = () => {
 
       axios
         .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/find_user?subdomain=${subdomain}`,
+          `/users/users/find_user?subdomain=${subdomain}`,
           {
             headers,
           }
@@ -76,7 +76,7 @@ const ExaminationDetails = () => {
 
       axios
         .get(
-          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_names",
+          "/examination_names",
           {
             headers,
             params: {
@@ -89,7 +89,7 @@ const ExaminationDetails = () => {
             "examination_name_viewport"
           );
           console.log(name_viewport);
-          if (responce.data.message === "Names found") {
+          if (responce.data.status === "ok") {
             if (responce.data.data.examination_names.length !== 0) {
               name_viewport.classList.remove("hidden");
               name_viewport.classList.add("flex");
@@ -107,7 +107,7 @@ const ExaminationDetails = () => {
 
       axios
         .get(
-          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_types",
+          "/examination_types",
           {
             headers,
             params: {
@@ -135,7 +135,7 @@ const ExaminationDetails = () => {
 
       axios
         .get(
-          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_times",
+          "/examination_times",
           {
             headers,
             params: {
@@ -178,7 +178,7 @@ const ExaminationDetails = () => {
 
     axios
       .post(
-        "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_names",
+        "/examination_names",
         {
           examination_name: {
             name: examinationName,
@@ -199,7 +199,7 @@ const ExaminationDetails = () => {
           });
           axios
             .get(
-              "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_names",
+              "/examination_names",
               {
                 headers,
                 params: {
@@ -239,7 +239,7 @@ const ExaminationDetails = () => {
 
     axios
       .post(
-        "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_types",
+        "/examination_types",
         {
           examination_type: {
             name: examinationType,
@@ -263,7 +263,7 @@ const ExaminationDetails = () => {
           });
           axios
             .get(
-              "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_types",
+              "/examination_types",
               {
                 headers,
                 params: {
@@ -325,7 +325,7 @@ const ExaminationDetails = () => {
     if (subdomain !== null || subdomain !== "") {
       axios
         .post(
-          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_times",
+          "/examination_times",
           {
             examination_time: {
               name: name,
@@ -344,7 +344,7 @@ const ExaminationDetails = () => {
             setEndTime("");
             axios
               .get(
-                "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_times",
+                "/examination_times",
                 {
                   headers,
                   params: {
@@ -494,100 +494,7 @@ const ExaminationDetails = () => {
               className="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
               aria-label="Sidebar"
             >
-              <div className="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
-                <ul className="space-y-2 font-medium">
-                  <li>
-                    <a
-                      href="/examinationDetails"
-                      className="flex items-center p-2 bg-slate-600 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                    >
-                      <span className="ml-3">Examination Details</span>
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="/examTimetable"
-                      className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                    >
-                      <span className="ml-3">Time Table</span>
-                    </a>
-                  </li>
-
-                  <li>
-                    <a
-                      href="/examBlockDetails"
-                      className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                    >
-                      <span className="ml-3">Enter Block Details</span>
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="/examAssignSupervision"
-                      className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                    >
-                      <span className="flex-1 ml-3 whitespace-nowrap">
-                        Assign Supervision
-                      </span>
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="/assignMarksEntry"
-                      className="flex items-center p-2 text-gray-900  rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                    >
-                      <span className="flex-1 ml-3 whitespace-nowrap">
-                        Assign Marks Entry
-                      </span>
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="/unlock_Marks"
-                      className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                    >
-                      <span className="ml-3">Unlock Marks</span>
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="/examViewTimeTable"
-                      className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                    >
-                      <span className="flex-1 ml-3 whitespace-nowrap">
-                        Report
-                      </span>
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="/result"
-                      className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                    >
-                      <span className="ml-3">Result</span>
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="/studentResult"
-                      className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                    >
-                      <span className="ml-3">Student Result</span>
-                    </a>
-                  </li>
-                  <li>
-                    <div className="p-4">
-                      <button
-                        type="button"
-                        className="inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition"
-                        onClick={handleLogout}
-                      >
-                        <span className="">Logout</span>
-                      </button>
-                    </div>
-                  </li>
-                </ul>
-              </div>
+              <Aside/>
             </aside>
 
             <div className="pt-4 sm:ml-64">

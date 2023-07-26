@@ -55,9 +55,7 @@ const FeeDetails = () => {
 
     if (subdomain !== null || subdomain !== "") {
       axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
-        )
+        .get(`/universities/${subdomain}/get_authorization_details`)
         .then((response) => {
           //   console.log(response.data.university.name);
           setUniName(response.data.university.name);
@@ -67,26 +65,27 @@ const FeeDetails = () => {
         });
 
       axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/find_user?subdomain=${subdomain}`,
-          {
-            headers,
-          }
-        )
+        .get(`/users/users/find_user?subdomain=${subdomain}`, {
+          headers,
+        })
         .then((responce) => {
           setFaculty(
             responce.data.user.first_name + " " + responce.data.user.last_name
           );
-        })
-        .catch((error) => console.log(error));
-
-      axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/courses?subdomain=${subdomain}`,
-          { headers }
-        )
-        .then((response) => {
-          setCourses(response.data.data.courses);
+          setCourseId(responce.data.user.course_id);
+          axios
+            .get(
+              `/branches?subdomain=${subdomain}&course_id=${responce.data.user.course_id}`,
+              { headers }
+            )
+            .then((response) => {
+              if (response.data.status === "ok") {
+                if (response.data.data.branches.length !== "0") {
+                  setBranches(response.data.data.branches);
+                }
+              }
+            })
+            .catch((error) => console.log(error));
         })
         .catch((error) => console.log(error));
     }
@@ -102,35 +101,6 @@ const FeeDetails = () => {
     setSelectedYear("");
     if (date !== "Select Year") {
       setSelectedYear(date);
-    }
-  };
-
-  const handleCourseChange = (e) => {
-    e.preventDefault();
-
-    setSemesters([]);
-    setBranches([]);
-    setCourseId("");
-    setBranchId("");
-    setHidden(true);
-    var course_id = e.target.value;
-    if (course_id !== "Select Course") {
-      setCourseId(course_id);
-      if (subdomain !== null || subdomain !== "") {
-        axios
-          .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/branches?subdomain=${subdomain}&course_id=${course_id}`,
-            { headers }
-          )
-          .then((response) => {
-            if (response.data.status === "ok") {
-              if (response.data.data.branches.length !== "0") {
-                setBranches(response.data.data.branches);
-              }
-            }
-          })
-          .catch((error) => console.log(error));
-      }
     }
   };
 
@@ -166,10 +136,9 @@ const FeeDetails = () => {
       console.log(selectedFilter);
       if (subdomain !== null || subdomain !== "") {
         axios
-          .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/semesters?subdomain=${subdomain}&branch_id=${branchId}`,
-            { headers }
-          )
+          .get(`/semesters?subdomain=${subdomain}&branch_id=${branchId}`, {
+            headers,
+          })
           .then((response) => {
             setHidden(false);
             if (response.data.status === "ok") {
@@ -178,16 +147,13 @@ const FeeDetails = () => {
                 response.data.data.semesters.map((semester) => {
                   selectedFilter["semester_id"] = semester.id;
                   axios
-                    .get(
-                      `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/fee_details/${semester.id}/fetch_details`,
-                      {
-                        headers,
-                        params: {
-                          fee_detail: selectedFilter,
-                          subdomain: subdomain,
-                        },
-                      }
-                    )
+                    .get(`/fee_details/${semester.id}/fetch_details`, {
+                      headers,
+                      params: {
+                        fee_detail: selectedFilter,
+                        subdomain: subdomain,
+                      },
+                    })
                     .then((response) => {
                       console.log(response);
                       const createButton = document.getElementById(
@@ -268,7 +234,7 @@ const FeeDetails = () => {
     if (e.target.innerHTML === "Update") {
       axios
         .put(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/fee_details/${semester_table_id}`,
+          `/fee_details/${semester_table_id}`,
           {
             subdomain: subdomain,
             fee_detail: selectedFilter,
@@ -291,7 +257,7 @@ const FeeDetails = () => {
     } else {
       axios
         .post(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/fee_details`,
+          `/fee_details`,
           {
             fee_detail: selectedFilter,
             subdomain: subdomain,
@@ -452,18 +418,10 @@ const FeeDetails = () => {
           <ul className="space-y-2 font-medium">
             <li>
               <a
-                href="/student_coordinator_homePage"
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <span className="ml-3">Students Detais</span>
-              </a>
-            </li>
-            <li>
-              <a
                 href="/feeDetails"
                 className="flex items-center p-2 bg-slate-600 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
               >
-                <span className="ml-3">Fee Detais</span>
+                <span className="ml-3">Fee Details</span>
               </a>
             </li>
 
@@ -497,16 +455,6 @@ const FeeDetails = () => {
               {academic_years.map((year) => {
                 return <option value={year}>{year}</option>;
               })}
-            </select>
-            <select
-              aria-label="Select Course"
-              className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
-              onChange={handleCourseChange}
-            >
-              <option value="Select Course">Course</option>
-              {courses.map((course, index) => (
-                <option value={course.id}>{course.name}</option>
-              ))}
             </select>
 
             <select

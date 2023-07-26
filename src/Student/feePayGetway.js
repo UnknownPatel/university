@@ -2,6 +2,7 @@ import axios from "axios";
 import { useCallback } from "react";
 import useRazorpay from "react-razorpay";
 import { RazorpayOptions } from "react-razorpay";
+import { toast } from "react-toastify";
 
 export default function FeePayGetway() {
   const [Razorpay] = useRazorpay();
@@ -14,7 +15,7 @@ export default function FeePayGetway() {
       name: "Acme Corp",
       description: "Test Transaction",
       // image: "https://example.com/your_logo",
-      order_id: "order_MG1xpRicjhhT3X",
+      order_id: "order_MG3uVbd0pVaCpB",
       handler: (res) => {
         console.log(res);
         var subdomain = "silver_oak";
@@ -23,7 +24,7 @@ export default function FeePayGetway() {
 
         axios
           .post(
-            `https://9c5d-182-69-164-36.ngrok-free.app/api/v1/students/payments/callback`,
+            `/students/payments/callback`,
             {
               order_id: res.razorpay_order_id,
               subdomain: subdomain,
@@ -35,7 +36,11 @@ export default function FeePayGetway() {
             }
           )
           .then((responce) => {
-            console.log(responce);
+            if (responce.data.status === "ok") {
+              toast.success(responce.data.message);
+            } else {
+              toast.error(responce.data.message);
+            }
           })
           .catch(function (err) {
             console.log(err.message);

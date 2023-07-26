@@ -73,7 +73,7 @@ const ViewMarks = () => {
       // Authorization Details
       axios
         .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
+          `/universities/${subdomain}/get_authorization_details`
         )
         .then((response) => {
           //   console.log(response.data.university.name);
@@ -86,7 +86,7 @@ const ViewMarks = () => {
       //  Get Current User Details
       axios
         .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/find_user?subdomain=${subdomain}`,
+          `/users/users/find_user?subdomain=${subdomain}`,
           {
             headers,
           }
@@ -110,7 +110,7 @@ const ViewMarks = () => {
       // Get Course
       axios
         .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/courses?subdomain=${subdomain}`,
+          `/courses?subdomain=${subdomain}`,
           { headers }
         )
         .then((response) => {
@@ -121,7 +121,7 @@ const ViewMarks = () => {
       // Get Examination Names
       axios
         .get(
-          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_names",
+          "/examination_names",
           {
             headers,
             params: {
@@ -145,7 +145,7 @@ const ViewMarks = () => {
       // Get Examination Types
       axios
         .get(
-          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_types",
+          "/examination_types",
           {
             headers,
             params: {
@@ -180,7 +180,7 @@ const ViewMarks = () => {
       // Get Branches
       axios
         .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/branches?subdomain=${subdomain}&course_id=${selectedFilter.course_id}`,
+          `/branches?subdomain=${subdomain}&course_id=${selectedFilter.course_id}`,
           { headers }
         )
         .then((response) => {
@@ -196,7 +196,7 @@ const ViewMarks = () => {
       // Get Semesters
       axios
         .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/semesters?subdomain=${subdomain}&branch_id=${selectedFilter.branch_id}`,
+          `/semesters?subdomain=${subdomain}&branch_id=${selectedFilter.branch_id}`,
           { headers }
         )
         .then((response) => {
@@ -213,7 +213,7 @@ const ViewMarks = () => {
       // Get Divisions
       axios
         .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/divisions?subdomain=${subdomain}`,
+          `/divisions?subdomain=${subdomain}`,
           {
             headers,
             params: {
@@ -230,7 +230,7 @@ const ViewMarks = () => {
 
       axios
         .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/subjects`,
+          `/subjects`,
           {
             headers,
             params: {
@@ -255,7 +255,7 @@ const ViewMarks = () => {
 
       axios
         .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks`,
+          `/student_marks`,
           {
             headers,
             params: {

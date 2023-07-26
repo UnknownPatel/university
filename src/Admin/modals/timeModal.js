@@ -23,7 +23,7 @@ const TimeModal = ({ setOpenModal, id, setTimes }) => {
     if (subdomain !== null || subdomain !== "") {
       axios
         .delete(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_times/${id}`,
+          `/examination_times/${id}`,
           {
             headers,
             params: {
@@ -38,7 +38,7 @@ const TimeModal = ({ setOpenModal, id, setTimes }) => {
             });
             axios
               .get(
-                `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_times`,
+                `/examination_times`,
                 {
                   headers,
                   params: {

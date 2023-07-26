@@ -52,7 +52,7 @@ const AcademicUploadSyllabus = () => {
       // if (access_token) {
       //   axios
       //     .get(
-      //       `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/find_user?subdomain=${subdomain}`,
+      //       `/users/users/find_user?subdomain=${subdomain}`,
       //       {
       //         headers: {
       //           Authorization: `Bearer ${access_token}`,
@@ -73,7 +73,7 @@ const AcademicUploadSyllabus = () => {
 
       axios
         .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
+          `/universities/${subdomain}/get_authorization_details`
         )
         .then((response) => {
           //   console.log(response.data.university.name);
@@ -85,7 +85,7 @@ const AcademicUploadSyllabus = () => {
 
       axios
         .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/find_user?subdomain=${subdomain}`,
+          `/users/users/find_user?subdomain=${subdomain}`,
           {
             headers,
           }
@@ -99,7 +99,7 @@ const AcademicUploadSyllabus = () => {
         .catch((error) => console.log(error));
       axios
         .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/courses?subdomain=${subdomain}`,
+          `/courses?subdomain=${subdomain}`,
           { headers }
         )
         .then((response) => {
@@ -130,7 +130,7 @@ const AcademicUploadSyllabus = () => {
       if (subdomain !== null || subdomain !== "") {
         axios
           .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/branches?subdomain=${subdomain}&course_id=${course_id}`,
+            `/branches?subdomain=${subdomain}&course_id=${course_id}`,
             { headers }
           )
           .then((response) => {
@@ -157,7 +157,7 @@ const AcademicUploadSyllabus = () => {
       if (subdomain !== null || subdomain !== "") {
         axios
           .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/semesters?subdomain=${subdomain}&branch_id=${branch_id}`,
+            `/semesters?subdomain=${subdomain}&branch_id=${branch_id}`,
             { headers }
           )
           .then((response) => {
@@ -215,7 +215,7 @@ const AcademicUploadSyllabus = () => {
       if (subdomain !== "" || subdomain !== null) {
         axios
           .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/subjects`,
+            `/subjects`,
             {
               headers,
               params: {
@@ -234,7 +234,7 @@ const AcademicUploadSyllabus = () => {
                   selectedFilter["subject_id"] = subject.id;
                   axios
                     .get(
-                      `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/syllabuses/${subject.id}/fetch_details`,
+                      `/syllabuses/${subject.id}/fetch_details`,
                       {
                         headers,
                         params: {
@@ -318,7 +318,7 @@ const AcademicUploadSyllabus = () => {
           var syllabus_id = e.target.getAttribute("data-syllabus-id");
           axios
             .put(
-              `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/syllabuses/${syllabus_id}`,
+              `/syllabuses/${syllabus_id}`,
               {
                 subdomain: subdomain,
                 syllabus: selectedFilter,
@@ -347,7 +347,7 @@ const AcademicUploadSyllabus = () => {
         } else {
           axios
             .post(
-              "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/syllabuses",
+              "/syllabuses",
               {
                 subdomain: subdomain,
                 syllabus: selectedFilter,

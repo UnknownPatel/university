@@ -23,7 +23,7 @@ const OtherDutyModal = ({ setOpenModal, id }) => {
     if (subdomain !== null || subdomain !== "") {
       axios
         .delete(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/other_duties/${id}`,
+          `/other_duties/${id}`,
           {
             headers,
             params: {

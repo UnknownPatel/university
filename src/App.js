@@ -44,6 +44,7 @@ import StudentProfile from "./Student/studentProfile";
 import StudentCoordinatorHome from "./Admin/Student Coordinator/studentCoordinatorHome";
 import FeeDetails from "./Admin/Student Coordinator/feeDetails";
 import FeePayGetway from "./Student/feePayGetway";
+import PayFee from "./Student/payFee";
 
 function App() {
   return (
@@ -137,6 +138,7 @@ function App() {
             element={<StudentCoordinatorHome />}
           />
           <Route path="/feeDetails" element={<FeeDetails />} />
+          <Route path="/payFee" element={<PayFee />} />
           <Route path="/feePayGetway" element={<FeePayGetway />} />
         </Routes>
       </BrowserRouter>

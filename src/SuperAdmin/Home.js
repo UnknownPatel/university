@@ -24,7 +24,7 @@ const Home = () => {
     if (subdomain !== null || subdomain !== "") {
       axios
         .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
+          `/universities/${subdomain}/get_authorization_details`
         )
         .then((response) => {
           console.log(response.data.university.name);
@@ -41,7 +41,7 @@ const Home = () => {
 
     axios
       .get(
-        `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
+        `/universities/${subdomain}/get_authorization_details`
       )
       .then(function (response) {
         setClentId(response.data.doorkeeper.client_id);
@@ -52,7 +52,7 @@ const Home = () => {
       });
     axios
       .post(
-        " http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/oauth/revoke",
+        " /oauth/revoke",
         {
           token: { accessToken },
           subdomain: subdomain,

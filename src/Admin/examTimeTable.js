@@ -66,9 +66,7 @@ const ExamTimeTable = () => {
 
     if (subdomain !== null || subdomain !== "") {
       axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
-        )
+        .get(`/universities/${subdomain}/get_authorization_details`)
         .then((response) => {
           //   console.log(response.data.university.name);
           setUniName(response.data.university.name);
@@ -78,39 +76,35 @@ const ExamTimeTable = () => {
         });
 
       axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/find_user?subdomain=${subdomain}`,
-          {
-            headers,
-          }
-        )
+        .get(`/users/users/find_user?subdomain=${subdomain}`, {
+          headers,
+        })
         .then((responce) => {
           setFaculty(
             responce.data.user.first_name + " " + responce.data.user.last_name
           );
+          setCourseId(responce.data.user.course_id);
+          axios
+            .get(
+              `/branches?subdomain=${subdomain}&course_id=${responce.data.user.course_id}`,
+              {
+                headers,
+              }
+            )
+            .then((response) => {
+              setBranches(response.data.data.branches);
+            })
+            .catch((error) => console.log(error));
         })
         .catch((error) => console.log(error));
 
       axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/courses?subdomain=${subdomain}`,
-          { headers }
-        )
-        .then((response) => {
-          setCourses(response.data.data.courses);
+        .get("/examination_names", {
+          headers,
+          params: {
+            subdomain: subdomain,
+          },
         })
-        .catch((error) => console.log(error));
-
-      axios
-        .get(
-          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_names",
-          {
-            headers,
-            params: {
-              subdomain: subdomain,
-            },
-          }
-        )
         .then((responce) => {
           if (responce.data.message === "Names found") {
             if (responce.data.data.examination_names.length !== 0) {
@@ -125,15 +119,12 @@ const ExamTimeTable = () => {
         });
 
       axios
-        .get(
-          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_types",
-          {
-            headers,
-            params: {
-              subdomain: subdomain,
-            },
-          }
-        )
+        .get("/examination_types", {
+          headers,
+          params: {
+            subdomain: subdomain,
+          },
+        })
         .then((responce) => {
           if (responce.data.message === "Types found") {
             if (responce.data.data.examination_types.length !== 0) {
@@ -148,15 +139,12 @@ const ExamTimeTable = () => {
         });
 
       axios
-        .get(
-          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_times",
-          {
-            headers,
-            params: {
-              subdomain: subdomain,
-            },
-          }
-        )
+        .get("/examination_times", {
+          headers,
+          params: {
+            subdomain: subdomain,
+          },
+        })
         .then((responce) => {
           if (responce.data.status === "ok") {
             if (responce.data.data.examination_times.length !== 0) {
@@ -199,44 +187,6 @@ const ExamTimeTable = () => {
     }
   };
 
-  const handleCourseChange = (e) => {
-    e.preventDefault();
-    var selectedFilter = {};
-    if (examinationName !== "Select Examination") {
-      selectedFilter["name"] = examinationName;
-    } else if (selectedYear !== "Select Year") {
-      selectedFilter["academic_year"] = selectedYear;
-    } else if (e.target.value !== "Select Course") {
-      selectedFilter["course_id"] = e.target.value;
-    }
-
-    console.log(selectedFilter);
-    setSubjects([]);
-    setSemesters([]);
-    setBranches([]);
-    handleViewPortChange();
-    var course_id = e.target.value;
-    setCourseId(course_id);
-    acces_token = localStorage.getItem("access_token");
-    const headers = { Authorization: `Bearer ${acces_token}` };
-    const host = window.location.host;
-    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
-    if (arr.length > 0) {
-      subdomain = arr[0];
-    }
-    if (subdomain !== null || subdomain !== "") {
-      axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/branches?subdomain=${subdomain}&course_id=${course_id}`,
-          { headers }
-        )
-        .then((response) => {
-          setBranches(response.data.data.branches);
-        })
-        .catch((error) => console.log(error));
-    }
-  };
-
   const handleBranchChange = (e) => {
     e.preventDefault();
     setSubjects([]);
@@ -258,10 +208,9 @@ const ExamTimeTable = () => {
     }
     if (subdomain !== null || subdomain !== "") {
       axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/semesters?subdomain=${subdomain}&branch_id=${branch_id}`,
-          { headers }
-        )
+        .get(`/semesters?subdomain=${subdomain}&branch_id=${branch_id}`, {
+          headers,
+        })
         .then((response) => {
           if (response.data.status === "ok") {
             setSemesters(response.data.data.semesters);
@@ -353,16 +302,13 @@ const ExamTimeTable = () => {
 
     if (subdomain !== null || subdomain !== "") {
       axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/subjects`,
-          {
-            headers,
-            params: {
-              subdomain: subdomain,
-              subject: selectedFilter,
-            },
-          }
-        )
+        .get(`/subjects`, {
+          headers,
+          params: {
+            subdomain: subdomain,
+            subject: selectedFilter,
+          },
+        })
         .then((res) => {
           console.log(res);
           if (res.data.status == "ok") {
@@ -375,16 +321,13 @@ const ExamTimeTable = () => {
               setSubjects(res.data.data.subjects);
               res.data.data.subjects.map((subject) => {
                 axios
-                  .get(
-                    `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/${subject.id}/fetch_details`,
-                    {
-                      headers,
-                      params: {
-                        time_table: selectedFilter,
-                        subdomain: subdomain,
-                      },
-                    }
-                  )
+                  .get(`/exam_time_tables/${subject.id}/fetch_details`, {
+                    headers,
+                    params: {
+                      time_table: selectedFilter,
+                      subdomain: subdomain,
+                    },
+                  })
                   .then((get_response) => {
                     const button = document.getElementById(
                       "button-subject-" + subject.id
@@ -497,7 +440,7 @@ const ExamTimeTable = () => {
       // Update TimeTable API
       axios
         .put(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/${time_table_id}`,
+          `/exam_time_tables/${time_table_id}`,
           {
             subdomain: subdomain,
             time_table: selectedFilter,
@@ -521,7 +464,7 @@ const ExamTimeTable = () => {
       // Create TimeTable API
       axios
         .post(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables`,
+          `/exam_time_tables`,
           {
             time_table: selectedFilter,
             subdomain: subdomain,
@@ -848,17 +791,6 @@ const ExamTimeTable = () => {
                       </option>
                     );
                   })}
-                </select>
-
-                <select
-                  aria-label="Select Course"
-                  className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
-                  onChange={handleCourseChange}
-                >
-                  <option value="Select Course">Course</option>
-                  {courses.map((course, index) => (
-                    <option value={course.id}>{course.name}</option>
-                  ))}
                 </select>
 
                 <select

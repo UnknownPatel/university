@@ -27,7 +27,7 @@ const AcademicCertificateRequrst = () => {
     if (subdomain !== null || subdomain !== "") {
       axios
         .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
+          `/universities/${subdomain}/get_authorization_details`
         )
         .then((response) => {
           //   console.log(response.data.university.name);
@@ -39,7 +39,7 @@ const AcademicCertificateRequrst = () => {
 
       axios
         .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/find_user?subdomain=${subdomain}`,
+          `/users/users/find_user?subdomain=${subdomain}`,
           {
             headers,
           }

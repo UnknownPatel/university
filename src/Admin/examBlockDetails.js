@@ -67,9 +67,7 @@ const ExamBlockDetails = () => {
     if (subdomain !== null || subdomain !== "") {
       // University details
       axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
-        )
+        .get(`/universities/${subdomain}/get_authorization_details`)
         .then((response) => {
           //   console.log(response.data.university.name);
           setUniName(response.data.university.name);
@@ -79,26 +77,32 @@ const ExamBlockDetails = () => {
         });
 
       axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/find_user?subdomain=${subdomain}`,
-          {
-            headers,
-          }
-        )
+        .get(`/users/users/find_user?subdomain=${subdomain}`, {
+          headers,
+        })
         .then((responce) => {
           // selectedFilter = responce.data.configuration;
           setFaculty(
             responce.data.user.first_name + " " + responce.data.user.last_name
           );
+          setCourseId(responce.data.user.course_id);
+          axios
+            .get(
+              `/branches?subdomain=${subdomain}&course_id=${responce.data.user.course_id}`,
+              {
+                headers,
+              }
+            )
+            .then((response) => {
+              setBranches2(response.data.data.branches);
+            })
+            .catch((error) => console.log(error));
         })
         .catch((error) => console.log(error));
 
       // Courses Index API
       axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/courses?subdomain=${subdomain}`,
-          { headers }
-        )
+        .get(`/courses?subdomain=${subdomain}`, { headers })
         .then((response) => {
           setCourses2(response.data.data.courses);
         })
@@ -106,15 +110,12 @@ const ExamBlockDetails = () => {
 
       // Examination Names API
       axios
-        .get(
-          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_names",
-          {
-            headers,
-            params: {
-              subdomain: subdomain,
-            },
-          }
-        )
+        .get("/examination_names", {
+          headers,
+          params: {
+            subdomain: subdomain,
+          },
+        })
         .then((responce) => {
           if (responce.data.message === "Names found") {
             if (responce.data.data.examination_names.length !== 0) {
@@ -130,15 +131,12 @@ const ExamBlockDetails = () => {
 
       // Examination Types API
       axios
-        .get(
-          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_types",
-          {
-            headers,
-            params: {
-              subdomain: subdomain,
-            },
-          }
-        )
+        .get("/examination_types", {
+          headers,
+          params: {
+            subdomain: subdomain,
+          },
+        })
         .then((responce) => {
           if (responce.data.message === "Types found") {
             if (responce.data.data.examination_types.length !== 0) {
@@ -153,15 +151,12 @@ const ExamBlockDetails = () => {
         });
 
       axios
-        .get(
-          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_times",
-          {
-            headers,
-            params: {
-              subdomain: subdomain,
-            },
-          }
-        )
+        .get("/examination_times", {
+          headers,
+          params: {
+            subdomain: subdomain,
+          },
+        })
         .then((responce) => {
           if (responce.data.status === "ok") {
             if (responce.data.data.examination_times.length !== 0) {
@@ -247,108 +242,13 @@ const ExamBlockDetails = () => {
 
     if (subdomain !== null || subdomain !== "") {
       axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
-          {
-            headers,
-            params: {
-              time_table: selectedFilter,
-              subdomain: subdomain,
-            },
-          }
-        )
-        .then((response) => {
-          if (response.data.message === "Examination dates are as below") {
-            if (response.data.data.dates.length !== 0) {
-              setStoreDates(response.data.data.dates);
-            }
-          }
+        .get(`/exam_time_tables/get_examination_dates`, {
+          headers,
+          params: {
+            time_table: selectedFilter,
+            subdomain: subdomain,
+          },
         })
-        .catch((error) => console.log(error));
-    }
-  };
-
-  const handleCourseChange2 = (e) => {
-    e.preventDefault();
-    handleViewPortChange();
-    setCourseId("");
-    setBranches2([]);
-    setBranchId("");
-    setSemesters2([]);
-    setSemesterId("");
-    var selectedFilter = {};
-    setStoreDates([]);
-    if (examinationName2 !== "Select Examination") {
-      selectedFilter["name"] = examinationName2;
-    } else {
-      delete selectedFilter["name"];
-    }
-
-    if (selectedYear2 !== "Select Year") {
-      selectedFilter["academic_year"] = selectedYear2;
-    } else {
-      delete selectedFilter["academic_year"];
-    }
-
-    if (time2 !== "") {
-      selectedFilter["time"] = time2;
-    } else {
-      delete selectedFilter["time"];
-    }
-
-    if (type !== "") {
-      selectedFilter["time_table_type"] = type;
-    } else {
-      delete selectedFilter["time_table_type"];
-    }
-
-    if (e.target.value !== "Select Course") {
-      selectedFilter["course_id"] = e.target.value;
-      console.log(selectedFilter);
-      const time_table_viewport = document.getElementById(
-        "time_table_viewport"
-      );
-      time_table_viewport.classList.add("hidden");
-      time_table_viewport.classList.remove("flex");
-      setCourseId(e.target.value);
-      if (subdomain !== null || subdomain !== "") {
-        axios
-          .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/branches`,
-            {
-              headers,
-              params: {
-                subdomain: subdomain,
-                course_id: e.target.value,
-              },
-            }
-          )
-          .then((response) => {
-            console.log(response);
-            setBranches2(response.data.data.branches);
-          })
-          .catch((error) => console.log(error));
-      }
-    } else {
-      setCourseId("");
-      setBranches2([]);
-      setBranchId("");
-      setSemesters2([]);
-      setSemesterId("");
-    }
-
-    if (subdomain !== null || subdomain !== "") {
-      axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
-          {
-            headers,
-            params: {
-              time_table: selectedFilter,
-              subdomain: subdomain,
-            },
-          }
-        )
         .then((response) => {
           if (response.data.message === "Examination dates are as below") {
             if (response.data.data.dates.length !== 0) {
@@ -402,16 +302,13 @@ const ExamBlockDetails = () => {
       setBranchId(e.target.value);
       if (subdomain !== null || subdomain !== "") {
         axios
-          .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/semesters`,
-            {
-              headers,
-              params: {
-                subdomain: subdomain,
-                branch_id: e.target.value,
-              },
-            }
-          )
+          .get(`/semesters`, {
+            headers,
+            params: {
+              subdomain: subdomain,
+              branch_id: e.target.value,
+            },
+          })
           .then((response) => {
             if (response.data.status === "ok") {
               setSemesters2(response.data.data.semesters);
@@ -427,16 +324,13 @@ const ExamBlockDetails = () => {
 
     if (subdomain !== null || subdomain !== "") {
       axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
-          {
-            headers,
-            params: {
-              time_table: selectedFilter,
-              subdomain: subdomain,
-            },
-          }
-        )
+        .get(`/exam_time_tables/get_examination_dates`, {
+          headers,
+          params: {
+            time_table: selectedFilter,
+            subdomain: subdomain,
+          },
+        })
         .then((response) => {
           if (response.data.message === "Examination dates are as below") {
             if (response.data.data.dates.length !== 0) {
@@ -485,16 +379,13 @@ const ExamBlockDetails = () => {
 
     if (subdomain !== null || subdomain !== "") {
       axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
-          {
-            headers,
-            params: {
-              time_table: selectedFilter,
-              subdomain: subdomain,
-            },
-          }
-        )
+        .get(`/exam_time_tables/get_examination_dates`, {
+          headers,
+          params: {
+            time_table: selectedFilter,
+            subdomain: subdomain,
+          },
+        })
         .then((response) => {
           if (response.data.message === "Examination dates are as below") {
             if (response.data.data.dates.length !== 0) {
@@ -552,16 +443,13 @@ const ExamBlockDetails = () => {
     console.log(selectedFilter);
     if (subdomain !== null || subdomain !== "") {
       axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
-          {
-            headers,
-            params: {
-              time_table: selectedFilter,
-              subdomain: subdomain,
-            },
-          }
-        )
+        .get(`/exam_time_tables/get_examination_dates`, {
+          headers,
+          params: {
+            time_table: selectedFilter,
+            subdomain: subdomain,
+          },
+        })
         .then((response) => {
           if (response.data.message === "Examination dates are as below") {
             if (response.data.data.dates.length !== 0) {
@@ -626,16 +514,13 @@ const ExamBlockDetails = () => {
     if (subdomain !== null || subdomain !== "") {
       console.log(selectedFilter);
       axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables`,
-          {
-            headers,
-            params: {
-              subdomain: subdomain,
-              time_table: selectedFilter,
-            },
-          }
-        )
+        .get(`/exam_time_tables`, {
+          headers,
+          params: {
+            subdomain: subdomain,
+            time_table: selectedFilter,
+          },
+        })
         .then((res) => {
           console.log(res);
           if (res.data.status === "ok") {
@@ -649,7 +534,7 @@ const ExamBlockDetails = () => {
               res.data.data.time_tables.map((time_table) => {
                 axios
                   .get(
-                    `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/time_table_block_wise_reports/${time_table.id}/fetch_details`,
+                    `/time_table_block_wise_reports/${time_table.id}/fetch_details`,
                     {
                       headers,
                       params: {
@@ -766,7 +651,7 @@ const ExamBlockDetails = () => {
       var report_id = e.target.getAttribute("data-report-id");
       axios
         .put(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/time_table_block_wise_reports/${report_id}`,
+          `/time_table_block_wise_reports/${report_id}`,
           {
             subdomain: subdomain,
             report: selectedFilter,
@@ -798,7 +683,7 @@ const ExamBlockDetails = () => {
     } else {
       axios
         .post(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/time_table_block_wise_reports?subdomain=${subdomain}`,
+          `/time_table_block_wise_reports?subdomain=${subdomain}`,
           {
             report: selectedFilter,
           },
@@ -1111,16 +996,6 @@ const ExamBlockDetails = () => {
                 </select>
 
                 <select
-                  className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
-                  onChange={handleCourseChange2}
-                >
-                  <option value="Select course">Course</option>
-                  {courses2.map((course) => (
-                    <option value={course.id}>{course.name}</option>
-                  ))}
-                </select>
-
-                <select
                   className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded justify-center shadow-md px-3 py-2 w-auto"
                   onChange={handleBranchChange2}
                 >
@@ -1171,9 +1046,7 @@ const ExamBlockDetails = () => {
                     );
                   })}
                 </select>
-              </div>
 
-              <div className="flex justify-center mt-5">
                 <button
                   className="text-center w-auto bg-transparent text-slate-950 p-3 rounded-2xl tracking-wide border border-slate-950
                 font-semibold focus:outline-none focus:shadow-outline hover:bg-gray-700 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"

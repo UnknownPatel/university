@@ -11,6 +11,7 @@ import LockMarkModal from "./modals/lockMarkModal";
 var headers;
 var subdomain;
 var access_token;
+var subjectIds;
 
 const LockMarks = () => {
   const [uniName, setUniName] = useState("");
@@ -46,6 +47,8 @@ const LockMarks = () => {
   const [faculty, setFaculty] = useState("");
   const [status, setStatus] = useState({});
   const [lockMarkShowModal, setLockMarkShowModal] = useState(false);
+  const [divisionIds, setDivisionIds] = useState([]);
+  const [saveSubjects, setSaveSubjects] = useState({});
 
   const navigate = useNavigate();
   // const {subject_id} = useParams();
@@ -74,7 +77,7 @@ const LockMarks = () => {
       // Authorization Details
       axios
         .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
+          `/universities/${subdomain}/get_authorization_details`
         )
         .then((response) => {
           //   console.log(response.data.university.name);
@@ -87,176 +90,214 @@ const LockMarks = () => {
       //  Get Current User Details
       axios
         .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/find_user?subdomain=${subdomain}`,
+          `/users/users/find_user?subdomain=${subdomain}`,
           {
             headers,
           }
         )
         .then((responce) => {
-          // selectedFilter = responce.data.configuration;
+          axios
+            .get("/examination_names", {
+              headers,
+              params: {
+                subdomain: subdomain,
+              },
+            })
+            .then((responce) => {
+              if (responce.data.message === "Names found") {
+                if (responce.data.data.examination_names.length !== 0) {
+                  setExaminationNames(responce.data.data.examination_names);
+                } else {
+                  setExaminationNames([]);
+                }
+              }
+            })
+            .catch(function (err) {
+              console.log(err.message);
+            });
+
+          // Get Examination Types
+          axios
+            .get("/examination_types", {
+              headers,
+              params: {
+                subdomain: subdomain,
+              },
+            })
+            .then((responce) => {
+              if (responce.data.message === "Types found") {
+                if (responce.data.data.examination_types.length !== 0) {
+                  setExaminationTypes(responce.data.data.examination_types);
+                } else {
+                  setExaminationTypes([]);
+                }
+              }
+            })
+            .catch(function (err) {
+              console.log(err.message);
+            });
+          setCourses([responce.data.user.course]);
+          setCourseId(responce.data.user.course_id);
+          setBranches([responce.data.user.branch]);
+          setBranchId(responce.data.user.branch_id);
+          setAcademicYears([
+            responce.data.user.marks_entries.map(
+              (object) => object.academic_year
+            ),
+          ]);
+          setSelectedYear(
+            responce.data.user.marks_entries.map(
+              (object) => object.academic_year
+            )
+          );
+          setExaminationName(
+            responce.data.user.marks_entries.map(
+              (object) => object.examination_name
+            )
+          );
+          setType(
+            responce.data.user.marks_entries.map((object) => object.entry_type)
+          );
+          var semesterIds = responce.data.user.marks_entries.map(
+            (object) => object.semester_id
+          );
+          setDivisionIds(
+            responce.data.user.marks_entries.map((object) => object.division_id)
+          );
+          var updatedCombination = {};
+          responce.data.user.marks_entries.map((object) => {
+            updatedCombination = {
+              ...updatedCombination,
+              [`${JSON.stringify(object.division_id)}`]: object.subjects,
+            };
+            setSaveSubjects(updatedCombination);
+          });
+
+          axios
+            .get(
+              `/semesters?subdomain=${subdomain}&branch_id=${responce.data.user.branch.id}&ids=${semesterIds}`,
+              { headers }
+            )
+            .then((response) => {
+              setSemesters(response.data.data.semesters);
+            })
+            .catch((error) => console.log(error));
+
           setFaculty(
             responce.data.user.first_name + " " + responce.data.user.last_name
           );
-          setSelectedFilter(responce.data.configuration);
-          setExaminationName(responce.data.configuration.examination_name);
-          setSelectedYear(responce.data.configuration.academic_year);
-          setType(responce.data.configuration.examination_type);
-          setCourseId(responce.data.configuration.course_id);
-          setBranchId(responce.data.configuration.branch_id);
-          setSemesterId(responce.data.configuration.semester_id);
-          setDivisionId(responce.data.configuration.division_id);
         })
         .catch((error) => console.log(error));
-
-      // Get Course
-      axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/courses?subdomain=${subdomain}`,
-          { headers }
-        )
-        .then((response) => {
-          setCourses(response.data.data.courses);
-        })
-        .catch((error) => console.log(error));
-
-      // Get Examination Names
-      axios
-        .get(
-          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_names",
-          {
-            headers,
-            params: {
-              subdomain: subdomain,
-            },
-          }
-        )
-        .then((responce) => {
-          if (responce.data.message === "Names found") {
-            if (responce.data.data.examination_names.length !== 0) {
-              setExaminationNames(responce.data.data.examination_names);
-            } else {
-              setExaminationNames([]);
-            }
-          }
-        })
-        .catch(function (err) {
-          console.log(err.message);
-        });
-
-      // Get Examination Types
-      axios
-        .get(
-          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_types",
-          {
-            headers,
-            params: {
-              subdomain: subdomain,
-            },
-          }
-        )
-        .then((responce) => {
-          if (responce.data.message === "Types found") {
-            if (responce.data.data.examination_types.length !== 0) {
-              setExaminationTypes(responce.data.data.examination_types);
-            } else {
-              setExaminationTypes([]);
-            }
-          }
-        })
-        .catch(function (err) {
-          console.log(err.message);
-        });
     }
   }, []);
 
-  useEffect(() => {
-    if (selectedFilter !== "") {
-      console.log(JSON.parse(JSON.stringify(selectedFilter.subject_ids)));
-      // Get Branches
+  const handleSemesterChange = (e) => {
+    e.preventDefault();
+    setDivisions([]);
+    setSubjects([]);
+    setMarksData([]);
+    hideViewPort();
+    if (e.target.value === "Select Semester") {
+      setSemesterId("");
+    } else {
+      setSemesterId(e.target.value);
       axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/branches?subdomain=${subdomain}&course_id=${selectedFilter.course_id}`,
-          { headers }
-        )
-        .then((response) => {
-          setBranches(response.data.data.branches);
-        })
-        .catch((error) => console.log(error));
-
-      // Get Semesters
-      axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/semesters?subdomain=${subdomain}&branch_id=${selectedFilter.branch_id}`,
-          { headers }
-        )
-        .then((response) => {
-          setSemesters(response.data.data.semesters);
-        })
-        .catch((error) => console.log(error));
-
-      // Get Divisions
-      axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/divisions?subdomain=${subdomain}`,
-          {
-            headers,
-            params: {
-              division: {
-                semester_id: selectedFilter.semester_id,
-              },
+        .get(`/divisions?subdomain=${subdomain}`, {
+          headers,
+          params: {
+            division: {
+              semester_id: e.target.value,
             },
-          }
-        )
+            ids: divisionIds,
+          },
+        })
         .then((response) => {
           setDivisions(response.data.data.divisions);
         })
         .catch((error) => console.log(error));
+    }
+  };
 
+  const handleDivisionChange = (e) => {
+    e.preventDefault();
+    setSubjects([]);
+    hideViewPort();
+    if (e.target.value === "Select Division") {
+      setDivisionId("");
+    } else {
+      setDivisionId(e.target.value);
+      subjectIds = saveSubjects[e.target.value].map((object) => object.id);
+    }
+  };
+
+  const hideViewPort = () => {
+    const viewport = document.getElementById("lockMarks_viewport");
+    viewport.classList.add("hidden");
+    viewport.classList.remove("flex");
+  };
+
+  const showViewport = () => {
+    const viewport = document.getElementById("lockMarks_viewport");
+    viewport.classList.add("flex");
+    viewport.classList.remove("hidden");
+  };
+
+  const handleFilterSubmit = (e) => {
+    e.preventDefault();
+    var selectedFilter = {};
+    if (semesterId === "") {
+      toast.error("Please select Semester");
+    } else if (divisionId === "") {
+      toast.error("Please select division");
+    } else {
+      console.log(type);
+      console.log(examinationName);
+      console.log(selectedYear);
+      selectedFilter = {
+        examination_name: examinationName[0],
+        examination_type: type[0],
+        academic_year: selectedYear[0],
+        course_id: courseId,
+        branch_id: branchId,
+        semester_id: semesterId,
+        division_id: divisionId,
+      };
       axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/fetch_subjects`,
-          {
-            headers,
-            params: {
-              student_mark: selectedFilter,
-              subdomain: subdomain,
-            },
-          }
-        )
+        .get(`/student_marks/fetch_subjects`, {
+          headers,
+          params: {
+            student_mark: selectedFilter,
+            subdomain: subdomain,
+          },
+        })
         .then((res) => {
           console.log(res);
           if (res.data.message === "Details found") {
             if (res.data.data.subject_ids.length !== 0) {
-              console.log("Details : " + selectedFilter.subject_ids);
               const filterSubjectIds = res.data.data.subject_ids.filter(
-                (subjectId) => selectedFilter.subject_ids.includes(subjectId)
+                (subjectId) => subjectIds.includes(subjectId)
               );
               axios
-                .get(
-                  `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/subjects`,
-                  {
-                    headers,
-                    params: {
-                      subject: {
-                        course_id: selectedFilter.course_id,
-                        branch_id: selectedFilter.branch_id,
-                        semester_id: selectedFilter.semester_id,
-                        id: JSON.stringify(filterSubjectIds),
-                      },
-                      subdomain: subdomain,
+                .get(`/subjects`, {
+                  headers,
+                  params: {
+                    subject: {
+                      course_id: selectedFilter.course_id,
+                      branch_id: selectedFilter.branch_id,
+                      semester_id: selectedFilter.semester_id,
+                      id: JSON.stringify(filterSubjectIds),
                     },
-                  }
-                )
+                    subdomain: subdomain,
+                  },
+                })
                 .then((response) => {
                   setSubjects(response.data.data.subjects);
-                  const viewport =
-                    document.getElementById("lockMarks_viewport");
                   var updatedCombination = {};
                   response.data.data.subjects.map((subject) => {
                     selectedFilter["subject_id"] = subject.id;
                     axios
                       .get(
-                        `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/fetch_status`,
+                        `/student_marks/fetch_status`,
                         {
                           headers,
                           params: {
@@ -280,10 +321,11 @@ const LockMarks = () => {
                         console.error(err);
                       });
                   });
-                  viewport.classList.remove("hidden");
-                  viewport.classList.add("flex");
+                  showViewport();
                 })
                 .catch((error) => console.log(error));
+            } else {
+              toast.error("You haven't entered marks for any subject.");
             }
           } else {
             toast.error(res.data.message, {
@@ -295,7 +337,7 @@ const LockMarks = () => {
           console.error(err);
         });
     }
-  }, [selectedFilter]);
+  };
 
   const handleViewMarks = (e) => {
     e.preventDefault();
@@ -531,7 +573,7 @@ const LockMarks = () => {
             <select
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-20"
               value={semesterId}
-              disabled={true}
+              onChange={handleSemesterChange}
             >
               <option value="Select Semester">Semester</option>
               {semesters.map((semester) => (
@@ -542,13 +584,23 @@ const LockMarks = () => {
             <select
               className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-28"
               value={divisionId}
-              disabled={true}
+              onChange={handleDivisionChange}
             >
               <option value="Select Division">Division</option>
               {divisions.map((division) => (
                 <option value={division.id}>{division.name}</option>
               ))}
             </select>
+
+            <button
+              className="text-center ml-4 w-auto bg-transparent text-slate-950 p-3 rounded-2xl tracking-wide border border-slate-950
+              font-semibold focus:outline-none focus:shadow-outline hover:bg-gray-700 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
+              onClick={handleFilterSubmit}
+            >
+              <p className="inline-flex">
+                Search <GiArchiveResearch className="mt-1 ml-2" />
+              </p>
+            </button>
           </div>
           {/* Table of Faculty List */}
           <div
@@ -623,7 +675,7 @@ const LockMarks = () => {
                                   onClick={(e) => {
                                     setLockMarkShowModal(true);
                                     setSubjectId(subject.id);
-                                    setLockSubjectName(subject.name)
+                                    setLockSubjectName(subject.name);
                                   }}
                                 >
                                   Lock Marks

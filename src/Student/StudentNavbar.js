@@ -1,44 +1,6 @@
-import axios from "axios";
 import React from "react";
-import { useEffect } from "react";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 
-var headers;
-var subdomain;
-var access_token;
-
-const StudentNavbar = () => {
-  const [uniName, setUniName] = useState("");
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    access_token = localStorage.getItem("access_token");
-    headers = { Authorization: `Bearer ${access_token}` };
-    const host = window.location.host;
-    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
-    if (arr.length > 0) {
-      subdomain = arr[0];
-    }
-
-    if (subdomain !== null || subdomain !== "") {
-      axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
-        )
-        .then((response) => {
-          setUniName(response.data.university.name);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    }
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.clear();
-    navigate("/");
-  };
+const StudentNavbar = ({uniName = null, studentName = null}) => {
 
   return (
     <div>
@@ -84,7 +46,7 @@ const StudentNavbar = () => {
                     aria-expanded="false"
                     data-dropdown-toggle="dropdown-user"
                   >
-                    <span className="self-center text-xl mr-2 font-semibold sm:text-2xl whitespace-nowrap dark:text-white"></span>
+                    <span className="self-center text-xl mr-2 font-semibold sm:text-2xl whitespace-nowrap dark:text-white">{studentName}</span>
                     <span className="sr-only">Open user menu</span>
                   </button>
                 </div>

@@ -49,7 +49,7 @@ const StudentCoordinatorHome = () => {
     if (subdomain !== null || subdomain !== "") {
       axios
         .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
+          `/universities/${subdomain}/get_authorization_details`
         )
         .then((response) => {
           //   console.log(response.data.university.name);
@@ -61,7 +61,7 @@ const StudentCoordinatorHome = () => {
 
       axios
         .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/find_user?subdomain=${subdomain}`,
+          `/users/users/find_user?subdomain=${subdomain}`,
           {
             headers,
           }
@@ -75,7 +75,7 @@ const StudentCoordinatorHome = () => {
 
       axios
         .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/courses?subdomain=${subdomain}`,
+          `/courses?subdomain=${subdomain}`,
           { headers }
         )
         .then((response) => {
@@ -109,7 +109,7 @@ const StudentCoordinatorHome = () => {
     if (subdomain !== null || subdomain !== "") {
       axios
         .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/branches?subdomain=${subdomain}&course_id=${course_id}`,
+          `/branches?subdomain=${subdomain}&course_id=${course_id}`,
           { headers }
         )
         .then((response) => {
@@ -140,7 +140,7 @@ const StudentCoordinatorHome = () => {
     if (subdomain !== null || subdomain !== "") {
       axios
         .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/semesters?subdomain=${subdomain}&branch_id=${branch_id}`,
+          `/semesters?subdomain=${subdomain}&branch_id=${branch_id}`,
           { headers }
         )
         .then((response) => {
@@ -188,7 +188,7 @@ const StudentCoordinatorHome = () => {
     if (subdomain !== null || subdomain !== "") {
       axios
         .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/students`,
+          `/students`,
           {
             headers,
             params: {

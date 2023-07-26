@@ -50,7 +50,7 @@ const ChangePassword = () => {
       if (subdomain !== "" || subdomain !== null) {
         axios
           .put(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/reset_password`,
+            `/reset_password`,
             {
               subdomain: subdomain,
               reset_password_token: reset_password_token,
@@ -64,9 +64,7 @@ const ChangePassword = () => {
               toast.success(res.data.message, {
                 position: toast.POSITION.BOTTOM_LEFT
               })
-              setTimeout(() => {
-                navigate("/");
-              }, 2000);
+              navigate("/");
             } else {
               toast.error(res.data.message, {
                 position: toast.POSITION.BOTTOM_LEFT

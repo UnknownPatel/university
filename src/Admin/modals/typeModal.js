@@ -23,7 +23,7 @@ const TypeModal = ({ setOpenModal, id, setTypes }) => {
     if (subdomain !== null || subdomain !== "") {
       axios
         .delete(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_types/${id}`,
+          `/examination_types/${id}`,
           {
             headers,
             params: {
@@ -39,7 +39,7 @@ const TypeModal = ({ setOpenModal, id, setTypes }) => {
             });
             axios
               .get(
-                `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_types`,
+                `/examination_types`,
                 {
                   headers,
                   params: {

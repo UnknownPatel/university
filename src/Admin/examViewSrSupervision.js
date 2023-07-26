@@ -66,7 +66,7 @@ const ExamViewSrSupervision = () => {
     if (subdomain !== null || subdomain !== "") {
       axios
         .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
+          `/universities/${subdomain}/get_authorization_details`
         )
         .then((response) => {
           //   console.log(response.data.university.name);
@@ -78,7 +78,7 @@ const ExamViewSrSupervision = () => {
 
       axios
         .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/find_user?subdomain=${subdomain}`,
+          `/users/users/find_user?subdomain=${subdomain}`,
           {
             headers,
           }
@@ -88,24 +88,26 @@ const ExamViewSrSupervision = () => {
           setFaculty(
             responce.data.user.first_name + " " + responce.data.user.last_name
           );
-        })
-        .catch((error) => console.log(error));
-
-      axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/courses?subdomain=${subdomain}`,
-          { headers }
-        )
-        .then((response) => {
-          setCourses(response.data.data.courses);
-          // setCourses2(response.data.data.courses);
+          setCourseId(responce.data.user.cource_id);
+          axios
+            .get(`/branches`, {
+              headers,
+              params: {
+                subdomain: subdomain,
+                course_id: responce.data.user.course_id,
+              },
+            })
+            .then((response) => {
+              setBranches(response.data.data.branches);
+            })
+            .catch((error) => console.log(error));
         })
         .catch((error) => console.log(error));
 
       // Examination Names API
       axios
         .get(
-          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_names",
+          "/examination_names",
           {
             headers,
             params: {
@@ -129,7 +131,7 @@ const ExamViewSrSupervision = () => {
       // Examination Types API
       axios
         .get(
-          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_types",
+          "/examination_types",
           {
             headers,
             params: {
@@ -152,7 +154,7 @@ const ExamViewSrSupervision = () => {
 
       axios
         .get(
-          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_times",
+          "/examination_times",
           {
             headers,
             params: {
@@ -224,73 +226,7 @@ const ExamViewSrSupervision = () => {
       if (subdomain !== null || subdomain !== "") {
         axios
           .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
-            {
-              headers,
-              params: {
-                time_table: selectedFilter,
-                subdomain: subdomain,
-              },
-            }
-          )
-          .then((response) => {
-            if (response.data.message === "Examination dates are as below") {
-              if (response.data.data.dates.length !== 0) {
-                setStoreDates(response.data.data.dates);
-              }
-            }
-          })
-          .catch((error) => console.log(error));
-      }
-    }
-  };
-
-  const handleCourseChange = (e) => {
-    e.preventDefault();
-    setCourseId("");
-    setBranches([]);
-    setBranchId("");
-    var selectedFilter = {};
-    setStoreDates([]);
-    setDate("");
-    setHidden(true);
-    examinationName4 !== "" || examinationName4 !== "Select Examination"
-      ? (selectedFilter["name"] = examinationName4)
-      : delete selectedFilter["name"];
-    selectedYear4 !== "" || selectedYear4 !== "Select Year"
-      ? (selectedFilter["academic_year"] = selectedYear4)
-      : delete selectedFilter["academic_year"];
-    type !== ""
-      ? (selectedFilter["time_table_type"] = type)
-      : delete selectedFilter["time_table_type"];
-    time !== ""
-      ? (selectedFilter["time"] = time)
-      : delete selectedFilter["time"];
-
-    if (e.target.value !== "Select Cource") {
-      selectedFilter["cource_id"] = e.target.value;
-      setCourseId(e.target.value);
-      if (subdomain !== null || subdomain !== "") {
-        axios
-          .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/branches`,
-            {
-              headers,
-              params: {
-                subdomain: subdomain,
-                course_id: e.target.value,
-              },
-            }
-          )
-          .then((response) => {
-            console.log(response);
-            setBranches(response.data.data.branches);
-          })
-          .catch((error) => console.log(error));
-
-        axios
-          .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
+            `/exam_time_tables/get_examination_dates`,
             {
               headers,
               params: {
@@ -345,7 +281,7 @@ const ExamViewSrSupervision = () => {
       if (subdomain !== null || subdomain !== "") {
         axios
           .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
+            `/exam_time_tables/get_examination_dates`,
             {
               headers,
               params: {
@@ -394,7 +330,7 @@ const ExamViewSrSupervision = () => {
       if (subdomain !== null || subdomain !== "") {
         axios
           .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
+            `/exam_time_tables/get_examination_dates`,
             {
               headers,
               params: {
@@ -489,7 +425,7 @@ const ExamViewSrSupervision = () => {
       if (subdomain !== null || subdomain !== "") {
         axios
           .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions`,
+            `/supervisions`,
             {
               headers,
               params: {
@@ -522,7 +458,7 @@ const ExamViewSrSupervision = () => {
         } else {
           axios
             .get(
-              `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
+              `/exam_time_tables/get_examination_dates`,
               {
                 headers,
                 params: {
@@ -894,16 +830,6 @@ const ExamViewSrSupervision = () => {
                       </option>
                     );
                   })}
-                </select>
-
-                <select
-                  className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                  onChange={handleCourseChange}
-                >
-                  <option value="Select Course">Course</option>
-                  {courses.map((course, index) => (
-                    <option value={course.id}>{course.name}</option>
-                  ))}
                 </select>
 
                 <select

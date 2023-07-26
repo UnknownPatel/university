@@ -47,7 +47,7 @@ const StudentResult = () => {
     if (subdomain !== null || subdomain !== "") {
       axios
         .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
+          `/universities/${subdomain}/get_authorization_details`
         )
         .then((response) => {
           setUniName(response.data.university.name);
@@ -59,7 +59,7 @@ const StudentResult = () => {
       // Get Examination Names
       axios
         .get(
-          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_names",
+          "/examination_names",
           {
             headers,
             params: {
@@ -83,7 +83,7 @@ const StudentResult = () => {
       // Get Examination Types
       axios
         .get(
-          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_types",
+          "/examination_types",
           {
             headers,
             params: {
@@ -192,7 +192,7 @@ const StudentResult = () => {
       if (subdomain !== "" || subdomain !== null) {
         axios
           .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/fetch_marks_through_enrollment_number`,
+            `/student_marks/fetch_marks_through_enrollment_number`,
             {
               headers,
               params: {
@@ -208,7 +208,7 @@ const StudentResult = () => {
             if (res.data.status === "ok") {
               axios
                 .get(
-                  `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/students/${enrollmentNumber}/fetch_subjects`,
+                  `/students/${enrollmentNumber}/fetch_subjects`,
                   {
                     headers,
                     params: {

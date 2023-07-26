@@ -91,9 +91,7 @@ const ExamAssignSupervision = () => {
 
     if (subdomain !== null || subdomain !== "") {
       axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
-        )
+        .get(`/universities/${subdomain}/get_authorization_details`)
         .then((response) => {
           setUniName(response.data.university.name);
         })
@@ -102,43 +100,41 @@ const ExamAssignSupervision = () => {
         });
 
       axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/find_user?subdomain=${subdomain}`,
-          {
-            headers,
-          }
-        )
+        .get(`/users/users/find_user?subdomain=${subdomain}`, {
+          headers,
+        })
         .then((responce) => {
           // selectedFilter = responce.data.configuration;
           setFaculty(
             responce.data.user.first_name + " " + responce.data.user.last_name
           );
-        })
-        .catch((error) => console.log(error));
-
-      axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/courses?subdomain=${subdomain}`,
-          { headers }
-        )
-        .then((response) => {
-          setCourses(response.data.data.courses);
-          setSrCourses(response.data.data.courses);
-          setOdCourses(response.data.data.courses);
+          setCourseId(responce.data.user.course_id);
+          setSrCourseId(responce.data.user.course_id);
+          setOdCourseId(responce.data.user.course_id);
+          axios
+            .get(
+              `/branches?subdomain=${subdomain}&course_id=${responce.data.user.course_id}`,
+              {
+                headers,
+              }
+            )
+            .then((response) => {
+              setBranches(response.data.data.branches);
+              setSrBranches(response.data.data.branches);
+              setOdBranches(response.data.data.branches);
+            })
+            .catch((error) => console.log(error));
         })
         .catch((error) => console.log(error));
 
       // Examination Names API
       axios
-        .get(
-          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_names",
-          {
-            headers,
-            params: {
-              subdomain: subdomain,
-            },
-          }
-        )
+        .get("/examination_names", {
+          headers,
+          params: {
+            subdomain: subdomain,
+          },
+        })
         .then((responce) => {
           if (responce.data.message === "Names found") {
             if (responce.data.data.examination_names.length !== 0) {
@@ -154,15 +150,12 @@ const ExamAssignSupervision = () => {
 
       // Examination Types API
       axios
-        .get(
-          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_types",
-          {
-            headers,
-            params: {
-              subdomain: subdomain,
-            },
-          }
-        )
+        .get("/examination_types", {
+          headers,
+          params: {
+            subdomain: subdomain,
+          },
+        })
         .then((responce) => {
           if (responce.data.message === "Types found") {
             if (responce.data.data.examination_types.length !== 0) {
@@ -177,15 +170,12 @@ const ExamAssignSupervision = () => {
         });
 
       axios
-        .get(
-          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_times",
-          {
-            headers,
-            params: {
-              subdomain: subdomain,
-            },
-          }
-        )
+        .get("/examination_times", {
+          headers,
+          params: {
+            subdomain: subdomain,
+          },
+        })
         .then((responce) => {
           if (responce.data.status === "ok") {
             if (responce.data.data.examination_times.length !== 0) {
@@ -224,29 +214,6 @@ const ExamAssignSupervision = () => {
       setJrTime("");
     } else {
       setJrType(e.target.value);
-    }
-  };
-
-  const handleJrCourseChange = (e) => {
-    e.preventDefault();
-    setBranches([]);
-    setFacultyName([]);
-    setCourseId(e.target.value);
-    handleJrViewPortChange();
-
-    var course_id = e.target.value;
-    if (subdomain !== null || subdomain !== "") {
-      if (e.target.value !== "Select Course") {
-        axios
-          .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/branches?subdomain=${subdomain}&course_id=${course_id}`,
-            { headers }
-          )
-          .then((response) => {
-            setBranches(response.data.data.branches);
-          })
-          .catch((error) => console.log(error));
-      }
     }
   };
 
@@ -341,7 +308,7 @@ const ExamAssignSupervision = () => {
 
         axios
           .put(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions/${supervision_id}?subdomain=${subdomain}`,
+            `/supervisions/${supervision_id}?subdomain=${subdomain}`,
             {
               time_table: timeTableSelectedFilter,
               supervision: {
@@ -373,7 +340,7 @@ const ExamAssignSupervision = () => {
         e.target.innerHTML = "Assigning ...";
         axios
           .post(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions?subdomain=${subdomain}`,
+            `/supervisions?subdomain=${subdomain}`,
             {
               time_table: timeTableSelectedFilter,
               supervision: {
@@ -489,16 +456,13 @@ const ExamAssignSupervision = () => {
 
       if (subdomain !== null || subdomain !== "") {
         axios
-          .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/faculty_names`,
-            {
-              headers,
-              params: {
-                subdomain: subdomain,
-                user: selectedFilter,
-              },
-            }
-          )
+          .get(`/users/users/faculty_names`, {
+            headers,
+            params: {
+              subdomain: subdomain,
+              user: selectedFilter,
+            },
+          })
           .then((res) => {
             console.log(res);
             const faculty_listing_viewport = document.getElementById(
@@ -512,16 +476,13 @@ const ExamAssignSupervision = () => {
                 res.data.data.users.map((faculty) => {
                   selectedFilter["user_id"] = faculty.id;
                   axios
-                    .get(
-                      `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions/${faculty.id}/fetch_details`,
-                      {
-                        headers,
-                        params: {
-                          subdomain: subdomain,
-                          supervision: selectedFilter,
-                        },
-                      }
-                    )
+                    .get(`/supervisions/${faculty.id}/fetch_details`, {
+                      headers,
+                      params: {
+                        subdomain: subdomain,
+                        supervision: selectedFilter,
+                      },
+                    })
                     .then((res) => {
                       const jr_no_of_supervisions_input =
                         document.getElementById(
@@ -597,29 +558,6 @@ const ExamAssignSupervision = () => {
       setSrTime("");
     } else {
       setSrType(e.target.value);
-    }
-  };
-
-  const handleSrCourseChange = (e) => {
-    e.preventDefault();
-    setSrBranches([]);
-    setSrFacultyName([]);
-    setSrCourseId(e.target.value);
-
-    handleSrViewPortChange();
-
-    if (subdomain !== null || subdomain !== "") {
-      if (e.target.value !== "Select Course") {
-        axios
-          .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/branches?subdomain=${subdomain}&course_id=${e.target.value}`,
-            { headers }
-          )
-          .then((response) => {
-            setSrBranches(response.data.data.branches);
-          })
-          .catch((error) => console.log(error));
-      }
     }
   };
 
@@ -708,7 +646,7 @@ const ExamAssignSupervision = () => {
 
         axios
           .put(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions/${supervision_id}`,
+            `/supervisions/${supervision_id}`,
             {
               subdomain: subdomain,
               supervision: {
@@ -742,7 +680,7 @@ const ExamAssignSupervision = () => {
         e.target.innerHTML = "Assigning ...";
         axios
           .post(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions`,
+            `/supervisions`,
             {
               supervision: selectedFilter,
               subdomain: subdomain,
@@ -855,16 +793,13 @@ const ExamAssignSupervision = () => {
 
       if (subdomain !== null || subdomain !== "") {
         axios
-          .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/faculty_names`,
-            {
-              headers,
-              params: {
-                subdomain: subdomain,
-                user: selectedFilter,
-              },
-            }
-          )
+          .get(`/users/users/faculty_names`, {
+            headers,
+            params: {
+              subdomain: subdomain,
+              user: selectedFilter,
+            },
+          })
           .then((res) => {
             console.log(res);
             const faculty_listing_viewport = document.getElementById(
@@ -877,16 +812,13 @@ const ExamAssignSupervision = () => {
                 setSrFacultyName(res.data.data.users);
                 res.data.data.users.map((faculty) => {
                   axios
-                    .get(
-                      `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/supervisions/${faculty.id}/fetch_details`,
-                      {
-                        headers,
-                        params: {
-                          subdomain: subdomain,
-                          supervision: selectedFilter,
-                        },
-                      }
-                    )
+                    .get(`/supervisions/${faculty.id}/fetch_details`, {
+                      headers,
+                      params: {
+                        subdomain: subdomain,
+                        supervision: selectedFilter,
+                      },
+                    })
                     .then((res) => {
                       const sr_no_of_supervisions_input =
                         document.getElementById(
@@ -970,29 +902,6 @@ const ExamAssignSupervision = () => {
     handleOdViewPortChange();
   };
 
-  const handleODCourseChange = (e) => {
-    e.preventDefault();
-    setOdBranches([]);
-    setOdFacultyName([]);
-    setOtherDutyData([]);
-    // setSrFacultyName([]);
-    setOdCourseId(e.target.value);
-    handleOdViewPortChange();
-    if (subdomain !== null || subdomain !== "") {
-      if (e.target.value !== "Select Course") {
-        axios
-          .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/branches?subdomain=${subdomain}&course_id=${e.target.value}`,
-            { headers }
-          )
-          .then((response) => {
-            setOdBranches(response.data.data.branches);
-          })
-          .catch((error) => console.log(error));
-      }
-    }
-  };
-
   const handleODBranchChange = (e) => {
     e.preventDefault();
     setFacultyName([]);
@@ -1049,16 +958,13 @@ const ExamAssignSupervision = () => {
 
     if (subdomain !== null || subdomain !== "") {
       axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/faculties_for_other_duties`,
-          {
-            headers,
-            params: {
-              subdomain: subdomain,
-              user: selectedFilter,
-            },
-          }
-        )
+        .get(`/users/users/faculties_for_other_duties`, {
+          headers,
+          params: {
+            subdomain: subdomain,
+            user: selectedFilter,
+          },
+        })
         .then((res) => {
           console.log(res);
           const faculty_listing_viewport = document.getElementById(
@@ -1072,16 +978,13 @@ const ExamAssignSupervision = () => {
               setOdFacultyName(res.data.data.users);
               res.data.data.users.map((faculty) => {
                 axios
-                  .get(
-                    `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/other_duties/${faculty.id}/fetch_details`,
-                    {
-                      headers,
-                      params: {
-                        subdomain: subdomain,
-                        other_duty: selectedFilter,
-                      },
-                    }
-                  )
+                  .get(`/other_duties/${faculty.id}/fetch_details`, {
+                    headers,
+                    params: {
+                      subdomain: subdomain,
+                      other_duty: selectedFilter,
+                    },
+                  })
                   .then((res) => {
                     console.log(res);
                     const od_assigned_duty_input = document.getElementById(
@@ -1187,7 +1090,7 @@ const ExamAssignSupervision = () => {
 
         axios
           .put(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/other_duties/${other_duty_id}`,
+            `/other_duties/${other_duty_id}`,
             {
               subdomain: subdomain,
               other_duty: {
@@ -1221,7 +1124,7 @@ const ExamAssignSupervision = () => {
         e.target.innerHTML = "Assigning ...";
         axios
           .post(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/other_duties`,
+            `/other_duties`,
             {
               other_duty: request_body,
               subdomain: subdomain,
@@ -1572,16 +1475,6 @@ const ExamAssignSupervision = () => {
                         </select>
 
                         <select
-                          className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                          onChange={handleJrCourseChange}
-                        >
-                          <option value="Select Course">Course</option>
-                          {courses.map((course) => (
-                            <option value={course.id}>{course.name}</option>
-                          ))}
-                        </select>
-
-                        <select
                           className="w-auto form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded justify-center shadow-md px-3 py-2"
                           onChange={handleJrBranchChange}
                         >
@@ -1807,16 +1700,6 @@ const ExamAssignSupervision = () => {
                         </select>
 
                         <select
-                          className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                          onChange={handleSrCourseChange}
-                        >
-                          <option value="Select Course">Course</option>
-                          {srCourses.map((course) => (
-                            <option value={course.id}>{course.name}</option>
-                          ))}
-                        </select>
-
-                        <select
                           className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded justify-center shadow-md px-3 py-2"
                           onChange={handleSrBranchChange}
                         >
@@ -2034,16 +1917,6 @@ const ExamAssignSupervision = () => {
                               </option>
                             );
                           })}
-                        </select>
-
-                        <select
-                          className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                          onChange={handleODCourseChange}
-                        >
-                          <option value="Select Course">Course</option>
-                          {odCourses.map((course) => (
-                            <option value={course.id}>{course.name}</option>
-                          ))}
                         </select>
 
                         <select

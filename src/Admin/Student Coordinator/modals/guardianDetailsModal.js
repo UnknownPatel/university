@@ -42,7 +42,7 @@ const GuardianDetailsModal = ({
     if (subdomain !== null || subdomain !== "") {
       axios
         .put(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/students/${id}`,
+          `/students/${id}`,
           {
             subdomain: subdomain,
             guardian_detail: {

@@ -66,7 +66,7 @@ const UnlockMarks = () => {
     if (subdomain !== null || subdomain !== "") {
       axios
         .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
+          `/universities/${subdomain}/get_authorization_details`
         )
         .then((response) => {
           setUniName(response.data.university.name);
@@ -77,7 +77,7 @@ const UnlockMarks = () => {
 
       axios
         .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/find_user?subdomain=${subdomain}`,
+          `/users/users/find_user?subdomain=${subdomain}`,
           {
             headers,
           }
@@ -87,24 +87,25 @@ const UnlockMarks = () => {
           setFaculty(
             responce.data.user.first_name + " " + responce.data.user.last_name
           );
-        })
-        .catch((error) => console.log(error));
-
-      // Get Course
-      axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/courses?subdomain=${subdomain}`,
-          { headers }
-        )
-        .then((response) => {
-          setCourses(response.data.data.courses);
+          setCourseId(responce.data.user.course_id);
+          axios
+            .get(
+              `/branches?subdomain=${subdomain}&course_id=${responce.data.user.course_id}`,
+              {
+                headers,
+              }
+            )
+            .then((response) => {
+              setBranches(response.data.data.branches);
+            })
+            .catch((error) => console.log(error));
         })
         .catch((error) => console.log(error));
 
       // Get Examination Names
       axios
         .get(
-          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_names",
+          "/examination_names",
           {
             headers,
             params: {
@@ -128,7 +129,7 @@ const UnlockMarks = () => {
       // Get Examination Types
       axios
         .get(
-          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_types",
+          "/examination_types",
           {
             headers,
             params: {
@@ -193,34 +194,6 @@ const UnlockMarks = () => {
     }
   };
 
-  const handleCourseChange = (e) => {
-    e.preventDefault();
-    const unlockMarks_viewport = document.getElementById(
-      "unlockMarks_viewport"
-    );
-    unlockMarks_viewport.classList.add("hidden");
-    unlockMarks_viewport.classList.remove("flex");
-    console.log(e.target.value);
-    if (e.target.value !== "Select course") {
-      setCourseId(e.target.value);
-      var course_id = e.target.value;
-      if (subdomain !== null || subdomain !== "") {
-        axios
-          .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/branches?subdomain=${subdomain}&course_id=${course_id}`,
-            { headers }
-          )
-          .then((response) => {
-            setBranches(response.data.data.branches);
-          })
-          .catch((error) => console.log(error));
-      }
-    } else {
-      setCourseId("");
-      setBranches([]);
-    }
-  };
-
   const handleBranchChange = (e) => {
     e.preventDefault();
     const unlockMarks_viewport = document.getElementById(
@@ -265,7 +238,7 @@ const UnlockMarks = () => {
     if (subdomain !== null || subdomain !== "") {
       axios
         .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/semesters?subdomain=${subdomain}&branch_id=${branch_id}`,
+          `/semesters?subdomain=${subdomain}&branch_id=${branch_id}`,
           { headers }
         )
         .then((response) => {
@@ -289,7 +262,7 @@ const UnlockMarks = () => {
       if (subdomain !== null || subdomain !== "") {
         axios
           .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/divisions`,
+            `/divisions`,
             {
               headers,
               params: {
@@ -372,7 +345,7 @@ const UnlockMarks = () => {
       var actual_subject_length = null;
       axios
         .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/subjects`,
+          `/subjects`,
           {
             headers,
             params: {
@@ -399,7 +372,7 @@ const UnlockMarks = () => {
 
       axios
         .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/fetch_subjects`,
+          `/student_marks/fetch_subjects`,
           {
             headers,
             params: {
@@ -414,7 +387,7 @@ const UnlockMarks = () => {
             if (res.data.data.subject_ids.length !== 0) {
               axios
                 .get(
-                  `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/subjects`,
+                  `/subjects`,
                   {
                     headers,
                     params: {
@@ -440,7 +413,7 @@ const UnlockMarks = () => {
                     selectedFilter["subject_id"] = subject.id;
                     axios
                       .get(
-                        `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/fetch_status`,
+                        `/student_marks/fetch_status`,
                         {
                           headers,
                           params: {
@@ -471,7 +444,7 @@ const UnlockMarks = () => {
                   ) {
                     axios
                       .get(
-                        `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/eligible_for_publish`,
+                        `/student_marks/eligible_for_publish`,
                         {
                           headers,
                           params: {
@@ -487,7 +460,7 @@ const UnlockMarks = () => {
                             setPublishDisabled(false);
                             axios
                               .get(
-                                `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/fetch_publish_status`,
+                                `/student_marks/fetch_publish_status`,
                                 {
                                   headers,
                                   params: {
@@ -652,7 +625,7 @@ const UnlockMarks = () => {
       if (e.target.innerHTML === "Unpublish Marks") {
         axios
           .put(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/unpublish_marks`,
+            `/student_marks/unpublish_marks`,
             {
               subdomain: subdomain,
               student_mark: selectedFilter,
@@ -678,7 +651,7 @@ const UnlockMarks = () => {
       } else {
         axios
           .put(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/student_marks/publish_marks`,
+            `/student_marks/publish_marks`,
             {
               subdomain: subdomain,
               student_mark: selectedFilter,
@@ -963,16 +936,6 @@ const UnlockMarks = () => {
                         </option>
                       );
                     })}
-                  </select>
-
-                  <select
-                    className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                    onChange={handleCourseChange}
-                  >
-                    <option value="Select course">Course</option>
-                    {courses.map((course, index) => (
-                      <option value={course.id}>{course.name}</option>
-                    ))}
                   </select>
 
                   <select

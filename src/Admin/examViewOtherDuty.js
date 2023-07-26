@@ -68,9 +68,7 @@ const ExamViewOtherDuty = () => {
 
     if (subdomain !== null || subdomain !== "") {
       axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
-        )
+        .get(`/universities/${subdomain}/get_authorization_details`)
         .then((response) => {
           //   console.log(response.data.university.name);
           setUniName(response.data.university.name);
@@ -80,41 +78,37 @@ const ExamViewOtherDuty = () => {
         });
 
       axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/find_user?subdomain=${subdomain}`,
-          {
-            headers,
-          }
-        )
+        .get(`/users/users/find_user?subdomain=${subdomain}`, {
+          headers,
+        })
         .then((responce) => {
           // selectedFilter = responce.data.configuration;
           setFaculty(
             responce.data.user.first_name + " " + responce.data.user.last_name
           );
+          setCourseId(responce.data.user.course_id);
+          axios
+            .get(`/branches`, {
+              headers,
+              params: {
+                subdomain: subdomain,
+                course_id: responce.data.user.course_id,
+              },
+            })
+            .then((response) => {
+              setBranches(response.data.data.branches);
+            })
+            .catch((error) => console.log(error));
         })
         .catch((error) => console.log(error));
 
       axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/courses?subdomain=${subdomain}`,
-          { headers }
-        )
-        .then((response) => {
-          setCourses(response.data.data.courses);
-          // setCourses2(response.data.data.courses);
+        .get("/examination_names", {
+          headers,
+          params: {
+            subdomain: subdomain,
+          },
         })
-        .catch((error) => console.log(error));
-
-      axios
-        .get(
-          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_names",
-          {
-            headers,
-            params: {
-              subdomain: subdomain,
-            },
-          }
-        )
         .then((responce) => {
           if (responce.data.message === "Names found") {
             if (responce.data.data.examination_names.length !== 0) {
@@ -129,15 +123,12 @@ const ExamViewOtherDuty = () => {
         });
 
       axios
-        .get(
-          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_types",
-          {
-            headers,
-            params: {
-              subdomain: subdomain,
-            },
-          }
-        )
+        .get("/examination_types", {
+          headers,
+          params: {
+            subdomain: subdomain,
+          },
+        })
         .then((responce) => {
           if (responce.data.message === "Types found") {
             if (responce.data.data.examination_types.length !== 0) {
@@ -152,15 +143,12 @@ const ExamViewOtherDuty = () => {
         });
 
       axios
-        .get(
-          "http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/examination_times",
-          {
-            headers,
-            params: {
-              subdomain: subdomain,
-            },
-          }
-        )
+        .get("/examination_times", {
+          headers,
+          params: {
+            subdomain: subdomain,
+          },
+        })
         .then((responce) => {
           if (responce.data.status === "ok") {
             if (responce.data.data.examination_times.length !== 0) {
@@ -224,82 +212,13 @@ const ExamViewOtherDuty = () => {
 
       if (subdomain !== null || subdomain !== "") {
         axios
-          .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
-            {
-              headers,
-              params: {
-                time_table: selectedFilter,
-                subdomain: subdomain,
-              },
-            }
-          )
-          .then((response) => {
-            if (response.data.message === "Examination dates are as below") {
-              if (response.data.data.dates.length !== 0) {
-                setStoreDates(response.data.data.dates);
-              }
-            }
+          .get(`/exam_time_tables/get_examination_dates`, {
+            headers,
+            params: {
+              time_table: selectedFilter,
+              subdomain: subdomain,
+            },
           })
-          .catch((error) => console.log(error));
-      }
-    }
-  };
-
-  const handleCourseChange = (e) => {
-    e.preventDefault();
-    setCourseId("");
-    setBranches([]);
-    setBranchId("");
-    var selectedFilter = {};
-    setStoreDates([]);
-    setDate("");
-    setHidden(true);
-    examinationName5 !== "" || examinationName5 !== "Select Examination"
-      ? (selectedFilter["name"] = examinationName5)
-      : delete selectedFilter["name"];
-    selectedYear5 !== "" || selectedYear5 !== "Select Year"
-      ? (selectedFilter["academic_year"] = selectedYear5)
-      : delete selectedFilter["academic_year"];
-    type !== ""
-      ? (selectedFilter["time_table_type"] = type)
-      : delete selectedFilter["time_table_type"];
-    time !== ""
-      ? (selectedFilter["time"] = time)
-      : delete selectedFilter["time"];
-
-    if (e.target.value !== "Select Cource") {
-      selectedFilter["cource_id"] = e.target.value;
-      setCourseId(e.target.value);
-      if (subdomain !== null || subdomain !== "") {
-        axios
-          .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/branches`,
-            {
-              headers,
-              params: {
-                subdomain: subdomain,
-                course_id: e.target.value,
-              },
-            }
-          )
-          .then((response) => {
-            console.log(response);
-            setBranches(response.data.data.branches);
-          })
-          .catch((error) => console.log(error));
-
-        axios
-          .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
-            {
-              headers,
-              params: {
-                time_table: selectedFilter,
-                subdomain: subdomain,
-              },
-            }
-          )
           .then((response) => {
             if (response.data.message === "Examination dates are as below") {
               if (response.data.data.dates.length !== 0) {
@@ -345,16 +264,13 @@ const ExamViewOtherDuty = () => {
       setBranchId(e.target.value);
       if (subdomain !== null || subdomain !== "") {
         axios
-          .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
-            {
-              headers,
-              params: {
-                time_table: selectedFilter,
-                subdomain: subdomain,
-              },
-            }
-          )
+          .get(`/exam_time_tables/get_examination_dates`, {
+            headers,
+            params: {
+              time_table: selectedFilter,
+              subdomain: subdomain,
+            },
+          })
           .then((response) => {
             if (response.data.message === "Examination dates are as below") {
               if (response.data.data.dates.length !== 0) {
@@ -394,16 +310,13 @@ const ExamViewOtherDuty = () => {
       selectedFilter["time"] = e.target.value;
       if (subdomain !== null || subdomain !== "") {
         axios
-          .get(
-            `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/exam_time_tables/get_examination_dates`,
-            {
-              headers,
-              params: {
-                time_table: selectedFilter,
-                subdomain: subdomain,
-              },
-            }
-          )
+          .get(`/exam_time_tables/get_examination_dates`, {
+            headers,
+            params: {
+              time_table: selectedFilter,
+              subdomain: subdomain,
+            },
+          })
           .then((response) => {
             if (response.data.message === "Examination dates are as below") {
               if (response.data.data.dates.length !== 0) {
@@ -453,16 +366,13 @@ const ExamViewOtherDuty = () => {
 
     if (subdomain !== null || subdomain !== "") {
       axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/other_duties`,
-          {
-            headers,
-            params: {
-              subdomain: subdomain,
-              other_duty: selectedFilter,
-            },
-          }
-        )
+        .get(`/other_duties`, {
+          headers,
+          params: {
+            subdomain: subdomain,
+            other_duty: selectedFilter,
+          },
+        })
         .then((res) => {
           console.log(res);
           if (res.data.status === "ok") {
@@ -749,22 +659,6 @@ const ExamViewOtherDuty = () => {
                     </a>
                   </li>
                   <li>
-                    <a
-                      href="/result"
-                      className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                    >
-                      <span className="ml-3">Result</span>
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="/studentResult"
-                      className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                    >
-                      <span className="ml-3">Student Result</span>
-                    </a>
-                  </li>
-                  <li>
                     <div className="p-4">
                       <button
                         type="button"
@@ -858,16 +752,6 @@ const ExamViewOtherDuty = () => {
 
                 <select
                   className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                  onChange={handleCourseChange}
-                >
-                  <option value="Select Course">Course</option>
-                  {courses.map((course, index) => (
-                    <option value={course.id}>{course.name}</option>
-                  ))}
-                </select>
-
-                <select
-                  className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
                   onChange={(e) => {
                     handleBranchChange(e);
                   }}
@@ -896,7 +780,8 @@ const ExamViewOtherDuty = () => {
                   })}
                 </select>
                 <button
-                  className="py-2 px-3 bg-gray-800 rounded-2xl text-white font-bold"
+                  className="text-center ml-4 w-auto bg-transparent text-slate-950 p-3 rounded-2xl tracking-wide border border-slate-950
+                  font-semibold focus:outline-none focus:shadow-outline hover:bg-gray-700 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
                   onClick={handleFilterSubmit}
                 >
                   <p className="inline-flex">

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import StudentNavbar from "./StudentNavbar";
 import { useNavigate } from "react-router-dom";
 import { FaUniversity, FaUserGraduate } from "react-icons/fa";
@@ -7,9 +7,63 @@ import { SlCalender, SlScreenSmartphone } from "react-icons/sl";
 import { MdOutlineMail } from "react-icons/md";
 import { HiOutlineSpeakerphone } from "react-icons/hi";
 import profile from "../Images/icons8-users-64.png";
+import axios from "axios";
+
+var access_token;
+var subdomain;
+var headers;
 
 const StudentHomePage = () => {
+  const [uniName, setUniName] = useState("");
+  const [student, setStudent] = useState([]);
+  const [studentDetails, setStudentDetails] = useState([]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    access_token = localStorage.getItem("access_token");
+    headers = { Authorization: `Bearer ${access_token}` };
+
+    const host = window.location.host;
+    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
+    if (arr.length > 0) {
+      subdomain = arr[0];
+    }
+
+    if (subdomain !== null || subdomain !== "") {
+      axios
+        .get(
+          `/universities/${subdomain}/get_authorization_details`
+        )
+        .then((response) => {
+          setUniName(response.data.university.name);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+
+      axios
+        .get(
+          `/students/find_student_by_auth_token?subdomain=${subdomain}`,
+          {
+            headers,
+          }
+        )
+        .then((res) => {
+          console.log(res);
+          if (res.data.status === "ok"){
+            if (res.data.data.student.length !== "0") {
+              setStudent(res.data.data.student.name);
+              setStudentDetails(res.data.data.student);
+            } else {
+              setStudent([]);
+            }
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    }
+  }, []);
 
   const handleLogout = () => {
     localStorage.clear();
@@ -17,7 +71,7 @@ const StudentHomePage = () => {
   };
   return (
     <div>
-      <StudentNavbar />
+      <StudentNavbar uniName={uniName} studentName={student}/>
       <aside
         id="logo-sidebar"
         className="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
@@ -105,7 +159,7 @@ const StudentHomePage = () => {
                 </div>
                 <div className="p-4 flex-grow">
                   <h2 className="text-lg font-semibold mt-5 mb-2 text-center">
-                    Student Name
+                    {student}
                   </h2>
                   <p className="text-gray-600 text-center">
                     Lorem ipsum dolor sit amet, consectetur adipiscing elit.
@@ -124,27 +178,27 @@ const StudentHomePage = () => {
               <div className="bg-slate-100 rounded-lg shadow-md h-full flex flex-col">
                 <div className="flex mt-9 ml-10">
                   <FaUniversity size={30} />
-                  <div className="ml-10 text-xl ">University Name</div>
+                  <div className="ml-10 text-xl ">{uniName}</div>
                 </div>
                 <div className="flex mt-5 ml-10">
                   <FaUserGraduate size={30} />
-                  <div className="ml-10 text-xl">Cource Name</div>
+                  <div className="ml-10 text-xl">{studentDetails["course"]?.["name"]}</div>
                 </div>
                 <div className="flex mt-5 ml-10">
                   <BsPersonSquare size={30} />
-                  <div className="ml-10 text-xl">Gender</div>
+                  <div className="ml-10 text-xl">{studentDetails["gender"]}</div>
                 </div>
                 <div className="flex mt-5 ml-10">
                   <SlCalender size={30} />
-                  <div className="ml-10 text-xl">Birth Date</div>
+                  <div className="ml-10 text-xl">{studentDetails["date_of_birth"]}</div>
                 </div>
                 <div className="flex mt-5 ml-10">
                   <MdOutlineMail size={30} />
-                  <div className="ml-10 text-xl">Email Id</div>
+                  <div className="ml-10 text-xl">{studentDetails["contact_details"]?.["personal_email_address"]}</div>
                 </div>
                 <div className="flex mt-5 ml-10 ">
                   <SlScreenSmartphone size={30} />
-                  <div className="ml-10 text-xl">Phone No.</div>
+                  <div className="ml-10 text-xl">{studentDetails["contact_details"]?.["mobile_number"]}</div>
                 </div>
               </div>
             </div>
