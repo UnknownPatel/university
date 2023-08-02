@@ -13,6 +13,8 @@ const CreateCertificate = () => {
   const navigate = useNavigate();
   const [uniName, setUniName] = useState("");
   const [faculty, setFaculty] = useState("");
+  const [hidden, setHidden] = useState(true);
+  const [certificates, setCertificates] = useState([]);
   const [certificateName, setCertificateName] = useState("");
   const [certificateFee, setCertificateFee] = useState("");
 
@@ -29,9 +31,7 @@ const CreateCertificate = () => {
 
     if (subdomain !== null || subdomain !== "") {
       axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
-        )
+        .get(`/universities/${subdomain}/get_authorization_details`)
         .then((response) => {
           //   console.log(response.data.university.name);
           setUniName(response.data.university.name);
@@ -41,12 +41,34 @@ const CreateCertificate = () => {
         });
 
       axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/find_user?subdomain=${subdomain}`,
-          {
-            headers,
+        .get(`/certificates`, {
+          headers,
+          params: {
+            subdomain: subdomain,
+          },
+        })
+        .then((res) => {
+          if (res.data.status === "ok") {
+            if (res.data.data.certificates.length !== 0) {
+              setHidden(false);
+              setCertificates(res.data.data.certificates);
+            } else {
+              setCertificates([]);
+              setHidden(true);
+            }
+          } else {
+            setCertificates([]);
+            setHidden(true);
           }
-        )
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+
+      axios
+        .get(`/users/users/find_user?subdomain=${subdomain}`, {
+          headers,
+        })
         .then((responce) => {
           setFaculty(
             responce.data.user.first_name + " " + responce.data.user.last_name
@@ -62,7 +84,60 @@ const CreateCertificate = () => {
     }
   }, []);
 
-  const handleCreateCertificate = (e) => {};
+  const handleCreateCertificate = (e) => {
+    e.preventDefault();
+    if (subdomain !== null || subdomain !== "") {
+      if (certificateName === "") {
+        toast.error("Please enter certificate name");
+      } else if (certificateFee === "") {
+        toast.error("Please enter certificate fee");
+      } else {
+        axios
+          .post(
+            `/certificates`,
+            {
+              subdomain: subdomain,
+              certificate: {
+                name: certificateName,
+                amount: certificateFee,
+              },
+            },
+            {
+              headers,
+            }
+          )
+          .then((res) => {
+            if (res.data.status === "created") {
+              if (res.data.data.certificate.length !== "0") {
+                setCertificateName("");
+                setCertificateFee("");
+                axios
+                  .get(`/certificates`, {
+                    headers,
+                    params: {
+                      subdomain: subdomain,
+                    },
+                  })
+                  .then((res) => {
+                    if (res.data.status === "ok") {
+                      setHidden(false);
+                      setCertificates(res.data.data.certificates);
+                    } else {
+                      setCertificates([]);
+                    }
+                  })
+                  .catch((err) => {
+                    console.error(err);
+                  });
+              }
+            }
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+      }
+    }
+  };
 
   const handleLogout = () => {
     localStorage.clear();
@@ -230,23 +305,23 @@ const CreateCertificate = () => {
           </div>
         </div>
         <div className="mt-5 ml-2">
-          <label htmlFor="">Certificate Name:-</label>
           <input
             type="text"
-            name="reason"
-            id="reason"
+            name="certificateName"
+            value={certificateName}
+            id="certificateName"
             onChange={(e) => setCertificateName(e.target.value)}
             placeholder="Enter Certificate Name"
-            className="h-10 border-0 border-b-2 border-b-gray-700 mt-1 ml-3 mr-10 rounded px-4 bg-gray-50"
+            className="h-10 border-0 border-b-2 border-b-gray-700 mt-1 rounded px-4 bg-gray-50"
           />
-          <label htmlFor="">Fee:-</label>
           <input
             type="text"
             name="reason"
             id="reason"
+            value={certificateFee}
             onChange={(e) => setCertificateFee(e.target.value)}
-            placeholder="Certificate fee"
-            className="h-10 border-0 border-b-2 border-b-gray-700 mt-1 ml-3 mr-10 rounded px-4 bg-gray-50"
+            placeholder="Enter Certificate fee"
+            className="h-10 border-0 border-b-2 border-b-gray-700 mt-1 ml-2 rounded px-4 bg-gray-50"
           />
           <button
             className="py-2 px-3 mr-7 ml-2 bg-gray-800 rounded-2xl text-white font-bold"
@@ -257,7 +332,7 @@ const CreateCertificate = () => {
         </div>
         <div
           id="certificate_viewport"
-          className="flex flex-col mt-5"
+          className={`${hidden ? "hidden" : "flex"} flex-col mt-5`}
           // style={{ height: 485 }}
         >
           <div className="">
@@ -289,7 +364,23 @@ const CreateCertificate = () => {
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="text-center divide-y divide-gray-200"></tbody>
+                  <tbody className="text-center divide-y divide-gray-200">
+                    {certificates.map((certificate, index) => {
+                      return (
+                        <tr key={certificate.id}>
+                          <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                            {index + 1}
+                          </td>
+                          <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                            {certificate.name}
+                          </td>
+                          <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                            {certificate.amount}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
                 </table>
               </div>
             </div>

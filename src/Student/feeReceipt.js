@@ -1,9 +1,85 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import StudentNavbar from "./StudentNavbar";
 import { useNavigate } from "react-router-dom";
 import { MdOutlineFileDownload } from "react-icons/md";
+import numberToWords from "number-to-words";
+import axios from "axios";
+
+var access_token;
+var subdomain;
+var headers;
+var studentId;
 
 const FeeReceipt = () => {
+  const [uniName, setUniName] = useState("");
+  const [student, setStudent] = useState([]);
+  const [studentDetails, setStudentDetails] = useState([]);
+  const [feeDetails, setFeeDetails] = useState([]);
+
+  useEffect(() => {
+    access_token = localStorage.getItem("access_token");
+    headers = { Authorization: `Bearer ${access_token}` };
+
+    const host = window.location.host;
+    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
+    if (arr.length > 0) {
+      subdomain = arr[0];
+    }
+
+    if (subdomain !== null || subdomain !== "") {
+      axios
+        .get(`/universities/${subdomain}/get_authorization_details`)
+        .then((response) => {
+          setUniName(response.data.university.name);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+
+      axios
+        .get(`/students/find_student_by_auth_token?subdomain=${subdomain}`, {
+          headers,
+        })
+        .then((res) => {
+          if (res.data.status === "ok") {
+            if (res.data.data.student.length !== "0") {
+              setStudent(res.data.data.student.name);
+              studentId = res.data.data.student.id;
+              setStudentDetails(res.data.data.student);
+              axios
+                .get(
+                  `/students/${res.data.data.student.id}/fetch_paid_fee_detail`,
+                  {
+                    headers,
+                    params: {
+                      subdomain: subdomain,
+                    },
+                  }
+                )
+                .then((res) => {
+                  console.log(res);
+                  if (res.data.status === "ok") {
+                    if (res.data.data.fee_details.length !== "0") {
+                      console.log("Hello Fee Details Found");
+                      setFeeDetails(res.data.data.fee_details);
+                    }
+                  }
+                })
+                .catch((err) => {
+                  console.error(err);
+                });
+            } else {
+              setStudentDetails([]);
+              setStudent([]);
+            }
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    }
+  }, []);
+
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -12,7 +88,7 @@ const FeeReceipt = () => {
   };
   return (
     <div>
-      <StudentNavbar />
+      <StudentNavbar uniName={uniName} studentName={student} />
       <aside
         id="logo-sidebar"
         className="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
@@ -94,7 +170,7 @@ const FeeReceipt = () => {
       <div className="pt-4 sm:ml-64">
         <div className="p-4 rounded-lg mt-14">
           <div className="text-center text-4xl">
-            <p>Fees Receipt Transaction</p>
+            <p>Fees Transaction Reciept</p>
           </div>
 
           <div
@@ -152,29 +228,35 @@ const FeeReceipt = () => {
                       </tr>
                     </thead>
                     <tbody className="text-center divide-y divide-gray-200">
-                      <tr>
-                        <td className=" px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap">
-                          2022 - 2023
-                        </td>
-                        <td className=" px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap">
-                          Semester
-                        </td>
-                        <td className=" px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap">
-                          01/03/2023
-                        </td>
-                        <td className=" px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap">
-                          230103-10694
-                        </td>
-                        <td className=" px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap">
-                          32000
-                        </td>
-                        <td className=" px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap">
-                          Online
-                        </td>
-                        <td className=" px-6 py-4 text-sm flex justify-center text-gray-800 whitespace-nowrap">
-                          <MdOutlineFileDownload size={20} />
-                        </td>
-                      </tr>
+                      {feeDetails.map((feeDetail) => {
+                        return (
+                          <tr key={feeDetail.id}>
+                            <td className=" px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap">
+                              {feeDetail.academic_year}
+                            </td>
+                            <td className=" px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap">
+                              {numberToWords.toOrdinal(
+                                feeDetail?.["semester"]?.["name"]
+                              ) + " semester"}
+                            </td>
+                            <td className=" px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap">
+                              01/03/2023
+                            </td>
+                            <td className=" px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap">
+                              230103-10694
+                            </td>
+                            <td className=" px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap">
+                              {feeDetail.amount}
+                            </td>
+                            <td className=" px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap">
+                              Online
+                            </td>
+                            <td className=" px-6 py-4 text-sm flex justify-center text-gray-800 whitespace-nowrap">
+                              <MdOutlineFileDownload size={20} />
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>

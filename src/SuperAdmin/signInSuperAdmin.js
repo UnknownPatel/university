@@ -27,13 +27,10 @@ const SignInSuperAdmin = () => {
   const location = useLocation();
   const queryParameters = new URLSearchParams(location.search);
 
-  const userSecureId = queryParameters.get("d");
-
   useEffect(() => {
     const host = window.location.host;
     domain = host.split(".")[2];
     console.log(domain);
-    console.log(userSecureId);
     const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
     if (arr.length > 0) {
       setIsSuperAdmin(arr[1] === "superadmin");

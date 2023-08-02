@@ -44,6 +44,10 @@ import StudentProfile from "./Student/studentProfile";
 import StudentCoordinatorHome from "./Admin/Student Coordinator/studentCoordinatorHome";
 import FeeDetails from "./Admin/Student Coordinator/feeDetails";
 import FeePayGetway from "./Student/feePayGetway";
+import UpdateProfile from "./Student/updateProfile";
+import CreateCertificate from "./Admin/Student Coordinator/createCertificate";
+import CertificateRequest from "./Admin/Student Coordinator/certificateRequest";
+import PayFee from "./Student/payFee";
 
 function App() {
   return (
@@ -140,7 +144,8 @@ function App() {
           <Route path="/createCertificate" element={<CreateCertificate />} />
           <Route path="/certificateRequest" element={<CertificateRequest />} />
           <Route path="/feeDetails" element={<FeeDetails />} />
-          <Route path="/feePayGetway" element={<FeePayGetway />} />
+          {/* <Route path="/feePayGetway" element={<FeePayGetway />} /> */}
+          <Route path="/payFee" element={<PayFee />} />
         </Routes>
       </BrowserRouter>
     </div>

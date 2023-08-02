@@ -1,78 +1,226 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import StudentNavbar from "./StudentNavbar";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useCallback } from "react";
 import useRazorpay from "react-razorpay";
+import numberToWords from "number-to-words";
+import { toast } from "react-toastify";
+
+var access_token;
+var subdomain;
+var headers;
+var studentId;
 
 const PayFee = () => {
+  const [uniName, setUniName] = useState("");
+  const [student, setStudent] = useState([]);
+  const [studentDetails, setStudentDetails] = useState([]);
+  const [feeDetails, setFeeDetails] = useState([]);
+  const [paymentStatus, setPaymentStatus] = useState({});
   const navigate = useNavigate();
   const [Razorpay] = useRazorpay();
 
-  const handlePayment = useCallback(() => {
-    const options = {
-      key: "rzp_test_tZlQ1CoRvo4DTY",
-      amount: "30000",
-      currency: "INR",
-      name: "Acme Corp",
-      description: "Test Transaction",
-      // image: "https://example.com/your_logo",
-      order_id: "order_MG1xpRicjhhT3X",
-      handler: (res) => {
-        console.log(res);
-        var subdomain = "silver_oak";
-        var access_token = "K7G3jeCx9XmZWN8ogc6Zk4pYJKLX4Q1V2on8d9pLwgg";
-        var headers = { Authorization: `Bearer ${access_token}` };
+  useEffect(() => {
+    access_token = localStorage.getItem("access_token");
+    headers = { Authorization: `Bearer ${access_token}` };
 
-        axios
-          .post(
-            `https://9c5d-182-69-164-36.ngrok-free.app/api/v1/students/payments/callback`,
-            {
-              order_id: res.razorpay_order_id,
-              subdomain: subdomain,
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${access_token}`,
-              },
+    const host = window.location.host;
+    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
+    if (arr.length > 0) {
+      subdomain = arr[0];
+    }
+
+    if (subdomain !== null || subdomain !== "") {
+      axios
+        .get(`/universities/${subdomain}/get_authorization_details`)
+        .then((response) => {
+          setUniName(response.data.university.name);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+
+      axios
+        .get(`/students/find_student_by_auth_token?subdomain=${subdomain}`, {
+          headers,
+        })
+        .then((res) => {
+          if (res.data.status === "ok") {
+            if (res.data.data.student.length !== "0") {
+              setStudent(res.data.data.student.name);
+              studentId = res.data.data.student.id;
+              setStudentDetails(res.data.data.student);
+              axios
+                .get(`/fee_details`, {
+                  headers,
+                  params: {
+                    subdomain: subdomain,
+                    fee_detail: {
+                      semester_id: res.data.data.student.semester_id,
+                    },
+                  },
+                })
+                .then((res) => {
+                  if (res.data.status === "ok") {
+                    setFeeDetails(res.data.data.fee_details);
+                    var updatedCombination = {};
+                    res.data.data.fee_details.map((fee_detail) => {
+                      axios.get(`/students/${studentId}/fetch_fee_payment_status`,{
+                        headers,
+                        params: {
+                          subdomain: subdomain,
+                          academic_year: fee_detail.academic_year,
+                          semester_id: fee_detail.semester_id
+                        }
+                      })
+                      .then(res => {
+                        if (res.data.status === "ok"){
+                          if(res.data.data.fee_detail.length !== "0"){
+                            updatedCombination = {
+                              ...updatedCombination,
+                              [`${JSON.stringify(res.data.data.fee_detail.id)}`]:
+                                res.data.data.status,
+                            };
+                            setPaymentStatus(updatedCombination);
+                          }
+                        }
+                      })
+                      .catch(err => {
+                        console.error(err); 
+                      })
+                    })
+                  } else {
+                    setFeeDetails([]);
+                  }
+                })
+                .catch((err) => {
+                  console.error(err);
+                });
+            } else {
+              setStudent([]);
             }
-          )
-          .then((responce) => {
-            console.log(responce);
-          })
-          .catch(function (err) {
-            console.log(err.message);
-          });
-      },
-      prefill: {
-        name: "Piyush Garg",
-        card_number: "5267 3181 8797 5449",
-        email: "youremail@example.com",
-        contact: "9999999999",
-      },
-      notes: {
-        subdomain: "silver_oak",
-        address: "Razorpay Corporate Office",
-      },
-      theme: {
-        color: "#3399cc",
-      },
-    };
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    }
+  }, []);
 
-    const rzpay = new Razorpay(options);
-    rzpay.open();
-    rzpay.on("payment.success", (res) => {
-      console.log(res);
-    });
-  }, [Razorpay]);
+  const handlePayment = useCallback(
+    (e) => {
+      var academic_year = e.target.getAttribute("data-academic-year");
+      var semester_id = e.target.getAttribute("data-semester-id")
+      axios
+        .post(
+          `/students/${studentId}/payments`,
+          {
+            subdomain: subdomain,
+            payment: {
+              academic_year: academic_year,
+            },
+          },
+          {
+            headers,
+          }
+        )
+        .then((res) => {
+          var options = {};
+          if (res.data.status === "created") {
+            if (res.data.data.payment.length !== "0") {
+              options = {
+                key: "rzp_test_tZlQ1CoRvo4DTY",
+                currency: "INR",
+                name: uniName,
+                description: "Test Transaction",
+                order_id: res.data.data.payment.razorpay_order_id,
+                handler: (res) => {
+                  axios
+                    .post(
+                      `/students/payments/callback`,
+                      {
+                        order_id: res.razorpay_order_id,
+                        payment_id: res.razorpay_payment_id,
+                        student_id: studentId,
+                        subdomain: subdomain,
+                      },
+                      {
+                        headers: {
+                          Authorization: `Bearer ${access_token}`,
+                        },
+                      }
+                    )
+                    .then((responce) => {
+                      if(responce.data.status === "ok"){
+                        console.log(responce.data);
+                        toast.success(responce.data.message);
+                        var updatedCombination = {};
+                        axios.get(`/students/${studentId}/fetch_fee_payment_status`,{
+                          headers,
+                          params: {
+                            subdomain: subdomain,
+                            academic_year: academic_year,
+                            semester_id: semester_id
+                          }
+                        })
+                        .then(res => {
+                          if (res.data.status === "ok"){
+                            if(res.data.data.fee_detail.length !== "0"){
+                              updatedCombination = {
+                                ...updatedCombination,
+                                [`${JSON.stringify(res.data.data.fee_detail.id)}`]:
+                                  res.data.data.status,
+                              };
+                              setPaymentStatus(updatedCombination);
+                            }
+                          }
+                        })
+                        .catch(err => {
+                          console.error(err); 
+                        })
+                      } else {
+                        toast.error(responce.data.message);
+                      }
+                    })
+                    .catch(function (err) {
+                      console.log(err.message);
+                    });
+                },
+                prefill: {
+                  name: student,
+                  contact: studentDetails?.["contact_details"]?.["mobile_number"],
+                },
+                notes: {
+                  subdomain: "silver_oak",
+                  address: "Razorpay Corporate Office",
+                },
+                theme: {
+                  color: "#3399cc",
+                },
+              };
+              const rzpay = new Razorpay(options);
+              rzpay.open();
+              rzpay.on("payment.success", (res) => {
+              });
+            }
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    },
+    [Razorpay]
+  );
 
   const handleLogout = () => {
     localStorage.clear();
     navigate("/");
   };
+
   return (
     <div>
-      <StudentNavbar />
+      <StudentNavbar uniName={uniName} studentName={student} />
       <aside
         id="logo-sidebar"
         className="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
@@ -205,28 +353,38 @@ const PayFee = () => {
                     </tr>
                   </thead>
                   <tbody className="text-center divide-y divide-gray-200">
-                    <tr>
-                      <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                        1
-                      </td>
-                      <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                        3rd
-                      </td>
-                      <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                        2022-2023
-                      </td>
-                      <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                        35000
-                      </td>
-                      <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                        <button
-                          className="inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition"
-                          onClick={handlePayment}
-                        >
-                          Click
-                        </button>
-                      </td>
-                    </tr>
+                    {feeDetails.map((fee_detail, index) => {
+                      return (
+                        <tr>
+                          <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                            {index + 1}
+                          </td>
+                          <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                            {numberToWords.toOrdinal(
+                              fee_detail?.["semester"]?.["name"]
+                            ) + " semester"}
+                          </td>
+                          <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                            {fee_detail.academic_year}
+                          </td>
+                          <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                            {fee_detail.amount}
+                          </td>
+                          <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                            <button
+                              data-academic-year={fee_detail.academic_year}
+                              data-semester-id={fee_detail.semester_id}
+                              className={`${paymentStatus?.[fee_detail.id] ? "cursor-not-allowed" : "inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition" } `}
+                              onClick={handlePayment}
+                              disabled={paymentStatus?.[fee_detail.id]}
+                            >
+                              {paymentStatus?.[fee_detail.id] ? "Paid" : "Pay Fees" }
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    <tr></tr>
                   </tbody>
                 </table>
               </div>
