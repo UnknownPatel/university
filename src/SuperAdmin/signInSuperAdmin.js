@@ -8,9 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 var subdomain;
 var domain;
-let regex_mobile = /^[+]?[0-9]{8,15}$/;
-let regex_email =
-  /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+var host = window.location.host;
 
 const SignInSuperAdmin = () => {
   const navigate = useNavigate();
@@ -24,13 +22,9 @@ const SignInSuperAdmin = () => {
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [isStudent, setIsStudent] = useState(false);
   const [disabled, setDisabled] = useState(true);
-  const location = useLocation();
-  const queryParameters = new URLSearchParams(location.search);
 
   useEffect(() => {
-    const host = window.location.host;
-    domain = host.split(".")[2];
-    console.log(domain);
+    domain = host.split(".")[host.split('.').length - 1]
     const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
     if (arr.length > 0) {
       setIsSuperAdmin(arr[1] === "superadmin");
@@ -416,7 +410,7 @@ const SignInSuperAdmin = () => {
                       New here?{" "}
                       <Link
                         className="text-blue-500 hover:text-blue-700 font-semibold"
-                        to={`${window.location.protocol}//${domain}/universityRegistration`}
+                        to={`${window.location.protocol}//${host.split(".")[host.split('.').length - 1]}/universityRegistration`}
                       >
                         Register University
                       </Link>

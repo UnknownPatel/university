@@ -7,7 +7,7 @@ import { ToastContainer, Zoom } from "react-toastify";
 import axios from "axios";
 
 axios.defaults.headers.common["ngrok-skip-browser-warning"] = true;
-axios.defaults.baseURL = "https://9ec6-106-214-127-198.ngrok-free.app/api/v1"
+axios.defaults.baseURL = "http://ec2-3-110-181-152.ap-south-1.compute.amazonaws.com/api/v1"
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
 root.render(
