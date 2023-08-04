@@ -49,27 +49,6 @@ const AcademicUploadSyllabus = () => {
     }
 
     if (subdomain !== null || subdomain !== "") {
-      // if (access_token) {
-      //   axios
-      //     .get(
-      //       `/users/users/find_user?subdomain=${subdomain}`,
-      //       {
-      //         headers: {
-      //           Authorization: `Bearer ${access_token}`,
-      //         },
-      //       }
-      //     )
-      //     .then((responce) => {
-      //       // console.log(responce);
-      //       // console.log(responce.data.roles);
-      //       if (responce.data.roles.length !== 0) {
-      //         roles = responce.data.roles;
-      //       } else {
-      //         roles = [];
-      //       }
-      //     })
-      //     .catch((error) => console.log(error));
-      // }
 
       axios
         .get(
@@ -95,17 +74,22 @@ const AcademicUploadSyllabus = () => {
           setFaculty(
             responce.data.user.first_name + " " + responce.data.user.last_name
           );
+          setCourseId(responce.data.user.course_id);
+          axios
+            .get(
+              `/branches?subdomain=${subdomain}&course_id=${responce.data.user.course_id}`,
+              {
+                headers,
+              }
+            )
+            .then((response) => {
+              setBranches(response.data.data.branches);
+            })
+            .catch((error) => console.log(error));
         })
         .catch((error) => console.log(error));
-      axios
-        .get(
-          `/courses?subdomain=${subdomain}`,
-          { headers }
-        )
-        .then((response) => {
-          setCourses(response.data.data.courses);
-        })
-        .catch((error) => console.log(error));
+
+      
     }
     if (roles === null) {
       toast.error("Something went wrong, please Try Again!", {
@@ -119,28 +103,6 @@ const AcademicUploadSyllabus = () => {
       setSelectedYear(date);
     } else {
       setSelectedYear("");
-    }
-  };
-
-  const handleCourseChange = (e) => {
-    e.preventDefault();
-    if (e.target.value !== "Select course") {
-      setCourseId(e.target.value);
-      var course_id = e.target.value;
-      if (subdomain !== null || subdomain !== "") {
-        axios
-          .get(
-            `/branches?subdomain=${subdomain}&course_id=${course_id}`,
-            { headers }
-          )
-          .then((response) => {
-            setBranches(response.data.data.branches);
-          })
-          .catch((error) => console.log(error));
-      }
-    } else {
-      setCourseId("");
-      setBranches([]);
     }
   };
 
@@ -540,16 +502,6 @@ const AcademicUploadSyllabus = () => {
                     {academic_years.map((year) => {
                       return <option value={year}>{year}</option>;
                     })}
-                  </select>
-
-                  <select
-                    className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                    onChange={handleCourseChange}
-                  >
-                    <option value="Select course">Course</option>
-                    {courses.map((course, index) => (
-                      <option value={course.id}>{course.name}</option>
-                    ))}
                   </select>
 
                   <select

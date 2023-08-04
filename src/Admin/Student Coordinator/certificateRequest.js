@@ -2,17 +2,19 @@ import axios from "axios";
 import React from "react";
 import { useEffect } from "react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import StudentCoordinatorAside from "./studentCoordinatorAside";
+import { SiRottentomatoes } from "react-icons/si";
 
 var acces_token;
 var headers;
 var subdomain;
 
 const CertificateRequest = () => {
-  const navigate = useNavigate();
   const [uniName, setUniName] = useState("");
   const [faculty, setFaculty] = useState("");
+  const [notes, setNotes] = useState("");
+  const [certificateRequests, setCertificateRequests] = useState([]);
 
   useEffect(() => {
     acces_token = localStorage.getItem("access_token");
@@ -27,9 +29,7 @@ const CertificateRequest = () => {
 
     if (subdomain !== null || subdomain !== "") {
       axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/universities/${subdomain}/get_authorization_details`
-        )
+        .get(`/universities/${subdomain}/get_authorization_details`)
         .then((response) => {
           //   console.log(response.data.university.name);
           setUniName(response.data.university.name);
@@ -39,18 +39,33 @@ const CertificateRequest = () => {
         });
 
       axios
-        .get(
-          `http://ec2-13-234-111-241.ap-south-1.compute.amazonaws.com/api/v1/users/users/find_user?subdomain=${subdomain}`,
-          {
-            headers,
-          }
-        )
+        .get(`/users/users/find_user?subdomain=${subdomain}`, {
+          headers,
+        })
         .then((responce) => {
           setFaculty(
             responce.data.user.first_name + " " + responce.data.user.last_name
           );
         })
         .catch((error) => console.log(error));
+
+      axios
+        .get(`/student_certificates`, {
+          headers,
+          params: {
+            subdomain: subdomain,
+          },
+        })
+        .then((res) => {
+          if (res.data.status === "ok") {
+            setCertificateRequests(res.data.data.student_certificates);
+          } else {
+            setCertificateRequests([]);
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+        });
     }
 
     if (roles === null) {
@@ -60,10 +75,57 @@ const CertificateRequest = () => {
     }
   }, []);
 
-  const handleLogout = () => {
-    localStorage.clear();
-    navigate("/");
+  const handleCertificateRequest = (e, requestId, status) => {
+    e.preventDefault();
+    if (notes === "") {
+      toast.error("Please enter some notes for the certificate");
+    } else {
+      if (subdomain !== null || subdomain !== "") {
+        axios
+          .put(
+            `/student_certificates/${requestId}`,
+            {
+              subdomain: subdomain,
+              student_certificate: {
+                notes: notes,
+                status: status,
+              },
+            },
+            {
+              headers,
+            }
+          )
+          .then((res) => {
+            if (res.data.status === "ok") {
+              toast.success(res.data.message);
+              axios
+                .get(`/student_certificates`, {
+                  headers,
+                  params: {
+                    subdomain: subdomain,
+                  },
+                })
+                .then((res) => {
+                  if (res.data.status === "ok") {
+                    setCertificateRequests(res.data.data.student_certificates);
+                  } else {
+                    setCertificateRequests([]);
+                  }
+                })
+                .catch((err) => {
+                  console.error(err);
+                });
+            } else {
+              toast.error(res.data.message);
+            }
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+      }
+    }
   };
+
   return (
     <div>
       <nav className="fixed top-0 z-50 w-full bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
@@ -164,60 +226,7 @@ const CertificateRequest = () => {
           </div>
         </div>
       </nav>
-      <aside
-        id="logo-sidebar"
-        className="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
-        aria-label="Sidebar"
-      >
-        <div className="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
-          <ul className="space-y-2 font-medium">
-            <li>
-              <a
-                href="/student_coordinator_homePage"
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <span className="ml-3">Students Detais</span>
-              </a>
-            </li>
-            <li>
-              <a
-                href="/feeDetails"
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <span className="ml-3">Fee Detais</span>
-              </a>
-            </li>
-            <li>
-              <a
-                href="/createCertificate"
-                className="flex items-center p-2  text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <span className="ml-3">Create Certificate</span>
-              </a>
-            </li>
-            <li>
-              <a
-                href="/certificateRequest"
-                className="flex items-center p-2 bg-slate-600 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <span className="ml-3">Certificate Request</span>
-              </a>
-            </li>
-
-            <li>
-              <div className="p-4">
-                <button
-                  type="button"
-                  className="inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition"
-                  onClick={handleLogout}
-                >
-                  <span className="">Logout</span>
-                </button>
-              </div>
-            </li>
-          </ul>
-        </div>
-      </aside>
+      <StudentCoordinatorAside />
 
       <div className="p-4 sm:ml-64">
         <div className="p-4 rounded-lg mt-14">
@@ -242,37 +251,111 @@ const CertificateRequest = () => {
                     <tr>
                       <th
                         scope="col"
-                        className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                        className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase"
                       >
                         sr.
                       </th>
                       <th
                         scope="col"
-                        className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                        className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
                       >
                         Certificate Name
                       </th>
                       <th
                         scope="col"
-                        className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                        className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
                       >
                         Student Name
                       </th>
                       <th
                         scope="col"
-                        className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                        className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
                       >
                         Enrollment No.
                       </th>
                       <th
                         scope="col"
-                        className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                        className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
                       >
                         No. of Copies
                       </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
+                      >
+                        Notes
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
+                      >
+                        Action
+                      </th>
                     </tr>
                   </thead>
-                  <tbody className="text-center divide-y divide-gray-200"></tbody>
+                  <tbody className="text-center divide-y divide-gray-200">
+                    {certificateRequests.map((request, index) => {
+                      return (
+                        <tr>
+                          <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                            {index + 1}
+                          </td>
+                          <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                            {request?.["certificate"]?.["name"]}
+                          </td>
+                          <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                            {request?.["student"]?.["name"]}
+                          </td>
+                          <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                            {request?.["student"]?.["enrollment_number"]}
+                          </td>
+                          <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                            {request.number_of_copy}
+                          </td>
+                          <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                            <input
+                              className="shadow appearance-none border rounded w-44 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                              id={"input-notes-" + request.id}
+                              onChange={(e) => setNotes(e.target.value)}
+                              type="text"
+                              placeholder="Enter notes for the certificate"
+                            />
+                          </td>
+                          <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                            <button
+                              className="text-center w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
+                              font-semibold focus:outline-none focus:shadow-outline hover:bg-green-600 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
+                              id={"button-request" + request.id}
+                              onClick={(e) => {
+                                handleCertificateRequest(
+                                  e,
+                                  request.id,
+                                  "accepted"
+                                );
+                              }}
+                            >
+                              Accept
+                            </button>
+
+                            <button
+                              className="ml-2 text-center w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
+                              font-semibold focus:outline-none focus:shadow-outline hover:bg-red-600 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
+                              id={"button-request" + request.id}
+                              onClick={(e) => {
+                                handleCertificateRequest(
+                                  e,
+                                  request.id,
+                                  "rejected"
+                                );
+                              }}
+                            >
+                              Reject
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
                 </table>
               </div>
             </div>

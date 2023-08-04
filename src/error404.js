@@ -4,20 +4,14 @@ import { useEffect } from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import StudentCoordinatorAside from "./studentCoordinatorAside";
 
 var acces_token;
 var headers;
 var subdomain;
 
-const CreateCertificate = () => {
-  const navigate = useNavigate();
+const Error404 = () => {
   const [uniName, setUniName] = useState("");
   const [faculty, setFaculty] = useState("");
-  const [hidden, setHidden] = useState(true);
-  const [certificates, setCertificates] = useState([]);
-  const [certificateName, setCertificateName] = useState("");
-  const [certificateFee, setCertificateFee] = useState("");
 
   useEffect(() => {
     acces_token = localStorage.getItem("access_token");
@@ -42,31 +36,6 @@ const CreateCertificate = () => {
         });
 
       axios
-        .get(`/certificates`, {
-          headers,
-          params: {
-            subdomain: subdomain,
-          },
-        })
-        .then((res) => {
-          if (res.data.status === "ok") {
-            if (res.data.data.certificates.length !== 0) {
-              setHidden(false);
-              setCertificates(res.data.data.certificates);
-            } else {
-              setCertificates([]);
-              setHidden(true);
-            }
-          } else {
-            setCertificates([]);
-            setHidden(true);
-          }
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-
-      axios
         .get(`/users/users/find_user?subdomain=${subdomain}`, {
           headers,
         })
@@ -85,66 +54,6 @@ const CreateCertificate = () => {
     }
   }, []);
 
-  const handleCreateCertificate = (e) => {
-    e.preventDefault();
-    if (subdomain !== null || subdomain !== "") {
-      if (certificateName === "") {
-        toast.error("Please enter certificate name");
-      } else if (certificateFee === "") {
-        toast.error("Please enter certificate fee");
-      } else {
-        axios
-          .post(
-            `/certificates`,
-            {
-              subdomain: subdomain,
-              certificate: {
-                name: certificateName,
-                amount: certificateFee,
-              },
-            },
-            {
-              headers,
-            }
-          )
-          .then((res) => {
-            if (res.data.status === "created") {
-              if (res.data.data.certificate.length !== "0") {
-                setCertificateName("");
-                setCertificateFee("");
-                toast.success(res.data.message);
-                axios
-                  .get(`/certificates`, {
-                    headers,
-                    params: {
-                      subdomain: subdomain,
-                    },
-                  })
-                  .then((res) => {
-                    if (res.data.status === "ok") {
-                      setHidden(false);
-                      setCertificates(res.data.data.certificates);
-                    } else {
-                      setCertificates([]);
-                    }
-                  })
-                  .catch((err) => {
-                    console.error(err);
-                  });
-              }
-            }
-          })
-          .catch((err) => {
-            console.error(err);
-          });
-      }
-    }
-  };
-
-  const handleLogout = () => {
-    localStorage.clear();
-    navigate("/");
-  };
   return (
     <div>
       <nav className="fixed top-0 z-50 w-full bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
@@ -245,99 +154,20 @@ const CreateCertificate = () => {
           </div>
         </div>
       </nav>
-      <StudentCoordinatorAside/>
+
+      <div className="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700">
+        
+      </div>
 
       <div className="p-4 sm:ml-64">
-        <div className="p-4 rounded-lg mt-14">
-          <div className="text-center text-4xl">
-            <p>Certificate</p>
-          </div>
-        </div>
-        <div className="mt-5 ml-2">
-          <input
-            type="text"
-            name="certificateName"
-            value={certificateName}
-            id="certificateName"
-            onChange={(e) => setCertificateName(e.target.value)}
-            placeholder="Enter Certificate Name"
-            className="h-10 border-0 border-b-2 border-b-gray-700 mt-1 rounded px-4 bg-gray-50"
-          />
-          <input
-            type="text"
-            name="reason"
-            id="reason"
-            value={certificateFee}
-            onChange={(e) => setCertificateFee(e.target.value)}
-            placeholder="Enter Certificate fee"
-            className="h-10 border-0 border-b-2 border-b-gray-700 mt-1 ml-2 rounded px-4 bg-gray-50"
-          />
-          <button
-            className="py-2 px-3 mr-7 ml-2 bg-gray-800 rounded-2xl text-white font-bold"
-            onClick={handleCreateCertificate}
-          >
-            <p className="inline-flex">Create</p>
-          </button>
-        </div>
-        <div
-          id="certificate_viewport"
-          className={`${hidden ? "hidden" : "flex"} flex-col mt-5`}
-          // style={{ height: 485 }}
-        >
-          <div className="">
-            <div className="p-1.5 w-full inline-block align-middle">
-              <div className="border rounded-lg">
-                <table
-                  id="my-table"
-                  className="min-w-full divide-y table-auto text-center divide-gray-200"
-                >
-                  <thead className="sticky top-0 bg-gray-50">
-                    <tr>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                      >
-                        sr.
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                      >
-                        Certificate Name
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                      >
-                        Certificate Fee
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="text-center divide-y divide-gray-200">
-                    {certificates.map((certificate, index) => {
-                      return (
-                        <tr key={certificate.id}>
-                          <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                            {index + 1}
-                          </td>
-                          <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                            {certificate.name}
-                          </td>
-                          <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                            {certificate.amount}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+          <div className="p-4 rounded-lg mt-14">
+            <div className="text-center text-4xl">
+              <p> Page Not Found </p>
             </div>
           </div>
         </div>
-      </div>
     </div>
   );
 };
 
-export default CreateCertificate;
+export default Error404;

@@ -1,10 +1,81 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
 import StudentNavbar from "./StudentNavbar";
-import { MdOutlineFileDownload } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { toast } from "react-toastify";
+
+var acces_token;
+var headers;
+var subdomain;
 
 const CertificateTracking = () => {
   const navigate = useNavigate();
+  const [uniName, setUniName] = useState("");
+  const [student, setStudent] = useState([]);
+  const [studentId, setStudentId] = useState("");
+  const [semesterId, setSemesterId] = useState("");
+  const [certificateRequests, setCertificateRequests] = useState([]);
+
+  useEffect(() => {
+    acces_token = localStorage.getItem("access_token");
+    headers = { Authorization: `Bearer ${acces_token}` };
+
+    const host = window.location.host;
+    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
+    if (arr.length > 0) {
+      subdomain = arr[0];
+    }
+
+    if (subdomain !== null || subdomain !== "") {
+      axios
+        .get(`/universities/${subdomain}/get_authorization_details`)
+        .then((response) => {
+          setUniName(response.data.university.name);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+
+      axios
+        .get(`/students/find_student_by_auth_token?subdomain=${subdomain}`, {
+          headers,
+        })
+        .then((res) => {
+          if (res.data.status === "ok") {
+            if (res.data.data.student.length !== "0") {
+              setStudent(res.data.data.student.name);
+              setStudentId(res.data.data.student.id);
+              setSemesterId(res.data.data.student.semester_id);
+              axios
+                .get(`/student_certificates`, {
+                  headers,
+                  params: {
+                    subdomain: subdomain,
+                    student_certificate: {
+                      student_id: res.data.data.student.id,
+                    },
+                  },
+                })
+                .then((res) => {
+                  if (res.data.status === "ok") {
+                    setCertificateRequests(res.data.data.student_certificates);
+                  } else {
+                    setCertificateRequests([]);
+                  }
+                })
+                .catch((err) => {
+                  console.error(err);
+                });
+            } else {
+              setStudent([]);
+            }
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    }
+  }, []);
 
   const handleLogout = () => {
     localStorage.clear();
@@ -12,7 +83,7 @@ const CertificateTracking = () => {
   };
   return (
     <div>
-      <StudentNavbar />
+      <StudentNavbar uniName={uniName} studentName={student} />
       <aside
         id="logo-sidebar"
         className="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
@@ -137,17 +208,18 @@ const CertificateTracking = () => {
                         >
                           Approval Date
                         </th>
-                        <th
-                          scope="col"
-                          className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase"
-                        >
-                          Payment Receipt
-                        </th>
+                        
                         <th
                           scope="col"
                           className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase"
                         >
                           Status
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase"
+                        >
+                          Acknowledgement
                         </th>
                         <th
                           scope="col"
@@ -164,15 +236,30 @@ const CertificateTracking = () => {
                       </tr>
                     </thead>
                     <tbody className="text-center divide-y divide-gray-200">
-                      <tr>
-                        <td className=" px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap"></td>
-                        <td className=" px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap"></td>
-                        <td className=" px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap"></td>
-                        <td className=" px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap"></td>
-                        <td className=" px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap"></td>
-                        <td className=" px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap"></td>
-                        <td className=" px-6 py-4 text-sm flex justify-center text-gray-800 whitespace-nowrap"></td>
-                      </tr>
+                      {certificateRequests.map((request, index) => {
+                        return (
+                          <tr key={request.id}>
+                            <td className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase">
+                              {request?.["certificate"]?.["name"]}
+                            </td>
+                            <td className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase">
+                              {semesterId}
+                            </td>
+                            <td className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase">
+                              {request.number_of_copy}
+                            </td>
+                            <td className="px-6 py-3 text-xs font-bold text-center text-gray-500">
+                              {request.requested_date}
+                            </td>
+                            <td className="px-6 py-3 text-xs font-bold text-center text-gray-500">
+                              {request.approval_date}
+                            </td>
+                            <td className="px-6 py-3 text-xs font-bold text-center text-gray-500">{request.status}</td>
+                            <td className="px-6 py-3 text-xs font-bold text-center text-gray-500">{request.notes}</td>
+                            <td className="px-6 py-3 text-xs font-bold text-center text-gray-500"></td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>

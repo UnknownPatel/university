@@ -162,6 +162,11 @@ const AssignRole = () => {
           axios
             .get(`/users/users/assigned_role_users?subdomain=${subdomain}`, {
               headers,
+              params: {
+                user: {
+                  course_id: courseId,
+                },
+              },
             })
             .then((get_response) => {
               if (get_response.data.status === "ok") {
@@ -221,6 +226,11 @@ const AssignRole = () => {
           axios
             .get(`/users/users/assigned_role_users?subdomain=${subdomain}`, {
               headers,
+              params: {
+                user: {
+                  course_id: courseId,
+                },
+              },
             })
             .then((get_response) => {
               if (get_response.data.status === "ok") {

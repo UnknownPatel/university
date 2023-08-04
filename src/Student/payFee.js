@@ -47,7 +47,7 @@ const PayFee = () => {
         })
         .then((res) => {
           if (res.data.status === "ok") {
-            if (res.data.data.student.length !== "0") {
+            if (res.data.data.student.length !== 0) {
               setStudent(res.data.data.student.name);
               studentId = res.data.data.student.id;
               setStudentDetails(res.data.data.student);
@@ -111,7 +111,8 @@ const PayFee = () => {
   const handlePayment = useCallback(
     (e) => {
       var academic_year = e.target.getAttribute("data-academic-year");
-      var semester_id = e.target.getAttribute("data-semester-id")
+      var semester_id = e.target.getAttribute("data-semester-id");
+      console.log(studentDetails);
       axios
         .post(
           `/students/${studentId}/payments`,
@@ -119,6 +120,7 @@ const PayFee = () => {
             subdomain: subdomain,
             payment: {
               academic_year: academic_year,
+              payment_type: "fee"
             },
           },
           {

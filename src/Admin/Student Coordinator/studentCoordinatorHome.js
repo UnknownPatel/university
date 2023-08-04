@@ -9,6 +9,7 @@ import BasicDetailsModal from "./modals/basicDetailsModal";
 import AddressDetailsModal from "./modals/addressDetailsModal";
 import ParentDetailsModal from "./modals/parentDetailsModal";
 import GuardianDetailsModal from "./modals/guardianDetailsModal";
+import StudentCoordinatorAside from "./studentCoordinatorAside";
 
 var acces_token;
 var headers;
@@ -318,44 +319,7 @@ const StudentCoordinatorHome = () => {
           </div>
         </div>
       </nav>
-      <aside
-        id="logo-sidebar"
-        className="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
-        aria-label="Sidebar"
-      >
-        <div className="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
-          <ul className="space-y-2 font-medium">
-            <li>
-              <a
-                href="/student_coordinator_homePage"
-                className="flex items-center p-2 bg-slate-600 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <span className="ml-3">Students Detais</span>
-              </a>
-            </li>
-            <li>
-              <a
-                href="/feeDetails"
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <span className="ml-3">fee Detais</span>
-              </a>
-            </li>
-
-            <li>
-              <div className="p-4">
-                <button
-                  type="button"
-                  className="inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition"
-                  onClick={handleLogout}
-                >
-                  <span className="">Logout</span>
-                </button>
-              </div>
-            </li>
-          </ul>
-        </div>
-      </aside>
+      <StudentCoordinatorAside/>
 
       <div className="p-4 sm:ml-64">
         <div className="p-4 rounded-lg mt-10">

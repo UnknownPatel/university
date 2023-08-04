@@ -544,6 +544,8 @@ const AssignMarksEntry = () => {
             e.target.classList.remove("cursor-not-allowed");
             e.target.innerHTML = "Update";
             if (res.data.message === "Update successful") {
+              const button = document.getElementById('search-button');
+              button.click();
               toast.success(res.data.message, {
                 position: toast.POSITION.BOTTOM_LEFT,
               });
@@ -919,6 +921,7 @@ const AssignMarksEntry = () => {
                 </select>
 
                 <button
+                  id="search-button"
                   className="text-center ml-4 w-auto bg-transparent text-slate-950 p-3 rounded-2xl tracking-wide border border-slate-950
                 font-semibold focus:outline-none focus:shadow-outline hover:bg-gray-700 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
                   onClick={handleFilterSubmit}

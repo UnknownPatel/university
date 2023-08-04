@@ -2,18 +2,23 @@ import React, { useEffect, useState } from "react";
 import StudentNavbar from "./StudentNavbar";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 var access_token;
 var subdomain;
 var headers;
-var studentId;
 var amount;
 
 const StudentCertificatePage = () => {
   const navigate = useNavigate();
   const [uniName, setUniName] = useState("");
   const [student, setStudent] = useState([]);
+  const [studentId, setStudentId] = useState("");
   const [certificates, setCertificates] = useState([]);
+  const [certificateId, setCertificateId] = useState("");
+  const [numberOfCopies, setNumberOfCopies] = useState("");
+  const [reason, setReason] = useState("");
+  const [text, setText] = useState("");
   const [fees, setFees] = useState("");
 
   useEffect(() => {
@@ -46,7 +51,6 @@ const StudentCertificatePage = () => {
         .then((res) => {
           if (res.data.status === "ok") {
             if (res.data.data.certificates.length !== 0) {
-              console.log("Hello");
               setCertificates(res.data.data.certificates);
             } else {
               setCertificates([]);
@@ -67,6 +71,7 @@ const StudentCertificatePage = () => {
           if (res.data.status === "ok") {
             if (res.data.data.student.length !== "0") {
               setStudent(res.data.data.student.name);
+              setStudentId(res.data.data.student.id);
             } else {
               setStudent([]);
             }
@@ -78,17 +83,82 @@ const StudentCertificatePage = () => {
     }
   }, []);
 
-  const handleCertificateChange = (e) => {
+  const handleCertificateTypeChange = (e) => {
     e.preventDefault();
     var selectedIndex = e.target.options.selectedIndex;
-    amount = e.target.options[selectedIndex].getAttribute("data-amount");
-  }
+    if (e.target.value === "Select Type") {
+      setText("");
+      setCertificateId("");
+      amount = "";
+    } else {
+      amount = e.target.options[selectedIndex].getAttribute("data-amount");
+      setCertificateId(e.target.value);
+      setText(`₹ ${amount} per copy`);
+    }
+  };
 
   const handleNoOfCopiesChange = (e) => {
     e.preventDefault();
-    var no_of_copies = e.target.value;
-    setFees(amount * no_of_copies);
-  }
+    if (e.target.value == "Select Number of copies") {
+      setFees("");
+      setNumberOfCopies("");
+    } else {
+      if (amount == "") {
+        setFees(amount);
+      } else {
+        setFees(amount * e.target.value);
+      }
+      setNumberOfCopies(e.target.value);
+    }
+  };
+
+  const handleCertificateRequest = (e) => {
+    console.log(certificateId);
+    console.log(numberOfCopies);
+    console.log(fees);
+    console.log(reason);
+    if (certificateId === "") {
+      toast.error("Please select Certificate type");
+    } else if (numberOfCopies === "") {
+      toast.error("Please select Number of copies ( Min : 1 )");
+    } else if (fees === "") {
+      toast.error("Please select number of copies ( Min : 1 )");
+    } else if (reason === "") {
+      toast.error(
+        "You need to mention the reason in order to request the certificate"
+      );
+    } else {
+      if (subdomain !== null || subdomain !== "") {
+        console.log("Hello");
+        axios
+          .post(
+            `/students/${studentId}/request_certificate`,
+            {
+              subdomain: subdomain,
+              student_certificate: {
+                number_of_copy: numberOfCopies,
+                certificate_id: certificateId,
+                amount: fees,
+                reason: reason,
+              },
+            },
+            {
+              headers
+            }
+          )
+          .then((res) => {
+            if (res.data.status === "created"){
+              toast.success(res.data.message);
+            } else {
+              toast.error(res.data.message);
+            }
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+      }
+    }
+  };
 
   const handleLogout = () => {
     localStorage.clear();
@@ -180,21 +250,41 @@ const StudentCertificatePage = () => {
           <div className="text-center text-4xl">
             <p>Request For Certificate</p>
           </div>
-          <div className="mt-5">
+          <div className="mt-5 flex flex-col">
+            <label htmlFor="certificate-type" className="px-3 py-2">
+              Certificate Type *
+            </label>
             <select
-              onChange={handleCertificateChange}
-              className=" form-select rounded justify-center text-sm md:text-base lg:text-base ml-3 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto">
-              <option value="">--- Select Certificate Type ---</option>
+              onChange={handleCertificateTypeChange}
+              id="certificate-type"
+              className="form-select rounded justify-center text-sm md:text-base lg:text-base ml-3 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 -mt-2 w-96"
+            >
+              <option value="Select Type">Select Type</option>
               {certificates.map((certificate) => {
                 return (
-                  <option value={certificate.id} data-amount={certificate.amount}>{certificate.name}</option>
-                )
+                  <option
+                    key={certificate.id}
+                    value={certificate.id}
+                    data-amount={certificate.amount}
+                  >
+                    {certificate.name}
+                  </option>
+                );
               })}
             </select>
-            <select 
+          </div>
+          <div className="mt-2 flex flex-col">
+            <label htmlFor="number-of-copies" className="px-3 py-2">
+              {" "}
+              Number of Copies *
+            </label>
+            <select
               onChange={handleNoOfCopiesChange}
-              className=" form-select rounded justify-center text-sm md:text-base lg:text-base ml-3 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto">
-              <option value="">--- Select No. of copies ---</option>
+              className=" form-select rounded justify-center text-sm md:text-base lg:text-base ml-3 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-96 -mt-2"
+            >
+              <option value="Select Number of copies">
+                Select Number of copies
+              </option>
               <option value="1">1</option>
               <option value="2">2</option>
               <option value="3">3</option>
@@ -203,21 +293,48 @@ const StudentCertificatePage = () => {
               <option value="6">6</option>
               <option value="7">7</option>
             </select>
+            <span
+              className={`${
+                text === "" ? "hidden" : "text-sm py-2 text-right w-96"
+              }`}
+            >
+              {text}
+            </span>
           </div>
-          <div className="mt-5">
+          <div className="mt-2 flex flex-col">
+            <label htmlFor="reason" className="px-3 py-2">
+              {" "}
+              Reason *
+            </label>
             <textarea
-              type=""
+              rows="5"
               name="reason"
               id="reason"
+              onChange={(e) => {
+                setReason(e.target.value);
+              }}
               placeholder="Reason for Certificate"
-              className="h-10 border-0 border-b-2 border-b-gray-700 mt-1 ml-3 rounded px-4 bg-gray-50"
+              className="border-0 border-b-2 border-b-gray-700 ml-3 w-96 rounded px-3 py-2 -mt-2 bg-gray-50"
             />
-            <div className="mt-5 ml-5">
-            fees:-{fees}
-            </div>
+          </div>
+          <div className="mt-2 flex flex-col">
+            <label htmlFor="" className="px-3 py-2">
+              {" "}
+              Amount{" "}
+            </label>
+            <input
+              type="text"
+              value={fees}
+              className="bg-gray-50 border-0 border-b-2 text-gray-900 text-sm rounded-lg block w-96 px-3 py-2 ml-3 border-gray-600 "
+              placeholder="₹ 0"
+              disabled={true}
+            />
           </div>
           <div className="mt-5">
-            <button className="bg-slate-500 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded">
+            <button
+              onClick={handleCertificateRequest}
+              className="bg-slate-500 hover:bg-slate-700 text-white font-bold py-2 px-3 ml-3 rounded"
+            >
               Submit Request
             </button>
           </div>

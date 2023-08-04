@@ -76,9 +76,7 @@ const LockMarks = () => {
     if (subdomain !== null || subdomain !== "") {
       // Authorization Details
       axios
-        .get(
-          `/universities/${subdomain}/get_authorization_details`
-        )
+        .get(`/universities/${subdomain}/get_authorization_details`)
         .then((response) => {
           //   console.log(response.data.university.name);
           setUniName(response.data.university.name);
@@ -89,12 +87,9 @@ const LockMarks = () => {
 
       //  Get Current User Details
       axios
-        .get(
-          `/users/users/find_user?subdomain=${subdomain}`,
-          {
-            headers,
-          }
-        )
+        .get(`/users/users/find_user?subdomain=${subdomain}`, {
+          headers,
+        })
         .then((responce) => {
           axios
             .get("/examination_names", {
@@ -190,6 +185,55 @@ const LockMarks = () => {
         .catch((error) => console.log(error));
     }
   }, []);
+
+  const handleLockMarks = (e, subjectId) => {
+    e.preventDefault();
+
+    let selectedFilter = {};
+    if (examinationName === "") {
+      toast.error("Please select examination name", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (selectedYear === "") {
+      toast.error("Please select year", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (courseId === "" || courseId === "Select Course") {
+      toast.error("Please select course", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (branchId === "") {
+      toast.error("Please select branch", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (semesterId === "") {
+      toast.error("Please select semester", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (divisionId === "") {
+      toast.error("Please select division", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else if (type === "") {
+      toast.error("Please select type", {
+        position: toast.POSITION.BOTTOM_LEFT,
+      });
+    } else {
+      selectedFilter = {
+        examination_name: examinationName,
+        academic_year: selectedYear,
+        course_id: courseId,
+        branch_id: branchId,
+        semester_id: semesterId,
+        division_id: divisionId,
+        examination_type: type,
+      };
+    }
+
+    selectedFilter["subject_id"] = subjectId;
+
+    setSelectedFilter(selectedFilter);
+  };
 
   const handleSemesterChange = (e) => {
     e.preventDefault();
@@ -296,16 +340,13 @@ const LockMarks = () => {
                   response.data.data.subjects.map((subject) => {
                     selectedFilter["subject_id"] = subject.id;
                     axios
-                      .get(
-                        `/student_marks/fetch_status`,
-                        {
-                          headers,
-                          params: {
-                            subdomain: subdomain,
-                            student_mark: selectedFilter,
-                          },
-                        }
-                      )
+                      .get(`/student_marks/fetch_status`, {
+                        headers,
+                        params: {
+                          subdomain: subdomain,
+                          student_mark: selectedFilter,
+                        },
+                      })
                       .then((res) => {
                         console.log(res);
                         if (res.data.message === "Details found") {
@@ -675,7 +716,9 @@ const LockMarks = () => {
                                   onClick={(e) => {
                                     setLockMarkShowModal(true);
                                     setSubjectId(subject.id);
+                                    console.log(subject.id);
                                     setLockSubjectName(subject.name);
+                                    handleLockMarks(e, subject.id);
                                   }}
                                 >
                                   Lock Marks

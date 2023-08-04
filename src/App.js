@@ -48,6 +48,7 @@ import UpdateProfile from "./Student/updateProfile";
 import CreateCertificate from "./Admin/Student Coordinator/createCertificate";
 import CertificateRequest from "./Admin/Student Coordinator/certificateRequest";
 import PayFee from "./Student/payFee";
+import Error404 from "./error404";
 
 function App() {
   return (
@@ -138,7 +139,7 @@ function App() {
           <Route path="/ChangePassword" element={<ChangePassword />} />
           <Route path="/facultyDashboard" element={<FacultyDashboard />} />
           <Route
-            path="/student_coordinator_homePage"
+            path="/studentDetails"
             element={<StudentCoordinatorHome />}
           />
           <Route path="/createCertificate" element={<CreateCertificate />} />
@@ -146,6 +147,7 @@ function App() {
           <Route path="/feeDetails" element={<FeeDetails />} />
           {/* <Route path="/feePayGetway" element={<FeePayGetway />} /> */}
           <Route path="/payFee" element={<PayFee />} />
+          <Route path="*" element={<Error404/>}/>
         </Routes>
       </BrowserRouter>
     </div>

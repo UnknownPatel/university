@@ -24,9 +24,11 @@ const LockMarkModal = ({
     if (arr.length > 0) {
       subdomain = arr[0];
     }
+    console.log(id);
   }, []);
 
   const handleLockMark = (e) => {
+    e.preventDefault();
     selectedFilter["subject_id"] = id;
 
     if (id !== "") {
@@ -92,7 +94,7 @@ const LockMarkModal = ({
                 <div className="items-center gap-2 mt-3 sm:flex">
                   <button
                     className="w-full mt-2 p-2.5 flex-1 text-white bg-red-600 rounded-md outline-none ring-offset-2 ring-red-600 focus:ring-2"
-                    onClick={() => handleLockMark()}
+                    onClick={(e) => handleLockMark(e)}
                   >
                     Lock Marks
                   </button>
