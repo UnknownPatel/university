@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, Link, useParams, useLocation } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Loader from "../Admin/loader";
 
 var subdomain;
 var domain;
@@ -22,39 +23,114 @@ const SignInSuperAdmin = () => {
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [isStudent, setIsStudent] = useState(false);
   const [disabled, setDisabled] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isApproved, setIsApproved] = useState(false);
+  const [isRegistered, setIsRegistered] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  var access_token;
 
   useEffect(() => {
-    domain = host.split(".")[host.split('.').length - 1]
+    setLoading(true);
+    domain = host.split(".")[host.split(".").length - 1];
+    access_token = localStorage.getItem("access_token");
     const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
     if (arr.length > 0) {
       setIsSuperAdmin(arr[1] === "superadmin");
       setIsStudent(arr[1] === "student");
-      setDisabled(arr[1] !== "superadmin");
+      setDisabled(arr[1] !== "superadmin" && arr[0] !== "admin");
+      setIsAdmin(arr[0] === "admin");
       subdomain = arr[0];
     }
 
-    if (subdomain !== "" || subdomain !== null) {
-      axios
-        .get(`/universities/${subdomain}/get_authorization_details`)
-        .then((response) => {
-          if (response.data.status === "ok") {
-            setClentId(response.data.doorkeeper.client_id);
-            setClientSecret(response.data.doorkeeper.client_secret);
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+    if (subdomain === "admin") {
+      setLoading(true);
+      setIsApproved(true);
+      if (access_token !== null) {
+        var headers = { Authorization: `Bearer ${access_token}` };
+        axios
+          .get(`/find_user`, {
+            headers,
+          })
+          .then((res) => {
+            console.log(res.data.roles.includes("admin"));
+            if (res.data.status === "ok") {
+              if (res.data.roles.includes("admin")) {
+                toast.error("You are already logged in!");
+                navigate("/pendingRequests");
+              }
+            }
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+      } else {
+        axios
+          .get(`/get_authorization_details`)
+          .then((res) => {
+            if (res.data.status === "ok") {
+              setClentId(res.data.doorkeeper.client_id);
+              setClientSecret(res.data.doorkeeper.client_secret);
+            }
+          })
+          .catch((err) => {
+            console.error(err);
+          })
+          .finally(() => {
+            setLoading(false);
+          });
+      }
+    } else if (subdomain !== "" || subdomain !== null) {
+      setLoading(true);
+      if (access_token !== null) {
+        var headers = { Authorization: `Bearer ${access_token}` };
+        axios
+          .get(`/users/users/find_user?subdomain=${subdomain}`, {
+            headers,
+          })
+          .then((responce) => {
+            if (responce.data.status === "ok") {
+              if (responce.data.roles.includes("super_admin")) {
+                navigate("/uploadExcel");
+              }
+            }
+          })
+          .catch((error) => console.log(error))
+          .finally(() => {
+            setLoading(false);
+          });
+      } else {
+        axios
+          .get(`/universities/${subdomain}/get_authorization_details`)
+          .then((response) => {
+            console.log(response.data);
+            if (response.data.status === "ok") {
+              if (response.data.university.status === "accepted") {
+                setClentId(response.data.doorkeeper.client_id);
+                setClientSecret(response.data.doorkeeper.client_secret);
+                setIsApproved(true);
+              }
+              setIsRegistered(response.data.university.status !== null);
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+          })
+          .finally(() => {
+            setLoading(false);
+          });
+      }
     }
   }, []);
 
   const handleSendOTP = (e) => {
-    console.log("Clicked");
     e.target.innerHTML = "Sending OTP ... ";
 
     if (isStudent) {
       if (getMobileNumber === "") {
         toast.error("Please enter mobile number to recieve OTP");
+        setDisabled(false);
+        e.target.innerHTML = "Send Otp";
       } else {
         if (subdomain !== "" || subdomain !== null) {
           axios
@@ -117,25 +193,40 @@ const SignInSuperAdmin = () => {
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const login_btn = document.getElementById("login-btn");
+  const disable_login_button = (login_btn) => {
     login_btn.disabled = true;
     login_btn.innerHTML = "Please wait ...";
     login_btn.classList.add("cursor-not-allowed");
+  };
 
+  const enable_login_button = (login_btn) => {
+    login_btn.disabled = false;
+    login_btn.innerHTML = "Log In";
+    login_btn.classList.remove("cursor-not-allowed");
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const login_btn = document.getElementById("login-btn");
+    disable_login_button(login_btn);
     if (clientId !== "" && clientSecret !== "") {
       var request_body = {
         grant_type: "password",
-        subdomain: subdomain,
         client_id: clientId,
         client_secret: clientSecret,
       };
+
+      if (!isAdmin) {
+        request_body["subdomain"] = subdomain;
+      }
+
       if (isSuperAdmin) {
         if (getEmail === "") {
           toast.error("Please enter email");
+          enable_login_button(login_btn);
         } else if (getPassword === "") {
           toast.error("Password can't be blank");
+          enable_login_button(login_btn);
         } else {
           request_body["email"] = getEmail;
           request_body["password"] = getPassword;
@@ -164,9 +255,7 @@ const SignInSuperAdmin = () => {
                         toast.success("Successfully Logged in");
                         navigate("/uploadExcel");
                       } else {
-                        login_btn.disabled = false;
-                        login_btn.innerHTML = "Log In";
-                        login_btn.classList.remove("cursor-not-allowed");
+                        enable_login_button(login_btn);
                         toast.error(
                           "You dont have rights to access the page, contact your administrator"
                         );
@@ -179,9 +268,7 @@ const SignInSuperAdmin = () => {
             .catch((err) => {
               console.log(err);
               console.log(err.response.data.error);
-              login_btn.disabled = false;
-              login_btn.innerHTML = "Log In";
-              login_btn.classList.remove("cursor-not-allowed");
+              enable_login_button(login_btn);
               if (err.response.data.error === "invalid_grant") {
                 toast.error("Invalid Credentials", {
                   position: toast.POSITION.BOTTOM_LEFT,
@@ -196,8 +283,10 @@ const SignInSuperAdmin = () => {
       } else if (isStudent) {
         if (getMobileNumber === "") {
           toast.error("Please enter Mobile Number");
+          enable_login_button(login_btn);
         } else if (otp === "") {
           toast.error("OTP can't be blank");
+          enable_login_button(login_btn);
         } else {
           request_body["otp"] = otp;
           request_body["mobile_number"] = getMobileNumber;
@@ -205,35 +294,74 @@ const SignInSuperAdmin = () => {
             axios
               .post(`/oauth/token`, request_body)
               .then((res) => {
-                login_btn.disabled = false;
-                login_btn.innerHTML = "Log In";
-                login_btn.classList.remove("cursor-not-allowed");
                 if (res.data.access_token !== "") {
                   const accessToken = res.data.access_token;
                   localStorage.setItem("access_token", accessToken);
                   toast.success("Successfully Logged in!");
                   navigate("/studentHomePage");
                 } else {
-                  login_btn.disabled = false;
-                  login_btn.innerHTML = "Log In";
-                  login_btn.classList.remove("cursor-not-allowed");
+                  enable_login_button(login_btn);
                   toast.error("Not allowed");
                 }
               })
               .catch((err) => {
                 toast.error("Invalid OTP");
-                login_btn.disabled = false;
-                login_btn.innerHTML = "Log In";
-                login_btn.classList.remove("cursor-not-allowed");
+                enable_login_button(login_btn);
                 console.error(err);
               });
           }
         }
+      } else if (isAdmin) {
+        if (getEmail === "") {
+          toast.error("Please enter email");
+          enable_login_button(login_btn);
+        } else if (getPassword === "") {
+          toast.error("Password can't be blank");
+          enable_login_button(login_btn);
+        } else {
+          request_body["email"] = getEmail;
+          request_body["password"] = getPassword;
+
+          axios
+            .post("/oauth/token", request_body)
+            .then((res) => {
+              login_btn.disabled = false;
+              login_btn.innerHTML = "Log In";
+              login_btn.classList.remove("cursor-not-allowed");
+              if (res.data.accessToken !== "") {
+                const accessToken = res.data.access_token;
+                localStorage.setItem("access_token", accessToken);
+                axios
+                  .get(`/users/users/find_user`, {
+                    headers: {
+                      Authorization: `Bearer ${accessToken}`,
+                    },
+                  })
+                  .then((res) => {
+                    if (res.status === 200) {
+                      const roles = res.data.roles;
+                      if (roles.includes("admin")) {
+                        toast.success("Successfully Logged in");
+                        navigate("/pendingRequests");
+                      }
+                    }
+                  })
+                  .catch((err) => {
+                    console.error(err);
+                  });
+              }
+            })
+            .catch((err) => {
+              console.error(err);
+            });
+        }
       } else {
         if (getEmail === "") {
           toast.error("Please enter Email Address / Mobile Number");
+          enable_login_button(login_btn);
         } else if (otp === "") {
           toast.error("OTP can't be blank");
+          enable_login_button(login_btn);
         } else {
           request_body["otp"] = otp;
           request_body["email"] = getEmail;
@@ -277,9 +405,7 @@ const SignInSuperAdmin = () => {
                 }
               })
               .catch((err) => {
-                login_btn.disabled = false;
-                login_btn.innerHTML = "Log In";
-                login_btn.classList.remove("cursor-not-allowed");
+                enable_login_button(login_btn);
                 console.error(err);
               });
           }
@@ -289,139 +415,185 @@ const SignInSuperAdmin = () => {
   };
 
   return (
-    <div className="h-screen flex items-center justify-center signinimage bg-cover">
-      <div className="-mt-32 w-96">
+    <div className="h-screen flex items-center justify-center bg-gradient-to-r from-gray-500 to-gray-900 bg-cover">
+      {loading ? (
+        <>
+          <Loader />
+        </>
+      ) : (isRegistered && isApproved) || isAdmin ? (
         <div>
-          <h2 className="font-semibold text-xl p-5 text-white"></h2>
-
-          <div className="bg-white rounded shadow-lg p-4 px-4 md:p-8 mb-6 mt-20">
-            <div className="flex justify-center mb-3">
-              <h2 className="font-semibold text-xl text-slate-900">
-                {" "}
-                Log In to your account
-              </h2>
-            </div>
-
-            <div className="grid gap-4 gap-y-2 text-sm grid-cols-1 lg:grid-cols-3">
-              <div className="lg:col-span-3">
-                <div className="grid gap-4 gap-y-2 text-sm grid-cols-2 md:grid-cols-9">
-                  <div className={`${isStudent ? "hidden" : ""} md:col-span-9`}>
-                    <label className="block text-gray-700">
-                      Enter Email Address
-                    </label>
-                    <input
-                      type="email"
-                      value={getEmail}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="Enter Email Address"
-                      className="w-full px-4 py-3 rounded-lg bg-gray-200 mt-2 border focus:border-blue-500 focus:bg-white focus:outline-none"
-                      autofocus
-                      autocomplete
-                      required
-                    />
-                  </div>
-
-                  <div className={`${isStudent ? "" : "hidden"} md:col-span-9`}>
-                    <label className="block text-gray-700">
-                      Enter Mobile Number
-                    </label>
-                    <input
-                      type="text"
-                      value={getMobileNumber}
-                      onChange={(e) => setMobileNumber(e.target.value)}
-                      placeholder="Enter Mobile Number"
-                      className="w-full px-4 py-3 rounded-lg bg-gray-200 mt-2 border focus:border-blue-500 focus:bg-white focus:outline-none"
-                      autofocus
-                      autocomplete
-                      required
-                    />
-                  </div>
-
-                  <div className="flex justify-end w-full md:col-span-9">
-                    <button
-                      onClick={handleSendOTP}
-                      className={`${
-                        isSuperAdmin ? "hidden" : "flex"
-                      } pl-3 max-w-full text-blue-500 text-end cursor-pointer`}
-                    >
-                      Send Otp
-                    </button>
-                  </div>
-
-                  <div
-                    className={`${
-                      isSuperAdmin ? "mt-4" : "-mt-4"
-                    } md:col-span-9`}
-                  >
-                    <label className="block text-gray-700">
-                      {isSuperAdmin ? "Password" : "OTP"}
-                    </label>
-                    <input
-                      type="password"
-                      value={isSuperAdmin ? getPassword : otp}
-                      onChange={(e) =>
-                        isSuperAdmin
-                          ? setPassword(e.target.value)
-                          : setOtp(e.target.value)
-                      }
-                      placeholder={
-                        isSuperAdmin ? "Enter Password" : "Enter OTP"
-                      }
-                      minlength="6"
-                      disabled={disabled}
-                      className={`${
-                        disabled ? "cursor-not-allowed" : ""
-                      } w-full px-4 py-3 rounded-lg bg-gray-200 mt-2 border focus:border-blue-500 focus:bg-white focus:outline-none`}
-                      required
-                    />
-                  </div>
-
-                  <div
-                    className={` ${
-                      isSuperAdmin ? "" : "hidden"
-                    } text-right mt-2 md:col-span-9`}
-                  >
-                    <a
-                      href="/ForgotPassword"
-                      className="text-sm font-semibold text-gray-700 hover:text-blue-700 focus:text-blue-700"
-                    >
-                      Forgot Password?
-                    </a>
-                  </div>
-
-                  <div className="text-right mt-2 md:col-span-9">
-                    <button
-                      type="submit"
-                      className="w-full block bg-indigo-500 hover:bg-indigo-400 focus:bg-indigo-400 text-white font-semibold rounded-lg px-4 py-3 mt-6"
-                      onClick={handleSubmit}
-                      id="login-btn"
-                    >
-                      Log In
-                    </button>
-                  </div>
-
-                  {/* </form> */}
-                  <div className="text-right mt-2 md:col-span-9">
-                    <hr className="my-6 border-gray-300 w-full" />
-                  </div>
-
-                  <div className="text-right mt-2 md:col-span-9">
-                    <p className="">
-                      New here?{" "}
-                      <Link
-                        className="text-blue-500 hover:text-blue-700 font-semibold"
-                        to={`${window.location.protocol}//${host.split(".")[host.split('.').length - 1]}/universityRegistration`}
-                      >
-                        Register University
-                      </Link>
-                    </p>
+          <div>
+            <div className="min-h-screen bg-transparent py-6 flex flex-col justify-center sm:py-12">
+              <div className="relative py-2 sm:max-w-xl sm:mx-auto">
+                <div className="absolute inset-0 bg-gradient-to-r from-gray-500 to-gray-950 shadow-lg transform -skew-y-6 sm:skew-y-0 sm:-rotate-6 sm:rounded-3xl"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-gray-500 to-gray-950 shadow-lg transform -skew-y-6 sm:skew-y-0 sm:-rotate-6 sm:rounded-3xl"></div>
+                <div
+                  className="relative bg-white shadow-lg sm:rounded-3xl sm:p-20"
+                  style={{ width: 476 }}
+                >
+                  <div className="max-w-md mx-auto">
+                    <div>
+                      <h1 className="text-2xl font-semibold">Sign In</h1>
+                    </div>
+                    <div className="divide-y divide-gray-200">
+                      <div className="py-8 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7">
+                        {/* Email Address  */}
+                        <div
+                          className={`${
+                            isStudent ? "hidden" : "relative text-right"
+                          }`}
+                        >
+                          <input
+                            autoComplete="off"
+                            id="email"
+                            type="email"
+                            className="peer placeholder-transparent h-10 w-full rounded-lg border-b-2 px-2 py-3 border-gray-300 text-gray-600 focus:outline-none focus:borer-rose-600"
+                            placeholder="Enter email address"
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                          />
+                          <label
+                            htmlFor="email"
+                            className="absolute left-0 -top-3.5 text-gray-600 text-sm peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-440 peer-placeholder-shown:top-2 transition-all peer-focus:-top-3.5 peer-focus:text-gray-600 peer-focus:text-sm"
+                          >
+                            Email Address
+                          </label>
+                        </div>
+                        {/* Mobile Number / Email Address */}
+                        <div className={`${isStudent ? "relative" : "hidden"}`}>
+                          <input
+                            autoComplete="off"
+                            id="mobile/email"
+                            type="text"
+                            className="peer placeholder-transparent h-10 w-full rounded-lg border-b-2 border-gray-300 text-gray-900 focus:outline-none focus:borer-rose-600"
+                            placeholder="Mobile Number / Email Address"
+                            onChange={(e) => setMobileNumber(e.target.value)}
+                            autoFocus
+                            required
+                          />
+                          <label
+                            htmlFor="mobile/email"
+                            className="absolute left-0 -top-3.5 text-gray-600 text-sm peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-440 peer-placeholder-shown:top-2 transition-all peer-focus:-top-3.5 peer-focus:text-gray-600 peer-focus:text-sm"
+                          >
+                            Mobile Number / Email Address
+                          </label>
+                        </div>
+                        {/* Password */}
+                        <div
+                          className={`${
+                            isSuperAdmin || isAdmin ? "relative" : "relative"
+                          }`}
+                        >
+                          <input
+                            autoComplete="off"
+                            id="password"
+                            type="password"
+                            className={`${
+                              disabled ? "cursor-not-allowed" : ""
+                            } peer placeholder-transparent h-10 w-full rounded-lg border-b-2 border-gray-300 text-gray-900 focus:outline-none focus:borer-rose-600`}
+                            placeholder="Otp"
+                            onChange={(e) =>
+                              isSuperAdmin || isAdmin
+                                ? setPassword(e.target.value)
+                                : setOtp(e.target.value)
+                            }
+                            minLength={6}
+                            disabled={disabled}
+                            required
+                          />
+                          <label
+                            htmlFor="password"
+                            className="absolute left-0 -top-3.5 text-gray-600 text-sm peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-440 peer-placeholder-shown:top-2 transition-all peer-focus:-top-3.5 peer-focus:text-gray-600 peer-focus:text-sm"
+                          >
+                            {isSuperAdmin || isAdmin ? "Password" : "OTP"}
+                          </label>
+                        </div>
+                        {/* Forgot Password */}
+                        <div
+                          className={`${
+                            isSuperAdmin || isAdmin ? "relative" : "hidden"
+                          }`}
+                        >
+                          <a
+                            href="/ForgotPassword"
+                            className="text-sm font-semibold text-blue-700 hover:text-blue-800 focus:text-blue-800"
+                          >
+                            Forgot Password?
+                          </a>
+                        </div>
+                        <div
+                          className={
+                            isSuperAdmin || isAdmin ? "hidden" : "relative"
+                          }
+                        >
+                          <div className="items-end">
+                            <button
+                              onClick={handleSendOTP}
+                              className={`flex p-1 font-semibold max-w-full text-blue-500 text-end cursor-pointer`}
+                            >
+                              Send Otp
+                            </button>
+                          </div>
+                        </div>
+                        <div className="relative text-right">
+                          <button
+                            type="submit"
+                            className="w-full bg-gray-500 focus:bg-gray-600 text-white rounded-md px-2 py-1 mt-6"
+                            onClick={handleSubmit}
+                            id="login-btn"
+                          >
+                            Log In
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      ) : !isRegistered ? (
+        <div className="-mt-32">
+          <div>
+            <h2 className="font-semibold text-xl p-5 text-white"></h2>
+
+            <div className="bg-white rounded shadow-lg p-4 px-4 md:p-8 mb-6 mt-20">
+              <div className="flex justify-center mb-3">
+                <h2 className="font-semibold text-xl text-slate-900">
+                  Your University is not yet registered,
+                  <Link
+                    className="text-blue-500 hover:text-blue-700 font-semibold"
+                    to={`${window.location.protocol}//${
+                      host.split(".")[host.split(".").length - 1]
+                    }/universityRegistration`}
+                  >
+                    Click here
+                  </Link>{" "}
+                  to register.
+                </h2>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div>
+          <div className="-mt-32">
+            <div>
+              <h2 className="font-semibold text-xl p-5 text-white"></h2>
+
+              <div className="bg-white rounded shadow-lg p-4 px-4 md:p-8 mb-6 mt-20">
+                <div className="flex justify-center mb-3">
+                  <h2 className="font-semibold text-xl text-slate-900">
+                    Your request has been sent to Admin, please wait for the
+                    approval.
+                  </h2>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

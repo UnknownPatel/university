@@ -31,44 +31,80 @@ const AssignRole = () => {
   const [remove, setRemove] = useState("");
   const [faculties, setFaculties] = useState([]);
   const [hidden, setHidden] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setFaculties([]);
-    const host = window.location.host;
-    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
-    if (arr.length > 0) {
-      subdomain = arr[0];
-    }
+    var acces_token = localStorage.getItem("access_token");
+    setLoading(true);
+    if (!acces_token) {
+      toast.error("You are not authorized to access the page.");
+      navigate("/");
+    } else {
+      setFaculties([]);
+      const host = window.location.host;
+      const arr = host
+        .split(".")
+        .slice(0, host.includes("localhost") ? -1 : -2);
+      if (arr.length > 0) {
+        subdomain = arr[0];
+      }
 
-    if (subdomain !== null || subdomain !== "") {
-      setFaculty("Super Admin");
+      if (subdomain !== null || subdomain !== "") {
+        setFaculty("Super Admin");
 
-      axios
-        .get(`/universities/${subdomain}/get_authorization_details`)
-        .then((response) => {
-          setUniName(response.data.university.name);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+        axios
+          .get(`/universities/${subdomain}/get_authorization_details`)
+          .then((response) => {
+            setUniName(response.data.university.name);
+            axios
+              .get(`/users/users/find_user?subdomain=${subdomain}`, {
+                headers,
+              })
+              .then((responce) => {
+                // selectedFilter = responce.data.configuration;
+                if (responce.data.status === "ok") {
+                  if (responce.data.roles.includes("super_admin")) {
+                    axios
+                      .get(`/courses?subdomain=${subdomain}`, { headers })
+                      .then((res) => {
+                        setCourses(res.data.data.courses);
+                      })
+                      .catch((err) => {
+                        console.error(err);
+                      })
+                      .finally(() => {
+                        setLoading(false);
+                      });
 
-      axios
-        .get(`/courses?subdomain=${subdomain}`, { headers })
-        .then((res) => {
-          setCourses(res.data.data.courses);
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-
-      axios
-        .get(`/roles?subdomain=${subdomain}`, {
-          headers,
-        })
-        .then((response) => {
-          setRoleData(response.data.data.role_names);
-        })
-        .catch((error) => console.log(error));
+                    axios
+                      .get(`/roles?subdomain=${subdomain}`, {
+                        headers,
+                      })
+                      .then((response) => {
+                        setRoleData(response.data.data.role_names);
+                      })
+                      .catch((error) => console.log(error))
+                      .finally(() => {
+                        setLoading(false);
+                      });
+                  } else {
+                    localStorage.clear();
+                    toast.error("You are not authorized to access the page.");
+                    navigate("/");
+                  }
+                  setFaculty(
+                    responce.data.user.first_name +
+                      " " +
+                      responce.data.user.last_name
+                  );
+                }
+              })
+              .catch((error) => console.log(error));
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      }
     }
   }, []);
 
@@ -323,8 +359,8 @@ const AssignRole = () => {
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
-                      clip-rule="evenodd"
-                      fill-rule="evenodd"
+                      clipRule="evenodd"
+                      fillRule="evenodd"
                       d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"
                     ></path>
                   </svg>
@@ -346,7 +382,7 @@ const AssignRole = () => {
                       data-dropdown-toggle="dropdown-user"
                     >
                       <span className="self-center text-xl mr-2 font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
-                        {faculty}
+                        {"Super Admin"}
                       </span>
                       <span className="sr-only">Open user menu</span>
                     </button>
@@ -469,73 +505,168 @@ const AssignRole = () => {
               </h3>
             </div>
 
-            <div className="flex justify-start mt-5">
-              <div className="bg-white rounded-lg">
-                <select
-                  aria-label="Select Course"
-                  className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded shadow-md px-3 py-2 w-auto"
-                  onChange={handleCourseChange}
-                >
-                  <option value="Select Course">Course</option>
-                  {courses.map((course, index) => (
-                    <option value={course.id}>{course.name}</option>
-                  ))}
-                </select>
-
-                <select
-                  className="form-select rounded ml-2 justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                  id="select_name"
-                  onChange={handleonChange}
-                >
-                  <option>Select Faculty name</option>
-                  {data.map((item) => {
-                    return (
-                      <>
+            <div className="flex flex-col justify-start mt-5">
+              <div className="flex flex-row w-full mt-5 bg-white rounded-xl z-10">
+                <div className="flex flex-row">
+                  <div className="relative text-left w-full">
+                    <select
+                      id="course"
+                      className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                      onChange={(e) => {
+                        handleCourseChange(e);
+                      }}
+                    >
+                      <option value="Select Course" className="text-gray-600">
+                        Course
+                      </option>
+                      {courses.map((course, index) => (
                         <option
-                          id={item.designation}
-                          value={item.id}
-                          data-designation={item.designation}
+                          value={course.id}
+                          className="text-black font-bold"
                         >
-                          {item.first_name} {item.last_name}
+                          {" "}
+                          {course.name}{" "}
                         </option>
-                      </>
-                    );
-                  })}
-                </select>
+                      ))}
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                      <svg
+                        className="h-5 w-5 text-gray-400"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                          clip-rule="evenodd"
+                        />
+                        <path
+                          fill-rule="evenodd"
+                          d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
 
-                <select
-                  className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                  onChange={(e) => {
-                    setSelectedValue(e.target.value);
-                    console.log(selectedValue);
-                  }}
-                >
-                  <option>Select Role</option>
-                  {roleData.map((item) => {
-                    // console.log( item.id)
-                    return (
-                      <>
-                        <option value={item.name}> {item.name} </option>
-                      </>
-                    );
-                  })}
-                </select>
+                <div className="flex flex-row">
+                  <div className="relative text-left w-full">
+                    <select
+                      id="select_name"
+                      className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                      onChange={handleonChange}
+                    >
+                      <option
+                        value="Select faculty name"
+                        className="text-gray-600"
+                      >
+                        Select faculty name
+                      </option>
+                      {data.map((item) => {
+                        return (
+                          <>
+                            <option
+                              id={item.designation}
+                              value={item.id}
+                              data-designation={item.designation}
+                              className="text-black font-bold"
+                            >
+                              {item.first_name} {item.last_name}
+                            </option>
+                          </>
+                        );
+                      })}
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                      <svg
+                        className="h-5 w-5 text-gray-400"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                          clip-rule="evenodd"
+                        />
+                        <path
+                          fill-rule="evenodd"
+                          d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
 
-                <button
-                  id="submit-button"
-                  className="text-center mr-24 bg-green-600 text-gray-100 p-2 rounded tracking-wide
-                font-semibold  focus:outline-none focus:shadow-outline hover:bg-green-700 shadow-md cursor-pointer transition ease-in duration-300"
-                  onClick={handleSubmit}
-                >
-                  Assign
-                </button>
+                <div className="flex flex-row">
+                  <div className="relative text-left w-full">
+                    <select
+                      id="select_role"
+                      className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                      onChange={(e) => {
+                        setSelectedValue(e.target.value);
+                      }}
+                    >
+                      <option value="Select Role" className="text-gray-600">
+                        Select Role
+                      </option>
+                      {roleData.map((item) => {
+                        // console.log( item.id)
+                        return (
+                          <>
+                            <option
+                              value={item.name}
+                              className="text-black font-bold"
+                            >
+                              {" "}
+                              {item.name}{" "}
+                            </option>
+                          </>
+                        );
+                      })}
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                      <svg
+                        className="h-5 w-5 text-gray-400"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                          clip-rule="evenodd"
+                        />
+                        <path
+                          fill-rule="evenodd"
+                          d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
 
-                <button
-                  onClick={toggleContent}
-                  className="absolute p-2 mr-10 bg-black rounded right-0 text-white font-bold"
-                >
-                  Create Role
-                </button>
+                <div className="flex flex-row justify-between -mt-7">
+                  <button
+                    id="submit-button"
+                    className="ml-2 text-center bg-gray-600 text-gray-100 p-1 px-12 rounded-2xl tracking-wide
+                  font-semibold focus:outline-none focus:shadow-outline hover:bg-gray-700 shadow-lg transition ease-in duration-300 mt-5"
+                    onClick={handleSubmit}
+                  >
+                    Assign
+                  </button>
+                  <button
+                    onClick={toggleContent}
+                    className="absolute right-10 ml-2 text-center bg-gray-600 text-gray-100 p-3 px-12 rounded-2xl tracking-wide
+                    font-semibold focus:outline-none focus:shadow-outline hover:bg-gray-700 shadow-lg transition ease-in duration-300 mt-5"
+                  >
+                    Create Role
+                  </button>
+                </div>
               </div>
             </div>
             <p class="text-sm mt-2 ml-2 text-gray-300">

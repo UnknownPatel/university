@@ -19,11 +19,9 @@ var headers;
 const ExamViewJrSupervision = () => {
   const [uniName, setUniName] = useState("");
   const [faculty, setFaculty] = useState("");
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [academic_years, setAcademicYears] = useState([]);
   const [selectedYear3, setSelectedYear3] = useState();
   const [examinationName3, setExaminationName3] = useState("");
-  const [courses, setCourses] = useState([]);
   const [branches, setBranches] = useState([]);
   const [branchId, setBranchId] = useState("");
   const [courseId, setCourseId] = useState("");
@@ -706,14 +704,14 @@ const ExamViewJrSupervision = () => {
                       <span className="ml-3">Result</span>
                     </a>
                   </li>
-                  <li>
+                  {/* <li>
                     <a
                       href="/studentResult"
                       className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                     >
                       <span className="ml-3">Student Result</span>
                     </a>
-                  </li>
+                  </li> */}
                   <li>
                     <div className="p-4">
                       <button
@@ -730,8 +728,8 @@ const ExamViewJrSupervision = () => {
             </aside>
 
             <div className="p-4 sm:ml-64">
-              <div className="flex flex-col items-center mt-14">
-                <div className="flex items-center space-x-4 mb-5">
+              <div className="p-4 rounded-lg mt-10">
+                <div className="text-center space-x-4 mt-2">
                   <a
                     className={`text-white font-bold py-2 px-4 rounded-lg bg-slate-500`}
                     href="/examViewTimeTable"
@@ -763,103 +761,293 @@ const ExamViewJrSupervision = () => {
                     Other Duties
                   </a>
                 </div>
+
+                <div className="flex flex-col justify-start mt-5">
+                  <div className="flex flex-row w-full mt-5 bg-white rounded-xl z-10">
+                    <div className="flex flex-row">
+                      <div className="relative text-left w-full">
+                        <select
+                          id="examinationName"
+                          className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                          onChange={(e) => {
+                            handleExaminationChange3(e.target.value);
+                          }}
+                        >
+                          <option
+                            value="Select Examination"
+                            className="text-gray-600"
+                          >
+                            Examination
+                          </option>
+                          {examinationNames.map((examination_name) => {
+                            return (
+                              <option
+                                value={examination_name.name}
+                                className="text-black font-bold"
+                              >
+                                {examination_name.name}
+                              </option>
+                            );
+                          })}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                          <svg
+                            className="h-5 w-5 text-gray-400"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                              clip-rule="evenodd"
+                            />
+                            <path
+                              fill-rule="evenodd"
+                              d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-row">
+                      <div className="relative text-left w-full">
+                        <select
+                          id="academicYear"
+                          className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                          onChange={(e) => handleYearChange3(e.target.value)}
+                        >
+                          <option value="Select Year" className="text-gray-600">
+                            Year
+                          </option>
+                          {academic_years.map((year) => {
+                            return (
+                              <option
+                                value={year}
+                                className="text-black font-bold"
+                              >
+                                {year}
+                              </option>
+                            );
+                          })}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                          <svg
+                            className="h-5 w-5 text-gray-400"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                              clip-rule="evenodd"
+                            />
+                            <path
+                              fill-rule="evenodd"
+                              d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-row">
+                      <div className="relative text-left w-full">
+                        <select
+                          id="examinationType"
+                          className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                          onChange={handleJrTypeChange}
+                        >
+                          <option value="Select Type" className="text-gray-600">
+                            Type
+                          </option>
+                          {examinationTypes.map((examination_type) => {
+                            return (
+                              <option
+                                value={examination_type.name}
+                                className="text-black font-bold"
+                              >
+                                {examination_type.name}
+                              </option>
+                            );
+                          })}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                          <svg
+                            className="h-5 w-5 text-gray-400"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                              clip-rule="evenodd"
+                            />
+                            <path
+                              fill-rule="evenodd"
+                              d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-row">
+                      <div className="relative text-left w-full">
+                        <select
+                          id="branch"
+                          className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                          onChange={(e) => {
+                            handleBranchChange(e);
+                          }}
+                        >
+                          <option
+                            value="Select Branch"
+                            className="text-gray-600"
+                          >
+                            Branch
+                          </option>
+                          {branches.map((branch) => (
+                            <option
+                              value={branch.id}
+                              className="text-black font-bold"
+                              data-name={branch.name}
+                            >
+                              {branch.name}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                          <svg
+                            className="h-5 w-5 text-gray-400"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                              clip-rule="evenodd"
+                            />
+                            <path
+                              fill-rule="evenodd"
+                              d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-row">
+                      <div className="relative text-left w-full">
+                        <select
+                          id="time"
+                          className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                          onChange={(e) => {
+                            handleTimeChange(e);
+                          }}
+                        >
+                          <option value="Select time" className="text-gray-600">
+                            Time
+                          </option>
+                          {examinationTimes.map((examination_time) => {
+                            return (
+                              <option
+                                value={examination_time.name}
+                                className="text-black font-bold"
+                              >
+                                {examination_time.name}
+                              </option>
+                            );
+                          })}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                          <svg
+                            className="h-5 w-5 text-gray-400"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                              clip-rule="evenodd"
+                            />
+                            <path
+                              fill-rule="evenodd"
+                              d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-row">
+                      <div className="relative text-left w-full">
+                        <select
+                          id="date"
+                          className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                          onChange={(e) => {
+                            handleDateChange(e);
+                          }}
+                        >
+                          <option value="Select Date" className="text-gray-600">
+                            Date
+                          </option>
+                          {storeDates.map((date) => (
+                            <option
+                              value={date}
+                              className="text-black font-bold"
+                            >
+                              {date}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                          <svg
+                            className="h-5 w-5 text-gray-400"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                              clip-rule="evenodd"
+                            />
+                            <path
+                              fill-rule="evenodd"
+                              d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-row ml-2">
+                      <button
+                        id="submit-button"
+                        className="ml-2 z-10 text-center w-auto bg-transparent text-slate-950 p-1 px-12 rounded-2xl tracking-wide border border-slate-950
+                    font-semibold focus:outline-none focus:shadow-outline hover:bg-gray-700 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
+                        onClick={handleFilterSubmit}
+                      >
+                        <div className="inline-flex">
+                          Search <GiArchiveResearch className="mt-1 ml-2" />
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
-
-              <div className="flex mt-5 ml-2">
-                <select
-                  className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                  onChange={(e) => {
-                    handleExaminationChange3(e.target.value);
-                  }}
-                >
-                  <option value="Select Examination">Examination</option>
-                  {examinationNames.map((examination_name) => {
-                    return (
-                      <option value={examination_name.name}>
-                        {examination_name.name}
-                      </option>
-                    );
-                  })}
-                </select>
-
-                <select
-                  className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                  onChange={(e) => handleYearChange3(e.target.value)}
-                >
-                  <option value="Select Year">Year</option>
-                  {academic_years.map((year) => {
-                    return <option value={year}>{year}</option>;
-                  })}
-                </select>
-
-                <select
-                  className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
-                  onChange={handleJrTypeChange}
-                >
-                  <option value="Select Type">Type</option>
-                  {examinationTypes.map((examination_type) => {
-                    return (
-                      <option value={examination_type.name}>
-                        {examination_type.name}
-                      </option>
-                    );
-                  })}
-                </select>
-
-                <select
-                  className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                  onChange={(e) => {
-                    handleBranchChange(e);
-                  }}
-                >
-                  <option value="Select Branch">Branch</option>
-                  {branches.map((branch) => (
-                    <option value={branch.id} data-name={branch.name}>
-                      {branch.name}
-                    </option>
-                  ))}
-                </select>
-
-                <select
-                  className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
-                  onChange={(e) => {
-                    handleTimeChange(e);
-                  }}
-                >
-                  <option value="Select time">Time</option>
-                  {examinationTimes.map((examination_time) => {
-                    return (
-                      <option value={examination_time.name}>
-                        {examination_time.name}
-                      </option>
-                    );
-                  })}
-                </select>
-
-                <select
-                  className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                  onChange={(e) => {
-                    handleDateChange(e);
-                  }}
-                >
-                  <option value="Select Date">Date</option>
-                  {storeDates.map((date) => (
-                    <option value={date}>{date}</option>
-                  ))}
-                </select>
-
-                <button
-                  className="text-center ml-4 w-auto bg-transparent text-slate-950 p-3 rounded-2xl tracking-wide border border-slate-950
-                font-semibold focus:outline-none focus:shadow-outline hover:bg-gray-700 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
-                  // id={"button-subject-" + subject.id}
-                  onClick={handleFilterSubmit}
-                >
-                  <p className="inline-flex">
-                    Search <GiArchiveResearch className="mt-1 ml-2" />
-                  </p>
-                </button>
-              </div>
-
               <div
                 className={`${
                   hidden ? "hidden" : "flex"
@@ -967,9 +1155,7 @@ const ExamViewJrSupervision = () => {
               </div>
             </div>
           </div>
-        ) : (
-          navigate(-1)
-        )
+        ) : null
       ) : (
         navigate("/")
       )}

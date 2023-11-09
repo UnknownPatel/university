@@ -65,9 +65,7 @@ const Result = () => {
 
     if (subdomain !== null || subdomain !== "") {
       axios
-        .get(
-          `/universities/${subdomain}/get_authorization_details`
-        )
+        .get(`/universities/${subdomain}/get_authorization_details`)
         .then((response) => {
           setUniName(response.data.university.name);
         })
@@ -76,12 +74,9 @@ const Result = () => {
         });
 
       axios
-        .get(
-          `/users/users/find_user?subdomain=${subdomain}`,
-          {
-            headers,
-          }
-        )
+        .get(`/users/users/find_user?subdomain=${subdomain}`, {
+          headers,
+        })
         .then((responce) => {
           // selectedFilter = responce.data.configuration;
           setFaculty(
@@ -92,10 +87,7 @@ const Result = () => {
 
       // Get Course
       axios
-        .get(
-          `/courses?subdomain=${subdomain}`,
-          { headers }
-        )
+        .get(`/courses?subdomain=${subdomain}`, { headers })
         .then((response) => {
           setCourses(response.data.data.courses);
         })
@@ -103,15 +95,12 @@ const Result = () => {
 
       // Get Examination Names
       axios
-        .get(
-          "/examination_names",
-          {
-            headers,
-            params: {
-              subdomain: subdomain,
-            },
-          }
-        )
+        .get("/examination_names", {
+          headers,
+          params: {
+            subdomain: subdomain,
+          },
+        })
         .then((responce) => {
           if (responce.data.message === "Names found") {
             if (responce.data.data.examination_names.length !== 0) {
@@ -127,15 +116,12 @@ const Result = () => {
 
       // Get Examination Types
       axios
-        .get(
-          "/examination_types",
-          {
-            headers,
-            params: {
-              subdomain: subdomain,
-            },
-          }
-        )
+        .get("/examination_types", {
+          headers,
+          params: {
+            subdomain: subdomain,
+          },
+        })
         .then((responce) => {
           if (responce.data.message === "Types found") {
             if (responce.data.data.examination_types.length !== 0) {
@@ -192,10 +178,9 @@ const Result = () => {
       var course_id = e.target.value;
       if (subdomain !== null || subdomain !== "") {
         axios
-          .get(
-            `/branches?subdomain=${subdomain}&course_id=${course_id}`,
-            { headers }
-          )
+          .get(`/branches?subdomain=${subdomain}&course_id=${course_id}`, {
+            headers,
+          })
           .then((response) => {
             setBranches(response.data.data.branches);
           })
@@ -251,10 +236,9 @@ const Result = () => {
       setBranchId(e.target.value);
       if (subdomain !== null || subdomain !== "") {
         axios
-          .get(
-            `/semesters?subdomain=${subdomain}&branch_id=${branch_id}`,
-            { headers }
-          )
+          .get(`/semesters?subdomain=${subdomain}&branch_id=${branch_id}`, {
+            headers,
+          })
           .then((response) => {
             setSemesters(response.data.data.semesters);
           })
@@ -277,18 +261,15 @@ const Result = () => {
       setSemesterId(e.target.value);
       if (subdomain !== null || subdomain !== "") {
         axios
-          .get(
-            `/divisions`,
-            {
-              headers,
-              params: {
-                subdomain: subdomain,
-                division: {
-                  semester_id: e.target.value,
-                },
+          .get(`/divisions`, {
+            headers,
+            params: {
+              subdomain: subdomain,
+              division: {
+                semester_id: e.target.value,
               },
-            }
-          )
+            },
+          })
           .then((response) => {
             setDivisions(response.data.data.divisions);
           })
@@ -359,32 +340,26 @@ const Result = () => {
 
       if (subdomain !== "" || subdomain !== null) {
         axios
-          .get(
-            `/subjects`,
-            {
-              headers,
-              params: {
-                subject: selectedFilter,
-                subdomain: subdomain,
-              },
-            }
-          )
+          .get(`/subjects`, {
+            headers,
+            params: {
+              subject: selectedFilter,
+              subdomain: subdomain,
+            },
+          })
           .then((response) => {
             setSubjects(response.data.data.subjects);
           })
           .catch((error) => console.log(error));
 
         axios
-          .get(
-            `/students`,
-            {
-              headers,
-              params: {
-                student: selectedFilter,
-                subdomain: subdomain,
-              },
-            }
-          )
+          .get(`/students`, {
+            headers,
+            params: {
+              student: selectedFilter,
+              subdomain: subdomain,
+            },
+          })
           .then((response) => {
             if (response.data.message === "Details found") {
               if (response.data.data.students.length !== 0) {
@@ -398,16 +373,13 @@ const Result = () => {
                 response.data.data.students.map((student, index) => {
                   selectedFilter["student_id"] = student.id;
                   axios
-                    .get(
-                      `/student_marks/${student.id}/fetch_marks`,
-                      {
-                        headers,
-                        params: {
-                          student_mark: selectedFilter,
-                          subdomain: subdomain,
-                        },
-                      }
-                    )
+                    .get(`/student_marks/${student.id}/fetch_marks`, {
+                      headers,
+                      params: {
+                        student_mark: selectedFilter,
+                        subdomain: subdomain,
+                      },
+                    })
                     .then((res) => {
                       if (res.data.status === "ok") {
                         const studentMarks = res.data.data.student_marks;
@@ -444,13 +416,6 @@ const Result = () => {
       }
     }
   };
-
-  // const exportToExcel = (tableData) => {
-  //   const worksheet = XLSX.utils.table_to_sheet(tableData);
-  //   const workbook = XLSX.utils.book_new();
-  //   XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-  //   XLSX.writeFile(workbook, "table_data.xlsx");
-  // };
 
   const exportToExcel = (tableData) => {
     const worksheet = XLSX.utils.table_to_sheet(tableData);
@@ -680,6 +645,96 @@ const Result = () => {
             <li>
               <a
                 href="/assignMarksEntry"
+                className="flex items-center p-2  text-gray-900  rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="flex-1 ml-3 whitespace-nowrap">
+                  Assign Marks Entry
+                </span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="/unlock_Marks"
+                className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="ml-3">Unlock Marks</span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="/examViewTimeTable"
+                className="flex items-center p-2 bg-slate-600 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="flex-1 ml-3 whitespace-nowrap">Report</span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="/result"
+                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="ml-3">Result</span>
+              </a>
+            </li>
+            <li>
+              <div className="p-4">
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-gray-300 hover:text-white text-sm font-semibold transition"
+                  onClick={handleLogout}
+                >
+                  <span className="">Logout</span>
+                </button>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </aside>
+      {/* <aside
+        id="logo-sidebar"
+        className="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
+        aria-label="Sidebar"
+      >
+        <div className="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
+          <ul className="space-y-2 font-medium">
+            <li>
+              <a
+                href="/examinationDetails"
+                className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="ml-3">Examination Details</span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="/examTimetable"
+                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="ml-3">Time Table</span>
+              </a>
+            </li>
+
+            <li>
+              <a
+                href="/examBlockDetails"
+                className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="ml-3">Enter Block Details</span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="/examAssignSupervision"
+                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="flex-1 ml-3 whitespace-nowrap">
+                  Assign Supervision
+                </span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="/assignMarksEntry"
                 className="flex items-center p-2 text-gray-900  rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 <span className="flex-1 ml-3 whitespace-nowrap">
@@ -732,15 +787,325 @@ const Result = () => {
             </li>
           </ul>
         </div>
-      </aside>
+      </aside> */}
 
-      <div className="pt-4 sm:ml-64">
-        <div className="p-4 rounded-lg mt-14">
+      <div className="p-4 sm:ml-64">
+        <div className="p-4 rounded-lg mt-10">
           <div className="text-center text-4xl">
-            <p>Result </p>
+            <h3 className="mt-2 text-3xl font-bold text-gray-900">Result</h3>
           </div>
+          <div className="flex flex-col justify-start mt-5">
+            <div className="flex flex-row w-full mt-5 bg-white rounded-xl z-10">
+              <div className="flex flex-row">
+                <div className="relative text-left w-full">
+                  <select
+                    id="examination_name"
+                    className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                    onChange={(e) => {
+                      handleExaminationChange(e.target.value);
+                    }}
+                  >
+                    <option
+                      value="Select Examination"
+                      className="text-gray-600"
+                    >
+                      Examination
+                    </option>
+                    {examinationNames.map((examination_name) => {
+                      return (
+                        <option
+                          value={examination_name.name}
+                          className="text-black font-bold"
+                        >
+                          {examination_name.name}
+                        </option>
+                      );
+                    })}
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                    <svg
+                      className="h-5 w-5 text-gray-400"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                        clip-rule="evenodd"
+                      />
+                      <path
+                        fill-rule="evenodd"
+                        d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              </div>
 
-          <div className="flex mt-5 ml-2">
+              <div className="flex flex-row">
+                <div className="relative text-left w-full">
+                  <select
+                    id="academicYear"
+                    className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                    onChange={(e) => handleYearChange(e.target.value)}
+                  >
+                    <option value="Select Year" className="text-gray-600">
+                      Year
+                    </option>
+                    {academic_years.map((year) => {
+                      return (
+                        <option value={year} className="text-black font-bold">
+                          {year}
+                        </option>
+                      );
+                    })}
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                    <svg
+                      className="h-5 w-5 text-gray-400"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                        clip-rule="evenodd"
+                      />
+                      <path
+                        fill-rule="evenodd"
+                        d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-row">
+                <div className="relative text-left w-full">
+                  <select
+                    id="examinationType"
+                    className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                    onChange={handleTypeChange}
+                  >
+                    <option value="Select Type" className="text-gray-600">
+                      Type
+                    </option>
+                    {examinationTypes.map((examination_type) => {
+                      return (
+                        <option
+                          value={examination_type.name}
+                          className="text-black font-bold"
+                        >
+                          {examination_type.name}
+                        </option>
+                      );
+                    })}
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                    <svg
+                      className="h-5 w-5 text-gray-400"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                        clip-rule="evenodd"
+                      />
+                      <path
+                        fill-rule="evenodd"
+                        d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-row">
+                <div className="relative text-left w-full">
+                  <select
+                    className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                    onChange={handleCourseChange}
+                  >
+                    <option
+                      value="Select course"
+                      className="text-black font-bold"
+                    >
+                      Course
+                    </option>
+                    {courses.map((course, index) => (
+                      <option value={course.id}>{course.name}</option>
+                    ))}
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                    <svg
+                      className="h-5 w-5 text-gray-400"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                        clip-rule="evenodd"
+                      />
+                      <path
+                        fill-rule="evenodd"
+                        d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-row">
+                <div className="relative text-left w-full">
+                  <select
+                    id="branch"
+                    className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                    onChange={handleBranchChange}
+                  >
+                    <option value="Select Branch" className="text-gray-600">
+                      Branch
+                    </option>
+                    {branches.map((branch) => (
+                      <option
+                        value={branch.id}
+                        className="text-black font-bold"
+                        data-name={branch.name}
+                      >
+                        {branch.name}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                    <svg
+                      className="h-5 w-5 text-gray-400"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                        clip-rule="evenodd"
+                      />
+                      <path
+                        fill-rule="evenodd"
+                        d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-row">
+                <div className="relative text-left w-full">
+                  <select
+                    id="branch"
+                    className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                    onChange={handleSemesterChange}
+                  >
+                    <option value="Select Semester" className="text-gray-600">
+                      Semester
+                    </option>
+                    {semesters.map((semester) => (
+                      <option
+                        value={semester.id}
+                        data-semester-name={semester.name}
+                        className="text-black font-bold"
+                      >
+                        {semester.name}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                    <svg
+                      className="h-5 w-5 text-gray-400"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                        clip-rule="evenodd"
+                      />
+                      <path
+                        fill-rule="evenodd"
+                        d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-row">
+                <div className="relative text-left w-full">
+                  <select
+                    id="branch"
+                    className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                    onChange={handleDivisionChange}
+                  >
+                    <option value="Select Semester" className="text-gray-600">
+                      Division
+                    </option>
+                    {divisions.map((division) => (
+                      <option
+                        value={division.id}
+                        data-semester-name={division.name}
+                        className="text-black font-bold"
+                      >
+                        {division.name}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                    <svg
+                      className="h-5 w-5 text-gray-400"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                        clip-rule="evenodd"
+                      />
+                      <path
+                        fill-rule="evenodd"
+                        d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-row ml-2">
+                <button
+                  id="submit-button"
+                  className="ml-2 z-10 text-center w-auto bg-transparent text-slate-950 p-1 px-12 rounded-2xl tracking-wide border border-slate-950
+                    font-semibold focus:outline-none focus:shadow-outline hover:bg-gray-700 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
+                  onClick={handleFilterSubmit}
+                >
+                  <div className="inline-flex">
+                    Search <GiArchiveResearch className="mt-1 ml-2" />
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+          {/* <div className="flex mt-5 ml-2">
             <select
               id="examination_name"
               className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
@@ -849,146 +1214,118 @@ const Result = () => {
             >
               <SiMicrosoftexcel />
             </a>
-          </div>
+          </div> */}
           {/* Table of Faculty List */}
-          <div
-            id="marks_entry_viewport"
-            className="hidden flex-col mt-5"
-            style={{ height: 390 }}
-          >
-            <div className="overflow-x-scroll">
-              <div className="p-1.5 w-full inline-block align-middle">
-                <div className="border rounded-lg">
-                  <table
-                    id="my-table"
-                    className="min-w-full divide-y table-auto text-center divide-gray-200"
-                  >
-                    <thead className="sticky top-0 bg-gray-50">
-                      <tr id="selected-filters">
-                        <th
-                          scope="col"
-                          className="px-6 py-3 text-xs font-bold text-gray-500 text-center"
-                          colSpan={
-                            type === "All"
-                              ? 3 + subjects.length * examinationTypes.length
-                              : 3 + subjects.length
-                          }
-                        >
-                          <p className="text-center">{uniName}</p>
-                          <p className="text-center">
-                            {examinationName} {selectedYear} {type}
-                          </p>
-                          <p className="text-center">
-                            {branchesName}, {semesterName}
-                          </p>
-                          <p className="text-center">{subjectName}</p>
-                        </th>
-                      </tr>
-                      <tr>
-                        <th
-                          scope="col"
-                          rowSpan={2}
-                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                        >
-                          Sr No.
-                        </th>
-                        <th
-                          scope="col"
-                          rowSpan={2}
-                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                        >
-                          Student Name
-                        </th>
-                        <th
-                          scope="col"
-                          rowSpan={2}
-                          className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                        >
-                          Enrollment No.
-                        </th>
-                        {subjects.map((subject) => {
+        </div>
+        <div
+          id="marks_entry_viewport"
+          className="hidden flex-col mt-5"
+          style={{ height: 390 }}
+        >
+          <div className="overflow-x-scroll">
+            <div className="p-1.5 w-full inline-block align-middle">
+              <div className="border rounded-lg">
+                <table
+                  id="my-table"
+                  className="min-w-full divide-y table-auto text-center divide-gray-200"
+                >
+                  <thead className="sticky top-0 bg-gray-50">
+                    <tr id="selected-filters">
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-xs font-bold text-gray-500 text-center"
+                        colSpan={
+                          type === "All"
+                            ? 3 + subjects.length * examinationTypes.length
+                            : 3 + subjects.length
+                        }
+                      >
+                        <p className="text-center">{uniName}</p>
+                        <p className="text-center">
+                          {examinationName} {selectedYear} {type}
+                        </p>
+                        <p className="text-center">
+                          {branchesName}, {semesterName}
+                        </p>
+                        <p className="text-center">{subjectName}</p>
+                      </th>
+                    </tr>
+                    <tr>
+                      <th
+                        scope="col"
+                        rowSpan={2}
+                        className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                      >
+                        Sr No.
+                      </th>
+                      <th
+                        scope="col"
+                        rowSpan={2}
+                        className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                      >
+                        Student Name
+                      </th>
+                      <th
+                        scope="col"
+                        rowSpan={2}
+                        className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                      >
+                        Enrollment No.
+                      </th>
+                      {subjects.map((subject) => {
+                        return (
+                          <th
+                            key={subject.id}
+                            scope="col"
+                            className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
+                            colSpan={
+                              type === "All" ? examinationTypes.length : 1
+                            }
+                          >
+                            {subject.name}
+                          </th>
+                        );
+                      })}
+                    </tr>
+                    <tr id="type-tr" className="hidden">
+                      {subjects.map((subject) =>
+                        examinationTypes.map((type) => (
+                          <th
+                            key={`${subject.id}-${type.id}`}
+                            scope="col"
+                            className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                          >
+                            {type.name}
+                          </th>
+                        ))
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody className="text-center divide-y divide-gray-200">
+                    {Object.entries(marksData).map(
+                      ([studentId, studentData], index) => {
+                        const {
+                          student_name,
+                          student_enrollment_number,
+                          marks,
+                        } = studentData;
+                        if (type === "All") {
                           return (
-                            <th
-                              key={subject.id}
-                              scope="col"
-                              className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
-                              colSpan={
-                                type === "All" ? examinationTypes.length : 1
-                              }
-                            >
-                              {subject.name}
-                            </th>
-                          );
-                        })}
-                      </tr>
-                      <tr id="type-tr" className="hidden">
-                        {subjects.map((subject) =>
-                          examinationTypes.map((type) => (
-                            <th
-                              key={`${subject.id}-${type.id}`}
-                              scope="col"
-                              className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                            >
-                              {type.name}
-                            </th>
-                          ))
-                        )}
-                      </tr>
-                    </thead>
-                    <tbody className="text-center divide-y divide-gray-200">
-                      {Object.entries(marksData).map(
-                        ([studentId, studentData], index) => {
-                          const {
-                            student_name,
-                            student_enrollment_number,
-                            marks,
-                          } = studentData;
-                          if (type === "All") {
-                            return (
-                              <tr key={studentId}>
-                                <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                  {index + 1}
-                                </td>
-                                <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                  {student_name}
-                                </td>
-                                <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                  {student_enrollment_number}
-                                </td>
-                                {subjects.flatMap((subject) => {
-                                  return examinationTypes.flatMap((type) => {
-                                    const cellKey = `${studentId}-${subject.name}-${type.name}`;
-                                    const studentMarks =
-                                      marks?.[subject.name]?.[type.name] || "-";
-
-                                    return (
-                                      <td
-                                        key={cellKey}
-                                        className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap"
-                                      >
-                                        {studentMarks}
-                                      </td>
-                                    );
-                                  });
-                                })}
-                              </tr>
-                            );
-                          } else {
-                            return (
-                              <tr key={studentId}>
-                                <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                  {index + 1}
-                                </td>
-                                <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                  {student_name}
-                                </td>
-                                <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                  {student_enrollment_number}
-                                </td>
-                                {subjects.flatMap((subject) => {
-                                  const cellKey = `${studentId}-${subject.name}-${type}`;
+                            <tr key={studentId}>
+                              <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                {index + 1}
+                              </td>
+                              <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                {student_name}
+                              </td>
+                              <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                {student_enrollment_number}
+                              </td>
+                              {subjects.flatMap((subject) => {
+                                return examinationTypes.flatMap((type) => {
+                                  const cellKey = `${studentId}-${subject.name}-${type.name}`;
                                   const studentMarks =
-                                    marks?.[subject.name]?.[type] || "-";
+                                    marks?.[subject.name]?.[type.name] || "-";
 
                                   return (
                                     <td
@@ -998,15 +1335,43 @@ const Result = () => {
                                       {studentMarks}
                                     </td>
                                   );
-                                })}
-                              </tr>
-                            );
-                          }
+                                });
+                              })}
+                            </tr>
+                          );
+                        } else {
+                          return (
+                            <tr key={studentId}>
+                              <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                {index + 1}
+                              </td>
+                              <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                {student_name}
+                              </td>
+                              <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                {student_enrollment_number}
+                              </td>
+                              {subjects.flatMap((subject) => {
+                                const cellKey = `${studentId}-${subject.name}-${type}`;
+                                const studentMarks =
+                                  marks?.[subject.name]?.[type] || "-";
+
+                                return (
+                                  <td
+                                    key={cellKey}
+                                    className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap"
+                                  >
+                                    {studentMarks}
+                                  </td>
+                                );
+                              })}
+                            </tr>
+                          );
                         }
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+                      }
+                    )}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>

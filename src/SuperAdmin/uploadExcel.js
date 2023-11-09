@@ -7,6 +7,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Modal from "./modal";
 import SignInSuperAdmin from "./signInSuperAdmin";
+import BookLoader from "../Admin/bookLoader";
 
 var acces_token = localStorage.getItem("access_token");
 var headers = { Authorization: `Bearer ${acces_token}` };
@@ -22,62 +23,86 @@ const UploadExcel = () => {
   const [excelSheets, setExcelSheets] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [deleteExcel, setDeleteExcel] = useState(false);
+  const [status, setStatus] = useState("accepted");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const host = window.location.host;
-    const arr = host.split(".").slice(0, host.includes("localhost") ? -1 : -2);
-    if (arr.length > 0) {
-      subdomain = arr[0];
-    }
+    var acces_token = localStorage.getItem("access_token");
+    setLoading(true);
+    if (!acces_token) {
+      toast.error("Not authorized to access the page.");
+      navigate("/");
+    } else {
+      const host = window.location.host;
+      const arr = host
+        .split(".")
+        .slice(0, host.includes("localhost") ? -1 : -2);
+      if (arr.length > 0) {
+        subdomain = arr[0];
+      }
 
-    if (subdomain !== null || subdomain !== "") {
-      if (acces_token) {
+      if (subdomain !== null || subdomain !== "") {
         axios
-          .get(`/users/users/find_user?subdomain=${subdomain}`, {
-            headers: {
-              Authorization: `Bearer ${acces_token}`,
-            },
-          })
-          .then((responce) => {
-            console.log(responce);
-            console.log(responce.data.roles);
-            if (responce.data.roles.length !== 0) {
-              roles = responce.data.roles;
-            } else {
-              roles = [];
+          .get(`/universities/${subdomain}/get_authorization_details`)
+          .then((response) => {
+            if (response.data.status === "ok") {
+              if (response.data.university.status === "accepted") {
+                setUniName(response.data.university.name);
+                axios
+                  .get(`/users/users/find_user?subdomain=${subdomain}`, {
+                    headers,
+                  })
+                  .then((responce) => {
+                    // selectedFilter = responce.data.configuration;
+                    if (responce.data.status === "ok") {
+                      if (responce.data.roles.includes("super_admin")) {
+                        axios
+                          .get(`/excel_sheets`, {
+                            headers,
+                            params: {
+                              subdomain: subdomain,
+                            },
+                          })
+                          .then((res) => {
+                            if (res.data.data.excel_sheets.length !== 0) {
+                              setLoading(false);
+                              setExcelSheets(res.data.data.excel_sheets);
+                            } else {
+                              setLoading(false);
+                            }
+                          })
+                          .catch((err) => {
+                            console.error(err);
+                          })
+                          .finally(() => {
+                            setLoading(false);
+                          });
+                      } else {
+                        localStorage.clear();
+                        toast.error(
+                          "You are not authorized to access the page."
+                        );
+                        navigate("/");
+                      }
+                      setFaculty(
+                        responce.data.user.first_name +
+                          " " +
+                          responce.data.user.last_name
+                      );
+                    }
+                  })
+                  .catch((error) => console.log(error));
+              } else {
+                navigate("/");
+              }
             }
           })
-          .catch((error) => console.log(error));
+          .catch((err) => {
+            console.log(err);
+          });
       }
-      axios
-        .get(`/universities/${subdomain}/get_authorization_details`)
-        .then((response) => {
-          setUniName(response.data.university.name);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-
-      axios
-        .get(`/excel_sheets`, {
-          headers,
-          params: {
-            subdomain: subdomain,
-          },
-        })
-        .then((res) => {
-          if (res.data.data.excel_sheets.length !== 0) {
-            setExcelSheets(res.data.data.excel_sheets);
-          } else {
-          }
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-
-      setFaculty("Super Admin");
     }
-  }, []);
+  }, [acces_token, navigate]);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -150,6 +175,7 @@ const UploadExcel = () => {
 
   const handleLogout = () => {
     localStorage.clear();
+    toast.success("Log out Successfully!");
     navigate("/");
   };
 
@@ -202,8 +228,8 @@ const UploadExcel = () => {
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
-                      clip-rule="evenodd"
-                      fill-rule="evenodd"
+                      clipRule="evenodd"
+                      fillRule="evenodd"
                       d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"
                     ></path>
                   </svg>
@@ -225,7 +251,7 @@ const UploadExcel = () => {
                       data-dropdown-toggle="dropdown-user"
                     >
                       <span className="self-center text-xl mr-2 font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
-                        {faculty}
+                        {"Super Admin"}
                       </span>
                       <span className="sr-only">Open user menu</span>
                     </button>
@@ -328,59 +354,90 @@ const UploadExcel = () => {
               </h3>
             </div>
 
-            <div className="flex justify-center">
-              <form
-                onSubmit={handleSubmit}
-                class="sm:max-w-lg w-full p-10 bg-white rounded-xl z-10"
-              >
-                <div className="flex">
-                  <select
-                    id="file_select"
-                    className="form-select w-full rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                    onChange={(e) => {
-                      handleSheetNameChange(e);
-                    }}
-                  >
-                    <option>Select Sheet name</option>
-                    <option>Faculty Details</option>
-                    <option>Course and Semester Details</option>
-                    <option>Subject Details</option>
-                    <option>Division Details</option>
-                    <option>Student Details</option>
-                  </select>
-                </div>
-
-                <div id="hidden_div" className="hidden">
-                  <div className="text-center text-2xl mt-5"></div>
-
-                  <div className="grid grid-cols-1 space-y-2">
-                    <label className="text-start text-sm font-bold text-gray-500 tracking-wide">
-                      Choose {selectedValue} Sheet
-                    </label>
-                    <div className="flex justify-center w-full">
-                      <span class="sr-only">Choose {selectedValue} Sheet</span>
-                      <input
-                        type="file"
-                        id="file_input"
-                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-blue-100"
-                        onChange={(e) => setSelectedFile(e.target.files[0])}
-                        accept=".xls,.xlsx"
-                      />
+            <div className="flex flex-col justify-center">
+              <div className="row">
+                <form
+                  onSubmit={handleSubmit}
+                  className="flex flex-row w-full mt-5 bg-white rounded-xl z-10"
+                >
+                  <div className="flex flex-row">
+                    <div className="relative text-left w-full">
+                      <select
+                        id="file_select"
+                        className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                        onChange={(e) => {
+                          handleSheetNameChange(e);
+                        }}
+                      >
+                        <option className="text-gray-600">
+                          Select Sheet name
+                        </option>
+                        <option className="text-black font-bold">
+                          Faculty Details
+                        </option>
+                        <option className="text-black font-bold">
+                          Course and Semester Details
+                        </option>
+                        <option className="text-black font-bold">
+                          Subject Details
+                        </option>
+                        <option className="text-black font-bold">
+                          Division Details
+                        </option>
+                        <option className="text-black font-bold">
+                          Student Details
+                        </option>
+                      </select>
+                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                        <svg
+                          className="h-5 w-5 text-gray-400"
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path
+                            fill-rule="evenodd"
+                            d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                            clip-rule="evenodd"
+                          />
+                          <path
+                            fill-rule="evenodd"
+                            d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                            clip-rule="evenodd"
+                          />
+                        </svg>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="flex justify-center mt-5">
-                    <button
-                      type="submit"
-                      id="button-submit-excel-sheet"
-                      className="text-center w-full bg-green-600 text-gray-100 p-4 rounded-full tracking-wide
-                font-semibold  focus:outline-none focus:shadow-outline hover:bg-green-700 shadow-lg transition ease-in duration-300"
-                    >
-                      Upload
-                    </button>
+                  <div id="hidden_div" className="hidden">
+                    <div className="flex flex-row justify-between ml-5 -mt-7">
+                      <div className="mr-5">
+                        <label className="text-start text-sm text-gray-500 tracking-wider">
+                          Choose {selectedValue} Sheet
+                        </label>
+                        <div>
+                          <input
+                            type="file"
+                            id="file_input"
+                            className="block w-full border-2 border-gray-300 rounded-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-gray-300 file:text-gray-700 hover:file:bg-gray-200"
+                            onChange={(e) => setSelectedFile(e.target.files[0])}
+                            accept=".xls,.xlsx"
+                          />
+                        </div>
+                      </div>
+                      <button
+                        type="submit"
+                        id="button-submit-excel-sheet"
+                        className="text-center bg-gray-600 text-gray-100 p-2 px-12 rounded-2xl tracking-wide
+                font-semibold focus:outline-none focus:shadow-outline hover:bg-gray-700 shadow-lg transition ease-in duration-300 mt-5"
+                      >
+                        Upload
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </form>
+                </form>
+              </div>
             </div>
             <div
               id="sheets_viewport"
@@ -389,76 +446,100 @@ const UploadExcel = () => {
             >
               <div className="">
                 <div className="p-1.5 w-full inline-block align-middle">
-                  <div className="border rounded-lg">
+                  <div
+                    className={`${
+                      loading ? "border-none" : "border"
+                    } rounded-lg`}
+                  >
                     <table className="min-w-full divide-y table-auto divide-gray-200">
-                      <thead className="sticky top-0 bg-gray-50">
-                        <tr>
-                          <th
-                            scope="col"
-                            className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                          >
-                            Sr No.
-                          </th>
-                          <th
-                            scope="col"
-                            className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                          >
-                            Sheet Name
-                          </th>
-                          <th
-                            scope="col"
-                            className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase"
-                          >
-                            Action
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="text-center divide-y divide-gray-200">
-                        {excelSheets.length === 0 ? (
-                          <tr className="items-center">
-                            {" "}
-                            <td colSpan={3}>
-                              {" "}
-                              No excel sheets uploaded yet! Please upload first{" "}
-                            </td>{" "}
-                          </tr>
-                        ) : (
-                          excelSheets.map((excelSheet, index) => {
-                            return (
-                              <tr key={excelSheet.id}>
-                                <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                  {index + 1}
-                                </td>
-                                <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                  {excelSheet.name}
-                                </td>
-                                <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                  <button
-                                    id={excelSheet.id}
-                                    className="text-center w-auto bg-transparent text-gray-100 p-1 rounded-full tracking-wide
-                                  font-semibold  focus:outline-none focus:shadow-outline hover:bg-red-200 shadow-lg cursor-pointer transition ease-in duration-300"
-                                    onClick={() => {
-                                      setShowModal(true);
-                                    }}
+                      {loading ? (
+                        <>
+                          <div className="w-full flex items-center justify-center">
+                            <BookLoader
+                              message={"Fetching Uploaded Sheets ..."}
+                            />
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          {excelSheets.length === 0 ? (
+                            <>
+                              <tbody className="text-center divide-y divide-gray-200">
+                                <tr className="items-center">
+                                  <td
+                                    colSpan={3}
+                                    className="bg-white border-2 border-red-900 border-collapse rounded-3xl text-black text-lg whitespace-nowrap"
                                   >
-                                    <RiDeleteBin6Line
-                                      size={20}
-                                      className="text-red-600"
-                                    />
-                                  </button>
-                                  {showModal && (
-                                    <Modal
-                                      setOpenModal={setShowModal}
-                                      id={excelSheet.id}
-                                      setSheets={setExcelSheets}
-                                    />
-                                  )}
-                                </td>
-                              </tr>
-                            );
-                          })
-                        )}
-                      </tbody>
+                                    No excel sheets uploaded yet, Please upload
+                                    one to view here!
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </>
+                          ) : (
+                            <>
+                              <thead className="sticky top-0 bg-gray-50">
+                                <tr>
+                                  <th
+                                    scope="col"
+                                    className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                                  >
+                                    Sr No.
+                                  </th>
+                                  <th
+                                    scope="col"
+                                    className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                                  >
+                                    Sheet Name
+                                  </th>
+                                  <th
+                                    scope="col"
+                                    className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase"
+                                  >
+                                    Action
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody className="text-center divide-y divide-gray-200">
+                                {excelSheets.map((excelSheet, index) => {
+                                  return (
+                                    <tr key={excelSheet.id}>
+                                      <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                        {index + 1}
+                                      </td>
+                                      <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                        {excelSheet.name}
+                                      </td>
+                                      <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                        <button
+                                          id={excelSheet.id}
+                                          className="text-center w-auto bg-transparent text-gray-100 p-1 rounded-full tracking-wide
+                                  font-semibold  focus:outline-none focus:shadow-outline hover:bg-red-200 shadow-lg cursor-pointer transition ease-in duration-300"
+                                          onClick={() => {
+                                            setShowModal(true);
+                                          }}
+                                        >
+                                          <RiDeleteBin6Line
+                                            size={20}
+                                            className="text-red-600"
+                                          />
+                                        </button>
+                                        {showModal && (
+                                          <Modal
+                                            setOpenModal={setShowModal}
+                                            id={excelSheet.id}
+                                            setSheets={setExcelSheets}
+                                          />
+                                        )}
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </>
+                          )}
+                        </>
+                      )}
                     </table>
                   </div>
                 </div>

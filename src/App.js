@@ -49,6 +49,10 @@ import CreateCertificate from "./Admin/Student Coordinator/createCertificate";
 import CertificateRequest from "./Admin/Student Coordinator/certificateRequest";
 import PayFee from "./Student/payFee";
 import Error404 from "./error404";
+import AdminDashboard from "./Admin/AdminDashboard";
+import AcceptUniversity from "./Admin/modals/acceptUniversity";
+import AcceptedUniversities from "./Admin/AcceptedUniversities";
+import RejectedUniversities from "./Admin/RejectedUniversities";
 
 function App() {
   return (
@@ -80,6 +84,9 @@ function App() {
           {/* <Route path="/AdminLogin" element={<AdminLogin />} /> */}
           {/* <Route path="/examController" element={<ExamController />} /> */}
           <Route path="/examBlockDetails" element={<ExamBlockDetails />} />
+          <Route path="/pendingRequests" element={<AdminDashboard />} />
+          <Route path="/acceptedUniversities" element={<AcceptedUniversities />} />
+          <Route path="/rejectedUniversities" element={<RejectedUniversities />} />
           <Route
             path="/examAssignSupervision"
             element={<ExamAssignSupervision />}
@@ -136,7 +143,7 @@ function App() {
           <Route path="/studentProfile" element={<StudentProfile />} />
           <Route path="/updateProfile" element={<UpdateProfile />} />
           <Route path="/ForgotPassword" element={<ForgotPassword />} />
-          <Route path="/ChangePassword" element={<ChangePassword />} />
+          <Route path="/resetPassword" element={<ChangePassword />} />
           <Route path="/facultyDashboard" element={<FacultyDashboard />} />
           <Route
             path="/studentDetails"

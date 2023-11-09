@@ -513,8 +513,8 @@ const ExaminationDetails = () => {
                   </div>
                   <button
                     type="submit"
-                    className="text-center ml-2 bg-green-600 text-gray-100 p-2 rounded tracking-wide
-                font-semibold  focus:outline-none focus:shadow-outline hover:bg-green-700 shadow-md cursor-pointer transition ease-in duration-300"
+                    className="ml-2 text-center bg-gray-600 text-gray-100 p-1 px-12 rounded-2xl tracking-wide
+                    font-semibold focus:outline-none focus:shadow-outline hover:bg-gray-700 shadow-lg transition ease-in duration-300"
                     onClick={handleCreateExaminationName}
                   >
                     Submit
@@ -622,8 +622,8 @@ const ExaminationDetails = () => {
                   </div>
                   <button
                     type="submit"
-                    className="text-center ml-2 bg-green-600 text-gray-100 p-2 rounded tracking-wide
-                font-semibold  focus:outline-none focus:shadow-outline hover:bg-green-700 shadow-md cursor-pointer transition ease-in duration-300"
+                    className="ml-2 text-center bg-gray-600 text-gray-100 p-1 px-12 rounded-2xl tracking-wide
+                    font-semibold focus:outline-none focus:shadow-outline hover:bg-gray-700 shadow-lg transition ease-in duration-300"
                     onClick={handleCreateExaminationType}
                   >
                     Submit
@@ -732,7 +732,7 @@ const ExaminationDetails = () => {
                         End Time:
                       </label>
                       <TimePicker
-                        className="ml-2 "
+                        className="ml-2"
                         disableClock={true}
                         format="h:m a"
                         onChange={handleEndTime}
@@ -742,8 +742,8 @@ const ExaminationDetails = () => {
                   </div>
                   <button
                     type="submit"
-                    className="text-center ml-2 bg-green-600 text-gray-100 p-1 rounded tracking-wide
-                font-semibold  focus:outline-none focus:shadow-outline hover:bg-green-700 shadow-md cursor-pointer transition ease-in duration-300"
+                    className="ml-2 text-center bg-gray-600 text-gray-100 p-1 px-12 rounded-2xl tracking-wide
+                    font-semibold focus:outline-none focus:shadow-outline hover:bg-gray-700 shadow-lg transition ease-in duration-300"
                     onClick={handleCreateExaminationTime}
                   >
                     Submit

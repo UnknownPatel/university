@@ -923,14 +923,6 @@ const ExamBlockDetails = () => {
                     </a>
                   </li>
                   <li>
-                    <a
-                      href="/studentResult"
-                      className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                    >
-                      <span className="ml-3">Student Result</span>
-                    </a>
-                  </li>
-                  <li>
                     <div className="p-4">
                       <button
                         type="button"
@@ -948,120 +940,351 @@ const ExamBlockDetails = () => {
             <div className="p-4 sm:ml-64">
               <div className="p-4 rounded-lg mt-10">
                 <div className="text-center text-4xl">
-                  <p>Enter Block Details</p>
+                  <h3 className="mt-2 text-3xl font-bold text-gray-900">
+                    Create Block Details
+                  </h3>
                 </div>
-              </div>
-              <div className="flex ml-2 mt-5">
-                {/* Select Examination option in BlockWise Report */}
+                <div className="flex flex-col justify-start mt-5">
+                  <div className="flex flex-row w-full mt-5 bg-white rounded-xl z-10">
+                    {/* Examination Name */}
+                    <div className="flex flex-row">
+                      <div className="relative text-left w-full">
+                        <select
+                          id="examinationName"
+                          className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                          onChange={(e) => {
+                              handleExaminationChange2(e.target.value);
+                          }}
+                        >
+                          <option
+                            value="Select Examination"
+                            className="text-gray-600"
+                          >
+                            Examination
+                          </option>
+                          {examinationNames.map((examination_name) => {
+                            return (
+                              <option
+                                value={examination_name.name}
+                                className="text-black font-bold"
+                              >
+                                {examination_name.name}
+                              </option>
+                            );
+                          })}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                          <svg
+                            className="h-5 w-5 text-gray-400"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                              clip-rule="evenodd"
+                            />
+                            <path
+                              fill-rule="evenodd"
+                              d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
 
-                <select
-                  className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md rounded justify-center px-3 py-2 w-auto"
-                  onChange={(e) => {
-                    handleExaminationChange2(e, e.target.value);
-                  }}
-                >
-                  <option value="Select Examination">Examination</option>
-                  {examinationNames.map((examination_name) => {
-                    return (
-                      <option value={examination_name.name}>
-                        {examination_name.name}
-                      </option>
-                    );
-                  })}
-                </select>
+                    {/* Academic Year */}
+                    <div className="flex flex-row">
+                      <div className="relative text-left w-full">
+                        <select
+                          id="academicYear"
+                          className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                          onChange={(e) => handleYearChange2(e.target.value)}
+                        >
+                          <option value="Select Year" className="text-gray-600">
+                            Year
+                          </option>
+                          {academic_years.map((year) => {
+                            return (
+                              <option
+                                value={year}
+                                className="text-black font-bold"
+                              >
+                                {year}
+                              </option>
+                            );
+                          })}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                          <svg
+                            className="h-5 w-5 text-gray-400"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                              clip-rule="evenodd"
+                            />
+                            <path
+                              fill-rule="evenodd"
+                              d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
 
-                {/* Select Year option in BlockWise Report */}
-                <select
-                  className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
-                  onChange={(e) => handleYearChange2(e.target.value)}
-                >
-                  <option value="Select Year">Year</option>
-                  {academic_years.map((year) => {
-                    return <option value={year}>{year}</option>;
-                  })}
-                </select>
+                    {/* Examination Type */}
+                    <div className="flex flex-row">
+                      <div className="relative text-left w-full">
+                        <select
+                          id="examinationType"
+                          className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                          onChange={handleTypeChange}
+                        >
+                          <option value="Select Type" className="text-gray-600">
+                            Type
+                          </option>
+                          {examinationTypes.map((examination_type) => {
+                            return (
+                              <option
+                                value={examination_type.name}
+                                className="text-black font-bold"
+                              >
+                                {examination_type.name}
+                              </option>
+                            );
+                          })}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                          <svg
+                            className="h-5 w-5 text-gray-400"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                              clip-rule="evenodd"
+                            />
+                            <path
+                              fill-rule="evenodd"
+                              d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Branch Name */}
+                    <div className="flex flex-row">
+                      <div className="relative text-left w-full">
+                        <select
+                          id="branch"
+                          className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                          onChange={handleBranchChange2}
+                        >
+                          <option
+                            value="Select Branch"
+                            className="text-gray-600"
+                          >
+                            Branch
+                          </option>
+                          {branches2.map((branch) => (
+                            <option
+                              value={branch.id}
+                              className="text-black font-bold"
+                            >
+                              {branch.name}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                          <svg
+                            className="h-5 w-5 text-gray-400"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                              clip-rule="evenodd"
+                            />
+                            <path
+                              fill-rule="evenodd"
+                              d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
 
-                <select
-                  className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
-                  onChange={handleTypeChange}
-                >
-                  <option value="Select Type">Type</option>
-                  {examinationTypes.map((examination_type) => {
-                    return (
-                      <option value={examination_type.name}>
-                        {examination_type.name}
-                      </option>
-                    );
-                  })}
-                </select>
-
-                <select
-                  className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded justify-center shadow-md px-3 py-2 w-auto"
-                  onChange={handleBranchChange2}
-                >
-                  <option value="Select Branch">Branch</option>
-                  {branches2.map((branch) => (
-                    <option value={branch.id}>{branch.name}</option>
-                  ))}
-                </select>
-
-                <select
-                  className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded justify-center shadow-md px-3 py-2 w-auto"
-                  onChange={handleSemesterChange2}
-                >
-                  <option value="Select Semester">Semester</option>
-                  {semesters2.map((semester) => (
-                    <option value={semester.id}>{semester.name}</option>
-                  ))}
-                </select>
-
-                <select
-                  className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
-                  onChange={(e) => {
-                    if (e.target.value !== "Select Date") {
-                      setDate2(e.target.value);
-                    } else {
-                      setDate2("");
-                    }
-                  }}
-                >
-                  <option value="Select Date">Date</option>
-                  {storeDates.map((date) => (
-                    <option value={date}>{date}</option>
-                  ))}
-                </select>
-
-                <select
-                  className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
-                  onChange={(e) => {
-                    handleTimeChange(e);
-                  }}
-                >
-                  <option value="Select time">Time</option>
-                  {examinationTimes.map((examination_time) => {
-                    return (
-                      <option value={examination_time.name}>
-                        {examination_time.name}
-                      </option>
-                    );
-                  })}
-                </select>
-
-                <button
-                  className="text-center w-auto bg-transparent text-slate-950 p-3 rounded-2xl tracking-wide border border-slate-950
-                font-semibold focus:outline-none focus:shadow-outline hover:bg-gray-700 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
-                  id={"submit-button"}
-                  onClick={handleFilterSubmit}
-                >
-                  <p className="inline-flex">
-                    Search <GiArchiveResearch className="mt-1 ml-2" />
-                  </p>
-                </button>
+                    {/* Semester Name */}
+                    <div className="flex flex-row">
+                      <div className="relative text-left w-full">
+                        <select
+                          id="branch"
+                          className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                          onChange={handleSemesterChange2}
+                        >
+                          <option
+                            value="Select Semester"
+                            className="text-gray-600"
+                          >
+                            Semester
+                          </option>
+                          {semesters2.map((semester) => (
+                            <option
+                              value={semester.id}
+                              className="text-black font-bold"
+                            >
+                              {semester.name}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                          <svg
+                            className="h-5 w-5 text-gray-400"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                              clip-rule="evenodd"
+                            />
+                            <path
+                              fill-rule="evenodd"
+                              d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Examination Date */}
+                    <div className="flex flex-row">
+                      <div className="relative text-left w-full">
+                        <select
+                          id="branch"
+                          className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                          onChange={(e) => {
+                            if (e.target.value !== "Select Date") {
+                              setDate2(e.target.value);
+                            } else {
+                              setDate2("");
+                            }
+                          }}
+                        >
+                          <option value="Select Date" className="text-gray-600">
+                            Date
+                          </option>
+                          {storeDates.map((date) => (
+                            <option
+                              value={date}
+                              className="text-black font-bold"
+                            >
+                              {date}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                          <svg
+                            className="h-5 w-5 text-gray-400"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                              clip-rule="evenodd"
+                            />
+                            <path
+                              fill-rule="evenodd"
+                              d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Examination Time */}
+                    <div className="flex flex-row">
+                      <div className="relative text-left w-full">
+                        <select
+                          id="time"
+                          className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                          onChange={(e) => handleTimeChange(e)}
+                        >
+                          <option value="Select time" className="text-gray-600">
+                            Time
+                          </option>
+                          {examinationTimes.map((examination_time) => {
+                            return (
+                              <option
+                                value={examination_time.name}
+                                className="text-black font-bold"
+                              >
+                                {examination_time.name}
+                              </option>
+                            );
+                          })}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                          <svg
+                            className="h-5 w-5 text-gray-400"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                              clip-rule="evenodd"
+                            />
+                            <path
+                              fill-rule="evenodd"
+                              d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Search Button */}
+                    <div className="flex flex-row ml-2">
+                      <button
+                        id="submit-button"
+                        className="ml-2 z-10 text-center w-auto bg-transparent text-slate-950 p-1 px-12 rounded-2xl tracking-wide border border-slate-950
+                    font-semibold focus:outline-none focus:shadow-outline hover:bg-gray-700 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
+                        onClick={handleFilterSubmit}
+                      >
+                        <div className="inline-flex">
+                          Search <GiArchiveResearch className="mt-1 ml-2" />
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div
                 id="time_table_viewport"
-                className="hidden flex-col h-96 max-h-fit overflow-y-scroll mt-5"
+                className="hidden flex-col h-[75vh] max-h-fit overflow-y-scroll mt-5"
               >
                 <div className="">
                   <div className="p-1.5 w-full inline-block align-middle">

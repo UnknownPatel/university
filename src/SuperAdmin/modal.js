@@ -32,6 +32,7 @@ const Modal = ({ setOpenModal, id, setSheets }) => {
           }
         )
         .then((res) => {
+          setOpenModal(false);
           if (res.data.status === "ok") {
             toast.success(res.data.message, {
               position: toast.POSITION.BOTTOM_LEFT,
@@ -49,10 +50,8 @@ const Modal = ({ setOpenModal, id, setSheets }) => {
               .then((res) => {
                 if (res.data.data.excel_sheets.length !== 0) {
                   setSheets(res.data.data.excel_sheets);
-                  setOpenModal(false);
                 } else {
-                  setSheets([])
-                  setOpenModal(false)
+                  setSheets([]);
                 }
               })
               .catch((err) => {
@@ -62,7 +61,6 @@ const Modal = ({ setOpenModal, id, setSheets }) => {
             toast.error(res.data.message, {
               position: toast.POSITION.BOTTOM_LEFT,
             });
-            setOpenModal(false);
           }
         })
         .catch((err) => {

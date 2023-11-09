@@ -12,7 +12,6 @@ var access_token;
 
 const UnlockMarks = () => {
   const [uniName, setUniName] = useState("");
-  const [courses, setCourses] = useState([]);
   const [courseId, setCourseId] = useState("");
   const [branches, setBranches] = useState([]);
   const [branchId, setBranchId] = useState("");
@@ -23,13 +22,11 @@ const UnlockMarks = () => {
   const [divisionId, setDivisionId] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
   const [examinationName, setExaminationName] = useState("");
-  const [faculties, setFaculties] = useState([]);
   const [faculty, setFaculty] = useState("");
   const [subjects, setSubjects] = useState([]);
   const [type, setType] = useState("");
   const [academic_years, setAcademicYears] = useState([]);
   const [selectedOptions, setSelectedOptions] = useState({});
-  const [subjectIds, setSubjectIds] = useState({});
   const [examinationNames, setExaminationNames] = useState([]);
   const [examinationTypes, setExaminationTypes] = useState([]);
   const [status, setStatus] = useState({});
@@ -65,9 +62,7 @@ const UnlockMarks = () => {
 
     if (subdomain !== null || subdomain !== "") {
       axios
-        .get(
-          `/universities/${subdomain}/get_authorization_details`
-        )
+        .get(`/universities/${subdomain}/get_authorization_details`)
         .then((response) => {
           setUniName(response.data.university.name);
         })
@@ -76,12 +71,9 @@ const UnlockMarks = () => {
         });
 
       axios
-        .get(
-          `/users/users/find_user?subdomain=${subdomain}`,
-          {
-            headers,
-          }
-        )
+        .get(`/users/users/find_user?subdomain=${subdomain}`, {
+          headers,
+        })
         .then((responce) => {
           // selectedFilter = responce.data.configuration;
           setFaculty(
@@ -104,15 +96,12 @@ const UnlockMarks = () => {
 
       // Get Examination Names
       axios
-        .get(
-          "/examination_names",
-          {
-            headers,
-            params: {
-              subdomain: subdomain,
-            },
-          }
-        )
+        .get("/examination_names", {
+          headers,
+          params: {
+            subdomain: subdomain,
+          },
+        })
         .then((responce) => {
           if (responce.data.message === "Names found") {
             if (responce.data.data.examination_names.length !== 0) {
@@ -128,15 +117,12 @@ const UnlockMarks = () => {
 
       // Get Examination Types
       axios
-        .get(
-          "/examination_types",
-          {
-            headers,
-            params: {
-              subdomain: subdomain,
-            },
-          }
-        )
+        .get("/examination_types", {
+          headers,
+          params: {
+            subdomain: subdomain,
+          },
+        })
         .then((responce) => {
           if (responce.data.message === "Types found") {
             if (responce.data.data.examination_types.length !== 0) {
@@ -225,6 +211,8 @@ const UnlockMarks = () => {
     if (branch_id === "Select Branch") {
       setBranchId("");
       setSemesterId("");
+      setSemesters([]);
+      setDivisions([]);
     } else {
       setBranchId(e.target.value);
     }
@@ -237,10 +225,9 @@ const UnlockMarks = () => {
     }
     if (subdomain !== null || subdomain !== "") {
       axios
-        .get(
-          `/semesters?subdomain=${subdomain}&branch_id=${branch_id}`,
-          { headers }
-        )
+        .get(`/semesters?subdomain=${subdomain}&branch_id=${branch_id}`, {
+          headers,
+        })
         .then((response) => {
           setSemesters(response.data.data.semesters);
         })
@@ -257,22 +244,20 @@ const UnlockMarks = () => {
     unlockMarks_viewport.classList.remove("flex");
     if (e.target.value === "Select Semester") {
       setSemesterId("");
+      setDivisions([]);
     } else {
       setSemesterId(e.target.value);
       if (subdomain !== null || subdomain !== "") {
         axios
-          .get(
-            `/divisions`,
-            {
-              headers,
-              params: {
-                subdomain: subdomain,
-                division: {
-                  semester_id: e.target.value,
-                },
+          .get(`/divisions`, {
+            headers,
+            params: {
+              subdomain: subdomain,
+              division: {
+                semester_id: e.target.value,
               },
-            }
-          )
+            },
+          })
           .then((response) => {
             setDivisions(response.data.data.divisions);
           })
@@ -344,20 +329,17 @@ const UnlockMarks = () => {
       console.log(selectedFilter);
       var actual_subject_length = null;
       axios
-        .get(
-          `/subjects`,
-          {
-            headers,
-            params: {
-              subdomain: subdomain,
-              subject: {
-                course_id: selectedFilter.course_id,
-                branch_id: selectedFilter.branch_id,
-                semester_id: selectedFilter.semester_id,
-              },
+        .get(`/subjects`, {
+          headers,
+          params: {
+            subdomain: subdomain,
+            subject: {
+              course_id: selectedFilter.course_id,
+              branch_id: selectedFilter.branch_id,
+              semester_id: selectedFilter.semester_id,
             },
-          }
-        )
+          },
+        })
         .then((res) => {
           if (res.data.status === "ok") {
             if (res.data.data.subjects.length !== 0) {
@@ -371,36 +353,30 @@ const UnlockMarks = () => {
         });
 
       axios
-        .get(
-          `/student_marks/fetch_subjects`,
-          {
-            headers,
-            params: {
-              student_mark: selectedFilter,
-              subdomain: subdomain,
-            },
-          }
-        )
+        .get(`/student_marks/fetch_subjects`, {
+          headers,
+          params: {
+            student_mark: selectedFilter,
+            subdomain: subdomain,
+          },
+        })
         .then((res) => {
           console.log(res);
           if (res.data.message === "Details found") {
             if (res.data.data.subject_ids.length !== 0) {
               axios
-                .get(
-                  `/subjects`,
-                  {
-                    headers,
-                    params: {
-                      subject: {
-                        course_id: selectedFilter.course_id,
-                        branch_id: selectedFilter.branch_id,
-                        semester_id: selectedFilter.semester_id,
-                        id: JSON.stringify(res.data.data.subject_ids),
-                      },
-                      subdomain: subdomain,
+                .get(`/subjects`, {
+                  headers,
+                  params: {
+                    subject: {
+                      course_id: selectedFilter.course_id,
+                      branch_id: selectedFilter.branch_id,
+                      semester_id: selectedFilter.semester_id,
+                      id: JSON.stringify(res.data.data.subject_ids),
                     },
-                  }
-                )
+                    subdomain: subdomain,
+                  },
+                })
                 .then((response) => {
                   const unlockMarks_viewport = document.getElementById(
                     "unlockMarks_viewport"
@@ -412,16 +388,13 @@ const UnlockMarks = () => {
                   response.data.data.subjects.map((subject) => {
                     selectedFilter["subject_id"] = subject.id;
                     axios
-                      .get(
-                        `/student_marks/fetch_status`,
-                        {
-                          headers,
-                          params: {
-                            subdomain: subdomain,
-                            student_mark: selectedFilter,
-                          },
-                        }
-                      )
+                      .get(`/student_marks/fetch_status`, {
+                        headers,
+                        params: {
+                          subdomain: subdomain,
+                          student_mark: selectedFilter,
+                        },
+                      })
                       .then((res) => {
                         console.log(res);
                         if (res.data.message === "Details found") {
@@ -443,32 +416,26 @@ const UnlockMarks = () => {
                     actual_subject_length === response.data.data.subjects.length
                   ) {
                     axios
-                      .get(
-                        `/student_marks/eligible_for_publish`,
-                        {
-                          headers,
-                          params: {
-                            subdomain: subdomain,
-                            student_mark: selectedFilter,
-                          },
-                        }
-                      )
+                      .get(`/student_marks/eligible_for_publish`, {
+                        headers,
+                        params: {
+                          subdomain: subdomain,
+                          student_mark: selectedFilter,
+                        },
+                      })
                       .then((res) => {
                         console.log(res);
                         if (res.data.status === "ok") {
                           if (res.data.data.eligible === true) {
                             setPublishDisabled(false);
                             axios
-                              .get(
-                                `/student_marks/fetch_publish_status`,
-                                {
-                                  headers,
-                                  params: {
-                                    subdomain: subdomain,
-                                    student_mark: selectedFilter,
-                                  },
-                                }
-                              )
+                              .get(`/student_marks/fetch_publish_status`, {
+                                headers,
+                                params: {
+                                  subdomain: subdomain,
+                                  student_mark: selectedFilter,
+                                },
+                              })
                               .then((res) => {
                                 if (res.data.status === "ok") {
                                   if (res.data.data.published_marks === true) {
@@ -867,14 +834,6 @@ const UnlockMarks = () => {
                     </a>
                   </li>
                   <li>
-                    <a
-                      href="/studentResult"
-                      className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                    >
-                      <span className="ml-3">Student Result</span>
-                    </a>
-                  </li>
-                  <li>
                     <div className="p-4">
                       <button
                         type="button"
@@ -889,221 +848,419 @@ const UnlockMarks = () => {
               </div>
             </aside>
 
-            <div className="pt-4 sm:ml-64">
-              <div className="p-4 rounded-lg mt-14">
+            <div className="p-4 sm:ml-64">
+              <div className="p-4 rounded-lg mt-10">
                 <div className="text-center text-4xl">
-                  <p>UnLock Marks Entry </p>
+                  <h3 className="mt-2 text-3xl font-bold text-gray-900">
+                    Unlock Marks
+                  </h3>
                 </div>
 
-                <div className="flex mt-5 ml-2">
-                  <select
-                    id="examination_name"
-                    className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                    onChange={(e) => {
-                      handleExaminationChange(e.target.value);
-                    }}
-                    aria-label="Examination Name"
-                  >
-                    <option value="Select Examination">Examination</option>
-                    {examinationNames.map((examination_name) => {
-                      return (
-                        <option value={examination_name.name}>
-                          {examination_name.name}
-                        </option>
-                      );
-                    })}
-                  </select>
+                <div className="flex flex-col justify-start mt-5">
+                  <div className="flex flex-row w-full mt-5 bg-white rounded-xl z-10">
+                    {/* Examination Name */}
+                    <div className="flex flex-row">
+                      <div className="relative text-left w-full">
+                        <select
+                          id="examination_name"
+                          className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                          onChange={(e) => {
+                            handleExaminationChange(e, e.target.value);
+                          }}
+                        >
+                          <option
+                            value="Select Examination"
+                            className="text-gray-600"
+                          >
+                            Examination
+                          </option>
+                          {examinationNames.map((examination_name) => {
+                            return (
+                              <option
+                                value={examination_name.name}
+                                className="text-black font-bold"
+                              >
+                                {examination_name.name}
+                              </option>
+                            );
+                          })}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                          <svg
+                            className="h-5 w-5 text-gray-400"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                              clip-rule="evenodd"
+                            />
+                            <path
+                              fill-rule="evenodd"
+                              d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
 
-                  <select
-                    className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                    onChange={(e) => handleYearChange(e.target.value)}
-                  >
-                    <option value="Select Year">Year</option>
-                    {academic_years.map((year) => {
-                      return <option value={year}>{year}</option>;
-                    })}
-                  </select>
+                    {/* Academic Year */}
+                    <div className="flex flex-row">
+                      <div className="relative text-left w-full">
+                        <select
+                          id="academicYear"
+                          className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                          onChange={(e) => handleYearChange(e.target.value)}
+                        >
+                          <option value="Select Year" className="text-gray-600">
+                            Year
+                          </option>
+                          {academic_years.map((year) => {
+                            return (
+                              <option
+                                value={year}
+                                className="text-black font-bold"
+                              >
+                                {year}
+                              </option>
+                            );
+                          })}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                          <svg
+                            className="h-5 w-5 text-gray-400"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                              clip-rule="evenodd"
+                            />
+                            <path
+                              fill-rule="evenodd"
+                              d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
 
-                  <select
-                    className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
-                    onChange={handleTypeChange}
-                  >
-                    <option value="Select Type">Type</option>
-                    {examinationTypes.map((examination_type) => {
-                      return (
-                        <option value={examination_type.name}>
-                          {examination_type.name}
-                        </option>
-                      );
-                    })}
-                  </select>
+                    {/* Examination Type */}
+                    <div className="flex flex-row">
+                      <div className="relative text-left w-full">
+                        <select
+                          id="examinationType"
+                          className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                          onChange={handleTypeChange}
+                        >
+                          <option value="Select Type" className="text-gray-600">
+                            Type
+                          </option>
+                          {examinationTypes.map((examination_type) => {
+                            return (
+                              <option
+                                value={examination_type.name}
+                                className="text-black font-bold"
+                              >
+                                {examination_type.name}
+                              </option>
+                            );
+                          })}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                          <svg
+                            className="h-5 w-5 text-gray-400"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                              clip-rule="evenodd"
+                            />
+                            <path
+                              fill-rule="evenodd"
+                              d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
 
-                  <select
-                    className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                    onChange={(e) => {
-                      handleBranchChange(e);
-                    }}
-                  >
-                    <option value="Select Branch">Branch</option>
-                    {branches.map((branch) => (
-                      <option value={branch.id} data-name={branch.name}>
-                        {branch.name}
-                      </option>
-                    ))}
-                  </select>
+                    {/* Branch Name */}
+                    <div className="flex flex-row">
+                      <div className="relative text-left w-full">
+                        <select
+                          id="branch"
+                          className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                          onChange={(e) => {
+                            handleBranchChange(e);
+                          }}
+                        >
+                          <option
+                            value="Select Branch"
+                            className="text-gray-600"
+                          >
+                            Branch
+                          </option>
+                          {branches.map((branch) => (
+                            <option
+                              value={branch.id}
+                              className="text-black font-bold"
+                            >
+                              {branch.name}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                          <svg
+                            className="h-5 w-5 text-gray-400"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                              clip-rule="evenodd"
+                            />
+                            <path
+                              fill-rule="evenodd"
+                              d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
 
-                  <select
-                    className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                    onChange={handleSemesterChange}
-                  >
-                    <option value="Select Semester">Semester</option>
-                    {semesters.map((semester) => (
-                      <option
-                        value={semester.id}
-                        data-semester-name={semester.name}
+                    {/* Semester Name */}
+                    <div className="flex flex-row">
+                      <div className="relative text-left w-full">
+                        <select
+                          id="branch"
+                          className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                          onChange={handleSemesterChange}
+                        >
+                          <option
+                            value="Select Semester"
+                            className="text-gray-600"
+                          >
+                            Semester
+                          </option>
+                          {semesters.map((semester) => (
+                            <option
+                              value={semester.id}
+                              className="text-black font-bold"
+                            >
+                              {semester.name}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                          <svg
+                            className="h-5 w-5 text-gray-400"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                              clip-rule="evenodd"
+                            />
+                            <path
+                              fill-rule="evenodd"
+                              d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Division Name */}
+                    <div className="flex flex-row">
+                      <div className="relative text-left w-full">
+                        <select
+                          id="division"
+                          className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                          onChange={handleDivisionChange}
+                        >
+                          <option
+                            value="Select Division"
+                            className="text-gray-600"
+                          >
+                            Division
+                          </option>
+                          {divisions.map((division) => (
+                            <option
+                              value={division.id}
+                              data-division-name={division.name}
+                              className="text-black font-bold"
+                            >
+                              {division.name}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                          <svg
+                            className="h-5 w-5 text-gray-400"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                              clip-rule="evenodd"
+                            />
+                            <path
+                              fill-rule="evenodd"
+                              d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Search Button */}
+                    <div className="flex flex-row ml-2">
+                      <button
+                        id="unlock-submit-button"
+                        className="ml-2 z-10 text-center w-auto bg-transparent text-slate-950 p-1 px-12 rounded-2xl tracking-wide border border-slate-950
+                    font-semibold focus:outline-none focus:shadow-outline hover:bg-gray-700 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
+                        onClick={handleFilterSubmit}
                       >
-                        {semester.name}
-                      </option>
-                    ))}
-                  </select>
+                        <div className="inline-flex">
+                          Search <GiArchiveResearch className="mt-1 ml-2" />
+                        </div>
+                      </button>
 
-                  <select
-                    className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                    onChange={handleDivisionChange}
-                  >
-                    <option value="Select Division">Division</option>
-                    {divisions.map((division) => (
-                      <option
-                        value={division.id}
-                        data-division-name={division.name}
+                      <button
+                        id="publish-marks"
+                        className={` ${
+                          publishDisabled
+                            ? "cursor-not-allowed"
+                            : "cursor-pointer"
+                        } ml-2 z-10 text-center w-auto bg-transparent text-slate-950 p-1 px-12 rounded-2xl tracking-wide border border-slate-950
+                        font-semibold focus:outline-none focus:shadow-outline hover:bg-gray-700 hover:text-white hover:border-white shadow-lg transition ease-in duration-300`}
+                        onClick={handlePublishMarks}
+                        disabled={publishDisabled}
                       >
-                        {division.name}
-                      </option>
-                    ))}
-                  </select>
-
-                  <button
-                    id="unlock-submit-button"
-                    className="text-center ml-4 w-auto bg-transparent text-slate-950 p-3 rounded-2xl tracking-wide border border-blue-600
-                  font-semibold focus:outline-none focus:shadow-outline hover:bg-blue-400 hover:text-white shadow-lg cursor-pointer transition ease-in duration-300"
-                    onClick={handleFilterSubmit}
-                  >
-                    <p className="inline-flex">
-                      Search <GiArchiveResearch className="mt-1 ml-2" />
-                    </p>
-                  </button>
-                  <button
-                    id="publish-marks"
-                    className={` ${
-                      publishDisabled ? "cursor-not-allowed" : "cursor-pointer"
-                    } text-center ml-4 w-auto bg-transparent text-slate-950 p-3 rounded-2xl tracking-wide border border-green-600 cursor-not-allowed
-                  font-semibold focus:outline-none focus:shadow-outline hover:bg-green-600 hover:text-white shadow-lg transition ease-in duration-300`}
-                    onClick={handlePublishMarks}
-                    disabled={publishDisabled}
-                  >
-                    Publish Marks
-                  </button>
+                        Publish Marks
+                      </button>
+                    </div>
+                  </div>
                 </div>
                 {/* Table of Faculty List */}
-
-                <div
-                  id="unlockMarks_viewport"
-                  className="hidden flex-col overflow-y-scroll mt-5 h-[65vh] max-h-fit "
-                >
-                  <div className="">
-                    <div className="p-1.5 w-full inline-block align-middle">
-                      <div className="border rounded-lg">
-                        <table className="min-w-full divide-y table-auto divide-gray-200">
-                          <thead className="sticky top-0 bg-gray-50">
-                            <tr>
-                              <th
-                                scope="col"
-                                className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
-                              >
-                                Sr No.
-                              </th>
-                              <th
-                                scope="col"
-                                className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                              >
-                                Subject Name
-                              </th>
-                              <th
-                                scope="col"
-                                className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
-                              >
-                                Status
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody className="text-center divide-y divide-gray-200">
-                            {subjects.map((subject, index) => {
-                              if (status[subject.id]) {
-                                return (
-                                  <tr>
-                                    <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                      {index + 1}
-                                    </td>
-                                    <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                      {subject.name}
-                                    </td>
-                                    <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                      <button
-                                        className={` ${
-                                          disabled ? "cursor-not-allowed" : ""
-                                        } text-center w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-green-600
+              </div>
+              <div
+                id="unlockMarks_viewport"
+                className="hidden flex-col overflow-y-scroll mt-5 h-[65vh] max-h-fit "
+              >
+                <div className="">
+                  <div className="p-1.5 w-full inline-block align-middle">
+                    <div className="border rounded-lg">
+                      <table className="min-w-full divide-y table-auto divide-gray-200">
+                        <thead className="sticky top-0 bg-gray-50">
+                          <tr>
+                            <th
+                              scope="col"
+                              className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
+                            >
+                              Sr No.
+                            </th>
+                            <th
+                              scope="col"
+                              className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                            >
+                              Subject Name
+                            </th>
+                            <th
+                              scope="col"
+                              className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
+                            >
+                              Status
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="text-center divide-y divide-gray-200">
+                          {subjects.map((subject, index) => {
+                            if (status[subject.id]) {
+                              return (
+                                <tr>
+                                  <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                    {index + 1}
+                                  </td>
+                                  <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                    {subject.name}
+                                  </td>
+                                  <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                    <button
+                                      className={` ${
+                                        disabled ? "cursor-not-allowed" : ""
+                                      } text-center w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-green-600
                                       font-semibold focus:outline-none focus:shadow-outline hover:bg-green-600 hover:text-white hover:border-white shadow-lg transition ease-in duration-300 unlock-buttons`}
-                                        id={subject.id}
-                                        data-subject-id={subject.id}
-                                        onClick={(e) =>
-                                          handleUnlockMarks(
-                                            e,
-                                            subject.id,
-                                            subject.name
-                                          )
-                                        }
-                                        disabled={disabled}
-                                      >
-                                        Unlock Marks
-                                      </button>
-                                      {unlockMarkShowModal && (
-                                        <UnlockMarkModal
-                                          setOpenModal={setUnlockMarkShowModal}
-                                          id={subjectId}
-                                          selectedFilter={sendSelectedFilter}
-                                          setStatus={setStatus}
-                                          status={status}
-                                          name={subjectName}
-                                        />
-                                      )}
-                                    </td>
-                                  </tr>
-                                );
-                              } else {
-                                return (
-                                  <tr>
-                                    <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                      {index + 1}
-                                    </td>
-                                    <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                      {subject.name}
-                                    </td>
-                                    <td className="flex justify-center text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                      <p
-                                        className="cursor-not-allowed text-center max-w-fit bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-red-600
+                                      id={subject.id}
+                                      data-subject-id={subject.id}
+                                      onClick={(e) =>
+                                        handleUnlockMarks(
+                                          e,
+                                          subject.id,
+                                          subject.name
+                                        )
+                                      }
+                                      disabled={disabled}
+                                    >
+                                      Unlock Marks
+                                    </button>
+                                    {unlockMarkShowModal && (
+                                      <UnlockMarkModal
+                                        setOpenModal={setUnlockMarkShowModal}
+                                        id={subjectId}
+                                        selectedFilter={sendSelectedFilter}
+                                        setStatus={setStatus}
+                                        status={status}
+                                        name={subjectName}
+                                      />
+                                    )}
+                                  </td>
+                                </tr>
+                              );
+                            } else {
+                              return (
+                                <tr>
+                                  <td className="text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                    {index + 1}
+                                  </td>
+                                  <td className="text-start px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                    {subject.name}
+                                  </td>
+                                  <td className="flex justify-center text-center px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                    <p
+                                      className="cursor-not-allowed text-center max-w-fit bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-red-600
                                       font-semibold focus:outline-none focus:shadow-outline hover:bg-red-600 hover:text-white hover:border-white shadow-lg transition ease-in duration-300"
-                                      >
-                                        {" "}
-                                        Pending{" "}
-                                      </p>
-                                    </td>
-                                  </tr>
-                                );
-                              }
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
+                                    >
+                                      {" "}
+                                      Pending{" "}
+                                    </p>
+                                  </td>
+                                </tr>
+                              );
+                            }
+                          })}
+                        </tbody>
+                      </table>
                     </div>
                   </div>
                 </div>

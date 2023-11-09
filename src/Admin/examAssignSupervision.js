@@ -15,12 +15,19 @@ import { useNavigate } from "react-router-dom";
 import JrSupervisionModal from "./modals/jrSupervisionModal";
 import SrSupervisionModal from "./modals/srSupervisionModal";
 import OtherDutyModal from "./modals/otherDutyModal";
+import Loader from "./loader";
+import { isTime } from "react-time-picker/dist/cjs/shared/propTypes";
 
 var acces_token;
 var headers;
 var subdomain;
 
 const ExamAssignSupervision = () => {
+  const [isFilterLoading, setIsFilterLoading] = useState(false);
+  const [isExaminationLoading, setIsExaminationLoading] = useState(true);
+  const [isTypeLoading, setIsTypeLoading] = useState(true);
+  const [isBranchLoading, setIsBranchLoading] = useState(true);
+  const [isTimeLoading, setIsTimeLoading] = useState(true);
   const [faculty, setFaculty] = useState("");
   const [uniName, setUniName] = useState("");
   const [jrType, setJrType] = useState("");
@@ -29,7 +36,6 @@ const ExamAssignSupervision = () => {
   const [examinationNames, setExaminationNames] = useState([]);
   const [examinationTimes, setExaminationTimes] = useState([]);
   const [selectedYear, setSelectedYear] = useState("");
-  const [courses, setCourses] = useState([]);
   const [courseId, setCourseId] = useState("");
   const [branchId, setBranchId] = useState("");
   const [facultyName, setFacultyName] = useState([]);
@@ -43,7 +49,6 @@ const ExamAssignSupervision = () => {
   const [srExaminationName, setSrExaminationName] = useState("");
   const [srSelectedYear, setSrSelectedYear] = useState("");
   const [srType, setSrType] = useState("");
-  const [srCourses, setSrCourses] = useState([]);
   const [srBranches, setSrBranches] = useState([]);
   const [srCourseId, setSrCourseId] = useState("");
   const [srBranchId, setSrBranchId] = useState("");
@@ -57,7 +62,6 @@ const ExamAssignSupervision = () => {
   const [odSelectedYear, setOdSelectedYear] = useState("");
   const [odType, setOdType] = useState("");
   const [odTime, setOdTime] = useState("");
-  const [odCourses, setOdCourses] = useState([]);
   const [odCourseId, setOdCourseId] = useState("");
   const [odBranches, setOdBranches] = useState([]);
   const [odBranchId, setOdBranchId] = useState("");
@@ -66,12 +70,14 @@ const ExamAssignSupervision = () => {
   const [odAssignedDuty, setOdAssignedDuty] = useState("");
   const [otherDutyShowModal, setOtherDutyShowModal] = useState(false);
   const [otherDutyId, setOtherDutyId] = useState("");
+  const [activeButton, setActiveButton] = useState("button1");
 
   const navigate = useNavigate();
 
   var year;
 
   useEffect(() => {
+    setIsFilterLoading(true);
     acces_token = localStorage.getItem("access_token");
     const roles = localStorage.getItem("roles");
 
@@ -111,6 +117,81 @@ const ExamAssignSupervision = () => {
           setCourseId(responce.data.user.course_id);
           setSrCourseId(responce.data.user.course_id);
           setOdCourseId(responce.data.user.course_id);
+
+          // Examination Names API
+          axios
+            .get("/examination_names", {
+              headers,
+              params: {
+                subdomain: subdomain,
+              },
+            })
+            .then((responce) => {
+              if (responce.data.message === "Names found") {
+                if (responce.data.data.examination_names.length !== 0) {
+                  setExaminationNames(responce.data.data.examination_names);
+                } else {
+                  setExaminationNames([]);
+                }
+              }
+            })
+            .catch(function (err) {
+              console.log(err.message);
+            })
+            .finally(() => {
+              setIsFilterLoading(false);
+              setIsExaminationLoading(false);
+            });
+
+          // Examination Types API
+          axios
+            .get("/examination_types", {
+              headers,
+              params: {
+                subdomain: subdomain,
+              },
+            })
+            .then((responce) => {
+              if (responce.data.message === "Types found") {
+                if (responce.data.data.examination_types.length !== 0) {
+                  setExaminationTypes(responce.data.data.examination_types);
+                } else {
+                  setExaminationTypes([]);
+                }
+              }
+            })
+            .catch(function (err) {
+              console.log(err.message);
+            })
+            .finally(() => {
+              setIsFilterLoading(false);
+              setIsTypeLoading(false);
+            });
+
+          axios
+            .get("/examination_times", {
+              headers,
+              params: {
+                subdomain: subdomain,
+              },
+            })
+            .then((responce) => {
+              if (responce.data.status === "ok") {
+                if (responce.data.data.examination_times.length !== 0) {
+                  setExaminationTimes(responce.data.data.examination_times);
+                } else {
+                  setExaminationTimes([]);
+                }
+              }
+            })
+            .catch(function (err) {
+              console.log(err.message);
+            })
+            .finally(() => {
+              setIsFilterLoading(false);
+              setIsTimeLoading(false);
+            });
+
           axios
             .get(
               `/branches?subdomain=${subdomain}&course_id=${responce.data.user.course_id}`,
@@ -123,75 +204,15 @@ const ExamAssignSupervision = () => {
               setSrBranches(response.data.data.branches);
               setOdBranches(response.data.data.branches);
             })
-            .catch((error) => console.log(error));
+            .catch((error) => console.log(error))
+            .finally(() => {
+              setIsFilterLoading(false);
+              setIsBranchLoading(false);
+            });
         })
         .catch((error) => console.log(error));
-
-      // Examination Names API
-      axios
-        .get("/examination_names", {
-          headers,
-          params: {
-            subdomain: subdomain,
-          },
-        })
-        .then((responce) => {
-          if (responce.data.message === "Names found") {
-            if (responce.data.data.examination_names.length !== 0) {
-              setExaminationNames(responce.data.data.examination_names);
-            } else {
-              setExaminationNames([]);
-            }
-          }
-        })
-        .catch(function (err) {
-          console.log(err.message);
-        });
-
-      // Examination Types API
-      axios
-        .get("/examination_types", {
-          headers,
-          params: {
-            subdomain: subdomain,
-          },
-        })
-        .then((responce) => {
-          if (responce.data.message === "Types found") {
-            if (responce.data.data.examination_types.length !== 0) {
-              setExaminationTypes(responce.data.data.examination_types);
-            } else {
-              setExaminationTypes([]);
-            }
-          }
-        })
-        .catch(function (err) {
-          console.log(err.message);
-        });
-
-      axios
-        .get("/examination_times", {
-          headers,
-          params: {
-            subdomain: subdomain,
-          },
-        })
-        .then((responce) => {
-          if (responce.data.status === "ok") {
-            if (responce.data.data.examination_times.length !== 0) {
-              setExaminationTimes(responce.data.data.examination_times);
-            } else {
-              setExaminationTimes([]);
-            }
-          }
-        })
-        .catch(function (err) {
-          console.log(err.message);
-        });
     }
   }, []);
-
-  const [activeButton, setActiveButton] = useState("button1");
 
   function toggleContent(buttonId) {
     setActiveButton(buttonId);
@@ -238,6 +259,7 @@ const ExamAssignSupervision = () => {
   const createObject = (e, user_id, no_of_supervisions) => {
     e.preventDefault();
     e.target.disabled = true;
+    console.log(examinationName)
     e.target.classList.add("cursor-not-allowed");
     var selectedFilter = {};
     var timeTableSelectedFilter = {};
@@ -1374,14 +1396,6 @@ const ExamAssignSupervision = () => {
                       </a>
                     </li>
                     <li>
-                      <a
-                        href="/studentResult"
-                        className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                      >
-                        <span className="ml-3">Student Result</span>
-                      </a>
-                    </li>
-                    <li>
                       <div className="p-4">
                         <button
                           type="button"
@@ -1397,696 +1411,1229 @@ const ExamAssignSupervision = () => {
               </aside>
 
               <div className="p-4 sm:ml-64">
-                <div className="flex flex-col items-center mt-14">
-                  <div className="flex justify-center space-x-4 mb-5">
-                    <button
-                      className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg ${
-                        activeButton === "button1" ? "bg-slate-800" : ""
-                      }`}
-                      onClick={() => toggleContent("button1")}
-                    >
-                      Assign Jr. Supervisors
-                    </button>
-                    <button
-                      className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg ${
-                        activeButton === "button2" ? "bg-slate-800" : ""
-                      }`}
-                      onClick={() => toggleContent("button2")}
-                    >
-                      Assign Sr. Supervisor
-                    </button>
-                    <button
-                      className={`bg-slate-500  text-white font-bold py-2 px-4 rounded-lg ${
-                        activeButton === "button3" ? "bg-slate-800" : ""
-                      }`}
-                      onClick={() => toggleContent("button3")}
-                    >
-                      Assign Other Duites
-                    </button>
+                <div className="p-4 rounded-lg mt-10">
+                  <div className="text-center">
+                    <div className="space-x-4">
+                      <button
+                        className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg ${
+                          activeButton === "button1" ? "bg-slate-800" : ""
+                        }`}
+                        onClick={() => toggleContent("button1")}
+                      >
+                        Assign Jr. Supervisors
+                      </button>
+                      <button
+                        className={`bg-slate-500 text-white font-bold py-2 px-4 rounded-lg ${
+                          activeButton === "button2" ? "bg-slate-800" : ""
+                        }`}
+                        onClick={() => toggleContent("button2")}
+                      >
+                        Assign Sr. Supervisor
+                      </button>
+                      <button
+                        className={`bg-slate-500  text-white font-bold py-2 px-4 rounded-lg ${
+                          activeButton === "button3" ? "bg-slate-800" : ""
+                        }`}
+                        onClick={() => toggleContent("button3")}
+                      >
+                        Assign Other Duites
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex w-full">
-                    <div
-                      id="content1"
-                      className={`min-w-full p-4 rounded-lg ${
-                        activeButton === "button1" ? "block" : "hidden"
-                      }`}
-                    >
-                      <div className="flex ml-2">
-                        <select
-                          className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                          onChange={(e) => {
-                            handleJrExaminationChange(e.target.value);
-                          }}
-                        >
-                          <option value="Select Examination">
-                            Examination
-                          </option>
-                          {examinationNames.map((examination_name) => {
-                            return (
-                              <option value={examination_name.name}>
-                                {examination_name.name}
-                              </option>
-                            );
-                          })}
-                        </select>
-
-                        <select
-                          className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                          onChange={(e) => handleJrYearChange(e.target.value)}
-                        >
-                          <option value="Select Year">Year</option>
-                          {academic_years.map((year) => {
-                            return <option value={year}>{year}</option>;
-                          })}
-                        </select>
-
-                        <select
-                          className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
-                          onChange={handleJrTypeChange}
-                        >
-                          <option value="Select Type">Type</option>
-                          {examinationTypes.map((examination_type) => {
-                            return (
-                              <option value={examination_type.name}>
-                                {examination_type.name}
-                              </option>
-                            );
-                          })}
-                        </select>
-
-                        <select
-                          className="w-auto form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded justify-center shadow-md px-3 py-2"
-                          onChange={handleJrBranchChange}
-                        >
-                          <option value="Select Branch">Branch</option>
-                          {branches.map((branch) => (
-                            <option style={{ width: 100 }} value={branch.id}>
-                              {branch.name}
-                            </option>
-                          ))}
-                        </select>
-
-                        <select
-                          className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                          onChange={(e) => {
-                            handleJrTimeChange(e);
-                            if (e.target.value !== "Select Time") {
-                              setJrTime(e.target.value);
-                            } else {
-                              setJrTime("");
-                            }
-                          }}
-                        >
-                          <option value="Select time"> Time </option>
-                          {examinationTimes.map((examination_time) => {
-                            return (
-                              <option value={examination_time.name}>
-                                {examination_time.name}
-                              </option>
-                            );
-                          })}
-                        </select>
-
-                        <button
-                          className="text-center ml-4 w-auto bg-transparent text-slate-950 p-3 rounded-2xl tracking-wide border border-slate-950
-                      font-semibold focus:outline-none focus:shadow-outline hover:bg-gray-700 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
-                          id="jr-submit-button"
-                          onClick={handleFilterSubmit}
-                        >
-                          <p className="inline-flex">
-                            Search <GiArchiveResearch className="mt-1 ml-2" />
-                          </p>
-                        </button>
-                      </div>
-                      <div
-                        id="jr_faculty_listing_viewport"
-                        className="hidden overflow-y-scroll h-96 flex-col mt-5"
-                      >
-                        <div className="">
-                          <div className="p-1.5 w-full inline-block align-middle">
-                            <div className="border rounded-lg">
-                              <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="sticky top-0 bg-gray-50">
-                                  <tr>
-                                    <th
-                                      scope="col"
-                                      className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                                    >
-                                      Name
-                                    </th>
-                                    <th
-                                      scope="col"
-                                      className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
-                                    >
-                                      Designation
-                                    </th>
-                                    <th
-                                      scope="col"
-                                      className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
-                                    >
-                                      Department
-                                    </th>
-                                    <th
-                                      scope="col"
-                                      className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
-                                    >
-                                      Enter No. Of Supervision
-                                    </th>
-                                    <th
-                                      scope="col"
-                                      className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
-                                    >
-                                      Action
-                                    </th>
-                                  </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-200">
-                                  {facultyName.map((item) => {
-                                    if (Object.keys(facultyName).length !== 0) {
-                                      return (
-                                        <tr>
-                                          <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                            {item.first_name} {item.last_name}
-                                          </td>
-                                          <td className="px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap">
-                                            {item.designation}
-                                          </td>
-                                          <td className="px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap">
-                                            {item.department}
-                                          </td>
-                                          <td className="px-6 py-4 text-sm font-medium flex justify-center whitespace-nowrap">
-                                            <input
-                                              className="shadow appearance-none border rounded w-52 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                              id={
-                                                "jr-student-input-user-" +
-                                                item.id
-                                              }
-                                              onChange={(e) =>
-                                                setNoOfSupervisions(
-                                                  parseInt(e.target.value)
-                                                )
-                                              }
-                                              type="text"
-                                              placeholder="Enter No. Of Supervision"
-                                            />
-                                          </td>
-                                          <td
-                                            className="px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap"
-                                            data-id={item.id}
-                                          >
-                                            <button
-                                              className="text-center w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
-                                          font-semibold focus:outline-none focus:shadow-outline hover:bg-green-600 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
-                                              id={
-                                                "jr-supervision-button-" +
-                                                item.id
-                                              }
-                                              onClick={(e) =>
-                                                createObject(
-                                                  e,
-                                                  item.id,
-                                                  noOfSupervisions
-                                                )
-                                              }
-                                            >
-                                              Create
-                                            </button>
-
-                                            <button
-                                              id={
-                                                "jr-delete-button-user-" +
-                                                item.id
-                                              }
-                                              className="hidden text-center ml-4 w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
-                                      font-semibold focus:outline-none focus:shadow-outline hover:bg-red-600 hover:text-slate-50 hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
-                                              onClick={(e) => {
-                                                setJrSupervisionShowModal(true);
-                                                setJrSupervisionId(
-                                                  e.target.getAttribute(
-                                                    "data-supervision-id"
-                                                  )
-                                                );
-                                              }}
-                                            >
-                                              Delete
-                                            </button>
-                                            {jrSupervisionShowModal && (
-                                              <JrSupervisionModal
-                                                setOpenModal={
-                                                  setJrSupervisionShowModal
-                                                }
-                                                id={jrSupervisionId}
-                                              />
-                                            )}
-                                          </td>
-                                        </tr>
-                                      );
-                                    }
+                  <div
+                    id="content1"
+                    className={`min-w-full rounded-lg ${
+                      activeButton === "button1" ? "block" : "hidden"
+                    }`}
+                  >
+                    {isBranchLoading ||
+                    isExaminationLoading ||
+                    isTimeLoading ||
+                    isTypeLoading ? (
+                      <>
+                        <div className="flex items-center justify-center mt-10 w-full">
+                          <Loader width={"w-10"} height={"h-10"}/>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex flex-col justify-start mt-5">
+                          <div className="flex flex-row w-full mt-5 bg-white rounded-xl z-10">
+                            <div className="flex flex-row">
+                              <div className="relative text-left w-full">
+                                <select
+                                  id="examinationName"
+                                  className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                                  onChange={(e) => {
+                                    handleJrExaminationChange(
+                                      e.target.value
+                                    );
+                                  }}
+                                >
+                                  <option
+                                    value="Select Examination"
+                                    className="text-gray-600"
+                                  >
+                                    Examination
+                                  </option>
+                                  {examinationNames.map((examination_name) => {
+                                    return (
+                                      <option
+                                        value={examination_name.name}
+                                        className="text-black font-bold"
+                                      >
+                                        {examination_name.name}
+                                      </option>
+                                    );
                                   })}
-                                </tbody>
-                              </table>
+                                </select>
+                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                                  <svg
+                                    className="h-5 w-5 text-gray-400"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                  >
+                                    <path
+                                      fill-rule="evenodd"
+                                      d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                                      clip-rule="evenodd"
+                                    />
+                                    <path
+                                      fill-rule="evenodd"
+                                      d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                                      clip-rule="evenodd"
+                                    />
+                                  </svg>
+                                </div>
+                              </div>
                             </div>
+
+                            <div className="flex flex-row">
+                              <div className="relative text-left w-full">
+                                <select
+                                  id="academicYear"
+                                  className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                                  onChange={(e) =>
+                                    handleJrYearChange(e.target.value)
+                                  }
+                                >
+                                  <option
+                                    value="Select Year"
+                                    className="text-gray-600"
+                                  >
+                                    Year
+                                  </option>
+                                  {academic_years.map((year) => {
+                                    return (
+                                      <option
+                                        value={year}
+                                        className="text-black font-bold"
+                                      >
+                                        {year}
+                                      </option>
+                                    );
+                                  })}
+                                </select>
+                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                                  <svg
+                                    className="h-5 w-5 text-gray-400"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                  >
+                                    <path
+                                      fill-rule="evenodd"
+                                      d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                                      clip-rule="evenodd"
+                                    />
+                                    <path
+                                      fill-rule="evenodd"
+                                      d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                                      clip-rule="evenodd"
+                                    />
+                                  </svg>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex flex-row">
+                              <div className="relative text-left w-full">
+                                <select
+                                  id="examinationType"
+                                  className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                                  onChange={handleJrTypeChange}
+                                >
+                                  <option
+                                    value="Select Type"
+                                    className="text-gray-600"
+                                  >
+                                    Type
+                                  </option>
+                                  {examinationTypes.map((examination_type) => {
+                                    return (
+                                      <option
+                                        value={examination_type.name}
+                                        className="text-black font-bold"
+                                      >
+                                        {examination_type.name}
+                                      </option>
+                                    );
+                                  })}
+                                </select>
+                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                                  <svg
+                                    className="h-5 w-5 text-gray-400"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                  >
+                                    <path
+                                      fill-rule="evenodd"
+                                      d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                                      clip-rule="evenodd"
+                                    />
+                                    <path
+                                      fill-rule="evenodd"
+                                      d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                                      clip-rule="evenodd"
+                                    />
+                                  </svg>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex flex-row">
+                              <div className="relative text-left w-full">
+                                <select
+                                  id="branch"
+                                  className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                                  onChange={handleJrBranchChange}
+                                >
+                                  <option
+                                    value="Select Branch"
+                                    className="text-gray-600"
+                                  >
+                                    Branch
+                                  </option>
+                                  {branches.map((branch) => (
+                                    <option
+                                      value={branch.id}
+                                      className="text-black font-bold"
+                                    >
+                                      {branch.name}
+                                    </option>
+                                  ))}
+                                </select>
+                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                                  <svg
+                                    className="h-5 w-5 text-gray-400"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                  >
+                                    <path
+                                      fill-rule="evenodd"
+                                      d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                                      clip-rule="evenodd"
+                                    />
+                                    <path
+                                      fill-rule="evenodd"
+                                      d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                                      clip-rule="evenodd"
+                                    />
+                                  </svg>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex flex-row">
+                              <div className="relative text-left w-full">
+                                <select
+                                  id="time"
+                                  className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                                  onChange={(e) => handleJrTimeChange(e)}
+                                >
+                                  <option
+                                    value="Select time"
+                                    className="text-gray-600"
+                                  >
+                                    Time
+                                  </option>
+                                  {examinationTimes.map((examination_time) => {
+                                    return (
+                                      <option
+                                        value={examination_time.name}
+                                        className="text-black font-bold"
+                                      >
+                                        {examination_time.name}
+                                      </option>
+                                    );
+                                  })}
+                                </select>
+                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                                  <svg
+                                    className="h-5 w-5 text-gray-400"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                  >
+                                    <path
+                                      fill-rule="evenodd"
+                                      d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                                      clip-rule="evenodd"
+                                    />
+                                    <path
+                                      fill-rule="evenodd"
+                                      d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                                      clip-rule="evenodd"
+                                    />
+                                  </svg>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex flex-row ml-2">
+                              <button
+                                id="submit-button"
+                                className="ml-2 z-10 text-center w-auto bg-transparent text-slate-950 p-1 px-12 rounded-2xl tracking-wide border border-slate-950
+                    font-semibold focus:outline-none focus:shadow-outline hover:bg-gray-700 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
+                                onClick={handleFilterSubmit}
+                              >
+                                <div className="inline-flex">
+                                  Search{" "}
+                                  <GiArchiveResearch className="mt-1 ml-2" />
+                                </div>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    <div
+                      id="jr_faculty_listing_viewport"
+                      className="hidden overflow-y-scroll h-[75vh] flex-col mt-5"
+                    >
+                      <div className="">
+                        <div className="p-1.5 w-full inline-block align-middle">
+                          <div className="border rounded-lg">
+                            <table className="min-w-full divide-y divide-gray-200">
+                              <thead className="sticky top-0 bg-gray-50">
+                                <tr>
+                                  <th
+                                    scope="col"
+                                    className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                                  >
+                                    Name
+                                  </th>
+                                  <th
+                                    scope="col"
+                                    className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
+                                  >
+                                    Designation
+                                  </th>
+                                  <th
+                                    scope="col"
+                                    className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
+                                  >
+                                    Department
+                                  </th>
+                                  <th
+                                    scope="col"
+                                    className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
+                                  >
+                                    Enter No. Of Supervision
+                                  </th>
+                                  <th
+                                    scope="col"
+                                    className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
+                                  >
+                                    Action
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-gray-200">
+                                {facultyName.map((item) => {
+                                  if (Object.keys(facultyName).length !== 0) {
+                                    return (
+                                      <tr>
+                                        <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                          {item.first_name} {item.last_name}
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap">
+                                          {item.designation}
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap">
+                                          {item.department}
+                                        </td>
+                                        <td className="px-6 py-4 text-sm font-medium flex justify-center whitespace-nowrap">
+                                          <input
+                                            className="shadow appearance-none border rounded w-52 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                            id={
+                                              "jr-student-input-user-" + item.id
+                                            }
+                                            onChange={(e) =>
+                                              setNoOfSupervisions(
+                                                parseInt(e.target.value)
+                                              )
+                                            }
+                                            type="text"
+                                            placeholder="Enter No. Of Supervision"
+                                          />
+                                        </td>
+                                        <td
+                                          className="px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap"
+                                          data-id={item.id}
+                                        >
+                                          <button
+                                            className="text-center w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
+                                          font-semibold focus:outline-none focus:shadow-outline hover:bg-green-600 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
+                                            id={
+                                              "jr-supervision-button-" + item.id
+                                            }
+                                            onClick={(e) =>
+                                              createObject(
+                                                e,
+                                                item.id,
+                                                noOfSupervisions
+                                              )
+                                            }
+                                          >
+                                            Create
+                                          </button>
+
+                                          <button
+                                            id={
+                                              "jr-delete-button-user-" + item.id
+                                            }
+                                            className="hidden text-center ml-4 w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
+                                      font-semibold focus:outline-none focus:shadow-outline hover:bg-red-600 hover:text-slate-50 hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
+                                            onClick={(e) => {
+                                              setJrSupervisionShowModal(true);
+                                              setJrSupervisionId(
+                                                e.target.getAttribute(
+                                                  "data-supervision-id"
+                                                )
+                                              );
+                                            }}
+                                          >
+                                            Delete
+                                          </button>
+                                          {jrSupervisionShowModal && (
+                                            <JrSupervisionModal
+                                              setOpenModal={
+                                                setJrSupervisionShowModal
+                                              }
+                                              id={jrSupervisionId}
+                                            />
+                                          )}
+                                        </td>
+                                      </tr>
+                                    );
+                                  }
+                                })}
+                              </tbody>
+                            </table>
                           </div>
                         </div>
                       </div>
                     </div>
-                    <div
-                      id="content2"
-                      className={`min-w-full p-4 rounded-lg ${
-                        activeButton === "button2" ? "block" : "hidden"
-                      }`}
-                    >
-                      <div className="flex ml-2">
-                        <select
-                          className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                          onChange={(e) => {
-                            handleSrExaminationChange(e.target.value);
-                          }}
-                        >
-                          <option value="Select Examination">
-                            Examination
-                          </option>
-                          {examinationNames.map((examination_name) => {
-                            return (
-                              <option value={examination_name.name}>
-                                {examination_name.name}
-                              </option>
-                            );
-                          })}
-                        </select>
+                  </div>
 
-                        <select
-                          className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                          onChange={(e) => handleSrYearChange(e.target.value)}
-                        >
-                          <option value="Select Year">Year</option>
-                          {academic_years.map((year) => {
-                            return <option value={year}>{year}</option>;
-                          })}
-                        </select>
-
-                        <select
-                          className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
-                          onChange={handleSrTypeChange}
-                        >
-                          <option value="Select Type">Type</option>
-                          {examinationTypes.map((examination_type) => {
-                            return (
-                              <option value={examination_type.name}>
-                                {examination_type.name}
-                              </option>
-                            );
-                          })}
-                        </select>
-
-                        <select
-                          className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded justify-center shadow-md px-3 py-2"
-                          onChange={handleSrBranchChange}
-                        >
-                          <option value="Select Branch">Branch</option>
-                          {srBranches.map((branch) => (
-                            <option value={branch.id}>{branch.name}</option>
-                          ))}
-                        </select>
-
-                        <select
-                          className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                          onChange={(e) => {
-                            handleSrTimeChange(e);
-                            if (e.target.value !== "Select Time") {
-                              setSrTime(e.target.value);
-                            } else {
-                              setSrTime("");
-                            }
-                          }}
-                        >
-                          <option value="Select time"> Time </option>
-                          {examinationTimes.map((examination_time) => {
-                            return (
-                              <option value={examination_time.name}>
-                                {examination_time.name}
-                              </option>
-                            );
-                          })}
-                        </select>
-                        <button
-                          className="text-center ml-4 w-auto bg-transparent text-slate-950 p-3 rounded-2xl tracking-wide border border-slate-950
-                      font-semibold focus:outline-none focus:shadow-outline hover:bg-gray-700 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
-                          id={"sr-submit-button"}
-                          onClick={handleSrFilterSubmit}
-                        >
-                          <p className="inline-flex">
-                            Search <GiArchiveResearch className="mt-1 ml-2" />
-                          </p>
-                        </button>
-                      </div>
-                      <div
-                        id="sr_faculty_listing_viewport"
-                        className="hidden overflow-y-scroll h-96 flex-col mt-5"
-                      >
-                        <div className="">
-                          <div className="p-1.5 w-full inline-block align-middle">
-                            <div className="border rounded-lg">
-                              <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="sticky top-0 bg-gray-50">
-                                  <tr>
-                                    <th
-                                      scope="col"
-                                      className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                                    >
-                                      Name
-                                    </th>
-                                    <th
-                                      scope="col"
-                                      className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
-                                    >
-                                      Designation
-                                    </th>
-                                    <th
-                                      scope="col"
-                                      className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
-                                    >
-                                      Department
-                                    </th>
-                                    <th
-                                      scope="col"
-                                      className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
-                                    >
-                                      Enter No. Of Supervision
-                                    </th>
-                                    <th
-                                      scope="col"
-                                      className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
-                                    >
-                                      Action
-                                    </th>
-                                  </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-200">
-                                  {srFacultyName.map((item) => {
-                                    if (
-                                      Object.keys(srFacultyName).length !== 0
-                                    ) {
-                                      return (
-                                        <tr>
-                                          <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                            {item.first_name} {item.last_name}
-                                          </td>
-                                          <td className="px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap">
-                                            {item.designation}
-                                          </td>
-                                          <td className="px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap">
-                                            {item.department}
-                                          </td>
-                                          <td className="px-6 py-4 text-sm font-medium flex justify-center whitespace-nowrap">
-                                            <input
-                                              className="shadow appearance-none border rounded w-52 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                              id={
-                                                "sr-student-input-user-" +
-                                                item.id
-                                              }
-                                              onChange={(e) =>
-                                                setSrNoOfSupervisions(
-                                                  parseInt(e.target.value)
-                                                )
-                                              }
-                                              type="text"
-                                              placeholder="Enter No. Of Supervision"
-                                            />
-                                          </td>
-                                          <td
-                                            className="px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap"
-                                            data-id={item.id}
-                                          >
-                                            <button
-                                              className="text-center w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
-                                          font-semibold focus:outline-none focus:shadow-outline hover:bg-green-600 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
-                                              id={
-                                                "sr-supervision-button-" +
-                                                item.id
-                                              }
-                                              onClick={(e) =>
-                                                createSrObject(e, item.id)
-                                              }
-                                            >
-                                              Create
-                                            </button>
-
-                                            <button
-                                              id={
-                                                "sr-delete-button-user-" +
-                                                item.id
-                                              }
-                                              className="hidden text-center ml-4 w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
-                                      font-semibold focus:outline-none focus:shadow-outline hover:bg-red-600 hover:text-slate-50 hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
-                                              onClick={(e) => {
-                                                setSrSupervisionShowModal(true);
-                                                setSrSupervisionId(
-                                                  e.target.getAttribute(
-                                                    "data-supervision-id"
-                                                  )
-                                                );
-                                              }}
-                                            >
-                                              Delete
-                                            </button>
-                                            {srSupervisionShowModal && (
-                                              <SrSupervisionModal
-                                                setOpenModal={
-                                                  setSrSupervisionShowModal
-                                                }
-                                                id={srSupervisionId}
-                                              />
-                                            )}
-                                          </td>
-                                        </tr>
-                                      );
-                                    }
+                  <div
+                    id="content2"
+                    className={`min-w-full rounded-lg ${
+                      activeButton === "button2" ? "block" : "hidden"
+                    }`}
+                  >
+                    {isBranchLoading ||
+                    isExaminationLoading ||
+                    isTimeLoading ||
+                    isTypeLoading ? (
+                      <>
+                        <div className="flex items-center justify-center mt-5 w-full">
+                          <Loader />
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex flex-col justify-start mt-5">
+                          <div className="flex flex-row w-full mt-5 bg-white rounded-xl z-10">
+                            <div className="flex flex-row">
+                              <div className="relative text-left w-full">
+                                <select
+                                  id="examinationName"
+                                  className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                                  onChange={(e) => {
+                                    handleSrExaminationChange(
+                                      e,
+                                      e.target.value
+                                    );
+                                  }}
+                                >
+                                  <option
+                                    value="Select Examination"
+                                    className="text-gray-600"
+                                  >
+                                    Examination
+                                  </option>
+                                  {examinationNames.map((examination_name) => {
+                                    return (
+                                      <option
+                                        value={examination_name.name}
+                                        className="text-black font-bold"
+                                      >
+                                        {examination_name.name}
+                                      </option>
+                                    );
                                   })}
-                                </tbody>
-                              </table>
+                                </select>
+                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                                  <svg
+                                    className="h-5 w-5 text-gray-400"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                  >
+                                    <path
+                                      fill-rule="evenodd"
+                                      d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                                      clip-rule="evenodd"
+                                    />
+                                    <path
+                                      fill-rule="evenodd"
+                                      d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                                      clip-rule="evenodd"
+                                    />
+                                  </svg>
+                                </div>
+                              </div>
                             </div>
+
+                            <div className="flex flex-row">
+                              <div className="relative text-left w-full">
+                                <select
+                                  id="academicYear"
+                                  className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                                  onChange={(e) =>
+                                    handleSrYearChange(e.target.value)
+                                  }
+                                >
+                                  <option
+                                    value="Select Year"
+                                    className="text-gray-600"
+                                  >
+                                    Year
+                                  </option>
+                                  {academic_years.map((year) => {
+                                    return (
+                                      <option
+                                        value={year}
+                                        className="text-black font-bold"
+                                      >
+                                        {year}
+                                      </option>
+                                    );
+                                  })}
+                                </select>
+                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                                  <svg
+                                    className="h-5 w-5 text-gray-400"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                  >
+                                    <path
+                                      fill-rule="evenodd"
+                                      d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                                      clip-rule="evenodd"
+                                    />
+                                    <path
+                                      fill-rule="evenodd"
+                                      d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                                      clip-rule="evenodd"
+                                    />
+                                  </svg>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex flex-row">
+                              <div className="relative text-left w-full">
+                                <select
+                                  id="examinationType"
+                                  className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                                  onChange={handleSrTypeChange}
+                                >
+                                  <option
+                                    value="Select Type"
+                                    className="text-gray-600"
+                                  >
+                                    Type
+                                  </option>
+                                  {examinationTypes.map((examination_type) => {
+                                    return (
+                                      <option
+                                        value={examination_type.name}
+                                        className="text-black font-bold"
+                                      >
+                                        {examination_type.name}
+                                      </option>
+                                    );
+                                  })}
+                                </select>
+                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                                  <svg
+                                    className="h-5 w-5 text-gray-400"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                  >
+                                    <path
+                                      fill-rule="evenodd"
+                                      d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                                      clip-rule="evenodd"
+                                    />
+                                    <path
+                                      fill-rule="evenodd"
+                                      d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                                      clip-rule="evenodd"
+                                    />
+                                  </svg>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex flex-row">
+                              <div className="relative text-left w-full">
+                                <select
+                                  id="branch"
+                                  className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                                  onChange={handleSrBranchChange}
+                                >
+                                  <option
+                                    value="Select Branch"
+                                    className="text-gray-600"
+                                  >
+                                    Branch
+                                  </option>
+                                  {branches.map((branch) => (
+                                    <option
+                                      value={branch.id}
+                                      className="text-black font-bold"
+                                    >
+                                      {branch.name}
+                                    </option>
+                                  ))}
+                                </select>
+                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                                  <svg
+                                    className="h-5 w-5 text-gray-400"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                  >
+                                    <path
+                                      fill-rule="evenodd"
+                                      d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                                      clip-rule="evenodd"
+                                    />
+                                    <path
+                                      fill-rule="evenodd"
+                                      d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                                      clip-rule="evenodd"
+                                    />
+                                  </svg>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex flex-row">
+                              <div className="relative text-left w-full">
+                                <select
+                                  id="time"
+                                  className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                                  onChange={(e) => handleSrTimeChange(e)}
+                                >
+                                  <option
+                                    value="Select time"
+                                    className="text-gray-600"
+                                  >
+                                    Time
+                                  </option>
+                                  {examinationTimes.map((examination_time) => {
+                                    return (
+                                      <option
+                                        value={examination_time.name}
+                                        className="text-black font-bold"
+                                      >
+                                        {examination_time.name}
+                                      </option>
+                                    );
+                                  })}
+                                </select>
+                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                                  <svg
+                                    className="h-5 w-5 text-gray-400"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                  >
+                                    <path
+                                      fill-rule="evenodd"
+                                      d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                                      clip-rule="evenodd"
+                                    />
+                                    <path
+                                      fill-rule="evenodd"
+                                      d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                                      clip-rule="evenodd"
+                                    />
+                                  </svg>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex flex-row ml-2">
+                              <button
+                                id="submit-button"
+                                className="ml-2 z-10 text-center w-auto bg-transparent text-slate-950 p-1 px-12 rounded-2xl tracking-wide border border-slate-950
+                    font-semibold focus:outline-none focus:shadow-outline hover:bg-gray-700 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
+                                onClick={handleSrFilterSubmit}
+                              >
+                                <div className="inline-flex">
+                                  Search{" "}
+                                  <GiArchiveResearch className="mt-1 ml-2" />
+                                </div>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    <div
+                      id="sr_faculty_listing_viewport"
+                      className="hidden overflow-y-scroll h-[75vh] flex-col mt-5"
+                    >
+                      <div className="">
+                        <div className="p-1.5 w-full inline-block align-middle">
+                          <div className="border rounded-lg">
+                            <table className="min-w-full divide-y divide-gray-200">
+                              <thead className="sticky top-0 bg-gray-50">
+                                <tr>
+                                  <th
+                                    scope="col"
+                                    className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                                  >
+                                    Name
+                                  </th>
+                                  <th
+                                    scope="col"
+                                    className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
+                                  >
+                                    Designation
+                                  </th>
+                                  <th
+                                    scope="col"
+                                    className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
+                                  >
+                                    Department
+                                  </th>
+                                  <th
+                                    scope="col"
+                                    className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
+                                  >
+                                    Enter No. Of Supervision
+                                  </th>
+                                  <th
+                                    scope="col"
+                                    className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
+                                  >
+                                    Action
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-gray-200">
+                                {srFacultyName.map((item) => {
+                                  if (Object.keys(srFacultyName).length !== 0) {
+                                    return (
+                                      <tr>
+                                        <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                          {item.first_name} {item.last_name}
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap">
+                                          {item.designation}
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap">
+                                          {item.department}
+                                        </td>
+                                        <td className="px-6 py-4 text-sm font-medium flex justify-center whitespace-nowrap">
+                                          <input
+                                            className="shadow appearance-none border rounded w-52 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                            id={
+                                              "sr-student-input-user-" + item.id
+                                            }
+                                            onChange={(e) =>
+                                              setSrNoOfSupervisions(
+                                                parseInt(e.target.value)
+                                              )
+                                            }
+                                            type="text"
+                                            placeholder="Enter No. Of Supervision"
+                                          />
+                                        </td>
+                                        <td
+                                          className="px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap"
+                                          data-id={item.id}
+                                        >
+                                          <button
+                                            className="text-center w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
+                                          font-semibold focus:outline-none focus:shadow-outline hover:bg-green-600 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
+                                            id={
+                                              "sr-supervision-button-" + item.id
+                                            }
+                                            onClick={(e) =>
+                                              createSrObject(e, item.id)
+                                            }
+                                          >
+                                            Create
+                                          </button>
+
+                                          <button
+                                            id={
+                                              "sr-delete-button-user-" + item.id
+                                            }
+                                            className="hidden text-center ml-4 w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
+                                      font-semibold focus:outline-none focus:shadow-outline hover:bg-red-600 hover:text-slate-50 hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
+                                            onClick={(e) => {
+                                              setSrSupervisionShowModal(true);
+                                              setSrSupervisionId(
+                                                e.target.getAttribute(
+                                                  "data-supervision-id"
+                                                )
+                                              );
+                                            }}
+                                          >
+                                            Delete
+                                          </button>
+                                          {srSupervisionShowModal && (
+                                            <SrSupervisionModal
+                                              setOpenModal={
+                                                setSrSupervisionShowModal
+                                              }
+                                              id={srSupervisionId}
+                                            />
+                                          )}
+                                        </td>
+                                      </tr>
+                                    );
+                                  }
+                                })}
+                              </tbody>
+                            </table>
                           </div>
                         </div>
                       </div>
                     </div>
-                    <div
-                      id="content3"
-                      className={`w-full p-4 rounded-lg ${
-                        activeButton === "button3" ? "block" : "hidden"
-                      }`}
-                    >
-                      <div className="flex ml-2">
-                        <select
-                          className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                          onChange={(e) => {
-                            handleODExaminationChange(e.target.value);
-                          }}
-                        >
-                          <option value="Select examination">
-                            Examination
-                          </option>
-                          {examinationNames.map((examination_name) => {
-                            return (
-                              <option value={examination_name.name}>
-                                {examination_name.name}
-                              </option>
-                            );
-                          })}
-                        </select>
+                  </div>
 
-                        <select
-                          className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                          onChange={(e) => handleODYearChange(e.target.value)}
-                        >
-                          <option value="Select Year">Year</option>
-                          {academic_years.map((year) => {
-                            return <option value={year}>{year}</option>;
-                          })}
-                        </select>
-
-                        <select
-                          className="form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2 w-auto"
-                          onChange={handleODTypeChange}
-                        >
-                          <option value="Select Type">Type</option>
-                          {examinationTypes.map((examination_type) => {
-                            return (
-                              <option value={examination_type.name}>
-                                {examination_type.name}
-                              </option>
-                            );
-                          })}
-                        </select>
-
-                        <select
-                          className="form-select text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 rounded justify-center shadow-md px-3 py-2"
-                          onChange={handleODBranchChange}
-                        >
-                          <option value="Select Branch">Branch</option>
-                          {odBranches.map((branch) => (
-                            <option value={branch.id}>{branch.name}</option>
-                          ))}
-                        </select>
-
-                        <select
-                          className="w-auto form-select rounded justify-center text-sm md:text-base lg:text-base mr-2 border-0 border-b-2 border-b-gray-700 shadow-md px-3 py-2"
-                          onChange={(e) => {
-                            handleODTimeChange(e);
-                            if (e.target.value !== "Select Time") {
-                              setOdTime(e.target.value);
-                            } else {
-                              setOdTime("");
-                            }
-                          }}
-                        >
-                          <option value="Select time"> Time </option>
-                          {examinationTimes.map((examination_time) => {
-                            return (
-                              <option value={examination_time.name}>
-                                {examination_time.name}
-                              </option>
-                            );
-                          })}
-                        </select>
-
-                        <button
-                          className="text-center ml-4 w-auto bg-transparent text-slate-950 p-3 rounded-2xl tracking-wide border border-slate-950
-                      font-semibold focus:outline-none focus:shadow-outline hover:bg-gray-700 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
-                          id={"od-submit-button"}
-                          onClick={handleODFilterSubmit}
-                        >
-                          <p className="inline-flex">
-                            Search <GiArchiveResearch className="mt-1 ml-2" />
-                          </p>
-                        </button>
-                      </div>
-                      <div
-                        id="od_faculty_listing_viewport"
-                        className="hidden overflow-y-scroll flex-col mt-5"
-                        style={{ height: 445 }}
-                      >
-                        <div className="">
-                          <div className="p-1.5 w-full inline-block align-middle">
-                            <div className="border rounded-lg">
-                              <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="sticky top-0 bg-gray-50">
-                                  <tr>
-                                    <th
-                                      scope="col"
-                                      className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                                    >
-                                      Name
-                                    </th>
-                                    <th
-                                      scope="col"
-                                      className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
-                                    >
-                                      Designation
-                                    </th>
-                                    <th
-                                      scope="col"
-                                      className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
-                                    >
-                                      Department
-                                    </th>
-                                    <th
-                                      scope="col"
-                                      className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
-                                    >
-                                      Assign Other Duty
-                                    </th>
-                                    <th
-                                      scope="col"
-                                      className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
-                                    >
-                                      Action
-                                    </th>
-                                  </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-200">
-                                  {odFacultyName.map((item) => {
-                                    if (
-                                      Object.keys(odFacultyName).length !== 0
-                                    ) {
-                                      return (
-                                        <tr>
-                                          <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                            {item.first_name} {item.last_name}
-                                          </td>
-                                          <td className="px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap">
-                                            {item.designation}
-                                          </td>
-                                          <td className="px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap">
-                                            {item.course_name}
-                                          </td>
-                                          <td className="px-6 py-4 text-sm font-medium flex justify-center whitespace-nowrap">
-                                            <input
-                                              className="shadow appearance-none border rounded w-52 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                              id={
-                                                "od-assigned-duty-user-" +
-                                                item.id
-                                              }
-                                              onChange={(e) =>
-                                                setOdAssignedDuty(
-                                                  e.target.value
-                                                )
-                                              }
-                                              type="text"
-                                              placeholder="Assign Duty"
-                                            />
-                                          </td>
-                                          <td
-                                            className="px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap"
-                                            data-id={item.id}
-                                          >
-                                            <button
-                                              className="text-center w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
-                                          font-semibold focus:outline-none focus:shadow-outline hover:bg-green-600 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
-                                              id={
-                                                "other-duty-button-" + item.id
-                                              }
-                                              onClick={(e) =>
-                                                createODObject(e, item.id)
-                                              }
-                                            >
-                                              Create
-                                            </button>
-
-                                            <button
-                                              id={
-                                                "od-delete-button-user-" +
-                                                item.id
-                                              }
-                                              className="hidden text-center ml-4 w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
-                                      font-semibold focus:outline-none focus:shadow-outline hover:bg-red-600 hover:text-slate-50 hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
-                                              onClick={(e) => {
-                                                setOtherDutyShowModal(true);
-                                                setOtherDutyId(
-                                                  e.target.getAttribute(
-                                                    "data-other-duty-id"
-                                                  )
-                                                );
-                                              }}
-                                            >
-                                              Delete
-                                            </button>
-                                            {otherDutyShowModal && (
-                                              <OtherDutyModal
-                                                setOpenModal={
-                                                  setOtherDutyShowModal
-                                                }
-                                                id={otherDutyId}
-                                              />
-                                            )}
-                                          </td>
-                                        </tr>
-                                      );
-                                    }
+                  <div
+                    id="content3"
+                    className={`min-w-full rounded-lg ${
+                      activeButton === "button3" ? "block" : "hidden"
+                    }`}
+                  >
+                    {isBranchLoading ||
+                    isExaminationLoading ||
+                    isTimeLoading ||
+                    isTypeLoading ? (
+                      <>
+                        <div className="flex items-center justify-center mt-10 w-full">
+                          <Loader />
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex flex-col justify-start mt-5">
+                          <div className="flex flex-row w-full mt-5 bg-white rounded-xl z-10">
+                            <div className="flex flex-row">
+                              <div className="relative text-left w-full">
+                                <select
+                                  id="examinationName"
+                                  className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                                  onChange={(e) => {
+                                    handleODExaminationChange(
+                                      e,
+                                      e.target.value
+                                    );
+                                  }}
+                                >
+                                  <option
+                                    value="Select examination"
+                                    className="text-gray-600"
+                                  >
+                                    Examination
+                                  </option>
+                                  {examinationNames.map((examination_name) => {
+                                    return (
+                                      <option
+                                        value={examination_name.name}
+                                        className="text-black font-bold"
+                                      >
+                                        {examination_name.name}
+                                      </option>
+                                    );
                                   })}
-                                </tbody>
-                              </table>
+                                </select>
+                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                                  <svg
+                                    className="h-5 w-5 text-gray-400"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                  >
+                                    <path
+                                      fill-rule="evenodd"
+                                      d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                                      clip-rule="evenodd"
+                                    />
+                                    <path
+                                      fill-rule="evenodd"
+                                      d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                                      clip-rule="evenodd"
+                                    />
+                                  </svg>
+                                </div>
+                              </div>
                             </div>
+
+                            <div className="flex flex-row">
+                              <div className="relative text-left w-full">
+                                <select
+                                  id="academicYear"
+                                  className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                                  onChange={(e) =>
+                                    handleODYearChange(e.target.value)
+                                  }
+                                >
+                                  <option
+                                    value="Select Year"
+                                    className="text-gray-600"
+                                  >
+                                    Year
+                                  </option>
+                                  {academic_years.map((year) => {
+                                    return (
+                                      <option
+                                        value={year}
+                                        className="text-black font-bold"
+                                      >
+                                        {year}
+                                      </option>
+                                    );
+                                  })}
+                                </select>
+                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                                  <svg
+                                    className="h-5 w-5 text-gray-400"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                  >
+                                    <path
+                                      fill-rule="evenodd"
+                                      d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                                      clip-rule="evenodd"
+                                    />
+                                    <path
+                                      fill-rule="evenodd"
+                                      d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                                      clip-rule="evenodd"
+                                    />
+                                  </svg>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex flex-row">
+                              <div className="relative text-left w-full">
+                                <select
+                                  id="examinationType"
+                                  className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                                  onChange={handleODTypeChange}
+                                >
+                                  <option
+                                    value="Select Type"
+                                    className="text-gray-600"
+                                  >
+                                    Type
+                                  </option>
+                                  {examinationTypes.map((examination_type) => {
+                                    return (
+                                      <option
+                                        value={examination_type.name}
+                                        className="text-black font-bold"
+                                      >
+                                        {examination_type.name}
+                                      </option>
+                                    );
+                                  })}
+                                </select>
+                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                                  <svg
+                                    className="h-5 w-5 text-gray-400"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                  >
+                                    <path
+                                      fill-rule="evenodd"
+                                      d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                                      clip-rule="evenodd"
+                                    />
+                                    <path
+                                      fill-rule="evenodd"
+                                      d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                                      clip-rule="evenodd"
+                                    />
+                                  </svg>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex flex-row">
+                              <div className="relative text-left w-full">
+                                <select
+                                  id="branch"
+                                  className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                                  onChange={handleODBranchChange}
+                                >
+                                  <option
+                                    value="Select Branch"
+                                    className="text-gray-600"
+                                  >
+                                    Branch
+                                  </option>
+                                  {branches.map((branch) => (
+                                    <option
+                                      value={branch.id}
+                                      className="text-black font-bold"
+                                    >
+                                      {branch.name}
+                                    </option>
+                                  ))}
+                                </select>
+                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                                  <svg
+                                    className="h-5 w-5 text-gray-400"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                  >
+                                    <path
+                                      fill-rule="evenodd"
+                                      d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                                      clip-rule="evenodd"
+                                    />
+                                    <path
+                                      fill-rule="evenodd"
+                                      d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                                      clip-rule="evenodd"
+                                    />
+                                  </svg>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex flex-row">
+                              <div className="relative text-left w-full">
+                                <select
+                                  id="time"
+                                  className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
+                                  onChange={(e) => {
+                                    handleODTimeChange(e);
+                                    if (e.target.value !== "Select Time") {
+                                      setOdTime(e.target.value);
+                                    } else {
+                                      setOdTime("");
+                                    }
+                                  }}
+                                >
+                                  <option
+                                    value="Select time"
+                                    className="text-gray-600"
+                                  >
+                                    Time
+                                  </option>
+                                  {examinationTimes.map((examination_time) => {
+                                    return (
+                                      <option
+                                        value={examination_time.name}
+                                        className="text-black font-bold"
+                                      >
+                                        {examination_time.name}
+                                      </option>
+                                    );
+                                  })}
+                                </select>
+                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                                  <svg
+                                    className="h-5 w-5 text-gray-400"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                  >
+                                    <path
+                                      fill-rule="evenodd"
+                                      d="M10 12a2 2 0 100-4 2 2 0 000 4z"
+                                      clip-rule="evenodd"
+                                    />
+                                    <path
+                                      fill-rule="evenodd"
+                                      d="M2 10a8 8 0 018-8 8 8 0 110 16 8 8 0 01-8-8zm1 0a7 7 0 1014 0 7 7 0 00-14 0z"
+                                      clip-rule="evenodd"
+                                    />
+                                  </svg>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex flex-row ml-2">
+                              <button
+                                id="od-submit-button"
+                                className="ml-2 z-10 text-center w-auto bg-transparent text-slate-950 p-1 px-12 rounded-2xl tracking-wide border border-slate-950
+                    font-semibold focus:outline-none focus:shadow-outline hover:bg-gray-700 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
+                                onClick={handleODFilterSubmit}
+                              >
+                                <div className="inline-flex">
+                                  Search{" "}
+                                  <GiArchiveResearch className="mt-1 ml-2" />
+                                </div>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    <div
+                      id="od_faculty_listing_viewport"
+                      className="hidden overflow-y-scroll h-[75vh] flex-col mt-5"
+                    >
+                      <div className="">
+                        <div className="p-1.5 w-full inline-block align-middle">
+                          <div className="border rounded-lg">
+                            <table className="min-w-full divide-y divide-gray-200">
+                              <thead className="sticky top-0 bg-gray-50">
+                                <tr>
+                                  <th
+                                    scope="col"
+                                    className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
+                                  >
+                                    Name
+                                  </th>
+                                  <th
+                                    scope="col"
+                                    className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
+                                  >
+                                    Designation
+                                  </th>
+                                  <th
+                                    scope="col"
+                                    className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
+                                  >
+                                    Department
+                                  </th>
+                                  <th
+                                    scope="col"
+                                    className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
+                                  >
+                                    Assign Other Duty
+                                  </th>
+                                  <th
+                                    scope="col"
+                                    className="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase "
+                                  >
+                                    Action
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-gray-200">
+                                {odFacultyName.map((item) => {
+                                  if (Object.keys(odFacultyName).length !== 0) {
+                                    return (
+                                      <tr>
+                                        <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                          {item.first_name} {item.last_name}
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap">
+                                          {item.designation}
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap">
+                                          {item.course_name}
+                                        </td>
+                                        <td className="px-6 py-4 text-sm font-medium flex justify-center whitespace-nowrap">
+                                          <input
+                                            className="shadow appearance-none border rounded w-52 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                            id={
+                                              "od-assigned-duty-user-" + item.id
+                                            }
+                                            onChange={(e) =>
+                                              setOdAssignedDuty(e.target.value)
+                                            }
+                                            type="text"
+                                            placeholder="Assign Duty"
+                                          />
+                                        </td>
+                                        <td
+                                          className="px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap"
+                                          data-id={item.id}
+                                        >
+                                          <button
+                                            className="text-center w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
+                                          font-semibold focus:outline-none focus:shadow-outline hover:bg-green-600 hover:text-white hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
+                                            id={"other-duty-button-" + item.id}
+                                            onClick={(e) =>
+                                              createODObject(e, item.id)
+                                            }
+                                          >
+                                            Create
+                                          </button>
+
+                                          <button
+                                            id={
+                                              "od-delete-button-user-" + item.id
+                                            }
+                                            className="hidden text-center ml-4 w-auto bg-transparent text-slate-950 p-2 rounded-2xl tracking-wide border border-slate-950
+                                      font-semibold focus:outline-none focus:shadow-outline hover:bg-red-600 hover:text-slate-50 hover:border-white shadow-lg cursor-pointer transition ease-in duration-300"
+                                            onClick={(e) => {
+                                              setOtherDutyShowModal(true);
+                                              setOtherDutyId(
+                                                e.target.getAttribute(
+                                                  "data-other-duty-id"
+                                                )
+                                              );
+                                            }}
+                                          >
+                                            Delete
+                                          </button>
+                                          {otherDutyShowModal && (
+                                            <OtherDutyModal
+                                              setOpenModal={
+                                                setOtherDutyShowModal
+                                              }
+                                              id={otherDutyId}
+                                            />
+                                          )}
+                                        </td>
+                                      </tr>
+                                    );
+                                  }
+                                })}
+                              </tbody>
+                            </table>
                           </div>
                         </div>
                       </div>
