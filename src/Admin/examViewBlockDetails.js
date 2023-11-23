@@ -502,8 +502,6 @@ const ExamViewBlockDetails = () => {
       }
     }
 
-    console.log(selectedFilter);
-
     if (subdomain !== null || subdomain !== "") {
       axios
         .get(`/time_table_block_wise_reports`, {

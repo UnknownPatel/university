@@ -865,7 +865,7 @@ const UnlockMarks = () => {
                           id="examination_name"
                           className="appearance-none w-full py-2 pl-3 pr-10 text-sm font-medium leading-5 rounded-full transition duration-150 ease-in-out border-0 border-b-2 focus:outline-none focus:shadow-outline-blue focus:border-gray-300 sm:text-sm sm:leading-5"
                           onChange={(e) => {
-                            handleExaminationChange(e, e.target.value);
+                            handleExaminationChange(e.target.value);
                           }}
                         >
                           <option

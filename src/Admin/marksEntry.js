@@ -56,9 +56,7 @@ const MarksEntry = () => {
     if (subdomain !== null || subdomain !== "") {
       // Authorization Details
       axios
-        .get(
-          `/universities/${subdomain}/get_authorization_details`
-        )
+        .get(`/universities/${subdomain}/get_authorization_details`)
         .then((response) => {
           //   console.log(response.data.university.name);
           setUniName(response.data.university.name);
@@ -69,103 +67,123 @@ const MarksEntry = () => {
 
       //  Get Current User Details
       axios
-        .get(
-          `/users/users/find_user?subdomain=${subdomain}`,
-          {
-            headers,
-          }
-        )
+        .get(`/users/users/find_user?subdomain=${subdomain}`, {
+          headers,
+        })
         .then((responce) => {
-          axios
-            .get("/examination_names", {
-              headers,
-              params: {
-                subdomain: subdomain,
-              },
-            })
-            .then((responce) => {
-              if (responce.data.message === "Names found") {
-                if (responce.data.data.examination_names.length !== 0) {
-                  setExaminationNames(responce.data.data.examination_names);
-                } else {
-                  setExaminationNames([]);
-                }
+          if (responce.data.status === "ok") {
+            const roles = responce.data.roles;
+            if (roles.includes("Marks Entry")) {
+              axios
+                .get("/examination_names", {
+                  headers,
+                  params: {
+                    subdomain: subdomain,
+                  },
+                })
+                .then((responce) => {
+                  if (responce.data.message === "Names found") {
+                    if (responce.data.data.examination_names.length !== 0) {
+                      setExaminationNames(responce.data.data.examination_names);
+                    } else {
+                      setExaminationNames([]);
+                    }
+                  }
+                })
+                .catch(function (err) {
+                  console.log(err.message);
+                });
+
+              // Get Examination Types
+              axios
+                .get("/examination_types", {
+                  headers,
+                  params: {
+                    subdomain: subdomain,
+                  },
+                })
+                .then((responce) => {
+                  if (responce.data.message === "Types found") {
+                    if (responce.data.data.examination_types.length !== 0) {
+                      setExaminationTypes(responce.data.data.examination_types);
+                    } else {
+                      setExaminationTypes([]);
+                    }
+                  }
+                })
+                .catch(function (err) {
+                  console.log(err.message);
+                });
+              setCourses([responce.data.user.course]);
+              setCourseId(responce.data.user.course_id);
+              setBranches([responce.data.user.branch]);
+              setBranchId(responce.data.user.branch_id);
+              setAcademicYears([
+                responce.data.user.marks_entries.map(
+                  (object) => object.academic_year
+                ),
+              ]);
+              setSelectedYear(
+                responce.data.user.marks_entries.map(
+                  (object) => object.academic_year
+                )
+              );
+              setExaminationName(
+                responce.data.user.marks_entries.map(
+                  (object) => object.examination_name
+                )
+              );
+              setType(
+                responce.data.user.marks_entries.map(
+                  (object) => object.entry_type
+                )
+              );
+              var semesterIds = responce.data.user.marks_entries.map(
+                (object) => object.semester_id
+              );
+              setDivisionIds(
+                responce.data.user.marks_entries.map(
+                  (object) => object.division_id
+                )
+              );
+              var updatedCombination = {};
+              responce.data.user.marks_entries.map((object) => {
+                updatedCombination = {
+                  ...updatedCombination,
+                  [`${JSON.stringify(object.division_id)}`]: object.subjects,
+                };
+                setSaveSubjects(updatedCombination);
+              });
+
+              axios
+                .get(
+                  `/semesters?subdomain=${subdomain}&branch_id=${responce.data.user.branch.id}&ids=${semesterIds}`,
+                  { headers }
+                )
+                .then((response) => {
+                  setSemesters(response.data.data.semesters);
+                })
+                .catch((error) => console.log(error));
+              setFaculty(
+                responce.data.user.first_name +
+                  " " +
+                  responce.data.user.last_name
+              );
+            } else {
+              toast.error("You are not authorized to enter marks.");
+              if (roles.includes("Examination Controller")) {
+                navigate("/examinationDetails");
+              } else if (roles.includes("super_admin")) {
+                navigate("/uploadExcel");
+              } else if (roles.includes("Academic Head")) {
+                navigate("/academic_UploadSyllabus");
+              } else if (roles.includes("Student Coordinator")) {
+                navigate("/feeDetails");
+              } else {
+                navigate("/facultyDashboard");
               }
-            })
-            .catch(function (err) {
-              console.log(err.message);
-            });
-
-          // Get Examination Types
-          axios
-            .get("/examination_types", {
-              headers,
-              params: {
-                subdomain: subdomain,
-              },
-            })
-            .then((responce) => {
-              if (responce.data.message === "Types found") {
-                if (responce.data.data.examination_types.length !== 0) {
-                  setExaminationTypes(responce.data.data.examination_types);
-                } else {
-                  setExaminationTypes([]);
-                }
-              }
-            })
-            .catch(function (err) {
-              console.log(err.message);
-            });
-          setCourses([responce.data.user.course]);
-          setCourseId(responce.data.user.course_id);
-          setBranches([responce.data.user.branch]);
-          setBranchId(responce.data.user.branch_id);
-          setAcademicYears([
-            responce.data.user.marks_entries.map(
-              (object) => object.academic_year
-            ),
-          ]);
-          setSelectedYear(
-            responce.data.user.marks_entries.map(
-              (object) => object.academic_year
-            )
-          );
-          setExaminationName(
-            responce.data.user.marks_entries.map(
-              (object) => object.examination_name
-            )
-          );
-          setType(
-            responce.data.user.marks_entries.map((object) => object.entry_type)
-          );
-          var semesterIds = responce.data.user.marks_entries.map(
-            (object) => object.semester_id
-          );
-          setDivisionIds(
-            responce.data.user.marks_entries.map((object) => object.division_id)
-          );
-          var updatedCombination = {};
-          responce.data.user.marks_entries.map((object) => {
-            updatedCombination = {
-              ...updatedCombination,
-              [`${JSON.stringify(object.division_id)}`]: object.subjects,
-            };
-            setSaveSubjects(updatedCombination);
-          });
-
-          axios
-            .get(
-              `/semesters?subdomain=${subdomain}&branch_id=${responce.data.user.branch.id}&ids=${semesterIds}`,
-              { headers }
-            )
-            .then((response) => {
-              setSemesters(response.data.data.semesters);
-            })
-            .catch((error) => console.log(error));
-
-          setFaculty(
-            responce.data.user.first_name + " " + responce.data.user.last_name
-          );
+            }
+          }
         })
         .catch((error) => console.log(error));
     }
@@ -245,15 +263,12 @@ const MarksEntry = () => {
 
     if (subdomain !== null || subdomain !== "") {
       axios
-        .get(
-          `/examination_types/${type}/fetch_maximum_marks`,
-          {
-            headers,
-            params: {
-              subdomain: subdomain,
-            },
-          }
-        )
+        .get(`/examination_types/${type}/fetch_maximum_marks`, {
+          headers,
+          params: {
+            subdomain: subdomain,
+          },
+        })
         .then((res) => {
           if (res.data.message === "Type found") {
             if (res.data.data.maximum_marks.length !== 0) {
@@ -413,16 +428,13 @@ const MarksEntry = () => {
                 response.data.data.students.map((student) => {
                   selectedFilter["student_id"] = student.id;
                   axios
-                    .get(
-                      `/student_marks/${student.id}/fetch_details`,
-                      {
-                        headers,
-                        params: {
-                          student_mark: selectedFilter,
-                          subdomain: subdomain,
-                        },
-                      }
-                    )
+                    .get(`/student_marks/${student.id}/fetch_details`, {
+                      headers,
+                      params: {
+                        student_mark: selectedFilter,
+                        subdomain: subdomain,
+                      },
+                    })
                     .then((res) => {
                       const student_marks_input = document.getElementById(
                         "input-marks-entry-" + student.id

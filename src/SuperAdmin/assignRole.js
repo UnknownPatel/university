@@ -123,6 +123,7 @@ const AssignRole = () => {
         .get(`/users/users/faculty_names?subdomain=${subdomain}`, {
           headers,
           params: {
+            request_from: "marks_entry",
             user: {
               course_id: e.target.value,
             },

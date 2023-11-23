@@ -384,7 +384,6 @@ const LockMarks = () => {
     e.preventDefault();
 
     const subject_id = e.target.id;
-    console.log(subject_id);
     viewNav(`/view_Marks/${subject_id}`);
 
     console.log(selectedFilter);

@@ -72,9 +72,7 @@ const ViewMarks = () => {
     if (subdomain !== null || subdomain !== "") {
       // Authorization Details
       axios
-        .get(
-          `/universities/${subdomain}/get_authorization_details`
-        )
+        .get(`/universities/${subdomain}/get_authorization_details`)
         .then((response) => {
           //   console.log(response.data.university.name);
           setUniName(response.data.university.name);
@@ -85,34 +83,49 @@ const ViewMarks = () => {
 
       //  Get Current User Details
       axios
-        .get(
-          `/users/users/find_user?subdomain=${subdomain}`,
-          {
-            headers,
-          }
-        )
+        .get(`/users/users/find_user?subdomain=${subdomain}`, {
+          headers,
+        })
         .then((responce) => {
           // selectedFilter = responce.data.configuration;
-          setFaculty(
-            responce.data.user.first_name + " " + responce.data.user.last_name
-          );
-          setSelectedFilter(responce.data.configuration);
-          setExaminationName(responce.data.configuration.examination_name);
-          setSelectedYear(responce.data.configuration.academic_year);
-          setType(responce.data.configuration.examination_type);
-          setCourseId(responce.data.configuration.course_id);
-          setBranchId(responce.data.configuration.branch_id);
-          setSemesterId(responce.data.configuration.semester_id);
-          setDivisionId(responce.data.configuration.division_id);
+          if (responce.data.status == "ok") {
+            const roles = responce.data.roles;
+            const data = responce.data;
+            if (roles.includes("Marks Entry")) {
+              setFaculty(
+                responce.data.user.first_name +
+                  " " +
+                  responce.data.user.last_name
+              );
+              setSelectedFilter(data.configuration);
+              setExaminationName(data.configuration.examination_name);
+              setSelectedYear(data.configuration.academic_year);
+              setType(data.configuration.examination_type);
+              setCourseId(data.configuration.course_id);
+              setBranchId(data.configuration.branch_id);
+              setSemesterId(data.configuration.semester_id);
+              setDivisionId(data.configuration.division_id);
+            } else {
+              toast.error("You are not authorized to view marks.");
+              if (roles.includes("Examination Controller")) {
+                navigate("/examinationDetails");
+              } else if (roles.includes("super_admin")) {
+                navigate("/uploadExcel");
+              } else if (roles.includes("Academic Head")) {
+                navigate("/academic_UploadSyllabus")
+              } else if (roles.includes("Student Coordinator")) { 
+                navigate("/feeDetails")
+              } else {
+                navigate("/facultyDashboard");
+              }
+            }
+          }
         })
         .catch((error) => console.log(error));
 
       // Get Course
       axios
-        .get(
-          `/courses?subdomain=${subdomain}`,
-          { headers }
-        )
+        .get(`/courses?subdomain=${subdomain}`, { headers })
         .then((response) => {
           setCourses(response.data.data.courses);
         })
@@ -120,15 +133,12 @@ const ViewMarks = () => {
 
       // Get Examination Names
       axios
-        .get(
-          "/examination_names",
-          {
-            headers,
-            params: {
-              subdomain: subdomain,
-            },
-          }
-        )
+        .get("/examination_names", {
+          headers,
+          params: {
+            subdomain: subdomain,
+          },
+        })
         .then((responce) => {
           if (responce.data.message === "Names found") {
             if (responce.data.data.examination_names.length !== 0) {
@@ -144,15 +154,12 @@ const ViewMarks = () => {
 
       // Get Examination Types
       axios
-        .get(
-          "/examination_types",
-          {
-            headers,
-            params: {
-              subdomain: subdomain,
-            },
-          }
-        )
+        .get("/examination_types", {
+          headers,
+          params: {
+            subdomain: subdomain,
+          },
+        })
         .then((responce) => {
           if (responce.data.message === "Types found") {
             if (responce.data.data.examination_types.length !== 0) {
@@ -212,38 +219,32 @@ const ViewMarks = () => {
 
       // Get Divisions
       axios
-        .get(
-          `/divisions?subdomain=${subdomain}`,
-          {
-            headers,
-            params: {
-              division: {
-                semester_id: selectedFilter.semester_id,
-              },
+        .get(`/divisions?subdomain=${subdomain}`, {
+          headers,
+          params: {
+            division: {
+              semester_id: selectedFilter.semester_id,
             },
-          }
-        )
+          },
+        })
         .then((response) => {
           setDivisions(response.data.data.divisions);
         })
         .catch((error) => console.log(error));
 
       axios
-        .get(
-          `/subjects`,
-          {
-            headers,
-            params: {
-              subject: {
-                course_id: selectedFilter.course_id,
-                branch_id: selectedFilter.branch_id,
-                semester_id: selectedFilter.semester_id,
-                id: JSON.stringify(selectedFilter.subject_ids),
-              },
-              subdomain: subdomain,
+        .get(`/subjects`, {
+          headers,
+          params: {
+            subject: {
+              course_id: selectedFilter.course_id,
+              branch_id: selectedFilter.branch_id,
+              semester_id: selectedFilter.semester_id,
+              id: JSON.stringify(selectedFilter.subject_ids),
             },
-          }
-        )
+            subdomain: subdomain,
+          },
+        })
         .then((response) => {
           setSubjects(response.data.data.subjects);
           var selectedIndex = subject_select.options.selectedIndex;
@@ -254,16 +255,13 @@ const ViewMarks = () => {
         .catch((error) => console.log(error));
 
       axios
-        .get(
-          `/student_marks`,
-          {
-            headers,
-            params: {
-              student_mark: selectedFilter,
-              subdomain: subdomain,
-            },
-          }
-        )
+        .get(`/student_marks`, {
+          headers,
+          params: {
+            student_mark: selectedFilter,
+            subdomain: subdomain,
+          },
+        })
         .then((res) => {
           console.log(res.data);
           if (res.data.message === "Details found") {

@@ -177,7 +177,7 @@ const ExamBlockDetails = () => {
     }
   }, []);
 
-  const handleExaminationChange2 = (e, examination) => {
+  const handleExaminationChange2 = (examination) => {
     handleViewPortChange();
     setExaminationName2(examination);
   };
@@ -681,6 +681,7 @@ const ExamBlockDetails = () => {
           console.error(err);
         });
     } else {
+      console.log(selectedFilter["examination_name"]);
       axios
         .post(
           `/time_table_block_wise_reports?subdomain=${subdomain}`,

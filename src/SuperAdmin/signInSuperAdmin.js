@@ -2,7 +2,7 @@ import { getMouseEventOptions } from "@testing-library/user-event/dist/utils";
 import PurePanel from "antd/es/tooltip/PurePanel";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { useNavigate, Link, useParams, useLocation } from "react-router-dom";
+import { useNavigate, Link, useParams, useLocation} from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Loader from "../Admin/loader";
@@ -27,7 +27,6 @@ const SignInSuperAdmin = () => {
   const [isApproved, setIsApproved] = useState(false);
   const [isRegistered, setIsRegistered] = useState(false);
   const [loading, setLoading] = useState(false);
-
   var access_token;
 
   useEffect(() => {
@@ -58,11 +57,17 @@ const SignInSuperAdmin = () => {
               if (res.data.roles.includes("admin")) {
                 toast.error("You are already logged in!");
                 navigate("/pendingRequests");
+              }else {
+                toast.error("You are not authorized to access the Admin panel.");
+                navigate(-1);
               }
             }
           })
           .catch((err) => {
             console.error(err);
+          })
+          .finally(() => {
+            setLoading(false);
           });
       } else {
         axios
@@ -90,8 +95,25 @@ const SignInSuperAdmin = () => {
           })
           .then((responce) => {
             if (responce.data.status === "ok") {
-              if (responce.data.roles.includes("super_admin")) {
-                navigate("/uploadExcel");
+              const roles = responce.data.roles;
+              if (arr[1] === "superadmin") {
+                if (roles.includes("super_admin")) {
+                  toast.info("You are already logged in");
+                  navigate("/uploadExcel");
+                }
+              } else {
+                toast.info("You are already logged in");
+                if (roles.includes("Examination Controller")) {
+                  navigate("/examinationDetails");
+                } else if (roles.includes("Marks Entry")) {
+                  navigate("/marks_entry");
+                } else if (roles.includes("Academic Head")) {
+                  navigate("/academic_UploadSyllabus")
+                } else if (roles.includes("Student Coordinator")) { 
+                  navigate("/feeDetails")
+                } else {
+                  navigate("/facultyDashboard");
+                }
               }
             }
           })
@@ -103,7 +125,6 @@ const SignInSuperAdmin = () => {
         axios
           .get(`/universities/${subdomain}/get_authorization_details`)
           .then((response) => {
-            console.log(response.data);
             if (response.data.status === "ok") {
               if (response.data.university.status === "accepted") {
                 setClentId(response.data.doorkeeper.client_id);
